@@ -173,3 +173,16 @@ Desktop/mobile Chromium checks covered the animated feature dropdown, global fin
 - `Dockerfile`: deployable Python image
 
 OpenStreetMap data © OpenStreetMap contributors, ODbL: https://www.openstreetmap.org/copyright. Review public usage policies before scaling. Self-hosted DM Sans and Manrope include OFL licenses. Third-party JavaScript license notices are retained in the compiled bundle.
+
+## GitHub publishing
+
+Repository: https://github.com/leephil1907-lab/sitegapreveal.git
+
+GitHub requires an authenticated account with write access. Authenticate through your trusted GitHub/CLI credential flow, not by committing a token. From this repository:
+
+```bash
+git remote set-url origin https://github.com/leephil1907-lab/sitegapreveal.git
+git push -u origin main
+```
+
+Do not force-push over someone else’s commits. SQLite data, `.env`, checks, and installed packages are ignored. The Docker image also excludes secrets and workspace data. No hosted deployment or SMTP connection is created by a Git push.
