@@ -63,6 +63,17 @@ class MapTests(unittest.TestCase):
     def test_single_map_job(self):
         self.start_scan()
         self.assertEqual(self.client.post('/api/map/scans',json={'category':'Bakery','label':'Other','bounds':[6.5,3.3,6.54,3.34]}).status_code,409)
+    def test_analytics_includes_actual_map_tasks(self):
+        sid=self.start_scan()
+        data=self.client.get('/api/analytics').json
+        self.assertEqual(data['map_scan_states'],{'queued':1})
+        self.assertEqual(data['tasks'][0]['id'],sid)
+        self.assertEqual(data['tasks'][0]['state'],'queued')
+        with patch('maps.query_overpass',return_value={'elements':[]}): module.app.extensions['map_worker'](sid)
+        data=self.client.get('/api/analytics').json
+        self.assertEqual(data['map_scan_states'],{'checked':1})
+        self.assertEqual(data['map_cell_states'],{'checked':1})
+        self.assertEqual(data['totals']['leads'],0)
     def test_place_cache(self):
         with patch('maps.geocode',return_value={'lat':'6.5','lon':'3.3','display_name':'Test place'}) as geo:
             self.assertEqual(self.client.post('/api/map/search',json={'query':'Test place'}).status_code,200)

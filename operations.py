@@ -215,7 +215,10 @@ def register_operations(app,db,now,log):
             enquiries=[dict(r) for r in c.execute('SELECT status,created FROM enquiries')]
             contracts=[dict(r) for r in c.execute('SELECT status,currency,amount_minor,paid_minor,created,signed_recorded_at FROM contracts')]
             runs=[dict(r) for r in c.execute('SELECT status,duration_ms,created FROM mcp_runs')]
-            jobs=[dict(r) for r in c.execute('SELECT state,added,checked FROM jobs')]
+            jobs=[dict(r) for r in c.execute('SELECT id,category,state,added,checked,progress,total,message,created,updated FROM jobs')]
+            map_scans=[dict(r) for r in c.execute("SELECT s.*,count(c.id) total,sum(CASE WHEN c.state='checked' THEN 1 ELSE 0 END) checked FROM map_scans s LEFT JOIN map_cells c ON c.scan_id=s.id GROUP BY s.id")]
+            map_cells=[dict(r) for r in c.execute('SELECT state,count(*) count FROM map_cells GROUP BY state')]
+            recent_runs=[dict(r) for r in c.execute('SELECT id,connector_name,tool_name,status,created,finished FROM mcp_runs ORDER BY created DESC LIMIT 20')]
             pages=[dict(r) for r in c.execute("SELECT page,created FROM usage_events WHERE event='page_request' AND created>=?",(cutoff,))]
             started=c.execute("SELECT MIN(created) FROM usage_events WHERE event='measurement_started'").fetchone()[0]
             drafts=c.execute("SELECT count(*) FROM leads WHERE trim(body)!=''").fetchone()[0]
@@ -226,6 +229,10 @@ def register_operations(app,db,now,log):
         for i in range(days):
             day=(start+timedelta(days=i)).isoformat()
             timeline.append({'date':day,'leads':sum(r['created'][:10]==day for r in leads),'emails':sum(r['created'][:10]==day and r['state']=='sent' for r in sends),'enquiries':sum(r['created'][:10]==day for r in enquiries),'contracts':sum(r['created'][:10]==day for r in contracts),'tool_runs':sum(r['created'][:10]==day for r in runs),'page_requests':sum(r['created'][:10]==day for r in pages)})
+        tasks=[{'id':j['id'],'kind':'City discovery','title':j['category'],'state':j['state'],'detail':f"{j['progress']}/{j['total']} locations processed · {j['added']} saved · {j['checked']} URL checks",'updated':j['updated'],'page':'global'} for j in jobs]
+        tasks += [{'id':s['id'],'kind':'Map scan','title':s['label']+' · '+s['category'],'state':s['state'],'detail':f"{s['checked']}/{s['total']} cells checked; partial cells are not complete",'updated':s['updated'],'page':'global'} for s in map_scans]
+        tasks += [{'id':r['id'],'kind':'Approved MCP run','title':r['connector_name']+' · '+r['tool_name'],'state':r['status'],'detail':'Provider result and evidence available in MCP run history.','updated':r['finished'] or r['created'],'page':'integrations'} for r in recent_runs]
+        tasks=sorted(tasks,key=lambda t:(t['state'] in ('running','queued'),t['updated']),reverse=True)[:20]
         amounts={}
         for r in contracts:
             currency=r['currency'];v=amounts.setdefault(currency,{'currency':currency,'decimals':CURRENCIES[currency],'pipeline_minor':0,'committed_minor':0,'payments_minor':0,'unpriced':0})
@@ -234,4 +241,4 @@ def register_operations(app,db,now,log):
             elif r['status'] in ('Signed','In progress','Completed'):v['committed_minor']+=r['amount_minor']
             v['payments_minor']+=r['paid_minor'] or 0
         opportunities=sum((l['status'] in ('NOT_LISTED','SOCIAL_ONLY') or l['audit_status'] in ('DNS_UNRESOLVED','HTTP_ERROR','PARKED_SUSPECTED','UNREACHABLE','SOCIAL_ONLY')) and l['stage']!='Not a fit' for l in leads)
-        return jsonify(generated_at=now(),days=days,tracking_started=started,totals={'leads':len(leads),'opportunities':opportunities,'email_available':sum(bool(l['email']) for l in leads),'phone_available':sum(bool(l['phone']) for l in leads),'emails_accepted':sum(s['state']=='sent' for s in sends),'drafts_saved':drafts,'enquiries':len(enquiries),'contracts':len(contracts),'active_contracts':sum(r['status'] in ('Signed','In progress') for r in contracts),'tool_runs':len(runs),'connectors':connectors,'skills':skills,'page_requests':len(pages)},lead_stages=counts(leads,'stage'),website_statuses=counts(leads,'status'),audits=counts(leads,'audit_status'),email_states=counts(sends,'state'),enquiry_stages=counts(enquiries,'status'),contract_stages=counts(contracts,'status'),run_states=counts(runs,'status'),job_states=counts(jobs,'state'),locations=dict(Counter(l['city'] or 'Not listed' for l in leads).most_common(10)),page_breakdown=counts(pages,'page'),amounts=list(amounts.values()),timeline=timeline,activity=activity)
+        return jsonify(generated_at=now(),days=days,tracking_started=started,totals={'leads':len(leads),'opportunities':opportunities,'email_available':sum(bool(l['email']) for l in leads),'phone_available':sum(bool(l['phone']) for l in leads),'emails_accepted':sum(s['state']=='sent' for s in sends),'drafts_saved':drafts,'enquiries':len(enquiries),'contracts':len(contracts),'active_contracts':sum(r['status'] in ('Signed','In progress') for r in contracts),'tool_runs':len(runs),'connectors':connectors,'skills':skills,'page_requests':len(pages)},lead_stages=counts(leads,'stage'),website_statuses=counts(leads,'status'),audits=counts(leads,'audit_status'),email_states=counts(sends,'state'),enquiry_stages=counts(enquiries,'status'),contract_stages=counts(contracts,'status'),run_states=counts(runs,'status'),job_states=counts(jobs,'state'),map_scan_states=counts(map_scans,'state'),map_cell_states={r['state']:r['count'] for r in map_cells},tasks=tasks,locations=dict(Counter(l['city'] or 'Not listed' for l in leads).most_common(10)),page_breakdown=counts(pages,'page'),amounts=list(amounts.values()),timeline=timeline,activity=activity)
