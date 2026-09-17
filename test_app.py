@@ -68,7 +68,7 @@ class ProspectTests(unittest.TestCase):
         module.last_discovery=0
         geo=MagicMock();geo.json.return_value=[{'lat':'49.89','lon':'-97.13'}]
         osm=MagicMock();osm.json.return_value={'elements':[{'type':'node','id':123,'tags':{'name':'Example','shop':'bakery'}}]}
-        with patch('app.requests.get',return_value=geo),patch('app.requests.post',return_value=osm):
+        with patch('app.requests.get',return_value=geo),patch('map_provider.query_overpass',return_value=osm.json.return_value):
             r=self.client.post('/api/discover',json={'city':'Winnipeg','category':'Bakery'});self.assertEqual(r.json['added'],1)
     def test_global_job_validation(self):
         self.assertEqual(self.client.post('/api/jobs',json={'locations':[],'category':'Bakery'}).status_code,400)

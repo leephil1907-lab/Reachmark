@@ -11,6 +11,7 @@ DB = os.getenv('DATABASE_PATH', os.path.join(os.path.dirname(__file__), 'prospec
 lock = threading.Lock()
 last_discovery = 0
 CATEGORIES = {'Auto repair':('shop','car_repair'),'Hair salon':('shop','hairdresser'),'Bakery':('shop','bakery'),'Restaurant':('amenity','restaurant'),'Dentist':('amenity','dentist'),'Florist':('shop','florist'),'Plumber':('craft','plumber'),'Electrician':('craft','electrician'),'HVAC contractor':('craft','hvac'),'Roofing contractor':('craft','roofer'),'Tattoo studio':('shop','tattoo'),'Physiotherapist':('healthcare','physiotherapist'),'Pet groomer':('shop','pet_grooming'),'Accountant':('office','accountant')}
+CATEGORIES.update({'Café':('amenity','cafe'),'Fast food':('amenity','fast_food'),'Bar':('amenity','bar'),'Hotel':('tourism','hotel'),'Guest house':('tourism','guest_house'),'Pharmacy':('amenity','pharmacy'),'Clinic':('amenity','clinic'),'Veterinarian':('amenity','veterinary'),'Gym':('leisure','fitness_centre'),'Beauty salon':('shop','beauty'),'Clothing shop':('shop','clothes'),'Supermarket':('shop','supermarket'),'Convenience store':('shop','convenience'),'Laundry':('shop','laundry'),'Car wash':('amenity','car_wash'),'Carpenter':('craft','carpenter'),'Painter':('craft','painter'),'Photographer':('craft','photographer'),'Lawyer':('office','lawyer'),'Estate agent':('office','estate_agent'),'Travel agency':('shop','travel_agency')})
 SOCIAL = ('facebook.com','instagram.com','linktr.ee','linktree.com','fb.com','business.site')
 def now(): return datetime.now(timezone.utc).isoformat()
 from contextlib import contextmanager
@@ -50,7 +51,8 @@ def lead(lid):
     return dict(r)
 def classify(url):
     if not url.strip(): return 'NOT_LISTED'
-    host=urlparse(url if '://' in url else 'https://'+url).hostname or ''
+    try: host=(urlparse(url if '://' in url else 'https://'+url).hostname or '').lower()
+    except ValueError: return 'HAS_WEBSITE'
     return 'SOCIAL_ONLY' if any(host==s or host.endswith('.'+s) for s in SOCIAL) else 'HAS_WEBSITE'
 def add_lead(v):
     lid=uuid.uuid4().hex; stamp=now()
@@ -64,6 +66,9 @@ def add_lead(v):
         return count
 @app.before_request
 def same_origin():
+    if request.is_json and request.method in ('POST','PATCH','PUT'):
+        body=request.get_json(silent=True)
+        if not isinstance(body,dict): return jsonify(error='Send a JSON object.'),400
     if request.method in ('POST','PATCH','DELETE'):
         origin=request.headers.get('Origin')
         if origin and urlparse(origin).netloc != request.host: return jsonify(error='Cross-origin request rejected.'),403
@@ -77,7 +82,7 @@ def same_origin():
 @app.after_request
 def headers(r):
     if request.path=='/' or request.path.startswith(('/api/','/preview/','/unsubscribe/')): r.headers['X-Robots-Tag']='noindex, nofollow'; r.headers['Cache-Control']='no-store'
-    r.headers['X-Content-Type-Options']='nosniff'; r.headers['Referrer-Policy']='same-origin'
+    r.headers['X-Content-Type-Options']='nosniff'; r.headers['Referrer-Policy']='strict-origin-when-cross-origin'
     return r
 @app.errorhandler(413)
 def too_big(e): return jsonify(error='File too large. Limit: 3 MB.'),413
@@ -181,7 +186,7 @@ def search_save(location, category, include_websites=False):
 def discover():
     global last_discovery
     v=request.get_json() or {}; city=str(v.get('city','')).strip(); category=v.get('category')
-    if not city or len(city)>150 or category not in CATEGORIES: return jsonify(error='Choose a location and category.'),400
+    if not city or len(city)>150 or not isinstance(category,str) or category not in CATEGORIES: return jsonify(error='Choose a location and category.'),400
     with lock:
         if time.monotonic()-last_discovery<10: return jsonify(error='Wait 10 seconds between searches.'),429
         last_discovery=time.monotonic()
@@ -223,7 +228,7 @@ def run_job(jid,locations,category,check):
 @app.route('/api/jobs',methods=['POST'])
 def start_job():
     v=request.get_json() or {}; locations=v.get('locations',[]); category=v.get('category')
-    if not isinstance(locations,list) or not 1<=len(locations)<=8 or any(not isinstance(x,str) or not x.strip() or len(x)>150 for x in locations) or category not in CATEGORIES: return jsonify(error='Enter 1–8 city/country locations and a supported category.'),400
+    if not isinstance(locations,list) or not 1<=len(locations)<=8 or any(not isinstance(x,str) or not x.strip() or len(x)>150 for x in locations) or not isinstance(category,str) or category not in CATEGORIES: return jsonify(error='Enter 1–8 city/country locations and a supported category.'),400
     locations=list(dict.fromkeys(x.strip() for x in locations));jid=uuid.uuid4().hex
     with db() as c:
         c.execute('BEGIN IMMEDIATE')
@@ -333,6 +338,8 @@ def send(lid):
         log('error',f'SMTP needs review for {l["name"]}: {type(e).__name__}')
         return jsonify(error=('SMTP rejected the message. Check your provider configuration and credentials before retrying.' if rejected else 'SMTP did not confirm success. Check credentials and your provider’s sent logs. Resending is blocked to avoid duplicates.')),502
 
+from maps import register_maps
+register_maps(app, db, now, add_lead, CATEGORIES)
 from enquiries import register_enquiries
 register_enquiries(app, db, now, log)
 from operations import register_operations

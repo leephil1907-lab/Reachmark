@@ -2,7 +2,7 @@ FROM python:3.13-slim
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-COPY app.py services.py enquiries.py portfolio.py operations.py mcp_transport.py ./
+COPY app.py services.py enquiries.py portfolio.py operations.py mcp_transport.py maps.py map_provider.py ./
 COPY templates ./templates
 COPY static ./static
 RUN useradd --create-home appuser && mkdir -p /data && chown appuser:appuser /data
