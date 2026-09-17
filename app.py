@@ -335,5 +335,7 @@ def send(lid):
 
 from enquiries import register_enquiries
 register_enquiries(app, db, now, log)
+from operations import register_operations
+register_operations(app, db, now, log)
 
 if __name__=='__main__': app.run(host='0.0.0.0',port=int(os.getenv('PORT','8000')),debug=False)

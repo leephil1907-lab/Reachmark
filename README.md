@@ -154,7 +154,7 @@ Private dashboard/API, proposal previews, and unsubscribe routes are noindex. Le
 ## Tests
 
 ```bash
-python -m unittest test_app -v
+python -m unittest test_app test_operations -v
 npm run build
 ```
 
@@ -227,3 +227,66 @@ Set `DASHBOARD_PASSWORD`, HTTPS, a real sender/contact profile, and appropriate 
 New source files: `portfolio.py`, `enquiries.py`, `templates/sample-site.html`, `templates/showcase.html`, `templates/enquire.html`, `templates/enquiry-form.html`, `templates/sample-cards.html`, `static/enquiry.js`, `static/inbox.js`, `static/public.css`, `static/inbox.css`, and `static/samples/`. The Dockerfile includes both new Python modules.
 
 Validation includes eight additional isolated backend tests and a full browser submission-to-inbox flow using a disposable database. No synthetic submissions were left in the live inbox.
+
+
+## MCP connectors and reusable skills
+
+Open **MCP & skills** in the dashboard or Tools menu.
+
+1. Add your provider's actual public HTTPS **Streamable HTTP MCP** endpoint, not its homepage or a regular REST endpoint.
+2. For Bearer authentication, set a dedicated host environment variable such as `MCP_TOKEN_DESIGN`. Enter only that variable name in the connector form. Never paste secrets into tool arguments, source files, or chat.
+3. Set `DASHBOARD_PASSWORD` before using an authenticated connector. Restart after environment changes.
+4. Click **Test & discover tools**. The client initializes a real MCP session and requests `tools/list`; no provider tools are hardcoded into the interface.
+5. Select a discovered tool, inspect its description/schema, prepare a JSON object, and explicitly approve its destination and arguments.
+6. Run it once and inspect the saved result. Tool outputs are rendered as untrusted text; they never automatically execute instructions or modify leads, email counts, or contracts.
+7. Save a validated tool/argument combination as a **skill**. This is a reusable preset, not code installation, an autonomous AI agent, or a model-training feature. Loading it does not run it. Adjusting a preset and saving creates a new preset; remove old ones as needed.
+
+### Supported MCP subset and limits
+
+- HTTPS on port 443, no-auth or server-side Bearer authentication.
+- Streamable HTTP POST with JSON-RPC, JSON or SSE responses, initialization, initialized notification, session/version headers, paginated `tools/list`, and approved `tools/call`.
+- Negotiated versions: `2025-06-18`, `2025-03-26`, `2025-11-25`. Not a promise of compatibility with every provider or future protocol revision.
+- No OAuth account-linking flow, local/stdio commands, legacy separate SSE endpoint transport, arbitrary shell/plugin execution, resources/prompts browser, server-to-client sampling/elicitation, or asynchronous task/resumption implementation.
+- A maximum of 200 discovered tools, 10 listing pages, 1 MB per MCP response, 30 KB input arguments, and 100,000 stored output characters per run.
+- Network timeouts and bounded streams. Long-running providers may need a dedicated integration. One run at a time; there are no automatic retries.
+- Exact endpoint redirects, query-string credentials, local/private/reserved destinations, and non-HTTPS connections are rejected. DNS results are validated, then the request is pinned to a validated address with TLS hostname verification.
+- Argument validation uses the provider JSON Schema; external `$ref`, `$dynamicRef`, and `$recursiveRef` resources are blocked. Provider descriptions/annotations are not guarantees of safety.
+- The tool definition is re-fetched before execution. If it changed since review, the call is blocked until re-synced/reviewed.
+- Repeated requests with the same run reference do not replay an action. Known success, provider `isError`, pre-call failure, and uncertain results remain separate. An interrupted connection can leave an external action completed but unconfirmed; inspect provider logs before a new run.
+- Token values are never returned to the browser, stored in the connector record, or placed in URLs. A connector stores only a dedicated environment variable name. The token is redacted from captured provider output. Arguments/results themselves are stored privately, so do not include unnecessary sensitive data.
+
+A live compatibility check successfully initialized `https://mcp.deepwiki.com/mcp` and discovered its actual `ask_question`, `read_wiki_contents`, and `read_wiki_structure` tools. This was a handshake/discovery check, not a production connection seeded into the workspace or an AI task performed on your data. No paid AI account was connected. Public endpoint availability can change.
+
+MCP protocol reference: https://modelcontextprotocol.io/specification/2025-03-26/basic/transports
+
+## Contracts
+
+**Contracts** is a manual agreement tracker. Store a project title, client/email, optional linked lead, notes, currency, value, payments received, and Draft / Sent / Signed / In progress / Completed / Cancelled stages.
+
+Amounts are stored in integer minor units, with explicit currency precision. Blank values remain **Not priced**, not guessed revenue. USD, EUR, GBP, CAD, NGN, AUD, JPY, INR, AED, SGD, ZAR, GHS and BRL are supported. JPY uses zero decimal places; the other supported currencies use two. Recorded payments cannot exceed the contract amount. Currency changes are manual edits, not exchange conversions.
+
+Saving a contract does **not** generate, send, sign, legally validate, or charge for an agreement. Signed dates indicate when that stage was first recorded here, not a verified electronic signature timestamp. Payment figures are manually entered, not bank-confirmed. Store the actual signed document in your appropriate document system and reference it in notes.
+
+## Expanded overview analytics
+
+The main Overview now queries `/api/analytics` for real database-backed breakdowns:
+
+- Current saved businesses, website opportunities, email/phone availability, source website status, URL checks, lead stages and top locations.
+- Saved email drafts, SMTP accepted messages, explicit rejections, sending state and uncertain outcomes. SMTP acceptance is not delivery; there is no fabricated open/reply rate.
+- Actual project form submissions and manually maintained enquiry stages.
+- Actual contract records and stages, unpriced agreements, pipeline values, committed values, and manually recorded payments **grouped by currency**. There is no summed multi-currency revenue figure.
+- Recorded MCP runs and outcomes, saved connectors/skills, and discovery job states. Calls made outside Reachmark are not silently imported into these counts.
+- 7/30/90-day UTC charts for saved lead creation, accepted emails, enquiries, contract creation, tool runs and server page requests.
+- A journal of the latest 30 recorded workspace actions.
+
+Most summary cards show stored totals; the page-request card and charts use the selected date range. Deleting a lead or contract removes it from its current totals and creation chart; historical SMTP/run records remain. This is not a comprehensive accounting ledger or an immutable audit service.
+
+Page measurement starts with this deployment. It counts successful GET requests to the workspace, public home, enquiry form, sample gallery and proposal/sample pages. Refreshes, developer checks and bots may be included. It does **not** claim unique visitors or people; static/API requests and client-side tab navigation are not counted. No historical visits are invented. Proposal tokens and individual visitor identifiers are not stored in the page analytics. Dataset snapshots and metrics refresh every 30 seconds while Overview is active.
+
+The existing 217 business records were retained. The new MCP/contract tables start empty: there are no seeded tools, contracts, runs, or payments. All UI integration-test data uses a disposable database, not the live workspace.
+
+### Operational notes
+
+`operations.py` adds the routes/storage and `mcp_transport.py` supplies the bounded transport. The Docker image includes both modules and `jsonschema` is pinned in requirements. Use one server worker as documented for jobs/tool execution. Protect the dashboard, persisted SQLite database, and backups before adding credentials or exposing private tool output publicly.
+
+There are 41 isolated backend tests, including MCP JSON/SSE/session handling, endpoint restrictions, schemas, approvals, changed-tool blocking, duplicate prevention, uncertain outcomes, presets, contract precision/currency totals and authentic empty-state analytics. A disposable-database browser test also covers connector discovery → saved skill → approved run → result/history → analytics, and contract creation → signed value → recorded-payment breakdown. Runtime provider availability, permissions and external actions cannot be guaranteed by tests.
