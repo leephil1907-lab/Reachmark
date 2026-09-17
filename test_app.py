@@ -100,4 +100,45 @@ class ProspectTests(unittest.TestCase):
         import socket
         with patch('services.socket.getaddrinfo',side_effect=socket.gaierror()):
             self.assertEqual(audit_website('https://unresolved.example')['status'],'DNS_UNRESOLVED')
+    def enquiry_data(self):
+        return {'name':'Test Visitor','email':'visitor@example.test','business':'Test Studio','kind':'Website estimate','budget':'Please advise','timeline':'Flexible','message':'I would like a small website with three pages and an enquiry form.','sample':'ember-coffee','consent':True,'request_id':'abcdef1234567890abcdef1234567890'}
+    def test_samples_are_public_and_not_leads(self):
+        before=len(self.client.get('/api/state').json['leads'])
+        self.assertEqual(self.client.get('/showcase').status_code,200)
+        for slug in ['ember-coffee','stillwell-studio','forma-homes']:
+            response=self.client.get('/showcase/'+slug);self.assertEqual(response.status_code,200);self.assertIn(b'FICTIONAL DESIGN SAMPLE',response.data)
+        self.assertEqual(len(self.client.get('/api/state').json['leads']),before)
+        self.assertEqual(self.client.get('/showcase/missing').status_code,404)
+    def test_enquiry_persists_with_reference(self):
+        r=self.client.post('/api/enquiries',json=self.enquiry_data());self.assertEqual(r.status_code,201);self.assertEqual(r.json['reference'],'ABCDEF12')
+        rows=self.client.get('/api/enquiries').json['enquiries'];self.assertEqual(len(rows),1);self.assertEqual(rows[0]['sample'],'ember-coffee');self.assertEqual(rows[0]['status'],'New')
+        self.assertEqual(self.client.get('/api/state').json['enquiry_count'],1)
+        self.assertEqual(len(self.client.get('/api/state').json['leads']),0)
+    def test_enquiry_retry_is_idempotent(self):
+        self.client.post('/api/enquiries',json=self.enquiry_data());r=self.client.post('/api/enquiries',json=self.enquiry_data());self.assertEqual(r.status_code,200)
+        self.assertEqual(len(self.client.get('/api/enquiries').json['enquiries']),1)
+    def test_enquiry_validation_and_consent(self):
+        data=self.enquiry_data();data['consent']=False;self.assertEqual(self.client.post('/api/enquiries',json=data).status_code,400)
+        data['consent']=True;data['email']='not-an-email';self.assertEqual(self.client.post('/api/enquiries',json=data).status_code,400)
+        data=self.enquiry_data();data['company_url']='spam';self.assertEqual(self.client.post('/api/enquiries',json=data).status_code,400)
+        self.assertEqual(len(self.client.get('/api/enquiries').json['enquiries']),0)
+    def test_enquiry_inbox_authentication(self):
+        with patch.dict(os.environ,{'DASHBOARD_PASSWORD':'test-only-password'}):
+            self.assertEqual(self.client.get('/enquire').status_code,200)
+            self.assertEqual(self.client.get('/showcase').status_code,200)
+            self.assertEqual(self.client.post('/api/enquiries',json=self.enquiry_data()).status_code,201)
+            self.assertEqual(self.client.get('/api/enquiries').status_code,401)
+            self.assertEqual(self.client.patch('/api/enquiries/abcdef1234567890abcdef1234567890',json={'status':'Answered'}).status_code,401)
+    def test_enquiry_update_and_delete(self):
+        self.client.post('/api/enquiries',json=self.enquiry_data());eid=self.enquiry_data()['request_id']
+        self.assertEqual(self.client.patch('/api/enquiries/'+eid,json={'status':'In progress','notes':'Scope under review'}).status_code,200)
+        self.assertEqual(self.client.get('/api/enquiries').json['enquiries'][0]['notes'],'Scope under review')
+        self.assertEqual(self.client.delete('/api/enquiries/'+eid).status_code,200)
+        self.assertEqual(self.client.get('/api/enquiries').json['enquiries'],[])
+    def test_enquiry_rate_limit(self):
+        for i in range(3):
+            data=self.enquiry_data();data['request_id']=f'{i:032x}';self.assertEqual(self.client.post('/api/enquiries',json=data).status_code,201)
+        data=self.enquiry_data();data['request_id']='e'*32;self.assertEqual(self.client.post('/api/enquiries',json=data).status_code,429)
+    def test_enquiry_cross_origin_is_rejected(self):
+        self.assertEqual(self.client.post('/api/enquiries',json=self.enquiry_data(),headers={'Origin':'https://elsewhere.example'}).status_code,403)
 if __name__=='__main__':unittest.main(verbosity=2)

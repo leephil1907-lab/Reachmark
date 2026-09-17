@@ -4,7 +4,7 @@ Global business discovery, live website checks, and reviewed website outreach.
 
 A working Flask + SQLite application with a redesigned editorial dashboard, charcoal/lime brand system, custom vector identity, React/Framer Motion transitions, Lucide icons, self-hosted fonts, and real server-side integrations. No Google Maps or language-model API key is required.
 
-**The repository starts with an empty database. It contains no seeded businesses, simulated analytics, fake reviews, contact lists, SMTP credentials, or automatic bulk-email campaign.** Workspace data is not committed. Unit-test fixtures are isolated from runtime data; tests mock external services only to avoid sending messages or hitting public endpoints.
+**The repository starts with an empty business/enquiry database. It contains no seeded leads, simulated analytics, fake reviews, contact lists, SMTP credentials, or automatic bulk-email campaign. A separate, explicitly fictional design gallery contains three website samples; those are never counted as real businesses or enquiries.** Workspace data is not committed. Unit-test fixtures are isolated from runtime data; tests mock external services only to avoid sending messages or hitting public endpoints.
 
 ## Run
 
@@ -158,7 +158,7 @@ python -m unittest test_app -v
 npm run build
 ```
 
-16 isolated tests cover CRUD, CSV, templates, mocked SMTP safety, persistent opt-outs, global job validation/start/cancel, source discovery, private-address blocking, invalid audit schemes, DNS uncertainty, metadata, and origin checks. Unit tests bootstrap temporary databases and never mutate the running workspace or send real email.
+24 isolated tests cover CRUD, CSV, templates, mocked SMTP safety, persistent opt-outs, global job validation/start/cancel, source discovery, private-address blocking, invalid audit schemes, DNS uncertainty, metadata, and origin checks. Unit tests bootstrap temporary databases and never mutate the running workspace or send real email.
 
 Desktop/mobile Chromium checks covered the animated feature dropdown, global finder, health list, detail evidence panel, metadata page, no horizontal overflow, and no JavaScript exceptions. Public integrations are still subject to network conditions; no claim of perfect uptime.
 
@@ -200,3 +200,30 @@ Brand assets in `brand/`: primary/inverse SVG and transparent PNG wordmarks, SVG
 The redesigned dashboard retains the same persistent database and workflows. The globe is a decorative illustration; numbers shown in workspace metrics come only from saved activity. No new business data was inserted for the visual redesign.
 
 Name selection is a creative recommendation, not a trademark/domain availability clearance. Check the relevant registrations before commercial launch. The GitHub repository URL remains `leephil1907-lab/sitegapreveal`; the public product name is Reachmark.
+
+## Website samples and project enquiries
+
+### Public pages
+
+- `/showcase`: three clearly labelled fictional website directions.
+- `/showcase/ember-coffee`: Ember & Oak, café/hospitality.
+- `/showcase/stillwell-studio`: Stillwell, wellness/beauty.
+- `/showcase/forma-homes`: Forma House, renovation/trades.
+- `/enquire`: working project estimate/question form. The `sample` query parameter preselects the design.
+- `/about`: includes the design gallery and the same working enquiry form.
+
+The existing Reachmark identity appears across the public pages, gallery and enquiry receipt. Sample names are fictional brands, not real leads, clients, reviews or completed commissions. The gallery uses actual browser screenshots of the sample pages; imagery within those pages is AI-generated concept art. No fictional sample is inserted into the business database or metrics. Preview navigation and “Ask about this design” links work; no false booking, ordering or payment tools are shown.
+
+### Real enquiries
+
+Visitors can send an estimate request, project question or other enquiry with their name/email, optional business, budget and timeline, message and optional sample selection. Validation and explicit contact permission are required. Successful requests are saved to SQLite and receive a reference in the browser. No quote, price, delivery date or automatic email response is invented.
+
+The owner’s **Enquiry inbox** provides search, status filters, message details, internal notes, status updates and deletion. **Reply in email app** opens a pre-addressed email draft in the owner’s mail application; it does not automatically send mail or mark the enquiry answered. There is no email notification service or automatic inbox-to-SMTP reply flow for these requests. Check the dashboard to read new messages.
+
+POST `/api/enquiries` is public. GET `/api/enquiries` and PATCH/DELETE `/api/enquiries/<id>` require dashboard authentication when `DASHBOARD_PASSWORD` is set. A cross-origin request check, hidden anti-bot field, length validation, retry/idempotency key and conservative database-backed hourly limits protect submissions. Basic rate limits use the socket address hash (not an untrusted forwarded header); users behind one proxy may share that limit. This is not a full CAPTCHA/spam-filter service.
+
+Set `DASHBOARD_PASSWORD`, HTTPS, a real sender/contact profile, and appropriate privacy/retention practices before public use. The form discloses stored request details and the hashed network identifier. Add a production CAPTCHA and trusted-proxy-aware abuse controls if needed. Do not collect sensitive documents, credentials or payment details in this form. The dashboard and APIs use `Cache-Control: no-store`.
+
+New source files: `portfolio.py`, `enquiries.py`, `templates/sample-site.html`, `templates/showcase.html`, `templates/enquire.html`, `templates/enquiry-form.html`, `templates/sample-cards.html`, `static/enquiry.js`, `static/inbox.js`, `static/public.css`, `static/inbox.css`, and `static/samples/`. The Dockerfile includes both new Python modules.
+
+Validation includes eight additional isolated backend tests and a full browser submission-to-inbox flow using a disposable database. No synthetic submissions were left in the live inbox.

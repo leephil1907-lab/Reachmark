@@ -37,6 +37,7 @@ with db() as c:
         if name not in columns: c.execute(f'ALTER TABLE leads ADD COLUMN {name} {kind}')
     c.execute("UPDATE jobs SET state='interrupted',message='Server restarted; start a new search to continue.' WHERE state IN ('queued','running')")
 from services import discover_location, audit_website
+from portfolio import SAMPLES
 DEFAULTS={'sender_name':'','agency':'','reply_email':'','postal_address':'','public_base_url':'','offer':'clear, mobile-friendly websites that make it easier for customers to learn about services and get in touch'}
 def settings():
     with db() as c: r=c.execute('SELECT data FROM settings WHERE id=1').fetchone()
@@ -68,19 +69,20 @@ def same_origin():
         if origin and urlparse(origin).netloc != request.host: return jsonify(error='Cross-origin request rejected.'),403
     # Optional protection for a public deployment. Preview and opt-out remain public.
     password=os.getenv('DASHBOARD_PASSWORD')
-    if password and not request.path.startswith(('/preview/','/unsubscribe/','/static/','/about','/robots.txt','/sitemap.xml','/healthz')):
+    public_path=request.path.startswith(('/preview/','/unsubscribe/','/static/','/about','/robots.txt','/sitemap.xml','/healthz','/showcase','/enquire')) or (request.path=='/api/enquiries' and request.method=='POST')
+    if password and not public_path:
         auth=request.authorization
         if not auth or auth.username!='admin' or auth.password!=password:
-            return Response('Authentication required',401,{'WWW-Authenticate':'Basic realm="Prospect"'})
+            return Response('Authentication required',401,{'WWW-Authenticate':'Basic realm="Reachmark"'})
 @app.after_request
 def headers(r):
-    if request.path=='/' or request.path.startswith(('/api/','/preview/','/unsubscribe/')): r.headers['X-Robots-Tag']='noindex, nofollow'
+    if request.path=='/' or request.path.startswith(('/api/','/preview/','/unsubscribe/')): r.headers['X-Robots-Tag']='noindex, nofollow'; r.headers['Cache-Control']='no-store'
     r.headers['X-Content-Type-Options']='nosniff'; r.headers['Referrer-Policy']='same-origin'
     return r
 @app.errorhandler(413)
 def too_big(e): return jsonify(error='File too large. Limit: 3 MB.'),413
 @app.route('/')
-def index(): return render_template('index.html')
+def index(): return render_template('index.html',samples=SAMPLES)
 @app.route('/healthz')
 def healthz():
     with db() as c: c.execute('SELECT 1').fetchone()
@@ -90,7 +92,7 @@ def about():
     base=settings()['public_base_url'].rstrip('/')
     structured={'@context':'https://schema.org','@type':'SoftwareApplication','name':'Reachmark','applicationCategory':'BusinessApplication','operatingSystem':'Web','description':'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.'}
     if base: structured['url']=base+'/about'
-    return render_template('about.html',base=base,structured=structured)
+    return render_template('about.html',base=base,structured=structured,samples=SAMPLES)
 @app.route('/robots.txt')
 def robots():
     base=settings()['public_base_url'].rstrip('/')
@@ -99,7 +101,7 @@ def robots():
 def sitemap():
     from xml.sax.saxutils import escape
     base=settings()['public_base_url'].rstrip('/')
-    entry='<url><loc>'+escape(base+'/about')+'</loc></url>' if base else ''
+    entry=''.join('<url><loc>'+escape(base+path)+'</loc></url>' for path in ('/about','/showcase','/enquire')) if base else ''
     return Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+entry+'</urlset>',mimetype='application/xml')
 @app.route('/api/state')
 def state():
@@ -108,8 +110,9 @@ def state():
         activity=[dict(r) for r in c.execute('SELECT * FROM activity ORDER BY id DESC LIMIT 12')]
         sent=c.execute("SELECT count(*) FROM sends WHERE state='sent'").fetchone()[0]
         suppressed=[r[0] for r in c.execute('SELECT email FROM suppression')]
+        enquiry_count=c.execute("SELECT count(*) FROM enquiries WHERE status='New'").fetchone()[0]
         jobs=[dict(r) for r in c.execute('SELECT * FROM jobs ORDER BY created DESC LIMIT 15')]
-    return jsonify(leads=leads,jobs=jobs,activity=activity,sent=sent,settings=settings(),categories=list(CATEGORIES),smtp_ready=bool(os.getenv('SMTP_HOST') and os.getenv('SMTP_FROM')),suppressed=suppressed)
+    return jsonify(leads=leads,enquiry_count=enquiry_count,jobs=jobs,activity=activity,sent=sent,settings=settings(),categories=list(CATEGORIES),smtp_ready=bool(os.getenv('SMTP_HOST') and os.getenv('SMTP_FROM')),suppressed=suppressed)
 @app.route('/api/settings',methods=['POST'])
 def save_settings():
     data=request.get_json() or {}; s={k:str(data.get(k,''))[:1500].strip() for k in DEFAULTS}
@@ -329,5 +332,8 @@ def send(lid):
         with db() as c: c.execute("UPDATE sends SET state=?,error=? WHERE id=?",('failed' if rejected else 'unknown',type(e).__name__,sid))
         log('error',f'SMTP needs review for {l["name"]}: {type(e).__name__}')
         return jsonify(error=('SMTP rejected the message. Check your provider configuration and credentials before retrying.' if rejected else 'SMTP did not confirm success. Check credentials and your provider’s sent logs. Resending is blocked to avoid duplicates.')),502
+
+from enquiries import register_enquiries
+register_enquiries(app, db, now, log)
 
 if __name__=='__main__': app.run(host='0.0.0.0',port=int(os.getenv('PORT','8000')),debug=False)

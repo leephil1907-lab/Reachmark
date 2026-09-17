@@ -1,0 +1,75 @@
+"""Public project requests and a private owner inbox; no simulated submissions."""
+import hashlib, re, uuid
+from datetime import datetime, timezone, timedelta
+from flask import request, jsonify, render_template, abort
+from portfolio import SAMPLES, find_sample
+
+def register_enquiries(app, db, now, log):
+    with db() as c:
+        c.execute('''CREATE TABLE IF NOT EXISTS enquiries (
+        id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, business TEXT,
+        kind TEXT, budget TEXT, timeline TEXT, message TEXT NOT NULL, sample TEXT,
+        status TEXT DEFAULT 'New', notes TEXT DEFAULT '', fingerprint TEXT, created TEXT, updated TEXT)''')
+        c.execute('CREATE INDEX IF NOT EXISTS enquiry_created ON enquiries(created)')
+
+    @app.route('/showcase')
+    def showcase():
+        return render_template('showcase.html',samples=SAMPLES)
+
+    @app.route('/showcase/<slug>')
+    def sample_site(slug):
+        sample=find_sample(slug)
+        if not sample: abort(404)
+        return render_template('sample-site.html',sample=sample)
+
+    @app.route('/enquire')
+    def enquire():
+        slug=request.args.get('sample','')
+        return render_template('enquire.html',samples=SAMPLES,chosen_sample=slug if find_sample(slug) else '')
+
+    @app.route('/api/enquiries',methods=['POST'])
+    def submit_enquiry():
+        v=request.get_json(silent=True)
+        if not isinstance(v,dict): return jsonify(error='Please submit the enquiry form.'),400
+        if v.get('company_url'): return jsonify(error='Unable to accept this submission.'),400
+        limits={'name':120,'email':250,'business':200,'kind':80,'budget':150,'timeline':150,'message':5000,'sample':80,'request_id':40}
+        data={k:str(v.get(k,'')).strip() for k in limits}
+        if any(len(data[k])>limits[k] for k in limits): return jsonify(error='One of the fields is too long. Keep your message under 5,000 characters.'),400
+        if len(data['name'])<2 or len(data['message'])<15: return jsonify(error='Please add your name and a message of at least 15 characters.'),400
+        if not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',data['email']): return jsonify(error='Please enter a valid email address.'),400
+        if data['kind'] not in ('Website estimate','Project question','Other enquiry'): return jsonify(error='Choose an enquiry type.'),400
+        if data['sample'] and not find_sample(data['sample']): return jsonify(error='Choose one of the listed samples, or no preference.'),400
+        if v.get('consent') is not True: return jsonify(error='Please confirm we may contact you about this request.'),400
+        rid=data['request_id']
+        if rid and not re.fullmatch(r'[a-f0-9]{32}',rid): return jsonify(error='Please refresh the form and try again.'),400
+        rid=rid or uuid.uuid4().hex
+        stamp=now();cutoff=(datetime.now(timezone.utc)-timedelta(hours=1)).isoformat()
+        email=data['email'].lower();fingerprint=hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()
+        with db() as c:
+            c.execute('BEGIN IMMEDIATE')
+            existing=c.execute('SELECT email FROM enquiries WHERE id=?',(rid,)).fetchone()
+            if existing:
+                if existing['email']==email: return jsonify(ok=True,reference=rid[:8].upper()),200
+                return jsonify(error='Please refresh the form and try again.'),409
+            if c.execute('SELECT count(*) FROM enquiries WHERE email=? AND created>?',(email,cutoff)).fetchone()[0]>=3 or c.execute('SELECT count(*) FROM enquiries WHERE fingerprint=? AND created>?',(fingerprint,cutoff)).fetchone()[0]>=30:
+                return jsonify(error='Too many recent requests. Please try again later.'),429
+            c.execute('INSERT INTO enquiries(id,name,email,business,kind,budget,timeline,message,sample,fingerprint,created,updated) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',(rid,data['name'],email,data['business'],data['kind'],data['budget'],data['timeline'],data['message'],data['sample'],fingerprint,stamp,stamp))
+        log('enquiry','A new project enquiry was received')
+        return jsonify(ok=True,reference=rid[:8].upper()),201
+
+    @app.route('/api/enquiries',methods=['GET'])
+    def inbox():
+        with db() as c: rows=[dict(r) for r in c.execute('SELECT id,name,email,business,kind,budget,timeline,message,sample,status,notes,created,updated FROM enquiries ORDER BY created DESC')]
+        return jsonify(enquiries=rows)
+
+    @app.route('/api/enquiries/<eid>',methods=['PATCH','DELETE'])
+    def update_enquiry(eid):
+        with db() as c:
+            if not c.execute('SELECT 1 FROM enquiries WHERE id=?',(eid,)).fetchone(): abort(404)
+            if request.method=='DELETE':
+                c.execute('DELETE FROM enquiries WHERE id=?',(eid,));return jsonify(ok=True)
+            v=request.get_json(silent=True) or {}
+            status=v.get('status');notes=v.get('notes','')
+            if status not in ('New','In progress','Answered','Closed') or not isinstance(notes,str) or len(notes)>5000: return jsonify(error='Choose a valid status and keep notes under 5,000 characters.'),400
+            c.execute('UPDATE enquiries SET status=?,notes=?,updated=? WHERE id=?',(status,notes,now(),eid))
+        return jsonify(ok=True)
