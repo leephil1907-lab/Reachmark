@@ -7,7 +7,7 @@ import requests, urllib3
 SOCIAL = ('facebook.com','instagram.com','linktr.ee','linktree.com','fb.com','business.site')
 geo_lock=threading.Lock()
 last_geo=0.0
-HEADERS={'User-Agent':'SiteGapReveal/1.0 (interactive public business directory research)'}
+HEADERS={'User-Agent':'Reachmark/1.0 (interactive public business directory research)'}
 def classify(url):
     if not url.strip(): return 'NOT_LISTED'
     host=(urlparse(url if '://' in url else 'https://'+url).hostname or '').lower()

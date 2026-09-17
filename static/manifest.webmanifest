@@ -1,1 +1,28 @@
-{"name":"SiteGap Reveal — Global Lead Discovery","short_name":"SiteGap Reveal","description":"Discover global businesses, review website health, and send thoughtful website proposals.","start_url":"/","scope":"/","display":"standalone","background_color":"#f8f9fc","theme_color":"#7660d9","icons":[{"src":"/static/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]}
+{
+  "name": "Reachmark \u2014 Discover Business Potential",
+  "short_name": "Reachmark",
+  "description": "Discover businesses worldwide, verify website opportunities, and start meaningful conversations.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f5ef",
+  "theme_color": "#20251f",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

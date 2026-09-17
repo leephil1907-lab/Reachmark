@@ -1,8 +1,8 @@
-# SiteGap Reveal
+# Reachmark
 
 Global business discovery, live website checks, and reviewed website outreach.
 
-A working Flask + SQLite application with a responsive dashboard, React/Framer Motion feature menu, Lucide vector icons, self-hosted fonts, and real server-side integrations. No Google Maps or language-model API key is required.
+A working Flask + SQLite application with a redesigned editorial dashboard, charcoal/lime brand system, custom vector identity, React/Framer Motion transitions, Lucide icons, self-hosted fonts, and real server-side integrations. No Google Maps or language-model API key is required.
 
 **The repository starts with an empty database. It contains no seeded businesses, simulated analytics, fake reviews, contact lists, SMTP credentials, or automatic bulk-email campaign.** Workspace data is not committed. Unit-test fixtures are isolated from runtime data; tests mock external services only to avoid sending messages or hitting public endpoints.
 
@@ -132,8 +132,8 @@ gunicorn --bind 0.0.0.0:8000 --workers 1 --threads 4 --timeout 120 app:app
 Or use the included Dockerfile:
 
 ```bash
-docker build -t sitegap-reveal .
-docker run --env-file .env -p 8000:8000 -v sitegap-data:/data sitegap-reveal
+docker build -t reachmark .
+docker run --env-file .env -p 8000:8000 -v sitegap-data:/data reachmark
 ```
 
 - Set a strong `DASHBOARD_PASSWORD`; Basic auth username is `admin`. Use HTTPS. Without the variable, the dashboard is open for local/workspace development only.
@@ -186,3 +186,17 @@ git push -u origin main
 ```
 
 Do not force-push over someone else’s commits. SQLite data, `.env`, checks, and installed packages are ignored. The Docker image also excludes secrets and workspace data. No hosted deployment or SMTP connection is created by a Git push.
+
+## Reachmark identity
+
+**Reachmark — Find potential. Make your mark.**
+
+Description: Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.
+
+The new interface uses charcoal `#20251F`, lime `#D5F268`, warm white `#F5F5EF`, and restrained olive accents. The custom forward-R symbol includes a destination dot; the wordmark is supplied as outlined SVG so it does not rely on installed fonts.
+
+Brand assets in `brand/`: primary/inverse SVG and transparent PNG wordmarks, SVG/PNG app symbol, and an optional asset-generation script. Production app icons, manifest and social-share image live in `static/`. Fonts retain their original OFL licenses.
+
+The redesigned dashboard retains the same persistent database and workflows. The globe is a decorative illustration; numbers shown in workspace metrics come only from saved activity. No new business data was inserted for the visual redesign.
+
+Name selection is a creative recommendation, not a trademark/domain availability clearance. Check the relevant registrations before commercial launch. The GitHub repository URL remains `leephil1907-lab/sitegapreveal`; the public product name is Reachmark.

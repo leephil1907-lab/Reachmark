@@ -88,7 +88,7 @@ def healthz():
 @app.route('/about')
 def about():
     base=settings()['public_base_url'].rstrip('/')
-    structured={'@context':'https://schema.org','@type':'SoftwareApplication','name':'SiteGap Reveal','applicationCategory':'BusinessApplication','operatingSystem':'Web','description':'Global business discovery, live website health checks, and reviewed website outreach.'}
+    structured={'@context':'https://schema.org','@type':'SoftwareApplication','name':'Reachmark','applicationCategory':'BusinessApplication','operatingSystem':'Web','description':'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.'}
     if base: structured['url']=base+'/about'
     return render_template('about.html',base=base,structured=structured)
 @app.route('/robots.txt')
@@ -164,7 +164,7 @@ def export():
     f=io.StringIO(); w=csv.DictWriter(f,fieldnames=fields,extrasaction='ignore'); w.writeheader()
     for row in rows:
         w.writerow({k: ("'"+str(v) if str(v).startswith(('=','+','-','@','\t','\r')) else v) for k,v in row.items()})
-    return Response(f.getvalue(),mimetype='text/csv',headers={'Content-Disposition':'attachment; filename=prospect-leads.csv'})
+    return Response(f.getvalue(),mimetype='text/csv',headers={'Content-Disposition':'attachment; filename=reachmark-leads.csv'})
 def search_save(location, category, include_websites=False):
     rows, resolved=discover_location(location,CATEGORIES[category])
     added=0; candidates=0
@@ -271,7 +271,7 @@ def draft(lid):
 def preview(token):
     with db() as c: r=c.execute('SELECT * FROM leads WHERE token=?',(token,)).fetchone()
     if not r: abort(404)
-    return render_template('preview.html',lead=dict(r),studio=settings()['agency'] or 'SiteGap Studio')
+    return render_template('preview.html',lead=dict(r),studio=settings()['agency'] or 'Reachmark Studio')
 @app.route('/unsubscribe/<token>',methods=['GET','POST'])
 def unsubscribe(token):
     with db() as c:

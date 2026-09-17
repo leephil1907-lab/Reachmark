@@ -87,6 +87,8 @@ class ProspectTests(unittest.TestCase):
             self.assertEqual(audit_website('https://private.example')['status'],'CHECK_FAILED');pool.assert_not_called()
     def test_public_metadata(self):
         response=self.client.get('/about');self.assertIn(b'application/ld+json',response.data)
+        self.assertIn(b'Reachmark',response.data)
+        self.assertIn(b'logo-primary.svg',response.data)
         self.assertEqual(self.client.get('/healthz').status_code,200)
         self.assertIn(b'/preview/',self.client.get('/robots.txt').data)
         self.assertEqual(self.client.get('/').headers['X-Robots-Tag'],'noindex, nofollow')
