@@ -8,23 +8,45 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet,ParagraphStyle
 from reportlab.lib.enums import TA_LEFT
-from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,KeepTogether
+from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,KeepTogether,Image
+from reportlab.lib.units import mm
 from operations import CURRENCIES
 FONTDIR=os.path.join(os.path.dirname(__file__),'static','pdf-fonts')
 pdfmetrics.registerFont(TTFont('Reachmark',os.path.join(FONTDIR,'DejaVuSans.ttf')))
 pdfmetrics.registerFont(TTFont('ReachmarkBold',os.path.join(FONTDIR,'DejaVuSans-Bold.ttf')))
 pdfmetrics.registerFontFamily('Reachmark',normal='Reachmark',bold='ReachmarkBold',italic='Reachmark',boldItalic='ReachmarkBold')
+# Branded logo for PDFs — primary wordmark; fallback to icon if missing
+LOGOPATH_PRIMARY=os.path.join(os.path.dirname(__file__),'static','reachmark-logo.png')
+LOGOPATH_FALLBACK=os.path.join(os.path.dirname(__file__),'static','icon-512.png')
+LOGOPATH=LOGOPATH_PRIMARY if os.path.exists(LOGOPATH_PRIMARY) else LOGOPATH_FALLBACK
 def amount(value,currency):return 'Tailored quote — amount not set' if value is None else f'{currency} {Decimal(value)/(10**CURRENCIES[currency]):,.{CURRENCIES[currency]}f}'
 def pdf(title,subtitle,sections,stamp,studio):
     buf=io.BytesIO();styles=getSampleStyleSheet()
     styles.add(ParagraphStyle(name='RMBody',fontName='Reachmark',fontSize=9.5,leading=15,spaceAfter=9,textColor=colors.HexColor('#30382c'),wordWrap='CJK'))
     styles.add(ParagraphStyle(name='RMTitle',fontName='ReachmarkBold',fontSize=26,leading=32,spaceAfter=14,textColor=colors.HexColor('#26351e')))
     styles.add(ParagraphStyle(name='RMHeading',fontName='ReachmarkBold',fontSize=12,leading=17,spaceBefore=14,spaceAfter=7))
+    styles.add(ParagraphStyle(name='RMStudio',fontName='ReachmarkBold',fontSize=10,leading=13,textColor=colors.HexColor('#26351e'),spaceAfter=2))
     def text(value):return escape(str(value or 'Not recorded')).replace('\n','<br/>')
-    story=[Paragraph(text(studio),styles['RMHeading']),Paragraph(text(title),styles['RMTitle']),Paragraph(text(subtitle),styles['RMBody']),Paragraph('Generated '+text(stamp),styles['RMBody'])]
+    story=[]
+    # Branded header: logo + studio name
+    try:
+        # Use PNG logo; height ~14mm keeps aspect
+        logo=Image(LOGOPATH, width=42*mm, height=10*mm)
+        logo.hAlign='LEFT'
+        story.append(logo)
+        story.append(Spacer(1,4))
+    except Exception:
+        pass
+    story.extend([Paragraph(text(studio),styles['RMStudio']), Paragraph(text(title),styles['RMTitle']),Paragraph(text(subtitle),styles['RMBody']),Paragraph('Generated '+text(stamp),styles['RMBody'])])
     for heading,value in sections:story.extend([Paragraph(text(heading),styles['RMHeading']),Paragraph(text(value),styles['RMBody'])])
     def page(canvas,doc):
+        # Footer rule and branding
         canvas.setStrokeColor(colors.HexColor('#cce57b'));canvas.setLineWidth(3);canvas.line(42,43,553,43);canvas.setFont('Reachmark',8);canvas.setFillColor(colors.HexColor('#56644a'));canvas.drawString(42,28,'REACHMARK · Saved-record export');canvas.drawRightString(553,28,f'Page {doc.page}')
+        # Small header logo on each page
+        try:
+            canvas.drawImage(LOGOPATH, 42, 800, width=120, height=28, preserveAspectRatio=True, mask='auto')
+        except Exception:
+            pass
     doc=SimpleDocTemplate(buf,pagesize=(595,842),rightMargin=42,leftMargin=42,topMargin=42,bottomMargin=60,title=title,author=studio)
     doc.build(story,onFirstPage=page,onLaterPages=page);return buf.getvalue()
 def register_documents(app,db,now,settings):
