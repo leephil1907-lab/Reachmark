@@ -29,7 +29,7 @@ def register_enquiries(app, db, now, log):
             'noindex': False,
         }
         gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
-        ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-XXXXXXXXXX'
+        ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'
         gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'
         structured=[{'@context':'https://schema.org','@type':'CollectionPage','name':'Website Samples — Reachmark','description': seo['description'], 'url': seo['canonical'] or request.url}]
         return render_template('showcase.html',samples=SAMPLES,seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gtm_id=gtm_id)
@@ -52,7 +52,7 @@ def register_enquiries(app, db, now, log):
             'noindex': False,
         }
         gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
-        ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-XXXXXXXXXX'
+        ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'
         gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'
         structured=[{'@context':'https://schema.org','@type':'CreativeWork','name': sample['name'], 'description': seo['description'], 'url': seo['canonical'] or request.url, 'image': seo['og_image']}]
         return render_template('sample-site.html',sample=sample,seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gtm_id=gtm_id)
@@ -74,7 +74,7 @@ def register_enquiries(app, db, now, log):
             'noindex': False,
         }
         gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
-        ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-XXXXXXXXXX'
+        ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'
         gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'
         structured=[{'@context':'https://schema.org','@type':'ContactPage','name':'Enquire — Reachmark','description': seo['description'], 'url': seo['canonical'] or request.url}]
         return render_template('enquire.html',samples=SAMPLES,chosen_sample=slug if find_sample(slug) else '',seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gtm_id=gtm_id)
