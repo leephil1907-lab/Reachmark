@@ -122,9 +122,10 @@ def home():
             {'@type':'ListItem','position':3,'name':'Enquire','item': (base or request.url_root.rstrip('/')) + '/enquire'}
         ]
     }]
-    ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # placeholder — replace via GOOGLE_ANALYTICS_ID env for real GA verification
+    ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
+    gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'  # second Google tag alongside GA4
     gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
-    return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gtm_id=gtm_id)
+    return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
 @app.route('/workspace')
 def workspace():
     return render_template('index.html',samples=SAMPLES)
@@ -155,9 +156,10 @@ def about():
         '@context':'https://schema.org','@type':'WebSite','name':'Reachmark','url': base or request.url_root.rstrip('/'),
         'potentialAction': {'@type':'SearchAction','target': (base or request.url_root.rstrip('/')) + '/showcase?q={search_term_string}', 'query-input':'required name=search_term_string'}
     }]
-    ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # placeholder — replace via GOOGLE_ANALYTICS_ID env for real GA verification
+    ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
+    gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'  # second Google tag alongside GA4
     gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
-    return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gtm_id=gtm_id)
+    return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
 @app.route('/robots.txt')
 def robots():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
