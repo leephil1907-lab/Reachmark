@@ -32,9 +32,16 @@ def register_enquiries(app, db, now, log):
         v=request.get_json(silent=True)
         if not isinstance(v,dict): return jsonify(error='Please submit the enquiry form.'),400
         if v.get('company_url'): return jsonify(error='Unable to accept this submission.'),400
-        limits={'name':120,'email':250,'business':200,'kind':80,'budget':150,'timeline':150,'message':5000,'sample':80,'request_id':40}
+        limits={'name':120,'email':250,'business':200,'kind':80,'budget':150,'timeline':150,'message':5000,'sample':80,'request_id':40,'project_details':3000}
         data={k:str(v.get(k,'')).strip() for k in limits}
-        if any(len(data[k])>limits[k] for k in limits): return jsonify(error='One of the fields is too long. Keep your message under 5,000 characters.'),400
+        # Merge free-form project details into the main message so the inbox shows everything
+        if data.get('project_details'):
+            extra=data['project_details']
+            if len(data['message'])+len(extra)+40 <= limits['message']:
+                data['message']=(data['message']+"\n\n— Project details (your own words):\n"+extra).strip()
+            else:
+                data['message']=(data['message']+"\n\n— Project details:\n"+extra[:3000]).strip()[:5000]
+        if any(len(data[k])>limits[k] for k in limits if k!='project_details') or len(data['message'])>5000: return jsonify(error='One of the fields is too long. Keep your message under 5,000 characters.'),400
         if len(data['name'])<2 or len(data['message'])<15: return jsonify(error='Please add your name and a message of at least 15 characters.'),400
         if not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',data['email']): return jsonify(error='Please enter a valid email address.'),400
         if data['kind'] not in ('Website estimate','Project question','Other enquiry'): return jsonify(error='Choose an enquiry type.'),400
