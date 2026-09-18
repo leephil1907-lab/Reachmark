@@ -7,12 +7,24 @@
 <link rel="stylesheet" href="/static/premium.css">
 <style>
 [data-theme="dark"]{color-scheme:dark}
-[data-theme="dark"] body{background:#0f1510;color:#e6e9dd}
-[data-theme="dark"] nav{background:#0f1510!important;border-color:#1e2a1c!important}
-[data-theme="dark"] .hero, [data-theme="dark"] .card, [data-theme="dark"] .honest, [data-theme="dark"] .enquiry-form-shell{background:#151c14!important;border-color:#222e20!important}
-[data-theme="dark"] .cta{background:#0f1510!important;border:1px solid #222e20}
-[data-theme="dark"] .ribbon{border-color:#222e20!important;color:#9aa38e}
-[data-theme="dark"] footer{border-color:#222e20}
+[data-theme="dark"] body{background:#1b2518;color:#e8f0d0}
+[data-theme="dark"] nav{background:rgba(27,37,24,0.96)!important;border-color:#2a3a22!important;backdrop-filter:blur(10px);box-shadow:0 2px 20px rgba(0,0,0,.18)!important}
+[data-theme="dark"] .nav-links, [data-theme="dark"] .public-links{color:#cbd5c0 !important}
+[data-theme="dark"] .nav-links a, [data-theme="dark"] .public-links a{color:#e8f0d0 !important}
+[data-theme="dark"] .nav-links a:hover, [data-theme="dark"] .public-links a:hover{color:#d5f268 !important}
+[data-theme="dark"] .nav-links a[href="/signin"], [data-theme="dark"] .public-links a[href="/signin"]{background:#d5f268!important;color:#0f1a0a!important;border-color:#cbe85b!important;opacity:1 !important}
+[data-theme="dark"] #theme-toggle-public{border-color:#2a3a22!important;color:#e8f0d0!important;background:rgba(255,255,255,0.06)!important}
+[data-theme="dark"] .hero{background:linear-gradient(180deg,#1e2e1a 0%,#1b2518 100%)!important;border-color:#2a3a22!important;box-shadow:0 12px 40px rgba(0,0,0,.22)!important}
+[data-theme="dark"] .hero h1{color:#e8f0d0!important}
+[data-theme="dark"] .hero h1 span, [data-theme="dark"] .banner-kicker{color:#d5f268!important}
+[data-theme="dark"] .hero p, [data-theme="dark"] .banner-sub, [data-theme="dark"] .honest p, [data-theme="dark"] .card p{color:#b8c7a8!important}
+[data-theme="dark"] .card, [data-theme="dark"] .honest, [data-theme="dark"] .enquiry-form-shell, [data-theme="dark"] .trustpilot-section, [data-theme="dark"] .review-section, [data-theme="dark"] .sample-section .card{background:#1e2e1a!important;border-color:#2a3a22!important;box-shadow:0 8px 32px rgba(0,0,0,.18)!important}
+[data-theme="dark"] .card h3, [data-theme="dark"] .honest h2, [data-theme="dark"] .trustpilot-section h2, [data-theme="dark"] .review-section h2{color:#e8f0d0!important}
+[data-theme="dark"] .cta{background:linear-gradient(135deg,#1a2315 0%,#252f1d 100%)!important;border:1px solid #2a3a22!important}
+[data-theme="dark"] .ribbon{border-color:#2a3a22!important;color:#9aa38e!important;background:transparent !important}
+[data-theme="dark"] footer.world-footer, [data-theme="dark"] footer{border-color:#1e2a1c!important;background:#131a12 !important}
+[data-theme="dark"] .banner-viewport, [data-theme="dark"] .carousel-viewport, [data-theme="dark"] .carousel-3d-hero{background:#1e2e1a!important;border-color:#2a3a22!important}
+[data-theme="dark"] .public-main, [data-theme="dark"] main{background:transparent !important}
 </style>
 <script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script></head><body class="public-page">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}<nav class="public-nav"><a href="/"><img class="public-logo" src="/static/logo-primary.svg" alt="Reachmark"></a><div class="public-links"><a href="/">About Reachmark</a><a href="/showcase" aria-current="page">Website samples</a><a class="public-btn" href="/enquire">Let’s talk ↗</a><button id="theme-toggle-public" aria-label="Toggle theme" title="Toggle theme" style="background:transparent;border:1px solid #e2e7d6;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:16px">◐</button></div></nav><main class="public-main"><header class="public-heading"><div class="public-eyebrow">FIGMA COMMUNITY · PREMIUM COLLECTION · 6 TEMPLATES</div><h1>Your business.<br>A different kind of first impression.</h1><p>Six Figma-inspired directions — editorial, clinical, commerce and architectural — each rendered as a premium 3D website mockup. Open a live preview, find what feels right, and tell us what you’d like to make your own.</p></header>
