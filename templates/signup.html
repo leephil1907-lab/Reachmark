@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create client account · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create client account · Reachmark</title><meta name="csrf-token" content="{{ csrf_token() }}"><link rel="stylesheet" href="/static/fonts.css"><style>
 *{box-sizing:border-box}body{margin:0;font-family:'Manrope',Arial,sans-serif;background:#eef6d1;color:#1a2315;min-height:100vh;display:grid;place-items:center;padding:24px}
 .auth-shell{width:min(1060px,100%);display:grid;grid-template-columns:.95fr 1.05fr;background:#fff;border:1px solid #e2e7d6;border-radius:24px;overflow:hidden;box-shadow:0 24px 64px rgba(16,24,12,.12);min-height:620px}
 .brand{position:relative;background:#0f1a0a;color:#eaf3de;padding:44px 40px;display:flex;flex-direction:column;overflow:hidden}
@@ -79,9 +79,9 @@ button[type=submit]:disabled{opacity:.6;cursor:not-allowed;transform:none}
 <script>
 const form=document.getElementById('signup-form'),msg=document.getElementById('msg');
 async function requestVerify(e){e.preventDefault();const email=document.getElementById('email').value.trim();try{let r=await fetch('/api/auth/request-verification',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});let j=await r.json();alert(j.already_verified?'Already verified.':'Verification email sent.');}catch(err){alert('Could not resend.')}}
-let csrfToken='';
-fetch('/api/auth/me').then(()=>{}).catch(()=>{});
-(async()=>{try{let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\"csrf_token\" value=\"([^"]+)\"/);csrfToken=m?m[1]:''}catch(e){}})();
+// Token comes from this page's own meta tag — never scrape another page,
+// whose Set-Cookie could race and overwrite the fresh client session (auto-logout bug).
+let csrfToken=document.querySelector('meta[name="csrf-token"]')?.content||'';
 form.onsubmit=async e=>{
   e.preventDefault();
   const name=document.getElementById('name').value.trim();
@@ -93,8 +93,7 @@ form.onsubmit=async e=>{
   msg.style.display='none';
   const btn=form.querySelector('button');btn.disabled=true;btn.textContent='Creating…';
   try{
-    if(!csrfToken){let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\"csrf_token\" value=\"([^"]+)\"/);csrfToken=m?m[1]:''}
-    let r=await fetch('/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({name,email,password:pw})});
+        let r=await fetch('/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({name,email,password:pw})});
     let j=await r.json();
     if(!r.ok) throw new Error(j.error||'Could not create account.');
     if(j.needs_verification){document.getElementById('verify-hint').style.display='block'; msg.textContent='Verification email sent — you can continue to dashboard or verify first.'; msg.style.display='block'; msg.style.background='#eef6d1'; msg.style.color='#2d4a0a'; msg.style.border='1px solid #d8e9b8'; setTimeout(()=>location.href='/dashboard',1400); return}

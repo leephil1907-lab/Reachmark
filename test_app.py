@@ -144,4 +144,40 @@ class ProspectTests(unittest.TestCase):
         data=self.enquiry_data();data['request_id']='e'*32;self.assertEqual(self.client.post('/api/enquiries',json=data).status_code,429)
     def test_enquiry_cross_origin_is_rejected(self):
         self.assertEqual(self.client.post('/api/enquiries',json=self.enquiry_data(),headers={'Origin':'https://elsewhere.example'}).status_code,403)
+    def test_client_auth_session_sticks_after_signup_and_login(self):
+        # Regression: signup/login must persist the client session (no auto-logout).
+        # Pages embed their own CSRF meta token; nothing scrapes another page whose
+        # Set-Cookie could race and overwrite the fresh session.
+        import re
+        page=self.client.get('/signup').get_data(as_text=True)
+        tok=re.search(r'name="csrf-token" content="([^"]+)"',page)
+        self.assertIsNotNone(tok,'signup page must embed its own CSRF token')
+        r=self.client.post('/api/auth/signup',json={'name':'Client One','email':'clientone@example.test','password':'password123'},headers={'X-CSRF-Token':tok.group(1)})
+        self.assertEqual(r.status_code,201)
+        sc=r.headers.get('Set-Cookie','')
+        self.assertIn('SameSite=Lax',sc)
+        self.assertIn('HttpOnly',sc)
+        self.assertEqual(self.client.get('/dashboard').status_code,200)
+        me=self.client.get('/api/auth/me')
+        self.assertEqual(me.status_code,200)
+        self.assertEqual(me.json['role'],'client')
+        self.assertEqual(me.json['email'],'clientone@example.test')
+        c2=module.app.test_client()
+        page2=c2.get('/signin').get_data(as_text=True)
+        tok2=re.search(r'name="csrf-token" content="([^"]+)"',page2)
+        self.assertIsNotNone(tok2,'signin page must embed its own CSRF token')
+        r2=c2.post('/api/auth/login',json={'email':'clientone@example.test','password':'password123'},headers={'X-CSRF-Token':tok2.group(1)})
+        self.assertEqual(r2.status_code,200)
+        self.assertEqual(c2.get('/api/auth/me').json['role'],'client')
+        self.assertEqual(c2.get('/dashboard').status_code,200)
+        self.assertEqual(c2.get('/api/state').json['role'],'client')
+    def test_anonymous_dashboard_goes_to_client_signin(self):
+        # Anonymous/expired visitors to the client dashboard land on the client
+        # sign-in, never the hidden owner login.
+        from werkzeug.security import generate_password_hash
+        hashed=generate_password_hash('owner-only',method='pbkdf2:sha256:1000')
+        with patch.dict(os.environ,{'OWNER_PASSWORD_HASH':hashed}):
+            r=self.client.get('/dashboard')
+            self.assertEqual(r.status_code,302)
+            self.assertEqual(r.headers['Location'],'/signin')
 if __name__=='__main__':unittest.main(verbosity=2)

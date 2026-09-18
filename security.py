@@ -14,7 +14,10 @@ def install_security(app, db):
         if not os.path.isabs(os.getenv('DATABASE_PATH','')): raise RuntimeError('Production requires an absolute persistent DATABASE_PATH.')
         app.wsgi_app=ProxyFix(app.wsgi_app,x_for=1,x_proto=1,x_host=0)
     app.secret_key=key or secrets.token_hex(32)
-    app.config.update(SESSION_COOKIE_HTTPONLY=True,SESSION_COOKIE_SAMESITE='Strict',SESSION_COOKIE_SECURE=production or os.getenv('SECURE_COOKIES')=='1',PERMANENT_SESSION_LIFETIME=timedelta(hours=8),SESSION_REFRESH_EACH_REQUEST=False)
+    # Lax: keep the session across top-level navigation from emails, Tawk.to and shared links
+    # (Strict silently drops the cookie on those, which looked like an automatic logout).
+    # 30-day sliding window refreshed on each request so active users are never kicked mid-work.
+    app.config.update(SESSION_COOKIE_HTTPONLY=True,SESSION_COOKIE_SAMESITE='Lax',SESSION_COOKIE_SECURE=production or os.getenv('SECURE_COOKIES')=='1',PERMANENT_SESSION_LIFETIME=timedelta(days=30),SESSION_REFRESH_EACH_REQUEST=True)
     with db() as c:c.execute('CREATE TABLE IF NOT EXISTS login_attempts(client TEXT PRIMARY KEY,failures INTEGER,blocked_until REAL)')
     def public():
         p=request.path
@@ -73,7 +76,8 @@ def install_security(app, db):
             auth=request.authorization; legacy=os.getenv('DASHBOARD_PASSWORD')
             if not production and legacy and auth and auth.username=='admin' and hmac.compare_digest(auth.password or '',legacy):return
             if request.path.startswith('/api/'):return jsonify(error='Owner login required.'),401
-            return redirect(url_for('owner_login'))
+            # Clients (or expired sessions) belong on the client sign-in, not the hidden owner login.
+            return redirect('/signin')
         # CSRF for owner writes
         check_csrf = authenticated or (session.get('client_id') and session.get('role')=='client')
         if check_csrf and request.method in ('POST','PATCH','DELETE','PUT'):

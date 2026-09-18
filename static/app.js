@@ -5,7 +5,7 @@ const statusLabel=s=>({NOT_LISTED:'Website not listed',SOCIAL_ONLY:'Social only'
 const badge=s=>`<span class="badge ${s==='NOT_LISTED'?'amber':s==='HAS_WEBSITE'?'green':''}">${esc(statusLabel(s))}</span>`;
 const empty=(title,desc,action='')=>`<div class="empty-state"><div class="empty-icon">⌁</div><strong>${title}</strong><p>${desc}</p>${action}</div>`;
 function toast(msg,error=false){clearTimeout(toastTimer);const el=$('#toast');el.textContent=msg;el.className='show'+(error?' error':'');toastTimer=setTimeout(()=>el.className='',6500)}
-async function api(path,method='GET',data){const opts={method,headers:{'X-CSRF-Token':document.querySelector('meta[name="csrf-token"]')?.content||''}};if(data instanceof FormData)opts.body=data;else if(data!==undefined){opts.headers={...opts.headers,'Content-Type':'application/json'};opts.body=JSON.stringify(data)}const res=await fetch(path,opts);let result;try{result=await res.json()}catch{throw Error('The server could not complete the request. Please try again.')}if(res.status===401){location.href='/login';throw Error('Please sign in again.')}if(!res.ok)throw Error(result.error||'Request failed');return result}
+async function api(path,method='GET',data){const opts={method,headers:{'X-CSRF-Token':document.querySelector('meta[name="csrf-token"]')?.content||''}};if(data instanceof FormData)opts.body=data;else if(data!==undefined){opts.headers={...opts.headers,'Content-Type':'application/json'};opts.body=JSON.stringify(data)}const res=await fetch(path,opts);let result;try{result=await res.json()}catch{throw Error('The server could not complete the request. Please try again.')}if(res.status===401){location.href=location.pathname.startsWith('/workspace')?'/login':'/signin';throw Error('Please sign in again.')}if(!res.ok)throw Error(result.error||'Request failed');return result}
 async function refresh(){state=await api('/api/state');render();}
 function render(){
  $('#nav-count').textContent=state.leads.length;$('#enquiry-count').textContent=state.enquiry_count||0;$('#stat-total').textContent=state.leads.length;$('#stat-opportunity').textContent=state.leads.filter(l=>(l.status!=='HAS_WEBSITE'||['DNS_UNRESOLVED','HTTP_ERROR','PARKED_SUSPECTED','UNREACHABLE','SOCIAL_ONLY'].includes(l.audit_status))&&l.stage!=='Not a fit').length;$('#stat-sent').textContent=state.sent;$('#stat-replied').textContent=state.leads.filter(l=>['Replied','Won'].includes(l.stage)).length;
@@ -82,6 +82,11 @@ async function applyRoleView(){
         btn.style.display='';
       }
     });
+    // Client sees their own identity, not the owner's studio label
+    if(isClient){
+      const pn=document.getElementById('profile-name');
+      if(pn) pn.innerHTML=esc(me.name||'Client')+'<small>'+(me.email||'Client account')+'</small>';
+    }
     // If client lands on owner-only page, redirect to dashboard view
     const hash = location.hash.slice(1);
     if(isClient && ownerOnly.includes(hash)){
