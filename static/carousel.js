@@ -49,20 +49,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3D template carousel — 4.2s
   initCarousel('.carousel-3d', '.carousel-track', '.carousel-slide', '.carousel-dots button', '.carousel-prev', '.carousel-next', '.carousel-viewport', 4200);
 
-  // 3D tilt on mousemove for active mock (meaningful delight, not waste)
-  document.querySelectorAll('.carousel-mock, .banner-visual').forEach(mock => {
-    mock.addEventListener('mousemove', (e) => {
-      const rect = mock.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      const img = mock.querySelector('img');
-      if (img) img.style.transform = `rotateY(${x * 10 - 8}deg) rotateX(${-y * 6 + 4}deg) translateY(-4px)`;
+  // 3D tilt on mousemove — only on fine pointer (not touch) to keep premium stable
+  if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll('.carousel-mock, .banner-visual').forEach(mock => {
+      mock.addEventListener('mousemove', (e) => {
+        const rect = mock.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        const img = mock.querySelector('img');
+        if (img) img.style.transform = `rotateY(${x * 10 - 8}deg) rotateX(${-y * 6 + 4}deg) translateY(-4px)`;
+      });
+      mock.addEventListener('mouseleave', () => {
+        const img = mock.querySelector('img');
+        if (img) img.style.transform = '';
+      });
     });
-    mock.addEventListener('mouseleave', () => {
-      const img = mock.querySelector('img');
-      if (img) img.style.transform = '';
-    });
-  });
+  }
 
   // Premium reveal — IntersectionObserver (every scroll has meaning)
   const reveals = document.querySelectorAll('.premium-reveal, .premium-stagger');
