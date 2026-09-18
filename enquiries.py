@@ -1,5 +1,5 @@
 """Public project requests and a private owner inbox; no simulated submissions."""
-import hashlib, re, uuid
+import hashlib, os, re, uuid
 from datetime import datetime, timezone, timedelta
 from flask import request, jsonify, render_template, abort
 from portfolio import SAMPLES, find_sample
@@ -14,18 +14,64 @@ def register_enquiries(app, db, now, log):
 
     @app.route('/showcase')
     def showcase():
-        return render_template('showcase.html',samples=SAMPLES)
+        from flask import request
+        base = (lambda: __import__('app').settings()['public_base_url'].rstrip('/'))() if 'app' in __import__('sys').modules else ''
+        try:
+            from app import settings
+            base = settings()['public_base_url'].rstrip('/')
+        except: base = request.url_root.rstrip('/')
+        seo = {
+            'title': 'Website Samples — 8 Premium Figma-inspired designs | Reachmark',
+            'description': 'Explore 8 premium Figma-inspired fictional website concepts — café, wellness, homes, clinic, law, boutique, fintech, SaaS invoice — each with a live 3D preview. Find your direction and enquire.',
+            'keywords': 'website samples, Figma templates, Reachmark portfolio, 3D previews, clinic, law, boutique, fintech',
+            'canonical': (base + '/showcase') if base else None,
+            'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
+            'noindex': False,
+        }
+        gsv = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+        structured=[{'@context':'https://schema.org','@type':'CollectionPage','name':'Website Samples — Reachmark','description': seo['description'], 'url': seo['canonical'] or request.url}]
+        return render_template('showcase.html',samples=SAMPLES,seo=seo,google_verification=gsv,structured=structured)
 
     @app.route('/showcase/<slug>')
     def sample_site(slug):
+        from flask import request
         sample=find_sample(slug)
         if not sample: abort(404)
-        return render_template('sample-site.html',sample=sample)
+        try:
+            from app import settings
+            base = settings()['public_base_url'].rstrip('/')
+        except: base = request.url_root.rstrip('/')
+        seo = {
+            'title': f"{sample['name']} — {sample['category']} Website Sample | Reachmark",
+            'description': sample['description'] + f" Fictional {sample['category'].lower()} design by Reachmark — Figma {sample['figma']}. Enquire about a similar website.",
+            'keywords': f"{sample['name']}, {sample['category']}, Reachmark, {sample['figma']}, website sample",
+            'canonical': (base + f"/showcase/{slug}") if base else None,
+            'og_image': (base + f"/static/samples/{slug}-preview.jpg") if base else f"/static/samples/{slug}-preview.jpg",
+            'noindex': False,
+        }
+        gsv = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+        structured=[{'@context':'https://schema.org','@type':'CreativeWork','name': sample['name'], 'description': seo['description'], 'url': seo['canonical'] or request.url, 'image': seo['og_image']}]
+        return render_template('sample-site.html',sample=sample,seo=seo,google_verification=gsv,structured=structured)
 
     @app.route('/enquire')
     def enquire():
+        from flask import request
         slug=request.args.get('sample','')
-        return render_template('enquire.html',samples=SAMPLES,chosen_sample=slug if find_sample(slug) else '')
+        try:
+            from app import settings
+            base = settings()['public_base_url'].rstrip('/')
+        except: base = request.url_root.rstrip('/')
+        seo = {
+            'title': 'Enquire — Start your website project | Reachmark',
+            'description': 'Tell Reachmark about your business and the website you need. Choose a sample direction or describe your idea — we reply with a tailored estimate. No commitment.',
+            'keywords': 'enquire Reachmark, website estimate, start project, contact studio',
+            'canonical': (base + '/enquire') if base else None,
+            'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
+            'noindex': False,
+        }
+        gsv = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+        structured=[{'@context':'https://schema.org','@type':'ContactPage','name':'Enquire — Reachmark','description': seo['description'], 'url': seo['canonical'] or request.url}]
+        return render_template('enquire.html',samples=SAMPLES,chosen_sample=slug if find_sample(slug) else '',seo=seo,google_verification=gsv,structured=structured)
 
     @app.route('/api/enquiries',methods=['POST'])
     def submit_enquiry():

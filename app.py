@@ -98,9 +98,31 @@ def too_big(e): return jsonify(error='File too large. Limit: 3 MB.'),413
 @app.route('/')
 def home():
     base=settings()['public_base_url'].rstrip('/')
-    structured={'@context':'https://schema.org','@type':'SoftwareApplication','name':'Reachmark','applicationCategory':'BusinessApplication','operatingSystem':'Web','description':'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.'}
-    if base: structured['url']=base+'/'
-    return render_template('about.html',base=base,structured=structured,samples=SAMPLES)
+    canonical = (base + '/') if base else None
+    seo = {
+        'title': 'Reachmark — Find Potential. Make Your Mark. | World-class website designer',
+        'description': 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals. 8 premium Figma-inspired samples, live 3D previews, OpenStreetMap discovery — no Google API key needed.',
+        'keywords': 'website designer, Figma templates, 3D website previews, OpenStreetMap leads, business discovery, Reachmark',
+        'canonical': canonical,
+        'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
+        'noindex': False,
+    }
+    gsv = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+    structured=[{
+        '@context':'https://schema.org','@type':'Organization','name':'Reachmark','url': base or request.url_root.rstrip('/'),
+        'logo': (base or request.url_root.rstrip('/')) + '/static/icon.svg',
+        'description': seo['description'], 'foundingDate':'2026', 'areaServed':'Worldwide'
+    },{
+        '@context':'https://schema.org','@type':'WebSite','name':'Reachmark','url': base or request.url_root.rstrip('/'),
+        'potentialAction': {'@type':'SearchAction','target': (base or request.url_root.rstrip('/')) + '/showcase?q={search_term_string}', 'query-input':'required name=search_term_string'}
+    },{
+        '@context':'https://schema.org','@type':'BreadcrumbList','itemListElement':[
+            {'@type':'ListItem','position':1,'name':'Home','item': base or request.url_root.rstrip('/')},
+            {'@type':'ListItem','position':2,'name':'Website samples','item': (base or request.url_root.rstrip('/')) + '/showcase'},
+            {'@type':'ListItem','position':3,'name':'Enquire','item': (base or request.url_root.rstrip('/')) + '/enquire'}
+        ]
+    }]
+    return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv)
 @app.route('/workspace')
 def workspace():
     return render_template('index.html',samples=SAMPLES)
@@ -114,19 +136,58 @@ def healthz():
 @app.route('/about')
 def about():
     base=settings()['public_base_url'].rstrip('/')
-    structured={'@context':'https://schema.org','@type':'SoftwareApplication','name':'Reachmark','applicationCategory':'BusinessApplication','operatingSystem':'Web','description':'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.'}
-    if base: structured['url']=base+'/'
-    return render_template('about.html',base=base,structured=structured,samples=SAMPLES)
+    canonical = (base + '/about') if base else None
+    seo = {
+        'title': 'About Reachmark — World-class website designer | Global discovery & 3D previews',
+        'description': 'Reachmark is a world-class website designer — Figma-inspired, Framer-smooth. Global OpenStreetMap discovery, honest website health checks, live 3D previews. 8 templates, crystal green design.',
+        'keywords': 'about Reachmark, world-class website designer, OpenStreetMap, website health check, Figma to website',
+        'canonical': canonical,
+        'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
+        'noindex': False,
+    }
+    gsv = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+    structured=[{
+        '@context':'https://schema.org','@type':'Organization','name':'Reachmark','url': base or request.url_root.rstrip('/'),
+        'logo': (base or request.url_root.rstrip('/')) + '/static/icon.svg'
+    },{
+        '@context':'https://schema.org','@type':'WebSite','name':'Reachmark','url': base or request.url_root.rstrip('/'),
+        'potentialAction': {'@type':'SearchAction','target': (base or request.url_root.rstrip('/')) + '/showcase?q={search_term_string}', 'query-input':'required name=search_term_string'}
+    }]
+    return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv)
 @app.route('/robots.txt')
 def robots():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
-    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /static/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
+    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /showcase\nAllow: /enquire\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
 @app.route('/sitemap.xml')
 def sitemap():
     from xml.sax.saxutils import escape
+    from datetime import datetime, timezone
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
-    entry=''.join('<url><loc>'+escape(base+path)+'</loc></url>' for path in ('/','/about','/showcase','/enquire'))
-    return Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+entry+'</urlset>',mimetype='application/xml')
+    now = datetime.now(timezone.utc).date().isoformat()
+    # Core public pages + all 8 showcase samples — every indexable route for Google
+    paths = ['/','/about','/showcase','/enquire'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
+    urls = []
+    for path in paths:
+        loc = escape(base+path)
+        # Priority & changefreq tuned for Google crawl budget
+        if path == '/': pri, freq = '1.0', 'weekly'
+        elif path == '/showcase': pri, freq = '0.9', 'weekly'
+        elif path.startswith('/showcase/'): pri, freq = '0.8', 'monthly'
+        elif path == '/enquire': pri, freq = '0.7', 'monthly'
+        else: pri, freq = '0.8', 'weekly'
+        urls.append(f'<url><loc>{loc}</loc><lastmod>{now}</lastmod><changefreq>{freq}</changefreq><priority>{pri}</priority></url>')
+    body = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(urls) + '</urlset>'
+    return Response(body, mimetype='application/xml', headers={'Cache-Control':'public, max-age=3600'})
+
+@app.route('/<filename>')
+def google_verify_file_generic(filename):
+    # Google Search Console HTML file verification — serve google*.html with token from env
+    # Preferred: meta tag <meta name="google-site-verification">, this is fallback for file upload method
+    if filename.startswith('google') and filename.endswith('.html'):
+        token = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+        if token:
+            return Response('google-site-verification: ' + token, mimetype='text/html')
+    abort(404)
 @app.route('/api/state')
 def state():
     from flask import session
