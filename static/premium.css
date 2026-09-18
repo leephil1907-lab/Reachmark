@@ -195,3 +195,68 @@ html{ scroll-behavior:smooth; }
   .review-section{ padding:28px 20px; }
   .sample-gallery{ grid-template-columns:1fr; }
 }
+
+/* ——— Reachmark Crystal Rebuild — 🍋‍🟩 crystal green, Black + Green typography, bigger logo, using generated banners to reshape ——— */
+html{ background:#eef6d1 }
+body{ background:#eef6d1 !important; color:#0f1a0a !important }
+nav{ background:#eef6d1 !important; border-color:#d8e9b8 !important; padding:28px 6% !important }
+.logo{ width:254px !important; filter:drop-shadow(0 2px 10px rgba(32,45,22,.08)) }
+@media(max-width:850px){ .logo{ width:210px !important } }
+@media(max-width:640px){ .logo{ width:178px !important } nav{ padding:21px 6% !important } }
+.nav-links{ color:#2d4a0a !important }
+.nav-links a{ color:#0f1a0a !important }
+.nav-links a:hover{ color:#1a3310 !important }
+.nav-links a[href="/signin"]{ background:#d5f268 !important; border-color:#cbe85b !important; color:#0f1a0a !important }
+
+/* Crystal globals — cards, honest, sections use generated-banner palette */
+.card{ background:#f7fbd9 !important; border-color:#d8e9b8 !important; box-shadow:0 6px 24px rgba(45,90,10,.07) !important }
+.card h3{ color:#0f1a0a !important }
+.card p{ color:#2d4a0a !important }
+.card small{ color:#4a6428 !important; border-color:#d8e9b8 !important }
+.honest{ background:#f7fbd9 !important; border-color:#d8e9b8 !important }
+.honest h2{ color:#0f1a0a !important }
+.honest p{ color:#2d4a0a !important }
+.honest strong{ color:#1a3310 !important }
+.section-head h2{ color:#0f1a0a !important }
+.section-head p{ color:#2d4a0a !important }
+.eyebrow{ color:#3a7a0a !important }
+.ribbon{ border-color:#d8e9b8 !important; color:#2d4a0a !important }
+
+/* Hero in the middle — crystal, generous, using banner-generated editorial feel */
+.hero{ background:linear-gradient(180deg, #eef6d1 0%, #e6f3c0 55%, #f7fbd9 100%) !important; border:1px solid #d8e9b8 !important; border-radius:24px !important; padding:64px 48px !important; margin:48px auto 72px !important; box-shadow:0 16px 48px rgba(45,90,10,.09) !important; gap:70px !important }
+.hero h1{ color:#0f1a0a !important }
+.hero h1 span{ color:#3a7a0a !important }
+.hero p{ color:#2d4a0a !important }
+.hero-note{ color:#4a6428 !important }
+.art{ background:#0f1a0a !important; border-color:#1a3310 !important }
+.art-caption{ color:#d5f268 !important }
+
+/* Banners at the top — keep light crystal editorial, not dark */
+.banner-carousel{ margin:28px auto 0 !important }
+.banner-viewport{ background:#ffffff !important; border-color:#d8e9b8 !important; box-shadow:0 20px 52px rgba(45,90,10,.10) !important }
+.banner-slide::before{ background:radial-gradient(ellipse at 70% 50%, rgba(213,242,104,.30) 0%, transparent 58%), linear-gradient(135deg, #f7fbd9 0%, #eef6d1 100%) !important }
+.banner-slide h2{ color:#0f1a0a !important }
+.banner-slide h2 em{ color:#3a7a0a !important }
+.banner-slide .banner-sub{ color:#2d4a0a !important }
+.banner-kicker{ color:#3a7a0a !important }
+.banner-kicker span{ background:#3a7a0a !important }
+.banner-proof span{ background:#eef6d1 !important; border-color:#d8e9b8 !important; color:#2d4a0a !important }
+
+/* Carousel-3D — crystal */
+.carousel-viewport{ background:linear-gradient(135deg,#f7fbd9 0%,#ffffff 100%) !important; border-color:#d8e9b8 !important }
+.carousel-slide h3{ color:#0f1a0a !important }
+.carousel-slide p{ color:#2d4a0a !important }
+.carousel-slide .eyebrow{ color:#3a7a0a !important }
+
+/* Sample cards, trust, review, cta — crystal */
+.figma-card, .trustpilot-section, .review-section{ background:#f7fbd9 !important; border-color:#d8e9b8 !important }
+.trust-card, .client-review-card, .review-form{ background:#ffffff !important; border-color:#d8e9b8 !important }
+.figma-card h4, .trustpilot-head h2, .review-head h2{ color:#0f1a0a !important }
+.figma-card p, .trust-card p, .client-review-card p{ color:#2d4a0a !important }
+.cta{ background:linear-gradient(135deg,#0f1a0a 0%,#1a3310 100%) !important; border:1px solid #1a3310 !important }
+.cta h2{ color:#eef6d1 !important }
+.cta p{ color:#c8deb6 !important }
+
+/* Footer stays dark for contrast, but world-badge removed */
+.world-footer{ margin-top:80px !important }
+
