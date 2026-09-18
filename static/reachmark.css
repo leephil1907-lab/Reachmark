@@ -8,6 +8,36 @@
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 /* Final legibility pass: essential UI text stays readable, even on dense screens. */
 @media(min-width:641px){.nav{font-size:12px}.topbar{font-size:11px}.top-right,.data-live{font-size:10px}.page-heading p{font-size:12px;color:#818976}.primary,.secondary{font-size:11px}.hero-card p{font-size:11px;color:#9ba98e}.white-btn{font-size:10px}.stat-top{font-size:11px}.stat-foot{font-size:9px;color:#8e997e}.pipeline-label{font-size:10px}.pipeline-footer{font-size:8px}.mini-eyebrow{font-size:7px}.metrics-heading>span{font-size:9px}.section-top p.small{font-size:10px;color:#8f9a7f}.business-name{font-size:12px}.business-sub{font-size:10px;color:#94a083}.badge{font-size:9px}.activity-entry p{font-size:11px;color:#829170}.activity-entry small{font-size:9px;color:#a4b195}.text-link{font-size:10px}.table-toolbar input,.table-toolbar select{font-size:11px}th{font-size:9px}td{font-size:12px}.table-bottom{font-size:10px}label{font-size:12px;color:#7b8b66}.notice,.notice.small{font-size:11px}.check{font-size:11px}.feature-trigger{font-size:10px}.feature-item strong{font-size:12px}.feature-item small{font-size:10px;color:#8f9f7a}.feature-dropdown>p{font-size:8px}.feature-dropdown .menu-note{font-size:9px}.global-grid .small{font-size:11px}.job-card .small{font-size:11px}.health-row strong{font-size:13px}.health-row .small{font-size:11px}.health-row small{font-size:10px}.settings-grid .small{font-size:11px}.workflow-strip strong{font-size:10px}.workflow-strip small{font-size:8px}.outreach-empty p{font-size:12px}.drawer-tabs button{font-size:11px}.drawer .small{font-size:11px}.composer-controls label{font-size:11px}.composer-banner p{font-size:10px}.recipient-line{font-size:11px}.composer-meta{font-size:10px}.audit-panel .small{font-size:11px}.audit-panel dl{font-size:10px}.audit-panel details{font-size:11px}.detail-address{font-size:12px}.hero-source{font-size:6px}.globe-caption{display:none}}
-@media(min-width:641px) and (max-width:1000px){.nav{font-size:0}.stat-top{font-size:10px}.stat-foot{font-size:8px}}
+@media(min-width:641px) and (max-width:1000px){.stat-top{font-size:10px}.stat-foot{font-size:8px}}
 @media(max-width:640px){.page-heading p{font-size:11px;color:#8b967b}.primary,.secondary{font-size:10px}.stat-top{font-size:9px}.stat-foot{font-size:8px;color:#95a180}.business-name{font-size:11px}.business-sub{font-size:9px}.recent-row .badge{font-size:7px}.activity-entry p{font-size:10px}.activity-entry small{font-size:8px}.text-link{font-size:9px}.global-grid .small{font-size:10px}label{font-size:11px}.table-toolbar input,.table-toolbar select{font-size:10px}.notice,.notice.small{font-size:10px}.feature-item strong{font-size:12px}.feature-item small{font-size:10px}.check{font-size:10px}.composer-banner p{font-size:9px}.health-row strong{font-size:12px}.health-row .small,.health-row small{font-size:10px}.outreach-empty p{font-size:11px}.metrics-heading>span{font-size:7px}.table-bottom{font-size:9px}.overview-heading .primary,.overview-heading .secondary{font-size:10px}}
 .brand .brand-wordmark{width:178px;height:auto}.brand .brand-compact{display:none}@media(min-width:1001px) and (max-width:1200px){.brand .brand-wordmark{width:155px}}@media(min-width:641px) and (max-width:1000px){.brand .brand-wordmark{display:none}.brand .brand-compact{display:block;width:35px;height:35px}}
+/* --- Fixes: sidebar expand + theme toggle + simplify --- */
+#sidebar-toggle{margin-left:auto;background:#2a3028;border:1px solid #3a4432;color:#c5d8a4;width:28px;height:28px;border-radius:7px;display:grid;place-items:center;cursor:pointer;font-size:14px;transition:transform .2s,background .2s}
+#sidebar-toggle:hover{background:#343f2a;transform:translateX(-1px)}
+#theme-toggle{background:#f2f5e9;border:1px solid #dfe3d2;color:#5a6a4a;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:16px;transition:background .2s,transform .2s}
+#theme-toggle:hover{background:#e8eedc;transform:rotate(12deg)}
+.sidebar.collapsed{width:78px;padding:32px 12px}
+.sidebar.collapsed .brand{margin:0 8px 32px;justify-content:center}
+.sidebar.collapsed .brand .brand-wordmark{display:none}
+.sidebar.collapsed .brand .brand-compact{display:block!important;width:36px;height:36px}
+.sidebar.collapsed .workspace, .sidebar.collapsed .nav-label, .sidebar.collapsed .sidebar-bottom, .sidebar.collapsed .profile{ display:none }
+.sidebar.collapsed .nav{justify-content:center;padding:14px 10px;font-size:0;gap:0}
+.sidebar.collapsed .nav>span{font-size:17px;width:auto}
+.sidebar.collapsed .nav b{display:none}
+.sidebar.collapsed+main{margin-left:78px}
+.sidebar.collapsed #sidebar-toggle{transform:rotate(180deg)}
+/* Tooltip when collapsed */
+.sidebar.collapsed .nav{position:relative}
+.sidebar.collapsed .nav:hover::after{content:attr(data-page);position:absolute;left:68px;top:50%;transform:translateY(-50%);background:#20251f;color:#e8ece0;padding:8px 10px;border-radius:6px;font-size:11px;white-space:nowrap;text-transform:capitalize;box-shadow:0 8px 20px #00000020;z-index:10}
+@media(max-width:1000px){ .sidebar:not(.collapsed) .brand .brand-wordmark{display:block!important} .sidebar:not(.collapsed) .brand .brand-compact{display:none!important} }
+/* Dark theme */
+[data-theme="dark"]{--bg:#0f1510;--ink:#e6e9dd;--muted:#9aa38e;--line:#232d21;--purple:#c5e06b;--purple-dark:#d5f268;--pale:#1a2117;--green:#7fa88a;--lime:#d5f268;--forest:#0f1510;--paper:#151c14}
+[data-theme="dark"] body{background:var(--bg);color:var(--ink)}
+[data-theme="dark"] .sidebar{background:#0f1510;border-color:#1e2a1c;color:#c8d0b8}
+[data-theme="dark"] .card, [data-theme="dark"] .stat, [data-theme="dark"] .table-toolbar, [data-theme="dark"] .topbar, [data-theme="dark"] .content .card{background:#151c14;border-color:#222e20}
+[data-theme="dark"] .topbar{background:#151c14}
+[data-theme="dark"] .nav{color:#8a9a7a}
+[data-theme="dark"] .nav.active{background:#d5f268;color:#1a2110}
+[data-theme="dark"] #theme-toggle{background:#1e2a1c;border-color:#2a3528;color:#c5d8a4}
+/* Simplify: reduce clutter on small screens */
+@media(max-width:640px){#sidebar-toggle{display:none} #theme-toggle{width:32px;height:32px}}

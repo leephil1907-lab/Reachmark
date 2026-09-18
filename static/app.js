@@ -67,3 +67,57 @@ setInterval(async()=>{if(!document.hidden&&(state.jobs||[]).some(j=>['running','
 window.addEventListener('beforeunload',e=>{if(selected&&($('#email-subject').value!==(selected.subject||'')||$('#email-body').value!==(selected.body||''))){e.preventDefault();e.returnValue=''}});
 
 function chooseWorldMix(){const regions=[['Lagos, Nigeria','Accra, Ghana','Nairobi, Kenya'],['London, United Kingdom','Lisbon, Portugal','Berlin, Germany'],['Toronto, Canada','Austin, United States','Vancouver, Canada'],['São Paulo, Brazil','Bogotá, Colombia','Lima, Peru'],['Tokyo, Japan','Mumbai, India','Singapore'],['Sydney, Australia','Auckland, New Zealand','Perth, Australia']];$('#global-locations').value=regions.map(r=>r[Math.floor(Math.random()*r.length)]).join('\n');toast('Six search locations selected across regions. These are search seeds, not business results.');}
+
+// --- Theme + Sidebar fixes (simplify + expand) ---
+(function(){
+  const root = document.documentElement;
+  const sidebar = document.getElementById('sidebar');
+  const tbtn = document.getElementById('theme-toggle');
+  const sbtn = document.getElementById('sidebar-toggle');
+  // theme
+  try{
+    const saved = localStorage.getItem('reachmark-theme');
+    if(saved) root.setAttribute('data-theme', saved);
+    else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) root.setAttribute('data-theme','dark');
+  }catch{}
+  function updateThemeIcon(){
+    if(!tbtn) return;
+    const isDark = root.getAttribute('data-theme')==='dark';
+    tbtn.textContent = isDark ? '☾' : '◐';
+    tbtn.title = isDark ? 'Switch to light' : 'Switch to dark';
+  }
+  updateThemeIcon();
+  if(tbtn){
+    tbtn.addEventListener('click', ()=>{
+      const isDark = root.getAttribute('data-theme')==='dark';
+      const next = isDark ? 'light' : 'dark';
+      if(next==='light') root.removeAttribute('data-theme');
+      else root.setAttribute('data-theme','dark');
+      try{ localStorage.setItem('reachmark-theme', next==='light'?'light':'dark'); }catch{}
+      updateThemeIcon();
+    });
+  }
+  // sidebar collapsed
+  try{
+    const sc = localStorage.getItem('reachmark-sidebar-collapsed');
+    if(sc==='1' && sidebar) sidebar.classList.add('collapsed');
+  }catch{}
+  function syncSidebarBtn(){
+    if(!sbtn || !sidebar) return;
+    const collapsed = sidebar.classList.contains('collapsed');
+    sbtn.setAttribute('aria-expanded', String(!collapsed));
+    sbtn.textContent = collapsed ? '›' : '‹';
+  }
+  syncSidebarBtn();
+  if(sbtn && sidebar){
+    sbtn.addEventListener('click', ()=>{
+      sidebar.classList.toggle('collapsed');
+      try{ localStorage.setItem('reachmark-sidebar-collapsed', sidebar.classList.contains('collapsed')?'1':'0'); }catch{}
+      syncSidebarBtn();
+    });
+  }
+  // ensure nav tooltips have data-page already set in HTML, but also ensure title
+  document.querySelectorAll('.nav').forEach(b=>{
+    if(!b.getAttribute('title')) b.setAttribute('title', (b.textContent||b.dataset.page||'').trim());
+  });
+})();
