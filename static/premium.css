@@ -199,10 +199,10 @@ html{ scroll-behavior:smooth; }
 /* ——— Reachmark Crystal Rebuild — 🍋‍🟩 crystal green, Black + Green typography, bigger logo, using generated banners to reshape ——— */
 html{ background:#eef6d1 }
 body{ background:#eef6d1 !important; color:#0f1a0a !important }
-nav{ background:#eef6d1 !important; border-color:#d8e9b8 !important; padding:28px 6% !important }
-.logo{ width:254px !important; filter:drop-shadow(0 2px 10px rgba(32,45,22,.08)) }
-@media(max-width:850px){ .logo{ width:210px !important } }
-@media(max-width:640px){ .logo{ width:178px !important } nav{ padding:21px 6% !important } }
+nav{ background:#ffffff !important; border-color:#e2e7d6 !important; padding:18px 6% !important; box-shadow:0 2px 12px rgba(32,45,22,.06) !important }
+.logo{ width:200px !important; filter:drop-shadow(0 2px 10px rgba(32,45,22,.08)) }
+@media(max-width:850px){ .logo{ width:180px !important } }
+@media(max-width:640px){ .logo{ width:160px !important } nav{ padding:21px 6% !important } }
 .nav-links{ color:#2d4a0a !important }
 .nav-links a{ color:#0f1a0a !important }
 .nav-links a:hover{ color:#1a3310 !important }
