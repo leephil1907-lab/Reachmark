@@ -28,9 +28,11 @@ def register_enquiries(app, db, now, log):
             'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
             'noindex': False,
         }
-        gsv = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+        gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
+        ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-XXXXXXXXXX'
+        gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-XXXXXXX'
         structured=[{'@context':'https://schema.org','@type':'CollectionPage','name':'Website Samples — Reachmark','description': seo['description'], 'url': seo['canonical'] or request.url}]
-        return render_template('showcase.html',samples=SAMPLES,seo=seo,google_verification=gsv,structured=structured)
+        return render_template('showcase.html',samples=SAMPLES,seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gtm_id=gtm_id)
 
     @app.route('/showcase/<slug>')
     def sample_site(slug):
@@ -49,9 +51,11 @@ def register_enquiries(app, db, now, log):
             'og_image': (base + f"/static/samples/{slug}-preview.jpg") if base else f"/static/samples/{slug}-preview.jpg",
             'noindex': False,
         }
-        gsv = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+        gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
+        ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-XXXXXXXXXX'
+        gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-XXXXXXX'
         structured=[{'@context':'https://schema.org','@type':'CreativeWork','name': sample['name'], 'description': seo['description'], 'url': seo['canonical'] or request.url, 'image': seo['og_image']}]
-        return render_template('sample-site.html',sample=sample,seo=seo,google_verification=gsv,structured=structured)
+        return render_template('sample-site.html',sample=sample,seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gtm_id=gtm_id)
 
     @app.route('/enquire')
     def enquire():
@@ -69,9 +73,11 @@ def register_enquiries(app, db, now, log):
             'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
             'noindex': False,
         }
-        gsv = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+        gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
+        ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-XXXXXXXXXX'
+        gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-XXXXXXX'
         structured=[{'@context':'https://schema.org','@type':'ContactPage','name':'Enquire — Reachmark','description': seo['description'], 'url': seo['canonical'] or request.url}]
-        return render_template('enquire.html',samples=SAMPLES,chosen_sample=slug if find_sample(slug) else '',seo=seo,google_verification=gsv,structured=structured)
+        return render_template('enquire.html',samples=SAMPLES,chosen_sample=slug if find_sample(slug) else '',seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gtm_id=gtm_id)
 
     @app.route('/api/enquiries',methods=['POST'])
     def submit_enquiry():

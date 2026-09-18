@@ -107,7 +107,7 @@ def home():
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
     }
-    gsv = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+    gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
     structured=[{
         '@context':'https://schema.org','@type':'Organization','name':'Reachmark','url': base or request.url_root.rstrip('/'),
         'logo': (base or request.url_root.rstrip('/')) + '/static/icon.svg',
@@ -122,7 +122,9 @@ def home():
             {'@type':'ListItem','position':3,'name':'Enquire','item': (base or request.url_root.rstrip('/')) + '/enquire'}
         ]
     }]
-    return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv)
+    ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-XXXXXXXXXX'  # placeholder — replace via GOOGLE_ANALYTICS_ID env for real GA verification
+    gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-XXXXXXX'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
+    return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gtm_id=gtm_id)
 @app.route('/workspace')
 def workspace():
     return render_template('index.html',samples=SAMPLES)
@@ -145,7 +147,7 @@ def about():
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
     }
-    gsv = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+    gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
     structured=[{
         '@context':'https://schema.org','@type':'Organization','name':'Reachmark','url': base or request.url_root.rstrip('/'),
         'logo': (base or request.url_root.rstrip('/')) + '/static/icon.svg'
@@ -153,7 +155,9 @@ def about():
         '@context':'https://schema.org','@type':'WebSite','name':'Reachmark','url': base or request.url_root.rstrip('/'),
         'potentialAction': {'@type':'SearchAction','target': (base or request.url_root.rstrip('/')) + '/showcase?q={search_term_string}', 'query-input':'required name=search_term_string'}
     }]
-    return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv)
+    ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-XXXXXXXXXX'  # placeholder — replace via GOOGLE_ANALYTICS_ID env for real GA verification
+    gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-XXXXXXX'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
+    return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gtm_id=gtm_id)
 @app.route('/robots.txt')
 def robots():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
