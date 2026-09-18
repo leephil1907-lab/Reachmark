@@ -18,7 +18,10 @@ def install_security(app, db):
     with db() as c:c.execute('CREATE TABLE IF NOT EXISTS login_attempts(client TEXT PRIMARY KEY,failures INTEGER,blocked_until REAL)')
     def public():
         p=request.path
-        return p in ('/','/login','/healthz','/about','/robots.txt','/sitemap.xml','/showcase','/enquire','/signup','/signin','/client-login') or p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/')) or (p=='/api/enquiries' and request.method=='POST') or (p in ('/api/auth/signup','/api/auth/login') and request.method=='POST') or (p=='/api/auth/me' and request.method=='GET')
+        if p in ('/','/login','/healthz','/about','/robots.txt','/sitemap.xml','/showcase','/enquire','/signup','/signin','/client-login','/forgot','/reset','/verify'): return True
+        if p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/','/verify/','/reset/','/forgot')): return True
+        if p.startswith(('/api/auth/verify','/api/auth/forgot','/api/auth/reset','/api/auth/request-verification','/api/deploy-check')): return True
+        return p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/')) or (p=='/api/enquiries' and request.method=='POST') or (p in ('/api/auth/signup','/api/auth/login') and request.method=='POST') or (p=='/api/auth/me' and request.method=='GET')
     def csrf():
         if 'csrf' not in session:session['csrf']=secrets.token_urlsafe(32)
         return session['csrf']
@@ -42,7 +45,7 @@ def install_security(app, db):
                         session.clear()
                     else:
                         # Allow client-allowed APIs and all non-API pages
-                        allowed_prefixes=('/api/auth/me','/api/auth/logout','/api/invoices','/api/projects','/api/documents/invoice','/api/documents/brief','/api/documents/proposal')
+                        allowed_prefixes=('/api/auth/me','/api/auth/logout','/api/auth/export','/api/auth/close','/api/auth/request-verification','/api/invoices','/api/projects','/api/documents/invoice','/api/documents/brief','/api/documents/proposal')
                         if request.path.startswith('/api/'):
                             if any(request.path.startswith(p) for p in allowed_prefixes) or request.path=='/api/state':
                                 # For /api/state, clients get filtered view elsewhere; allow but check CSRF for writes

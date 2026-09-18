@@ -474,6 +474,8 @@ from enquiries import register_enquiries
 register_enquiries(app, db, now, log)
 from operations import register_operations
 register_operations(app, db, now, log)
+from standard import register_standard
+register_standard(app, db, log, settings)
 
 
 # Client reviews — leave a review for good job done
