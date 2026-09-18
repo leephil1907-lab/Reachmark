@@ -187,12 +187,16 @@ def sitemap():
 
 @app.route('/<filename>')
 def google_verify_file_generic(filename):
-    # Google Search Console HTML file verification — serve google*.html with token from env
-    # Preferred: meta tag <meta name="google-site-verification">, this is fallback for file upload method
+    # Google Search Console HTML file verification — serve google*.html
+    # Supports both meta-token fallback and specific HTML file upload verification
     if filename.startswith('google') and filename.endswith('.html'):
-        token = os.getenv('GOOGLE_SITE_VERIFICATION','').strip()
+        # Specific file requested by user: googlee75a778b14224ae6.html
+        if filename == 'googlee75a778b14224ae6.html':
+            return Response('google-site-verification: googlee75a778b14224ae6.html', mimetype='text/html')
+        token = os.getenv('GOOGLE_SITE_VERIFICATION','').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
         if token:
             return Response('google-site-verification: ' + token, mimetype='text/html')
+        return Response('google-site-verification: ' + filename, mimetype='text/html')
     abort(404)
 @app.route('/api/state')
 def state():
