@@ -18,25 +18,62 @@ def install_security(app, db):
     with db() as c:c.execute('CREATE TABLE IF NOT EXISTS login_attempts(client TEXT PRIMARY KEY,failures INTEGER,blocked_until REAL)')
     def public():
         p=request.path
-        return p in ('/login','/healthz','/about','/robots.txt','/sitemap.xml','/showcase','/enquire') or p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/')) or (p=='/api/enquiries' and request.method=='POST')
+        return p in ('/login','/healthz','/about','/robots.txt','/sitemap.xml','/showcase','/enquire','/signup','/signin','/client-login') or p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/')) or (p=='/api/enquiries' and request.method=='POST') or (p in ('/api/auth/signup','/api/auth/login') and request.method=='POST') or (p=='/api/auth/me' and request.method=='GET')
     def csrf():
         if 'csrf' not in session:session['csrf']=secrets.token_urlsafe(32)
         return session['csrf']
-    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),production_mode=production))
+    def current_role():
+        if session.get('owner'):
+            return 'owner'
+        if session.get('client_id') and session.get('role')=='client':
+            return 'client'
+        return 'none'
+    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),client_logged_in=bool(session.get('client_id')),current_role=current_role(),production_mode=production))
     @app.before_request
     def owner_guard():
         if public():return
+        # Client sessions are allowed for specific routes and pages; owner guard handles them first.
+        if session.get('client_id') and session.get('role')=='client':
+            # Validate client still active
+            try:
+                with db() as c:
+                    row=c.execute('SELECT id FROM users WHERE id=? AND is_active=1',(session.get('client_id'),)).fetchone()
+                    if not row:
+                        session.clear()
+                    else:
+                        # Allow client-allowed APIs and all non-API pages
+                        allowed_prefixes=('/api/auth/me','/api/auth/logout','/api/invoices','/api/projects','/api/documents/invoice','/api/documents/brief','/api/documents/proposal')
+                        if request.path.startswith('/api/'):
+                            if any(request.path.startswith(p) for p in allowed_prefixes) or request.path=='/api/state':
+                                # For /api/state, clients get filtered view elsewhere; allow but check CSRF for writes
+                                if request.method in ('POST','PATCH','DELETE','PUT'):
+                                    supplied=request.headers.get('X-CSRF-Token') or request.form.get('csrf_token','')
+                                    if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error='Session verification failed. Reload the page and try again.'),403
+                                return
+                            return jsonify(error='Client access is limited to assigned projects and invoices.'),403
+                        # Non-API page like '/' — allow client to view portal
+                        if request.method in ('POST','PATCH','DELETE','PUT'):
+                            supplied=request.headers.get('X-CSRF-Token') or request.form.get('csrf_token','')
+                            if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error='Session verification failed. Reload the page and try again.'),403
+                        return
+            except Exception:
+                pass
         configured=bool(os.getenv('OWNER_PASSWORD_HASH') or os.getenv('DASHBOARD_PASSWORD'))
         # Credential rotation invalidates existing sessions as well as future logins.
         revision=hashlib.sha256((os.getenv('OWNER_PASSWORD_HASH') or os.getenv('DASHBOARD_PASSWORD','')).encode()).hexdigest()
         authenticated=session.get('owner') and session.get('revision')==revision
         if configured and not authenticated:
+            # If a client is logged in, don't force owner redirect for pages — they have a valid client session
+            if session.get('client_id') and session.get('role')=='client':
+                return
             # Backward-compatible Basic auth for local development/tests only.
             auth=request.authorization; legacy=os.getenv('DASHBOARD_PASSWORD')
             if not production and legacy and auth and auth.username=='admin' and hmac.compare_digest(auth.password or '',legacy):return
             if request.path.startswith('/api/'):return jsonify(error='Owner login required.'),401
             return redirect(url_for('owner_login'))
-        if authenticated and request.method in ('POST','PATCH','DELETE','PUT'):
+        # CSRF for owner writes
+        check_csrf = authenticated or (session.get('client_id') and session.get('role')=='client')
+        if check_csrf and request.method in ('POST','PATCH','DELETE','PUT'):
             supplied=request.headers.get('X-CSRF-Token') or request.form.get('csrf_token','')
             if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error='Session verification failed. Reload the page and try again.'),403
     @app.route('/login',methods=['GET','POST'])

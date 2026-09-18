@@ -31,6 +31,13 @@ def register_workflow(app,db,now,log):
             c.execute('ALTER TABLE leads ADD COLUMN source_seen_at TEXT');c.execute('UPDATE leads SET source_seen_at=created')
         c.executescript('''CREATE TABLE IF NOT EXISTS lead_reviews(lead_id TEXT PRIMARY KEY,verification TEXT,note TEXT,evidence_url TEXT,reviewed_at TEXT);
         CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY,title TEXT,lead_id TEXT,contract_id TEXT,stage TEXT,next_action TEXT,due_date TEXT,scope TEXT,currency TEXT,quote_minor INTEGER,created TEXT,updated TEXT);''')
+        # Migration for client assignment
+        proj_cols={r[1] for r in c.execute('PRAGMA table_info(projects)')}
+        if 'client_user_id' not in proj_cols:
+            try:
+                c.execute('ALTER TABLE projects ADD COLUMN client_user_id TEXT')
+            except Exception:
+                pass
     @app.get('/api/quality')
     def quality():
         with db() as c:
@@ -54,28 +61,78 @@ def register_workflow(app,db,now,log):
         log('review','Manual business verification recorded');return jsonify(ok=True)
     @app.get('/api/projects')
     def list_projects():
-        with db() as c:rows=[dict(r) for r in c.execute('SELECT * FROM projects ORDER BY updated DESC')]
+        from flask import session
+        with db() as c:
+            rows=[dict(r) for r in c.execute('SELECT p.*,u.email as client_email FROM projects p LEFT JOIN users u ON u.id=p.client_user_id ORDER BY p.updated DESC')]
+        if session.get('client_id') and session.get('role')=='client' and not session.get('owner'):
+            cid=session.get('client_id')
+            user_email=None
+            with db() as cc:
+                r=cc.execute('SELECT email FROM users WHERE id=?',(cid,)).fetchone()
+                user_email=r['email'].lower() if r else None
+            filtered=[]
+            for p in rows:
+                if p.get('client_user_id')==cid:
+                    filtered.append(p)
+                elif not p.get('client_user_id') and p.get('lead_id') and user_email:
+                    with db() as cc2:
+                        lead=cc2.execute('SELECT email FROM leads WHERE id=?',(p['lead_id'],)).fetchone()
+                        if lead and lead['email'] and lead['email'].strip().lower()==user_email:
+                            filtered.append(p)
+            rows=filtered
         return jsonify(projects=rows,stages=STAGES,currencies=CURRENCIES,today=date.today().isoformat())
     @app.route('/api/projects',methods=['POST'])
     @app.route('/api/projects/<pid>',methods=['PATCH','DELETE'])
     def project_write(pid=None):
+        from flask import session
+        # Clients cannot create/modify projects
+        if request.method in ('POST','PATCH','DELETE') and session.get('client_id') and not session.get('owner'):
+            return jsonify(error='Only the studio owner can manage projects.'),403
         if request.method=='DELETE':
             with db() as c:c.execute('DELETE FROM projects WHERE id=?',(pid,))
             log('project','A project record was deleted');return jsonify(ok=True)
-        v=request.get_json();fields=['title','lead_id','contract_id','stage','next_action','due_date','scope','currency']
-        if any(not isinstance(v.get(k,''),str) for k in fields):return jsonify(error='Project fields must be text.'),400
+        v=request.get_json();fields=['title','lead_id','contract_id','stage','next_action','due_date','scope','currency','client_user_id','client_email']
+        if any(not isinstance(v.get(k,''),str) for k in fields if k in v):return jsonify(error='Project fields must be text.'),400
         title=v.get('title','').strip();stage=v.get('stage','Discover');currency=v.get('currency','USD');due=v.get('due_date','');lead=v.get('lead_id','');contract=v.get('contract_id','')
         if not title or len(title)>180 or stage not in STAGES or currency not in CURRENCIES or len(v.get('scope',''))>10000 or len(v.get('next_action',''))>500:return jsonify(error='Provide a title, supported stage/currency and bounded scope.'),400
+        # Resolve client assignment: accept client_email or client_user_id
+        client_user_id=str(v.get('client_user_id','')).strip() or None
+        client_email=str(v.get('client_email','')).strip().lower() or None
+        if client_email and not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',client_email):
+            return jsonify(error='Enter a valid client email.'),400
+        if client_email and not client_user_id:
+            with db() as c:
+                u=c.execute('SELECT id FROM users WHERE lower(email)=lower(?)',(client_email,)).fetchone()
+                if u:
+                    client_user_id=u['id']
+        if client_user_id:
+            with db() as c:
+                if not c.execute('SELECT 1 FROM users WHERE id=? AND role=\"client\"',(client_user_id,)).fetchone():
+                    return jsonify(error='Client account not found.'),400
         try:
             if due and (not re.fullmatch(r'\d{4}-\d{2}-\d{2}',due) or date.fromisoformat(due).isoformat()!=due):raise ValueError()
             quote=money(v.get('quote'),currency,optional=True)
         except ValueError:return jsonify(error='Enter a valid date and non-negative quote amount, or leave them blank.'),400
+        # Preserve existing client assignment if not explicitly changed
+        if pid:
+            with db() as cc:
+                existing=cc.execute('SELECT client_user_id FROM projects WHERE id=?',(pid,)).fetchone()
+                if existing and 'client_user_id' not in v and 'client_email' not in v:
+                    client_user_id=existing['client_user_id']
         with db() as c:
             old=c.execute('SELECT * FROM projects WHERE id=?',(pid,)).fetchone() if pid else None
             if pid and not old:abort(404)
             if lead and not c.execute('SELECT 1 FROM leads WHERE id=?',(lead,)).fetchone():return jsonify(error='Linked business not found.'),400
             if contract and not c.execute('SELECT 1 FROM contracts WHERE id=?',(contract,)).fetchone():return jsonify(error='Linked contract not found.'),400
             pid=pid or uuid.uuid4().hex;stamp=now()
-            c.execute('INSERT OR REPLACE INTO projects VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',(pid,title,lead,contract,stage,v.get('next_action','').strip(),due,v.get('scope','').strip(),currency,quote,old['created'] if old else stamp,stamp))
+            # Explicit column list avoids ordering issues after migration
+            try:
+                c.execute('INSERT OR REPLACE INTO projects(id,title,lead_id,contract_id,stage,next_action,due_date,scope,currency,quote_minor,created,updated,client_user_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',(pid,title,lead,contract,stage,v.get('next_action','').strip(),due,v.get('scope','').strip(),currency,quote,old['created'] if old else stamp,stamp,client_user_id))
+            except Exception as e:
+                # Fallback for very old DBs without client column
+                if 'no column named client_user_id' in str(e) or 'has no column' in str(e):
+                    c.execute('INSERT OR REPLACE INTO projects(id,title,lead_id,contract_id,stage,next_action,due_date,scope,currency,quote_minor,created,updated) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',(pid,title,lead,contract,stage,v.get('next_action','').strip(),due,v.get('scope','').strip(),currency,quote,old['created'] if old else stamp,stamp))
+                else:
+                    raise
         log('project',f'Project saved: {title} · {stage}')
         return jsonify(id=pid),200 if old else 201

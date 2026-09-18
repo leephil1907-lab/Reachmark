@@ -2,11 +2,49 @@
 
 ## What is ready, and what still needs activation
 
-Implemented: owner sessions, CSRF checks, login throttling, secure production cookies, production startup validation, Docker/Caddy deployment files, persistent SQLite storage, scheduled snapshot service, verified offline restore, optional encrypted offsite copies, optional Sentry integration, CI/deployment workflows and post-deploy verification.
+Implemented: studio-owner sessions, **client portal (signup/signin) with assigned-project and invoice visibility**, **branded invoice creator with line items, tax/discount and manual status tracking**, CSRF checks, login throttling, secure production cookies, production startup validation, Docker/Caddy deployment files, persistent SQLite storage, scheduled snapshot service, verified offline restore, optional encrypted offsite copies, optional Sentry integration, CI/deployment workflows and post-deploy verification.
 
 **Not yet activated:** a VPS, domain/DNS, public HTTPS certificates, GitHub deployment secrets/environment, external uptime/error/backup alerts, offsite storage and a dedicated map-data contract. There is no live production deployment to certify yet. Docker is not available in the development sandbox, so the actual container build/start must be checked by CI/on the target host. Local Python/browser/backup tests are not a substitute for that launch test.
 
 Recommended starting architecture: a small VPS with roughly 2 vCPU, 2 GB RAM and 25+ GB disk, Docker Compose, Caddy and one threaded application worker. Reassess storage against lead/source-tag/backup growth. Do not run multiple app replicas: discovery workers use in-process coordination and startup recovery. For multiple users/replicas, migrate job coordination and storage first.
+
+### Zero-budget path (your current situation)
+
+You noted no funds right now. Do **not** purchase anything yet. Two safe options until budget is available:
+
+1. **Run locally with secure sharing — no VPS needed.**
+   ```bash
+   docker compose up -d            # uses the same Compose file
+   # then expose it safely for testing
+   cloudflared tunnel --url http://localhost:8000
+   # or: npx localtunnel --port 8000
+   ```
+   Keep the local SQLite file backed up with `python scripts/backup.py backup`. This is the fastest way to keep using the new client portal and invoices while you evaluate.
+
+2. **Free-tier cloud (no card or with free credits).** When you do need a public URL without paying, these are the most practical:
+
+   | Option | What you get free | Reachmark fit | Note |
+   |---|---|---|---|
+   | **Oracle Cloud Free Tier (Always Free)** | 2 ARM VMs (4 OCPU, 24 GB RAM total), 200 GB storage | Excellent — runs Docker Compose exactly as documented | Requires card for verification, no charge if you stay within Always Free. ARM works with the provided Dockerfile. |
+   | **Fly.io Free allowance** | 3 shared VMs, 3 GB persistent volume, free bandwidth allowance | Good — `fly launch` + `fly volumes create` + `Dockerfile` | Add `[[services]]` for port 8000; keep one worker. |
+   | **Render Free** | 750 h/month web service, 1 GB ephemeral (needs external DB for persistence) | Usable for demo only — persistence needs paid disk or external SQLite | Not recommended for real client data without a persistent disk. |
+   | **Railway Hobby trial** | ~$5 free credit | Short demo only | Good for a day-long test, then needs payment. |
+
+**Recommendation for now:** stay on **local Docker + Cloudflare Tunnel** for real client work, and claim the **Oracle Free Tier** ARM machine when you are ready for a 24/7 public deployment. It is the only free option that comfortably fits the recommended 2 vCPU/2 GB/25 GB spec without time limits.
+
+### VPS comparison when you have ~$5–10/month
+
+| Provider | Cheapest plan that fits Reachmark | Specs | Why consider it |
+|---|---|---|---|
+| **Hetzner CX22** | ~**€4.15/mo (~$4.50)** | 2 vCPU, 4 GB RAM, 40 GB SSD, 20 TB traffic | Best price-to-performance in EU; clean Docker/Caddy install (Ubuntu 24.04). |
+| **Contabo Cloud VPS S** | ~**€4.50/mo** | 4 vCPU, 8 GB RAM, 50 GB SSD | More RAM for less, but older hardware reports; support slower. |
+| **Hostinger KVM 1** | **~$6–7/mo** | 1 vCPU, 4 GB RAM, 50 GB NVMe, weekly backups | Includes backups/DDoS; easy panel. |
+| **DigitalOcean Basic** | **$6/mo** | 1 vCPU, 1 GB RAM, 25 GB SSD | Great docs, but 1 GB is tight for Reachmark + backups; next size $18. |
+| **Vultr / Linode** | **$5–6/mo** | 1 vCPU, 1 GB RAM, 25–30 GB SSD | Similar to DO; $6–12 plans are more comfortable. |
+
+**When you move off free:** **Hetzner CX22** is the recommended starting point on a tight budget — it exceeds the minimum spec for Reachmark at the lowest price, with EU data centers closer to Nigeria than US-only hosts. If you prefer a US provider with simpler billing, use **Hostinger KVM 1** or **DigitalOcean $12/mo (2 GB)** plan. Avoid the $5/1 GB plans for production if you keep many leads and daily backups on the same disk.
+
+All paid options still need a **domain (~$10–15/yr, e.g., Namecheap/Cloudflare Registrar)** for HTTPS. No purchase is made by this repo.
 
 ## 1. Accounts and network
 
@@ -113,9 +151,11 @@ If verification fails, the workflow fails; it does not silently declare success 
 - Duplicate candidates use matching phone, email or name+city/address, capped explicitly; shared branches may match. Never auto-merge/delete.
 - Source/import timestamp, automated URL-check timestamp and manual-review timestamp remain distinct.
 - A manually reviewed URL-unavailable conclusion requires an evidence URL and notes. “No site found in research” is not a universal absence claim. Editing the listed website clears stale manual verification.
-- **Projects & follow-ups** links leads, contracts, scope, draft quote, stage, next action and due date. Overdue/today reminders use UTC calendar dates and are shown in-app only.
-- Audit PDFs download from business details. Draft proposal/quote and brief PDFs download from saved projects. Contract-record PDFs download from Contracts. PDFs contain saved data, not invented prices, legal terms or acceptance. Review all content before sharing; a manually recorded contract stage is not an e-signature or verified payment receipt.
-- No project transition sends email, executes an MCP tool, signs an agreement or charges money. Existing explicit approval gates remain.
+- **Projects & follow-ups** links leads, contracts, scope, draft quote, stage, next action and due date. Overdue/today reminders use UTC calendar dates and are shown in-app only. Assign a project to a client’s email and it appears in their portal; unassigned projects remain studio-only.
+- **Client portal (new):** visitors sign up at `/signup` and sign in at `/signin` (client login). No invitation code is needed. Clients see **only** invoices and projects assigned to their email — they never see the lead directory, global discovery, website health, contracts, or studio settings. The owner still uses `/login` with the studio password. Share a project or invoice by entering the client’s registered email; the system links it via `client_user_id` and shows it on next client login. No payment provider is charged.
+- **Invoices (new, AllScale-inspired workflow, original Reachmark design):** owner-only creation. Add 1–25 line items (description, quantity up to 2 decimals, unit price), choose currency (13 supported), tax 0–100%, discount none/percent/fixed, issue/due dates, linked project or business, notes and terms. Totals are computed locally as `(Σ qty×unit) – discount + tax`; no automatic currency conversion. Statuses: **Draft, Sent, Paid, Overdue, Cancelled** — **Paid is manual** (mark only after you confirm bank/wallet receipt). Branded PDFs (`/api/documents/invoice/<id>.pdf`) are available to the owner and to the assigned client. No e-signature, automated charging, or stablecoin payment is performed; this is a manual record, not a payment gateway.
+- Audit PDFs download from business details. Draft proposal/quote and brief PDFs download from saved projects — assigned clients can also download their project’s proposal/brief PDFs. Contract-record PDFs download from Contracts. PDFs contain saved data, not invented prices, legal terms or acceptance. Review all content before sharing; a manually recorded contract stage is not an e-signature or verified payment receipt.
+- No project or invoice transition sends email, executes an MCP tool, signs an agreement or charges money. Existing explicit approval gates remain. Client status changes are shown in-app only.
 
 ## 8. Launch acceptance checklist
 

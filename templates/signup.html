@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create client account · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/production.css"><style>.auth-page{margin:0;background:#e9edde;color:#26351e;min-height:100vh;display:grid;place-items:center;font-family:Manrope,Arial,sans-serif}.auth-card{box-sizing:border-box;width:min(480px,calc(100% - 32px));padding:40px;background:#fff;border:1px solid #d2d8c7;border-radius:22px;box-shadow:0 22px 70px #24311b10}.auth-brand{font-size:25px;font-weight:800;color:#26351e;text-decoration:none}.auth-card h1{font-size:32px;letter-spacing:-1.2px;margin:14px 0 8px}.auth-card p{line-height:1.7;color:#535f4c;font-size:14px}.auth-card label{display:block;margin:14px 0 6px;font-weight:600;font-size:13px}.auth-card input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #a1ad95;border-radius:8px;font-size:15px}.auth-card button{width:100%;margin:18px 0 10px;padding:13px;background:#d2e985;border:0;border-radius:8px;color:#26351e;font-weight:700;font-size:15px;cursor:pointer}.auth-error{background:#f9e7e1;padding:10px;color:#8b3524;border-radius:6px;font-size:13px}.auth-note{font-size:12px;color:#8a9976}.eyebrow{font-size:10px;letter-spacing:2px;color:#8c9c77;margin-top:18px}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}</style></head><body class="auth-page"><main class="auth-card"><a href="/about" class="auth-brand">reachmark.</a><p class="eyebrow">CLIENT PORTAL</p><h1>Create your account.</h1><p>Track your website project, proposals and invoices in one private portal. Your owner will assign work to your email.</p><div id="msg" role="alert" class="auth-error" style="display:none"></div><form id="signup-form"><label for="name">Your name</label><input id="name" name="name" maxlength="120" placeholder="Ada Lovelace"><label for="email">Work email</label><input id="email" name="email" type="email" required maxlength="250" placeholder="you@company.com" autocomplete="email"><label for="password">Password — at least 8 characters</label><input id="password" name="password" type="password" required minlength="8" maxlength="1024" autocomplete="new-password"><label for="confirm">Confirm password</label><input id="confirm" type="password" required maxlength="1024" autocomplete="new-password"><button type="submit">Create account →</button></form><p class="auth-note">Already have an account? <a href="/signin">Sign in</a> · Studio owner? <a href="/login">Owner login</a> · <a href="/about">About Reachmark</a></p><p class="auth-note">Your data is kept private to your assigned projects and invoices. Leads and global discovery remain studio-only.</p></main><script>const csrf=document.createElement('input');</script><script>
+const form=document.getElementById('signup-form'),msg=document.getElementById('msg');
+function getCsrf(){const m=document.querySelector('meta[name="csrf-token"]');return m?m.content:''}
+async function fetchCsrf(){let r=await fetch('/about');let t=await r.text();let m=t.match(/csrf-token\" content=\"([^\"]+)\"/);return m?m[1]:''}
+let csrfToken='';
+fetch('/api/auth/me').then(()=>{}).catch(()=>{});
+(async()=>{try{let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\"csrf_token\" value=\"([^\"]+)\"/);csrfToken=m?m[1]:''}catch(e){}})();
+form.onsubmit=async e=>{
+  e.preventDefault();
+  const name=document.getElementById('name').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const pw=document.getElementById('password').value;
+  const confirm=document.getElementById('confirm').value;
+  if(pw!==confirm){msg.textContent='Passwords do not match.';msg.style.display='block';return}
+  if(pw.length<8){msg.textContent='Password must be at least 8 characters.';msg.style.display='block';return}
+  msg.style.display='none';
+  const btn=form.querySelector('button');btn.disabled=true;btn.textContent='Creating…';
+  try{
+    // Ensure csrf
+    if(!csrfToken){
+      let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\"csrf_token\" value=\"([^\"]+)\"/);csrfToken=m?m[1]:'';
+    }
+    let r=await fetch('/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({name,email,password:pw})});
+    let j=await r.json();
+    if(!r.ok) throw new Error(j.error||'Could not create account.');
+    location.href='/';
+  }catch(err){msg.textContent=err.message;msg.style.display='block';btn.disabled=false;btn.textContent='Create account →';}
+};
+</script></body></html>

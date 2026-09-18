@@ -69,6 +69,8 @@ def add_lead(v):
         return count
 from security import install_security
 install_security(app,db)
+from accounts import register_accounts
+register_accounts(app,db,log)
 @app.before_request
 def same_origin():
     if request.is_json and request.method in ('POST','PATCH','PUT'):
@@ -108,13 +110,24 @@ def sitemap():
     return Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+entry+'</urlset>',mimetype='application/xml')
 @app.route('/api/state')
 def state():
+    from flask import session
+    is_client = bool(session.get('client_id') and session.get('role')=='client')
     with db() as c:
-        leads=[dict(r) for r in c.execute("SELECT l.*,r.verification,r.reviewed_at FROM leads l LEFT JOIN lead_reviews r ON r.lead_id=l.id ORDER BY l.created DESC")]
-        activity=[dict(r) for r in c.execute('SELECT * FROM activity ORDER BY id DESC LIMIT 12')]
-        sent=c.execute("SELECT count(*) FROM sends WHERE state='sent'").fetchone()[0]
-        suppressed=[r[0] for r in c.execute('SELECT email FROM suppression')]
-        enquiry_count=c.execute("SELECT count(*) FROM enquiries WHERE status='New'").fetchone()[0]
-        jobs=[dict(r) for r in c.execute('SELECT * FROM jobs ORDER BY created DESC LIMIT 15')]
+        if is_client:
+            # Clients see no leads/jobs; they have filtered invoices/projects elsewhere
+            leads=[]
+            activity=[]
+            sent=0
+            suppressed=[]
+            enquiry_count=0
+            jobs=[]
+        else:
+            leads=[dict(r) for r in c.execute("SELECT l.*,r.verification,r.reviewed_at FROM leads l LEFT JOIN lead_reviews r ON r.lead_id=l.id ORDER BY l.created DESC")]
+            activity=[dict(r) for r in c.execute('SELECT * FROM activity ORDER BY id DESC LIMIT 12')]
+            sent=c.execute("SELECT count(*) FROM sends WHERE state='sent'").fetchone()[0]
+            suppressed=[r[0] for r in c.execute('SELECT email FROM suppression')]
+            enquiry_count=c.execute("SELECT count(*) FROM enquiries WHERE status='New'").fetchone()[0]
+            jobs=[dict(r) for r in c.execute('SELECT * FROM jobs ORDER BY created DESC LIMIT 15')]
     return jsonify(leads=leads,enquiry_count=enquiry_count,jobs=jobs,activity=activity,sent=sent,settings=settings(),categories=list(CATEGORIES),smtp_ready=bool(os.getenv('SMTP_HOST') and os.getenv('SMTP_FROM')),suppressed=suppressed)
 @app.route('/api/settings',methods=['POST'])
 def save_settings():
@@ -341,6 +354,8 @@ from readiness import register_readiness
 register_readiness(app)
 from workflow import register_workflow
 register_workflow(app,db,now,log)
+from invoices import register_invoices
+register_invoices(app,db,now,log)
 from documents import register_documents
 register_documents(app,db,now,settings)
 from maps import register_maps

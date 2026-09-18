@@ -295,6 +295,42 @@ The existing 217 business records were retained. The new MCP/contract tables sta
 
 There are 41 isolated backend tests, including MCP JSON/SSE/session handling, endpoint restrictions, schemas, approvals, changed-tool blocking, duplicate prevention, uncertain outcomes, presets, contract precision/currency totals and authentic empty-state analytics. A disposable-database browser test also covers connector discovery → saved skill → approved run → result/history → analytics, and contract creation → signed value → recorded-payment breakdown. Runtime provider availability, permissions and external actions cannot be guaranteed by tests.
 
+
+## Client portal and invoices (new)
+
+**You noted no budget for hosting right now — these features work locally today and on any VPS later. See `PRODUCTION.md` for the free-tier path.**
+
+### Website signup and client login
+
+- Visitors create a client account at **`/signup`** (name, email, password ≥8 characters) and sign in at **`/signin`** (also reachable via `/client-login`).
+- The studio owner still uses **`/login`** with the single owner password ( `OWNER_PASSWORD_HASH` ). Client accounts are separate and do not gain lead-directory or discovery access.
+- Public navigation (`/about`, `/showcase`, `/enquire`) now links to **Create account** and **Client portal** for easy discovery.
+- Sessions are HTTP-only, SameSite=Strict, 8 h lifetime, CSRF-protected. Login throttling (5 failures → 15 min block) applies to both owner and client.
+- `GET /api/auth/me`, `POST /api/auth/signup`, `POST /api/auth/login`, `POST /api/auth/logout`, and `GET /api/clients` (owner only) support the flow. The profile badge shows the signed-in client’s name/email when in portal mode.
+
+### Privacy model: clients only see what you assign
+
+- **Owner sees everything** — leads, discovery, health, contracts, projects, invoices, settings.
+- **Clients see only** invoices and projects whose `client_email` matches their registered email (linked via `client_user_id`). No leads, no global search, no health checks.
+- Assign by entering the client’s registered email when creating or editing a **Project** (new “Assign to client” field) or an **Invoice**. The server links `client_user_id` automatically if the email is already registered; otherwise the link resolves on next client login. Unassigned records remain studio-only.
+
+### Invoice creator — original Reachmark design, AllScale-inspired workflow
+
+Built as an **original** Reachmark billing workspace, not a copy of AllScale’s branding or payment rails. The workflow is intentionally similar — create, add items, set tax/discount, track status, download a branded PDF — but all billing is manual.
+
+- **Owner-only creation** at **Invoices** in the workspace (also via `POST /api/invoices`). Add 1–25 line items — each needs a description (≤500 c), quantity (positive, up to 2 decimals), and unit price. Example presets (Website design + Content) are shown for new invoices.
+- **Currencies:** USD, EUR, GBP, CAD, NGN, AUD, JPY (0 decimals), INR, AED, SGD, ZAR, GHS, BRL — amounts stored in integer minor units, no invented conversion.
+- **Totals:** live preview in the form as `(Σ qty×unit) – discount + tax`. Discount is **none / percent (0–100%) / fixed amount** (capped at subtotal). Tax is 0–100%. `subtotal_minor`, `discount_minor`, `tax_minor`, `total_minor` are persisted.
+- **Metadata:** issue/due dates (YYYY-MM-DD, due ≥ issue), linked project or business, notes and terms (≤5000 c each), status **Draft / Sent / Paid / Overdue / Cancelled**. **Paid is manual** — mark only after you verify the bank, wallet or card receipt yourself. No payment provider is charged and no stablecoin settlement occurs.
+- **PDFs:** branded DejaVu PDFs at `/api/documents/invoice/<id>.pdf` — same visual system as other exports (studio header, lime rule, page numbers). The owner and the assigned client can both download; unassigned invoices are owner-only. The PDF header marks Draft clearly and the footer states this is a record, not an electronic signature, payment receipt or legal contract.
+- **Client portal:** clients see a filtered invoice list (search by number/client, filter by status), view-only detail, and PDF download. They cannot create, edit or delete invoices. Projects assigned to them also allow proposal/brief PDF downloads.
+
+Validation, disposable-DB browser checks, and the 63-test backend suite cover the new flows. No test data is written to the live workspace; the live test run that created a sample client/invoice was cleaned up, leaving 217 authentic leads.
+
+### VPS and deployment — recommendation for no funds
+
+See **`PRODUCTION.md`** (zero-budget path + $5–10 comparison). TL;DR: keep running **local Docker + Cloudflare Tunnel** for free, and claim **Oracle Cloud Free Tier (ARM)** when you want a 24/7 public host. **Hetzner CX22 (~€4.15/mo)** is the recommended cheap paid starting point when budget is available; Hostinger KVM 1 and DigitalOcean $12 plans are alternatives. No domain or hosting was purchased by this update.
+
 ## World map and durable area scans
 
 Global finder now includes a locally shipped Leaflet map (no Google API or runtime JavaScript CDN), city/country search, direct latitude/longitude navigation, saved-lead clusters (click a count to zoom; overlapping points spread at maximum zoom), world/fit controls, mobile layout and locally remembered view. Basemap tiles come from OpenStreetMap with visible attribution and origin referrers. No prefetching, offline tile packs or tile proxy. If tiles fail, markers, cell overlays, coordinate navigation and the lead directory remain available; use **Reload basemap** to retry. Tile availability is independent of Overpass discovery.

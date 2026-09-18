@@ -2,7 +2,7 @@
 import io,os
 from decimal import Decimal
 from xml.sax.saxutils import escape
-from flask import Response,abort
+from flask import Response,abort, session
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib import colors
@@ -30,22 +30,72 @@ def pdf(title,subtitle,sections,stamp,studio):
 def register_documents(app,db,now,settings):
     @app.get('/api/documents/<kind>/<record_id>.pdf')
     def export_pdf(kind,record_id):
-        if kind not in ('audit','proposal','contract','brief'):abort(404)
-        table='leads' if kind=='audit' else 'contracts' if kind=='contract' else 'projects'
+        if kind not in ('audit','proposal','contract','brief','invoice'):abort(404)
+        if kind=='audit':
+            table='leads'
+        elif kind=='contract':
+            table='contracts'
+        elif kind=='invoice':
+            table='invoices'
+        else:
+            table='projects'
         with db() as c:
             row=c.execute('SELECT * FROM '+table+' WHERE id=?',(record_id,)).fetchone()
             if not row:abort(404)
             r=dict(row)
-            client=c.execute('SELECT name,city,address,email FROM leads WHERE id=?',(r.get('lead_id',''),)).fetchone() if kind in ('proposal','brief') else None
+            # Client access check for invoice/proposal/brief
+            if session.get('client_id') and session.get('role')=='client' and not session.get('owner'):
+                cid=session.get('client_id')
+                u=c.execute('SELECT email FROM users WHERE id=?',(cid,)).fetchone()
+                user_email=u['email'].lower() if u else ''
+                allowed=False
+                if kind=='invoice':
+                    if r.get('client_user_id')==cid or (not r.get('client_user_id') and r.get('client_email','').lower()==user_email):
+                        allowed=True
+                elif kind in ('proposal','brief'):
+                    if r.get('client_user_id')==cid:
+                        allowed=True
+                    elif not r.get('client_user_id') and r.get('lead_id'):
+                        lead=c.execute('SELECT email FROM leads WHERE id=?',(r.get('lead_id'),)).fetchone()
+                        if lead and lead['email'] and lead['email'].strip().lower()==user_email:
+                            allowed=True
+                if not allowed:
+                    abort(404)
+            client=c.execute('SELECT name,city,address,email FROM leads WHERE id=?',(r.get('lead_id',''),)).fetchone() if kind in ('proposal','brief') and r.get('lead_id') else None
+            # If project assigned to a client user, fetch that user's details when lead not linked
+            if kind in ('proposal','brief') and r.get('client_user_id') and not client:
+                u=c.execute('SELECT name,email FROM users WHERE id=?',(r['client_user_id'],)).fetchone()
+                if u:
+                    client={'name': u['name'] or r.get('title','Client'), 'city':'', 'address':'', 'email': u['email']}
             review=c.execute('SELECT * FROM lead_reviews WHERE lead_id=?',(record_id,)).fetchone() if kind=='audit' else None
+            invoice_items=[]
+            if kind=='invoice':
+                invoice_items=[dict(x) for x in c.execute('SELECT * FROM invoice_items WHERE invoice_id=? ORDER BY created',(record_id,))]
         if kind=='audit':
             title='Business audit report';subtitle=r['name']+' · Evidence summary, not a guarantee'
             sections=[('Business and source',f"{r['name']}\n{r['city']}\n{r['address']}\nSource: {r['source']}\n{r['source_url']}\nLast imported / seen: {r['source_seen_at']}"),('Website evidence',f"Listed URL: {r['website'] or 'No website listed in source'}\nSource status: {r['status']}\nAutomated observation: {r['audit_status'] or 'Not checked'}\nChecked: {r['checked_at'] or 'Not checked'}\n{r['audit_reason'] or 'No URL check recorded.'}"),('Manual verification',f"{review['verification']}\n{review['note']}\n{review['evidence_url']}\nReviewed: {review['reviewed_at']}" if review else 'No manual verification recorded.'),('Limitations','A missing source URL is not proof of no website. Connection errors do not establish closure or permanent unavailability. Contact fields and ownership must be independently verified.')]
         elif kind=='contract':
             title='Contract record';subtitle=r['title']+' · '+('DRAFT / NOT AGREED' if r['status'] in ('Draft','Sent') else 'MANUALLY RECORDED STATUS: '+r['status'])
             sections=[('Client',r['client']+'\n'+r['email']),('Recorded agreement',f"Status: {r['status']}\nValue: {amount(r['amount_minor'],r['currency'])}\nPayments recorded: {amount(r['paid_minor'],r['currency'])}"),('Recorded scope and notes',r['notes']),('Important distinction','This PDF is an export of your tracker, not an electronically signed agreement, invoice, payment receipt or independently verified contract. No additional terms are implied.')]
+        elif kind=='invoice':
+            title='Invoice';subtitle=r['number']+' · '+r['status'] + (' · DRAFT' if r['status']=='Draft' else '')
+            lines=[]
+            for idx,it in enumerate(invoice_items,1):
+                decimals=CURRENCIES[r['currency']]
+                unit = Decimal(it['unit_minor']) / (10**decimals) if decimals else Decimal(it['unit_minor'])
+                amt = Decimal(it['amount_minor']) / (10**decimals) if decimals else Decimal(it['amount_minor'])
+                unit_str = f"{r['currency']} {unit:,.{decimals}f}" if decimals else f"{r['currency']} {unit:,}"
+                amt_str = f"{r['currency']} {amt:,.{decimals}f}" if decimals else f"{r['currency']} {amt:,}"
+                lines.append(f"{idx}. {it['description']}  —  {it['quantity']} × {unit_str} = {amt_str}")
+            items_text='\n'.join(lines) if lines else 'No items'
+            sub = amount(r['subtotal_minor'], r['currency'])
+            disc = amount(r['discount_minor'], r['currency'])
+            tax = amount(r['tax_minor'], r['currency'])
+            total = amount(r['total_minor'], r['currency'])
+            sections=[('Bill to',f"{r['client_name']}\n{r['client_email']}\n{r['client_address']}"),('Invoice details',f"Number: {r['number']}\nStatus: {r['status']}\nCurrency: {r['currency']}\nIssue date: {r['issue_date'] or 'Not set'}\nDue date: {r['due_date'] or 'Not set'}\nProject: {r['project_id'] or 'Not linked'}\nBusiness: {r['lead_id'] or 'Not linked'}"),('Items',items_text),('Totals',f"Subtotal: {sub}\nDiscount ({r['discount_type']} {r['discount_value']}): -{disc}\nTax ({r['tax_rate']}%): {tax}\nTotal: {total}"),('Notes',r['notes'] or '—'),('Terms',r['terms'] or 'Payment due as specified. This is a record; verify acceptance and bank receipt separately. Additional terms must be agreed explicitly.')]
         else:
             title='Website proposal & quote' if kind=='proposal' else 'Project brief';subtitle=r['title']+' · DRAFT FOR REVIEW'
-            sections=[('Client',f"{client['name']}\n{client['city']}\n{client['address']}\n{client['email']}" if client else 'No business linked'),('Project',f"Stage: {r['stage']}\nLead reference: {r['lead_id'] or 'Not linked'}\nContract reference: {r['contract_id'] or 'Not linked'}"),('Proposed scope',r['scope']),('Tailored quote',amount(r['quote_minor'],r['currency'])),('Next action',f"{r['next_action'] or 'Not set'}\nTarget date: {r['due_date'] or 'Not set'}"),('Approval and terms','Draft only. Pricing, scope, taxes, payment terms, schedule and acceptance must be expressly agreed with the client. Linked contract records remain separate. No automatic sending, signing or payment collection.')]
+            client_text=f"{client['name']}\n{client['city']}\n{client['address']}\n{client['email']}" if client else 'No business linked'
+            sections=[('Client',client_text),('Project',f"Stage: {r['stage']}\nLead reference: {r['lead_id'] or 'Not linked'}\nContract reference: {r['contract_id'] or 'Not linked'}\nAssigned client: {r.get('client_user_id') or 'Not assigned'}"),('Proposed scope',r['scope']),('Tailored quote',amount(r['quote_minor'],r['currency'])),('Next action',f"{r['next_action'] or 'Not set'}\nTarget date: {r['due_date'] or 'Not set'}"),('Approval and terms','Draft only. Pricing, scope, taxes, payment terms, schedule and acceptance must be expressly agreed with the client. Linked contract records remain separate. No automatic sending, signing or payment collection.')]
         content=pdf(title,subtitle,sections,now(),settings()['agency'] or 'Reachmark Studio')
         return Response(content,mimetype='application/pdf',headers={'Content-Disposition':f'attachment; filename="reachmark-{kind}-{record_id[:12]}.pdf"','Cache-Control':'no-store'})
