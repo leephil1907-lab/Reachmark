@@ -1,3 +1,7 @@
+# Reachmark production upgrade
+
+See **[PRODUCTION.md](PRODUCTION.md)** for owner login, Docker/HTTPS deployment, backup/restore, monitoring activation, CI release verification and the launch checklist. Production hosting/domain/alerts are not yet provisioned. New: evidence-based lead reviews, duplicate suggestions, advanced filters, project follow-ups and branded PDF downloads.
+
 # Reachmark
 
 Global business discovery, live website checks, and reviewed website outreach.
@@ -305,7 +309,10 @@ Place search is explicit (no autocomplete), serialized at ≥1.1 seconds, and su
 
 Run backend regressions with `python -m unittest test_app test_operations test_maps.MapTests -q` (53 tests). Map coverage includes bounds/dateline validation, failures, caps/partial results, deduplication, resume, cancellation, authentication, persistent place cache, provider fallback and rate limits. `checks/map_flow.py` (workspace QA helper) uses a disposable database and deliberately blocks external tiles to test navigation, scans, reload persistence and mobile alignment without adding production fixtures.
 
-Deployment still requires one application worker (threaded Gunicorn as in Dockerfile), a persistent writable DATABASE_PATH, HTTPS and a strong DASHBOARD_PASSWORD before public access. SMTP and MCP credentials can be configured later. The map does not depend on either. Never run multiple app workers against these in-process discovery queues. Stop/pause discovery before redeploying. Full deployment hardening and document PDF downloads are separate follow-up work; this update does not claim them complete.
+Deployment still requires one application worker (threaded Gunicorn as in Dockerfile), a persistent writable DATABASE_PATH, HTTPS and a strong DASHBOARD_PASSWORD before public access. SMTP and MCP credentials can be configured later. The map does not depend on either. Never run multiple app workers against these in-process discovery queues. Stop/pause discovery before redeploying. Superseded by the production upgrade: owner authentication, deployment scaffolding and document PDF downloads are now implemented. Infrastructure, monitoring accounts and actual public deployment still require activation; see PRODUCTION.md.
 
 ### Live task overview
 The analytics overview now includes real map-scan/cell states and a live workspace task list for city searches, map scans and approved MCP runs. It refreshes every 30 seconds while visible and prioritizes active jobs, with up to 20 entries. It is not an autonomous agent or a record of development actions in chat. Empty counters remain zero; no activity is fabricated.
+
+## Production upgrade validation
+Run `python -m unittest test_app test_operations test_maps.MapTests test_production -q` (63 isolated backend tests). Browser regressions: `PYTHONPATH=. python tests/browser/production_flow.py` and `PYTHONPATH=. python tests/browser/map_flow.py` (install Playwright and Chromium first). No test fixtures are written to the live database. This remains JavaScript/JSX, not a TypeScript project; npm build and JS syntax checks are used rather than claiming a nonexistent TypeScript check.

@@ -171,7 +171,7 @@ def register_operations(app,db,now,log):
 
     def write_contract(cid):
         v=request.get_json(silent=True) or {};currency=v.get('currency','USD');status=v.get('status','Draft');title=str(v.get('title','')).strip();client=str(v.get('client','')).strip();email=str(v.get('email','')).strip();notes=str(v.get('notes','')).strip();lead_id=str(v.get('lead_id','')).strip()
-        if currency not in CURRENCIES or status not in STAGES or not title or not client or len(title)>180 or len(client)>180 or len(notes)>5000: return jsonify(error='Provide a title, client, supported currency, and valid contract stage.'),400
+        if not isinstance(currency,str) or currency not in CURRENCIES or not isinstance(status,str) or status not in STAGES or not title or not client or len(title)>180 or len(client)>180 or len(notes)>5000: return jsonify(error='Provide a title, client, supported currency, and valid contract stage.'),400
         if email and not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',email): return jsonify(error='Enter a valid client email.'),400
         try:
             amount=money(v.get('amount'),currency,optional=True);paid=money(v.get('paid'),currency)

@@ -25,7 +25,7 @@ class MapTests(unittest.TestCase):
     def test_cell_resume_preserves_success_and_deduplicates(self):
         sid=self.start_scan([6.5,3.3,6.6,3.4]);worker=module.app.extensions['map_worker']
         payload={'elements':[{'type':'node','id':900,'lat':6.52,'lon':3.32,'tags':{'name':'Isolated map fixture','website':'https://example.test'}}]}
-        with patch('maps.query_overpass',side_effect=[payload,ValueError('offline'),payload,payload]): worker(sid)
+        with patch('maps.query_overpass',side_effect=[payload,ValueError('offline'),payload,payload]), self.assertLogs(module.app.logger,level='WARNING'): worker(sid)
         scan=self.client.get('/api/map/state').json['scans'][0]
         self.assertEqual(scan['state'],'partial');self.assertEqual(sum(c['state']=='failed' for c in scan['cells']),1)
         self.assertEqual(len(self.client.get('/api/state').json['leads']),1)

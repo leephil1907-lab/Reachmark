@@ -18,12 +18,14 @@ from contextlib import contextmanager
 @contextmanager
 def db():
     c = sqlite3.connect(DB, timeout=20); c.row_factory=sqlite3.Row
+    c.execute('PRAGMA busy_timeout=20000')
     try:
         with c:
             yield c
     finally:
         c.close()
 with db() as c:
+    c.execute('PRAGMA journal_mode=WAL')
     c.executescript('''CREATE TABLE IF NOT EXISTS leads (id TEXT PRIMARY KEY, source_key TEXT UNIQUE, name TEXT NOT NULL, category TEXT, city TEXT, address TEXT, phone TEXT, email TEXT, website TEXT, status TEXT, stage TEXT DEFAULT 'New', source TEXT, source_url TEXT, note TEXT DEFAULT '', subject TEXT DEFAULT '', body TEXT DEFAULT '', token TEXT UNIQUE, created TEXT, updated TEXT);
     CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, data TEXT);
     CREATE TABLE IF NOT EXISTS activity (id INTEGER PRIMARY KEY, kind TEXT, message TEXT, created TEXT);
@@ -42,7 +44,7 @@ from portfolio import SAMPLES
 DEFAULTS={'sender_name':'','agency':'','reply_email':'','postal_address':'','public_base_url':'','offer':'clear, mobile-friendly websites that make it easier for customers to learn about services and get in touch'}
 def settings():
     with db() as c: r=c.execute('SELECT data FROM settings WHERE id=1').fetchone()
-    return {**DEFAULTS,**(json.loads(r[0]) if r else {})}
+    return {**DEFAULTS,**(json.loads(r[0]) if r else {}),**({'public_base_url':os.environ['PUBLIC_BASE_URL'].rstrip('/')} if os.getenv('PUBLIC_BASE_URL') else {})}
 def log(kind, message):
     with db() as c: c.execute('INSERT INTO activity(kind,message,created) VALUES(?,?,?)',(kind,message,now()))
 def lead(lid):
@@ -63,7 +65,10 @@ def add_lead(v):
         count=cur.rowcount
         if count:
             c.execute('UPDATE leads SET latitude=?,longitude=?,opening_hours=?,social_url=?,source_tags=? WHERE id=?',(v.get('latitude'),v.get('longitude'),v.get('opening_hours',''),v.get('social_url',''),json.dumps(v.get('source_tags',{})),lid))
+        c.execute('UPDATE leads SET source_seen_at=? WHERE source_key=?',(stamp,key))
         return count
+from security import install_security
+install_security(app,db)
 @app.before_request
 def same_origin():
     if request.is_json and request.method in ('POST','PATCH','PUT'):
@@ -72,13 +77,6 @@ def same_origin():
     if request.method in ('POST','PATCH','DELETE'):
         origin=request.headers.get('Origin')
         if origin and urlparse(origin).netloc != request.host: return jsonify(error='Cross-origin request rejected.'),403
-    # Optional protection for a public deployment. Preview and opt-out remain public.
-    password=os.getenv('DASHBOARD_PASSWORD')
-    public_path=request.path.startswith(('/preview/','/unsubscribe/','/static/','/about','/robots.txt','/sitemap.xml','/healthz','/showcase','/enquire')) or (request.path=='/api/enquiries' and request.method=='POST')
-    if password and not public_path:
-        auth=request.authorization
-        if not auth or auth.username!='admin' or auth.password!=password:
-            return Response('Authentication required',401,{'WWW-Authenticate':'Basic realm="Reachmark"'})
 @app.after_request
 def headers(r):
     if request.path=='/' or request.path.startswith(('/api/','/preview/','/unsubscribe/')): r.headers['X-Robots-Tag']='noindex, nofollow'; r.headers['Cache-Control']='no-store'
@@ -90,8 +88,8 @@ def too_big(e): return jsonify(error='File too large. Limit: 3 MB.'),413
 def index(): return render_template('index.html',samples=SAMPLES)
 @app.route('/healthz')
 def healthz():
-    with db() as c: c.execute('SELECT 1').fetchone()
-    return jsonify(status='ok')
+    with db() as c: c.execute('SELECT id FROM leads LIMIT 1').fetchone()
+    return jsonify(status='ok',release=os.getenv('RELEASE_SHA','local'))
 @app.route('/about')
 def about():
     base=settings()['public_base_url'].rstrip('/')
@@ -111,7 +109,7 @@ def sitemap():
 @app.route('/api/state')
 def state():
     with db() as c:
-        leads=[dict(r) for r in c.execute('SELECT * FROM leads ORDER BY created DESC')]
+        leads=[dict(r) for r in c.execute("SELECT l.*,r.verification,r.reviewed_at FROM leads l LEFT JOIN lead_reviews r ON r.lead_id=l.id ORDER BY l.created DESC")]
         activity=[dict(r) for r in c.execute('SELECT * FROM activity ORDER BY id DESC LIMIT 12')]
         sent=c.execute("SELECT count(*) FROM sends WHERE state='sent'").fetchone()[0]
         suppressed=[r[0] for r in c.execute('SELECT email FROM suppression')]
@@ -146,6 +144,7 @@ def update_lead(lid):
         data['status']=classify(data['website'])
         if data['website']!=lead(lid)['website']:
             data.update(audit_status=None,audit_reason=None,http_code=None,checked_at=None)
+            with db() as c:c.execute('DELETE FROM lead_reviews WHERE lead_id=?',(lid,))
     data['updated']=now()
     with db() as c: c.execute('UPDATE leads SET '+','.join(k+'=?' for k in data)+' WHERE id=?',[*data.values(),lid])
     return jsonify(ok=True)
@@ -338,6 +337,12 @@ def send(lid):
         log('error',f'SMTP needs review for {l["name"]}: {type(e).__name__}')
         return jsonify(error=('SMTP rejected the message. Check your provider configuration and credentials before retrying.' if rejected else 'SMTP did not confirm success. Check credentials and your provider’s sent logs. Resending is blocked to avoid duplicates.')),502
 
+from readiness import register_readiness
+register_readiness(app)
+from workflow import register_workflow
+register_workflow(app,db,now,log)
+from documents import register_documents
+register_documents(app,db,now,settings)
 from maps import register_maps
 register_maps(app, db, now, add_lead, CATEGORIES)
 from enquiries import register_enquiries
