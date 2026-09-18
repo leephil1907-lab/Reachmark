@@ -90,13 +90,23 @@ def same_origin():
         if origin and urlparse(origin).netloc != request.host: return jsonify(error='Cross-origin request rejected.'),403
 @app.after_request
 def headers(r):
-    if request.path=='/' or request.path.startswith(('/api/','/preview/','/unsubscribe/')): r.headers['X-Robots-Tag']='noindex, nofollow'; r.headers['Cache-Control']='no-store'
+    if request.path.startswith(('/api/','/preview/','/unsubscribe/','/workspace','/dashboard')): r.headers['X-Robots-Tag']='noindex, nofollow'; r.headers['Cache-Control']='no-store'
     r.headers['X-Content-Type-Options']='nosniff'; r.headers['Referrer-Policy']='strict-origin-when-cross-origin'
     return r
 @app.errorhandler(413)
 def too_big(e): return jsonify(error='File too large. Limit: 3 MB.'),413
 @app.route('/')
-def index(): return render_template('index.html',samples=SAMPLES)
+def home():
+    base=settings()['public_base_url'].rstrip('/')
+    structured={'@context':'https://schema.org','@type':'SoftwareApplication','name':'Reachmark','applicationCategory':'BusinessApplication','operatingSystem':'Web','description':'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.'}
+    if base: structured['url']=base+'/'
+    return render_template('about.html',base=base,structured=structured,samples=SAMPLES)
+@app.route('/workspace')
+def workspace():
+    return render_template('index.html',samples=SAMPLES)
+@app.route('/dashboard')
+def client_dashboard():
+    return render_template('index.html',samples=SAMPLES)
 @app.route('/healthz')
 def healthz():
     with db() as c: c.execute('SELECT id FROM leads LIMIT 1').fetchone()
@@ -105,17 +115,17 @@ def healthz():
 def about():
     base=settings()['public_base_url'].rstrip('/')
     structured={'@context':'https://schema.org','@type':'SoftwareApplication','name':'Reachmark','applicationCategory':'BusinessApplication','operatingSystem':'Web','description':'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.'}
-    if base: structured['url']=base+'/about'
+    if base: structured['url']=base+'/'
     return render_template('about.html',base=base,structured=structured,samples=SAMPLES)
 @app.route('/robots.txt')
 def robots():
-    base=settings()['public_base_url'].rstrip('/')
-    return Response('User-agent: *\nAllow: /about\nAllow: /static/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /$\n'+('Sitemap: '+base+'/sitemap.xml\n' if base else ''),mimetype='text/plain')
+    base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
+    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /static/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
 @app.route('/sitemap.xml')
 def sitemap():
     from xml.sax.saxutils import escape
-    base=settings()['public_base_url'].rstrip('/')
-    entry=''.join('<url><loc>'+escape(base+path)+'</loc></url>' for path in ('/about','/showcase','/enquire')) if base else ''
+    base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
+    entry=''.join('<url><loc>'+escape(base+path)+'</loc></url>' for path in ('/','/about','/showcase','/enquire'))
     return Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+entry+'</urlset>',mimetype='application/xml')
 @app.route('/api/state')
 def state():
@@ -137,7 +147,8 @@ def state():
             suppressed=[r[0] for r in c.execute('SELECT email FROM suppression')]
             enquiry_count=c.execute("SELECT count(*) FROM enquiries WHERE status='New'").fetchone()[0]
             jobs=[dict(r) for r in c.execute('SELECT * FROM jobs ORDER BY created DESC LIMIT 15')]
-    return jsonify(leads=leads,enquiry_count=enquiry_count,jobs=jobs,activity=activity,sent=sent,settings=settings(),categories=list(CATEGORIES),smtp_ready=bool(os.getenv('SMTP_HOST') and os.getenv('SMTP_FROM')),suppressed=suppressed)
+    role='client' if is_client else 'owner' if session.get('owner') else 'none'
+    return jsonify(leads=leads,enquiry_count=enquiry_count,jobs=jobs,activity=activity,sent=sent,settings=settings(),categories=list(CATEGORIES),smtp_ready=bool(os.getenv('SMTP_HOST') and os.getenv('SMTP_FROM')),suppressed=suppressed,role=role)
 @app.route('/api/settings',methods=['POST'])
 def save_settings():
     data=request.get_json() or {}; s={k:str(data.get(k,''))[:1500].strip() for k in DEFAULTS}

@@ -18,7 +18,7 @@ def install_security(app, db):
     with db() as c:c.execute('CREATE TABLE IF NOT EXISTS login_attempts(client TEXT PRIMARY KEY,failures INTEGER,blocked_until REAL)')
     def public():
         p=request.path
-        return p in ('/login','/healthz','/about','/robots.txt','/sitemap.xml','/showcase','/enquire','/signup','/signin','/client-login') or p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/')) or (p=='/api/enquiries' and request.method=='POST') or (p in ('/api/auth/signup','/api/auth/login') and request.method=='POST') or (p=='/api/auth/me' and request.method=='GET')
+        return p in ('/','/login','/healthz','/about','/robots.txt','/sitemap.xml','/showcase','/enquire','/signup','/signin','/client-login') or p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/')) or (p=='/api/enquiries' and request.method=='POST') or (p in ('/api/auth/signup','/api/auth/login') and request.method=='POST') or (p=='/api/auth/me' and request.method=='GET')
     def csrf():
         if 'csrf' not in session:session['csrf']=secrets.token_urlsafe(32)
         return session['csrf']
@@ -94,7 +94,7 @@ def install_security(app, db):
             if valid:
                 with db() as c:c.execute('DELETE FROM login_attempts WHERE client=?',(client,))
                 session.clear();session.permanent=True;session['owner']=True;session['revision']=hashlib.sha256((hashed or legacy).encode()).hexdigest();csrf()
-                return redirect('/')
+                return redirect('/workspace')
             message='Unable to sign in. Check your owner password.'
         return render_template('login.html',message=message)
     @app.post('/logout')

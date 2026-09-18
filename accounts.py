@@ -55,15 +55,19 @@ def register_accounts(app, db, log):
     # Public pages
     @app.get('/signup')
     def signup_page():
-        # If already client logged in, go to portal
+        # If already client logged in, go to their dashboard
         if session.get('client_id'):
-            return redirect('/')
+            return redirect('/dashboard')
+        if session.get('owner'):
+            return redirect('/workspace')
         return render_template('signup.html')
 
     @app.get('/signin')
     def signin_page():
-        if session.get('client_id') or session.get('owner'):
-            return redirect('/')
+        if session.get('client_id'):
+            return redirect('/dashboard')
+        if session.get('owner'):
+            return redirect('/workspace')
         return render_template('client_login.html')
 
     # Also alias /client-login for clarity
@@ -114,7 +118,7 @@ def register_accounts(app, db, log):
         if 'csrf' not in session:
             session['csrf'] = secrets.token_urlsafe(32)
         log('account', f'Client account created: {email}')
-        return jsonify(ok=True, id=uid)
+        return jsonify(ok=True, id=uid),201
 
     @app.post('/api/auth/login')
     def login():

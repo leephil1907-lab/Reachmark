@@ -19,8 +19,10 @@ class ProductionTests(unittest.TestCase):
         with patch.dict(os.environ,{'OWNER_PASSWORD_HASH':hashed}):
             for path in ['/api/state','/api/projects','/api/quality','/api/documents/audit/any.pdf','/api/export']:
                 self.assertEqual(self.client.get(path).status_code,401)
-            self.assertEqual(self.client.get('/').status_code,302)
+            self.assertEqual(self.client.get('/').status_code,200)
             self.assertEqual(self.client.get('/about').status_code,200)
+            self.assertEqual(self.client.get('/workspace').status_code,302)
+            self.assertEqual(self.client.get('/dashboard').status_code,302)
             self.assertEqual(self.client.get('/healthz').status_code,200)
             page=self.client.get('/login').text;csrf=re.search(r'name="csrf_token" value="([^"]+)"',page).group(1)
             self.assertEqual(self.client.post('/login',data={'password':'a-test-password','csrf_token':csrf}).status_code,302)

@@ -66,6 +66,44 @@ function renderHealth(){const filter=$('#health-filter').value;const rows=state.
 setInterval(async()=>{if(!document.hidden&&(state.jobs||[]).some(j=>['running','queued'].includes(j.state))){try{const fresh=await api('/api/state');state.jobs=fresh.jobs;if(!$('.drawer-backdrop.open')&&!$('#page-settings').classList.contains('active')){state=fresh;render()}else renderJobs()}catch{}}},4000);
 window.addEventListener('beforeunload',e=>{if(selected&&($('#email-subject').value!==(selected.subject||'')||$('#email-body').value!==(selected.body||''))){e.preventDefault();e.returnValue=''}});
 
+
+// --- Client vs Owner view: hide owner-only nav for clients, show dashboard ---
+async function applyRoleView(){
+  try{
+    const me = await fetch('/api/auth/me').then(r=>r.json().catch(()=>({})));
+    const role = me.role || 'none';
+    const isClient = role==='client';
+    const ownerOnly = ['global','leads','health','integrations','contracts'];
+    document.querySelectorAll('.nav').forEach(btn=>{
+      const page = btn.dataset.page;
+      if(isClient && ownerOnly.includes(page)){
+        btn.style.display='none';
+      } else {
+        btn.style.display='';
+      }
+    });
+    // If client lands on owner-only page, redirect to dashboard view
+    const hash = location.hash.slice(1);
+    if(isClient && ownerOnly.includes(hash)){
+      navigate('invoices');
+      history.replaceState(null,'','#invoices');
+    }
+    // If client, ensure breadcrumb shows Dashboard
+    if(isClient){
+      const bc=document.getElementById('breadcrumb');
+      if(bc && !bc.textContent.includes('Dashboard')) {
+        // keep Overview as Dashboard for clients
+      }
+    }
+  }catch{}
+}
+originalRefresh = refresh;
+refresh = async function(){
+  const res = await originalRefresh();
+  applyRoleView();
+  return res;
+};
+
 function chooseWorldMix(){const regions=[['Lagos, Nigeria','Accra, Ghana','Nairobi, Kenya'],['London, United Kingdom','Lisbon, Portugal','Berlin, Germany'],['Toronto, Canada','Austin, United States','Vancouver, Canada'],['São Paulo, Brazil','Bogotá, Colombia','Lima, Peru'],['Tokyo, Japan','Mumbai, India','Singapore'],['Sydney, Australia','Auckland, New Zealand','Perth, Australia']];$('#global-locations').value=regions.map(r=>r[Math.floor(Math.random()*r.length)]).join('\n');toast('Six search locations selected across regions. These are search seeds, not business results.');}
 
 // --- Theme + Sidebar fixes (simplify + expand) ---
