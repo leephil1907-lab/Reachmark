@@ -123,7 +123,7 @@ def home():
         ]
     }]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-XXXXXXXXXX'  # placeholder — replace via GOOGLE_ANALYTICS_ID env for real GA verification
-    gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-XXXXXXX'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
+    gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
     return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gtm_id=gtm_id)
 @app.route('/workspace')
 def workspace():
@@ -156,7 +156,7 @@ def about():
         'potentialAction': {'@type':'SearchAction','target': (base or request.url_root.rstrip('/')) + '/showcase?q={search_term_string}', 'query-input':'required name=search_term_string'}
     }]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-XXXXXXXXXX'  # placeholder — replace via GOOGLE_ANALYTICS_ID env for real GA verification
-    gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-XXXXXXX'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
+    gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
     return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gtm_id=gtm_id)
 @app.route('/robots.txt')
 def robots():
