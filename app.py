@@ -41,13 +41,12 @@ with db() as c:
     c.execute("UPDATE jobs SET state='interrupted',message='Server restarted; start a new search to continue.' WHERE state IN ('queued','running')")
 from services import discover_location, audit_website
 from portfolio import SAMPLES
-DEFAULTS={'sender_name':'','agency':'','reply_email':'','postal_address':'','public_base_url':'','offer':'clear, mobile-friendly websites that make it easier for customers to learn about services and get in touch','smartsupp_key':''}
+DEFAULTS={'sender_name':'','agency':'','reply_email':'','postal_address':'','public_base_url':'','offer':'clear, mobile-friendly websites that make it easier for customers to learn about services and get in touch'}
 def settings():
     with db() as c: r=c.execute('SELECT data FROM settings WHERE id=1').fetchone()
     base={**DEFAULTS,**(json.loads(r[0]) if r else {})}
-    # Env takes precedence for public URL and live chat (useful for container secrets)
+    # Env takes precedence for public URL (useful for container secrets)
     if os.getenv('PUBLIC_BASE_URL'): base['public_base_url']=os.environ['PUBLIC_BASE_URL'].rstrip('/')
-    if os.getenv('SMARTSUPP_KEY'): base['smartsupp_key']=os.getenv('SMARTSUPP_KEY').strip()
     return base
 def log(kind, message):
     with db() as c: c.execute('INSERT INTO activity(kind,message,created) VALUES(?,?,?)',(kind,message,now()))
@@ -79,7 +78,7 @@ register_accounts(app,db,log)
 def inject_branding():
     try: s=settings()
     except Exception: s={}
-    return {'smartsupp_key': s.get('smartsupp_key','') or os.getenv('SMARTSUPP_KEY',''), 'app_settings': s}
+    return {'app_settings': s}
 @app.before_request
 def same_origin():
     if request.is_json and request.method in ('POST','PATCH','PUT'):

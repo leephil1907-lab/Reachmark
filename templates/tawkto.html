@@ -1,0 +1,57 @@
+<!-- Tawk.to Live Chat — Reachmark support bubble (no branding, logo avatar, non-intrusive) -->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/6aaca9204636c23448aaa757/default';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+// Customize after load: hide branding, keep bubble small, use site logo as avatar where possible
+Tawk_API.onLoad = function(){
+  try{
+    // Inject style to hide Tawk branding and keep widget from overshadowing content
+    var css = document.createElement('style');
+    css.id = 'tawk-custom-style';
+    css.textContent = [
+      '/* Hide Tawk.to branding */',
+      'a[class*="tawk-branding"], div[class*="tawk-branding"], .tawk-branding { display:none !important; visibility:hidden !important; opacity:0 !important; height:0 !important; pointer-events:none !important; }',
+      '/* Keep chat window bounded so it never covers the whole page */',
+      'iframe[title*="chat widget"], iframe[title*="Tawk"], iframe[src*="tawk.to"] { max-width: 360px !important; max-height: 520px !important; border-radius: 14px !important; }',
+      '@media(max-width:640px){ iframe[title*="chat widget"], iframe[title*="Tawk"], iframe[src*="tawk.to"] { max-width: 94vw !important; max-height: 68vh !important; right: 3vw !important; bottom: 12px !important; } }',
+      '/* Bubble should stay at bottom-right, not center */',
+      '#tawkchat-container { z-index: 9999 !important; }'
+    ].join('\n');
+    document.head.appendChild(css);
+
+    // Try to replace bubble icon with site logo (best-effort; proper avatar is set in Tawk dashboard → Administration → Chat Widget → Appearance → Widget Icon)
+    var tries = 0;
+    var rep = setInterval(function(){
+      tries++;
+      try{
+        // Tawk renders bubble inside iframe, but the launcher button is outside; look for its image
+        var bubble = document.querySelector('[id*="tawk"][id*="chat"] img, .tawk-min-container img, img[src*="tawk"]');
+        if(bubble){
+          // Use site logo as avatar - will be cached by browser
+          bubble.src = '/static/logo-primary.svg';
+          bubble.alt = 'Reachmark support';
+          bubble.style.objectFit = 'contain';
+          bubble.style.background = '#ffffff';
+          bubble.style.borderRadius = '50%';
+          clearInterval(rep);
+        }
+      }catch(e){}
+      if(tries>20) clearInterval(rep);
+    }, 800);
+
+    // Ensure widget is visible but not auto-maximized (only bubble until user clicks)
+    if(Tawk_API.minimize) Tawk_API.minimize();
+  }catch(e){}
+};
+// Optional: keep chat minimized on load, user opens via bubble only
+Tawk_API.onBeforeLoad = function(){
+  // Do not auto-popup; wait for user click
+};
+</script>
