@@ -366,3 +366,11 @@ img, svg, video{ max-width:100%; height:auto; }
 *{ -webkit-tap-highlight-color: transparent; }
 a, button{ touch-action: manipulation; }
 
+/* —— Bright readable — premium but crisp —— */
+body{ color:#0f1a0a !important; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+.card p, .honest p, .carousel-slide p, .banner-sub, .trust-card p, .client-review-card p, .review-form p{ color:#1e2e15 !important; font-weight:500 !important; }
+.figma-card p, .sample-section p, .section-head p{ color:#1e2e15 !important; }
+.eyebrow, .banner-kicker, .public-eyebrow{ color:#1a3310 !important; font-weight:700 !important; }
+h1,h2,h3{ color:#0f1a0a !important; }
+small, .hero-note, .art-caption{ color:#2d4a0a !important; font-weight:600 !important; }
+

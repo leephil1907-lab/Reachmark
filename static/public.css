@@ -21,3 +21,12 @@ body.public-page{background:#ffffff;color:#1a2315}
 .gallery-callout{border-radius:14px;padding:40px;gap:30px}
 .public-footer{border-top:1px solid #eef1e4;padding:32px 6% 45px}
 @media(max-width:700px){.enquiry-layout{padding:35px 0 50px;gap:30px} .sample-gallery{gap:22px}}
+
+/* —— Bright readable — no washed-out text —— */
+body.public-page{ color:#0f1a0a; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+.public-heading h1, .sample-card h3, .enquiry-intro h2{ color:#0f1a0a !important; }
+.public-heading p, .sample-card p, .sample-card-copy p, .enquiry-intro>p, .enquiry-points p, .sample-explainer, .enquiry-points strong{ color:#1e2e15 !important; font-weight:500 !important; }
+.sample-kicker, .public-eyebrow, .sample-card-actions{ color:#1a3310 !important; font-weight:600 !important; }
+.public-links, .public-footer, .public-footer p{ color:#1e2e15 !important; }
+.enquiry-form-shell label{ color:#0f1a0a !important; font-weight:600 !important; }
+
