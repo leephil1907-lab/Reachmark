@@ -260,3 +260,20 @@ nav{ background:#ffffff !important; border-color:#e2e7d6 !important; padding:18p
 /* Footer stays dark for contrast, but world-badge removed */
 .world-footer{ margin-top:80px !important }
 
+
+/* ——— Premium Nav Motion — dynamic, sticky, glass on scroll ——— */
+nav, .public-nav{position:sticky !important; top:0 !important; z-index:50 !important; transition: padding .35s var(--premium-ease), background .35s var(--premium-ease), box-shadow .35s var(--premium-ease), border-color .35s var(--premium-ease), backdrop-filter .35s var(--premium-ease) !important; will-change: padding, background, box-shadow;}
+@keyframes navSlideDown{from{transform:translateY(-100%); opacity:0} to{transform:none; opacity:1}}
+nav, .public-nav{animation: navSlideDown .7s .15s both var(--premium-ease);}
+nav.scrolled, .public-nav.scrolled{padding:14px 6% !important; background:rgba(255,255,255,0.88) !important; backdrop-filter:blur(12px) saturate(1.2) !important; box-shadow:0 8px 32px rgba(32,45,22,.10) !important; border-color:rgba(212,230,184,.7) !important;}
+[data-theme="dark"] nav.scrolled, [data-theme="dark"] .public-nav.scrolled{background:rgba(27,37,24,0.88) !important; box-shadow:0 8px 32px rgba(0,0,0,.28) !important; border-color:#2a3a22 !important;}
+nav .logo, .public-nav .public-logo, .public-nav img{transition: width .35s var(--premium-ease), transform .35s var(--premium-ease);}
+nav.scrolled .logo, .public-nav.scrolled .public-logo{width:170px !important; transform:translateY(0) !important;}
+@media(max-width:640px){ nav.scrolled .logo, .public-nav.scrolled .public-logo{width:150px !important;} }
+.nav-links a, .public-links a{position:relative; transition: color .25s var(--premium-ease), transform .25s var(--premium-ease);}
+.nav-links a::after, .public-links a::after{content:''; position:absolute; left:0; right:0; bottom:-4px; height:1px; background:currentColor; transform:scaleX(0); transform-origin:left; transition:transform .3s var(--premium-ease); opacity:.5;}
+.nav-links a:hover::after, .public-links a:hover::after{transform:scaleX(1);}
+.nav-links a:hover, .public-links a:hover{transform:translateY(-1px);}
+#theme-toggle-public{transition: transform .3s var(--premium-ease), background .3s, border-color .3s;}
+#theme-toggle-public:hover{transform:rotate(15deg) scale(1.05);}
+#theme-toggle-public:active{transform:scale(.95);}

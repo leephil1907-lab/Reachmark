@@ -1,4 +1,4 @@
-<!-- Tawk.to Live Chat — Reachmark support bubble (small preview, not full-page, logo avatar, no branding) -->
+<!-- Tawk.to Live Chat — Reachmark support bubble (ultra-compact preview, not full-page, logo avatar, no branding) -->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
 (function(){
@@ -11,46 +11,39 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 Tawk_API.onLoad = function(){
   try{
-    // Never auto-popup — only bubble until user clicks
     if(Tawk_API.minimize) Tawk_API.minimize();
-    // Inject premium small-preview styles
     var css=document.createElement('style');
     css.id='tawk-custom-style';
     css.textContent=[
       '/* Hide Tawk branding */',
-      'a[class*=\"tawk-branding\"], div[class*=\"tawk-branding\"], .tawk-branding, a[href*=\"tawk.to\"]{display:none !important; visibility:hidden !important; opacity:0 !important; height:0 !important; pointer-events:none !important;}',
+      'a[class*="tawk-branding"], div[class*="tawk-branding"], .tawk-branding, a[href*="tawk.to"]{display:none !important; visibility:hidden !important; opacity:0 !important; height:0 !important; pointer-events:none !important;}',
       '/* Keep launcher bubble small, bottom-right */',
-      '#tawkchat-container{position:fixed !important; z-index:9999 !important; inset:auto 18px 18px auto !important; pointer-events:auto !important;}',
+      '#tawkchat-container{position:fixed !important; z-index:9999 !important; inset:auto 14px 14px auto !important; pointer-events:auto !important;}',
       '#tawkchat-container > div, #tawkchat-minified-wrapper{width:auto !important; height:auto !important; right:0 !important; bottom:0 !important; left:auto !important; top:auto !important;}',
-      /* Chat window as compact card, not fullscreen */
-      'iframe[title*=\"chat\"] , iframe[title*=\"Tawk\"], iframe[src*=\"tawk.to\"], #tawkchat-maximized-wrapper, .tawk-max-container iframe{',
-      '  position:fixed !important; width:360px !important; height:440px !important; max-width:360px !important; max-height:72vh !important;',
-      '  right:18px !important; bottom:18px !important; left:auto !important; top:auto !important;',
+      '/* Chat window as ultra-compact card, not fullscreen — user can still use site */',
+      'iframe[title*="chat"] , iframe[title*="Tawk"], iframe[src*="tawk.to"], #tawkchat-maximized-wrapper, .tawk-max-container iframe{',
+      '  position:fixed !important; width:320px !important; height:380px !important; max-width:320px !important; max-height:60vh !important;',
+      '  right:14px !important; bottom:14px !important; left:auto !important; top:auto !important;',
       '  border-radius:16px !important; box-shadow:0 18px 48px rgba(16,24,12,.24), 0 4px 18px rgba(16,24,12,.12) !important;',
       '  border:1px solid #e2e7d6 !important; overflow:hidden !important; margin:0 !important;',
       '}',
-      /* No full-page overlay backdrop */
-      'div[id*=\"tawk\"][style*=\"position: fixed\"][style*=\"inset: 0\"], div[style*=\"background: rgba(0,0,0\"]{display:none !important;}',
+      'div[id*="tawk"][style*="position: fixed"][style*="inset: 0"], div[style*="background: rgba(0,0,0"]{display:none !important;}',
       '@media(max-width:640px){',
-      '  iframe[title*=\"chat\"], iframe[title*=\"Tawk\"], iframe[src*=\"tawk.to\"], #tawkchat-maximized-wrapper, .tawk-max-container iframe{',
-      '    width:92vw !important; height:58vh !important; max-height:62vh !important; right:4vw !important; bottom:12px !important; left:auto !important;',
+      '  iframe[title*="chat"], iframe[title*="Tawk"], iframe[src*="tawk.to"], #tawkchat-maximized-wrapper, .tawk-max-container iframe{',
+      '    width:88vw !important; height:52vh !important; max-height:56vh !important; right:6vw !important; bottom:10px !important; left:auto !important;',
       '  }',
-      '  #tawkchat-container{ right:12px !important; bottom:12px !important;}',
+      '  #tawkchat-container{ right:10px !important; bottom:10px !important;}',
       '}',
-      /* Ensure site stays scrollable/interactive behind chat */
       'html.tawk-open, body.tawk-open{overflow:auto !important; height:auto !important;}',
-      '/* Launcher button refinement */',
-      '.tawk-button, [id*=\"tawk\"][id*=\"launcher\"]{box-shadow:0 8px 24px rgba(16,24,12,.18) !important; border-radius:999px !important;}'
+      '.tawk-button, [id*="tawk"][id*="launcher"]{box-shadow:0 8px 24px rgba(16,24,12,.18) !important; border-radius:999px !important;}'
     ].join('\n');
     document.head.appendChild(css);
-    // Try to use site logo as avatar inside bubble (Tawk dashboard Appearance → Widget Icon is the official way; this is best-effort DOM swap)
     var tries=0; var rep=setInterval(function(){
       tries++;
       try{
-        var imgs=document.querySelectorAll('img[src*=\"tawk\"]');
+        var imgs=document.querySelectorAll('img[src*="tawk"]');
         for(var i=0;i<imgs.length;i++){
           var im=imgs[i];
-          // Only replace tiny launcher icons, not chat avatars
           if(im.width<80 && im.height<80){
             im.src='/static/logo-primary.svg';
             im.alt='Reachmark';
@@ -60,15 +53,13 @@ Tawk_API.onLoad = function(){
             im.style.padding='4px';
           }
         }
-        // Also try to find launcher container background
-        var launcher=document.querySelector('[id*=\"tawk\"][id*=\"launcher\"], .tawk-min-container');
+        var launcher=document.querySelector('[id*="tawk"][id*="launcher"], .tawk-min-container');
         if(launcher){ launcher.style.background='#d5f268'; }
       }catch(e){}
       if(tries>18) clearInterval(rep);
     }, 700);
-    // Keep page interactive: remove any overlay that blocks clicks
     var obs=new MutationObserver(function(){
-      document.querySelectorAll('div[style*=\"z-index: 100000\"]', 'div[style*=\"inset: 0\"]').forEach(function(el){
+      document.querySelectorAll('div[style*="z-index: 100000"]', 'div[style*="inset: 0"]').forEach(function(el){
         var s=(el.getAttribute('style')||'');
         if(s.includes('inset: 0') && s.includes('position: fixed') && el.querySelector('iframe')===null){
           el.style.display='none';
@@ -79,5 +70,5 @@ Tawk_API.onLoad = function(){
     try{ obs.observe(document.body,{childList:true, subtree:true}); }catch(e){}
   }catch(e){}
 };
-Tawk_API.onBeforeLoad = function(){ /* no auto popup */ };
+Tawk_API.onBeforeLoad = function(){};
 </script>

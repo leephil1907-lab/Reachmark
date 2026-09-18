@@ -19,6 +19,23 @@
       btn.textContent=isDark?'☾':'◐';
       btn.addEventListener('click', window.toggleTheme);
     }
+    // nav dynamic motion: sticky glass on scroll
+    const navEl=document.querySelector('nav, .public-nav');
+    if(navEl){
+      let tick=false;
+      const onNavScroll=()=>{
+        if(!tick){
+          requestAnimationFrame(()=>{
+            if(window.scrollY>18) navEl.classList.add('scrolled');
+            else navEl.classList.remove('scrolled');
+            tick=false;
+          });
+          tick=true;
+        }
+      };
+      window.addEventListener('scroll', onNavScroll, {passive:true});
+      onNavScroll();
+    }
     // motion: reveal on scroll
     const els=document.querySelectorAll('.hero, .ribbon, .features .card, .honest, .sample-card, .enquiry-layout, .cta');
     els.forEach((el,i)=>{el.style.opacity='0'; el.style.transform='translateY(14px)'; el.style.transition='opacity .6s ease, transform .6s cubic-bezier(.16,1,.3,1)'; el.style.transitionDelay=(i%3*80)+'ms'});
