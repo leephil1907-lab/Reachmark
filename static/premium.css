@@ -61,13 +61,59 @@ html{ scroll-behavior:smooth; }
 
 /* Premium illustration for hero */
 .hero-illustration{ position:absolute; right:-10px; top:-10px; width:120px; height:120px; opacity:.08; pointer-events:none; }
+
+/* Trustpilot — world-class social proof */
+.trustpilot-section{ background:#fcfdf8; border:1px solid #eef1e4; border-radius:16px; padding:42px; margin:70px 0 60px; box-shadow:0 8px 32px rgba(32,45,22,.06); }
+.trustpilot-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:30px; margin-bottom:32px; }
+.trustpilot-badge{ display:flex; align-items:center; gap:14px; background:#fff; border:1px solid #e2e7d6; border-radius:12px; padding:14px 18px; box-shadow:0 4px 16px rgba(32,45,22,.06); }
+.trustpilot-badge .tp-logo{ font:800 18px 'Manrope',sans-serif; letter-spacing:-.5px; color:#00b67a; display:flex; align-items:center; gap:8px; }
+.trustpilot-badge .tp-logo span{ color:#191919; }
+.trustpilot-badge .tp-stars{ display:flex; gap:3px; }
+.trustpilot-badge .tp-stars span{ width:22px; height:22px; background:#00b67a; color:#fff; display:grid; place-items:center; font-size:12px; border-radius:3px; }
+.trustpilot-meta{ font-size:10px; color:#6b7a5a; line-height:1.6; }
+.trustpilot-meta strong{ color:#1e2e15; font-size:13px; }
+.trustpilot-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.trust-card{ background:#fff; border:1px solid #eef1e4; border-radius:12px; padding:24px; transition: transform .3s var(--premium-ease), box-shadow .3s; }
+.trust-card:hover{ transform:translateY(-4px); box-shadow:0 12px 28px rgba(32,45,22,.08); }
+.trust-card .stars{ color:#00b67a; font-size:13px; letter-spacing:1px; margin-bottom:12px; }
+.trust-card p{ font-size:11px; line-height:1.8; color:#5a6b4d; margin:0 0 16px; min-height:72px; }
+.trust-card .author{ display:flex; align-items:center; gap:12px; border-top:1px solid #eef1e4; padding-top:14px; }
+.trust-card .avatar{ width:36px; height:36px; border-radius:50%; background:#f0f5e0; border:1px solid #dfe9cc; display:grid; place-items:center; font:600 12px 'Manrope',sans-serif; color:#6b7a5a; }
+.trust-card .author strong{ font-size:11px; color:#1e2e15; display:block; }
+.trust-card .author small{ font-size:9px; color:#8a9976; }
+.trustpilot-foot{ text-align:center; margin-top:22px; font-size:9px; color:#a8b39b; }
+
+/* World-class footer */
+.world-footer{ background:#0f1510; color:#e6e9dd; margin-top:80px; border-top:1px solid #1e2a1c; }
+.world-footer-inner{ max-width:1280px; margin:auto; padding:50px 6% 30px; }
+.footer-top{ display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:40px; padding-bottom:40px; border-bottom:1px solid #1e2a1c; }
+.footer-brand .footer-logo{ width:160px; filter:brightness(1.2); margin-bottom:16px; display:block; }
+.footer-brand p{ font-size:11px; line-height:1.8; color:#9aa38e; max-width:320px; margin:0 0 18px; }
+.footer-brand .world-badge{ display:inline-flex; align-items:center; gap:8px; background:#1a2315; border:1px solid #2a3a22; color:#d5f268; padding:8px 12px; border-radius:20px; font-size:8px; letter-spacing:.6px; }
+.footer-brand .world-badge span{ width:8px; height:8px; border-radius:50%; background:#d5f268; }
+.footer-col h4{ font:600 11px 'Manrope',sans-serif; letter-spacing:1px; color:#e6e9dd; margin:0 0 18px; text-transform:uppercase; }
+.footer-col a{ display:block; font-size:11px; line-height:2.2; color:#9aa38e; transition:color .2s; }
+.footer-col a:hover{ color:#d5f268; }
+.footer-bottom{ display:flex; justify-content:space-between; align-items:center; gap:20px; padding:22px 0 0; font-size:9px; color:#6b7a5a; flex-wrap:wrap; }
+.footer-bottom .legal{ display:flex; gap:18px; flex-wrap:wrap; }
+.footer-bottom .legal a{ color:#8a9a7a; }
+.footer-social{ display:flex; gap:10px; }
+.footer-social a{ width:32px; height:32px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:12px; transition: all .2s; }
+.footer-social a:hover{ background:#d5f268; color:#0f1510; border-color:#cbe85b; }
+
 @media(max-width:900px){
   .carousel-slide{ grid-template-columns:1fr; padding:30px; gap:26px; }
   .carousel-mock img{ max-width:100%; transform:none !important; }
   .figma-grid{ grid-template-columns:1fr 1fr; }
+  .trustpilot-grid{ grid-template-columns:1fr; }
+  .footer-top{ grid-template-columns:1fr 1fr; gap:30px; }
 }
 @media(max-width:640px){
   .figma-grid{ grid-template-columns:1fr; }
   .carousel-3d-hero img{ height:280px; }
   .carousel-3d-hero .hero-overlay{ padding:20px; }
+  .trustpilot-section{ padding:28px 20px; }
+  .trustpilot-head{ flex-direction:column; }
+  .footer-top{ grid-template-columns:1fr; }
+  .world-footer-inner{ padding:40px 6% 24px; }
 }
