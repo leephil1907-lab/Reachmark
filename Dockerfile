@@ -7,8 +7,7 @@ COPY *.py ./
 COPY scripts ./scripts
 COPY templates ./templates
 COPY static ./static
-RUN useradd --uid 10001 --create-home appuser && mkdir -p /data /backups && chown appuser:appuser /data /backups
-USER appuser
+RUN mkdir -p /data /backups
 ARG RELEASE_SHA=local
 ENV RELEASE_SHA=$RELEASE_SHA DATABASE_PATH=/data/reachmark.sqlite3 PORT=8000
 EXPOSE 8000
