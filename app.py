@@ -32,7 +32,8 @@ with db() as c:
     CREATE TABLE IF NOT EXISTS sends (id TEXT PRIMARY KEY, lead_id TEXT, recipient TEXT, state TEXT, error TEXT, created TEXT);
     CREATE TABLE IF NOT EXISTS suppression (email TEXT PRIMARY KEY, created TEXT);
     CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY,state TEXT,locations TEXT,category TEXT,progress INTEGER,total INTEGER,added INTEGER,checked INTEGER,message TEXT,created TEXT,updated TEXT);
-    CREATE TABLE IF NOT EXISTS optout_links (token TEXT PRIMARY KEY, email TEXT NOT NULL);''')
+    CREATE TABLE IF NOT EXISTS optout_links (token TEXT PRIMARY KEY, email TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS client_reviews (id TEXT PRIMARY KEY, name TEXT NOT NULL, business TEXT, rating INTEGER NOT NULL, text TEXT NOT NULL, created TEXT NOT NULL, approved INTEGER DEFAULT 1);''')
 # Non-destructive migrations for earlier workspaces.
 with db() as c:
     columns={r[1] for r in c.execute('PRAGMA table_info(leads)')}
@@ -383,5 +384,41 @@ from enquiries import register_enquiries
 register_enquiries(app, db, now, log)
 from operations import register_operations
 register_operations(app, db, now, log)
+
+
+# Client reviews — leave a review for good job done
+@app.route('/api/client-reviews', methods=['GET'])
+def list_client_reviews():
+    with db() as c:
+        rows = [dict(r) for r in c.execute('SELECT * FROM client_reviews WHERE approved=1 ORDER BY created DESC LIMIT 50')]
+    return jsonify(rows)
+
+@app.route('/api/client-reviews', methods=['POST'])
+def create_client_review():
+    d = request.get_json() or {}
+    name = str(d.get('name','')).strip()[:80]
+    business = str(d.get('business','')).strip()[:120]
+    rating = d.get('rating')
+    text = str(d.get('text','')).strip()[:800]
+    if not name or not text or not isinstance(rating, int) or rating not in (1,2,3,4,5):
+        return jsonify(error='Name, 1-5 rating and review text are required.'), 400
+    if len(text) < 12:
+        return jsonify(error='Review text should be at least 12 characters.'), 400
+    rid = __import__('uuid').uuid4().hex
+    created = now()
+    with db() as c:
+        c.execute('INSERT INTO client_reviews VALUES(?,?,?,?,?,?,1)', (rid, name, business, rating, text, created))
+    log('review', f'New client review from {name} ({rating}★)')
+    return jsonify(ok=True, id=rid), 201
+
+@app.route('/reviews')
+def reviews_page():
+    base=settings()['public_base_url'].rstrip('/')
+    structured={'@context':'https://schema.org','@type':'CollectionPage','name':'Client Reviews — Reachmark'}
+    if base: structured['url']=base+'/reviews'
+    with db() as c:
+        revs=[dict(r) for r in c.execute('SELECT * FROM client_reviews WHERE approved=1 ORDER BY created DESC LIMIT 50')]
+    return render_template('about.html', base=base, structured=structured, samples=SAMPLES, client_reviews=revs)
+
 
 if __name__=='__main__': app.run(host='0.0.0.0',port=int(os.getenv('PORT','8000')),debug=False)

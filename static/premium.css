@@ -117,3 +117,81 @@ html{ scroll-behavior:smooth; }
   .footer-top{ grid-template-columns:1fr; }
   .world-footer-inner{ padding:40px 6% 24px; }
 }
+
+/* Reachmark Banner Carousel — 3 professional ad banners, live switching */
+.banner-carousel{ position:relative; max-width:1280px; margin:18px auto 0; padding:0 6%; }
+.banner-viewport{ overflow:hidden; border-radius:18px; border:1px solid #eef1e4; background:#ffffff; box-shadow:0 18px 48px rgba(32,45,22,.09); }
+.banner-track{ display:flex; transition: transform .75s cubic-bezier(.16,1,.3,1); will-change:transform; }
+.banner-slide{ min-width:100%; display:grid; grid-template-columns:1.15fr .95fr; gap:30px; align-items:center; padding:38px 44px; position:relative; overflow:hidden; }
+.banner-slide::before{ content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 70% 50%, rgba(213,242,104,.18) 0%, transparent 55%), linear-gradient(135deg, #f7f9f0 0%, #ffffff 55%); pointer-events:none; }
+.banner-copy{ position:relative; z-index:1; }
+.banner-kicker{ font-size:8px; letter-spacing:1.6px; color:#8c9c77; display:flex; align-items:center; gap:8px; font-weight:600; }
+.banner-kicker span{ width:22px; height:1px; background:#a7b68e; }
+.banner-slide h2{ font:800 clamp(28px,3.4vw,38px)/1.08 'Manrope',sans-serif; letter-spacing:-1.4px; color:#1e2e15; margin:16px 0 14px; }
+.banner-slide h2 em{ font-style:normal; color:#8ca650; }
+.banner-slide .banner-sub{ font-size:12px; line-height:1.8; color:#6b7a5a; max-width:480px; margin:0 0 20px; }
+.banner-ctas{ display:flex; gap:12px; flex-wrap:wrap; }
+.banner-ctas a{ display:inline-flex; align-items:center; gap:8px; padding:12px 18px; border-radius:8px; font:600 11px 'Manrope',sans-serif; transition: all .2s; text-decoration:none; }
+.banner-ctas .primary{ background:#1a2315; color:#eaf3de; border:1px solid #263321; }
+.banner-ctas .primary:hover{ background:#263321; transform:translateY(-1px); box-shadow:0 8px 20px rgba(32,45,22,.15); }
+.banner-ctas .ghost{ background:#d5f268; color:#1e2e15; border:1px solid #cbe85b; }
+.banner-ctas .ghost:hover{ background:#c7e55b; transform:translateY(-1px); }
+.banner-proof{ display:flex; align-items:center; gap:10px; margin-top:18px; font-size:9px; color:#8a9976; flex-wrap:wrap; }
+.banner-proof span{ display:inline-flex; align-items:center; gap:6px; background:#f0f5e0; border:1px solid #dfe9cc; padding:6px 10px; border-radius:20px; }
+.banner-visual{ position:relative; z-index:1; display:grid; place-items:center; perspective:1000px; }
+.banner-visual img{ width:100%; max-width:560px; height:360px; object-fit:cover; border-radius:14px; box-shadow:0 28px 60px rgba(32,45,22,.16), 0 8px 20px rgba(32,45,22,.1); transform: rotateY(-6deg) rotateX(3deg); transition: transform .6s var(--premium-ease); border:1px solid #eef1e4; }
+.banner-slide:hover .banner-visual img{ transform: rotateY(-3deg) rotateX(1deg) translateY(-4px); }
+.banner-visual::after{ content:''; position:absolute; inset:auto 8% -14px 8%; height:22px; background:radial-gradient(ellipse at center, rgba(32,45,22,.13) 0%, transparent 70%); filter:blur(6px); }
+.banner-nav{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:16px; padding:0 4px; }
+.banner-dots{ display:flex; gap:8px; }
+.banner-dots button{ width:8px; height:8px; border-radius:50%; border:1px solid #d2d8c7; background:#eef1e4; cursor:pointer; transition: all .3s; }
+.banner-dots button.active{ width:26px; border-radius:20px; background:#d5f268; border-color:#cbe85b; }
+.banner-arrows{ display:flex; gap:10px; }
+.banner-arrows button{ width:40px; height:40px; border-radius:10px; border:1px solid #e2e7d6; background:#fff; display:grid; place-items:center; cursor:pointer; font-size:18px; transition: all .2s; }
+.banner-arrows button:hover{ background:#f7f9f0; transform:translateY(-1px); box-shadow:0 6px 16px rgba(32,45,22,.08); }
+.banner-badge{ position:absolute; top:18px; right:18px; z-index:2; background:rgba(255,255,255,.92); backdrop-filter:blur(8px); border:1px solid #e2e7d6; padding:7px 10px; border-radius:20px; font-size:7px; letter-spacing:.5px; color:#6b7a5a; display:flex; align-items:center; gap:6px; }
+.banner-badge span{ width:7px; height:7px; border-radius:50%; background:#d5f268; border:1px solid #cbe85b; }
+
+/* Review column — leave a review for good job done */
+.review-section{ background:#fcfdf8; border:1px solid #eef1e4; border-radius:16px; padding:42px; margin:70px 0 60px; box-shadow:0 8px 32px rgba(32,45,22,.06); }
+.review-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:30px; margin-bottom:32px; flex-wrap:wrap; }
+.review-head h2{ font:600 30px/1.15 'Manrope',sans-serif; letter-spacing:-1.2px; color:#1e2e15; margin:12px 0 8px; }
+.review-head p{ font-size:11px; line-height:1.8; color:#8a9976; max-width:460px; margin:0; }
+.review-grid{ display:grid; grid-template-columns:1.15fr .85fr; gap:28px; align-items:start; }
+.review-list{ display:grid; gap:14px; }
+.client-review-card{ background:#fff; border:1px solid #eef1e4; border-radius:12px; padding:20px; }
+.client-review-card .stars{ color:#00b67a; font-size:12px; letter-spacing:1px; margin-bottom:10px; }
+.client-review-card p{ font-size:11px; line-height:1.7; color:#5a6b4d; margin:0 0 12px; }
+.client-review-card .meta{ display:flex; justify-content:space-between; align-items:center; font-size:9px; color:#8a9976; border-top:1px solid #eef1e4; padding-top:12px; }
+.review-form{ background:#fff; border:1px solid #eef1e4; border-radius:14px; padding:26px; box-shadow:0 6px 20px rgba(32,45,22,.06); position:sticky; top:24px; }
+.review-form h3{ font:600 16px 'Manrope',sans-serif; margin:0 0 6px; color:#1e2e15; }
+.review-form > p{ font-size:10px; color:#8a9976; line-height:1.6; margin:0 0 18px; }
+.review-form label{ font-size:10px; font-weight:600; color:#3a4a2a; display:block; margin:14px 0 6px; }
+.review-form input, .review-form textarea{ width:100%; background:#fcfdf8; border:1px solid #dfe9cc; border-radius:8px; padding:11px 12px; font:11px 'DM Sans',sans-serif; color:#1e2e15; outline:none; transition: border .2s, box-shadow .2s; }
+.review-form input:focus, .review-form textarea:focus{ border-color:#8ca650; box-shadow:0 0 0 3px rgba(140,166,80,.14); background:#fff; }
+.review-form textarea{ min-height:92px; resize:vertical; }
+.star-input{ display:flex; gap:6px; margin:6px 0 4px; }
+.star-input button{ width:36px; height:36px; border-radius:8px; border:1px solid #e2e7d6; background:#fcfdf8; cursor:pointer; font-size:16px; color:#c2cdb4; transition: all .15s; }
+.star-input button.active{ background:#00b67a; color:#fff; border-color:#00a36d; transform:translateY(-1px); }
+.star-input button:hover{ border-color:#00b67a; color:#00b67a; }
+.review-form .submit{ width:100%; background:#1a2315; color:#eaf3de; border:1px solid #263321; padding:13px 18px; border-radius:8px; font:600 11px 'Manrope',sans-serif; cursor:pointer; margin-top:16px; transition: all .2s; }
+.review-form .submit:hover{ background:#263321; transform:translateY(-1px); box-shadow:0 8px 18px rgba(32,45,22,.12); }
+.review-form .submit:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+.review-toast{ margin-top:12px; padding:10px 12px; border-radius:8px; font-size:10px; display:none; }
+.review-toast.ok{ background:#e6f5ec; border:1px solid #c8e6d6; color:#1e3a2d; }
+.review-toast.err{ background:#fef0e6; border:1px solid #ffdac1; color:#7a3a15; }
+.sample-gallery{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+@media(max-width:900px){
+  .banner-slide{ grid-template-columns:1fr; padding:30px; gap:24px; }
+  .banner-visual img{ height:280px; transform:none !important; }
+  .review-grid{ grid-template-columns:1fr; }
+  .review-form{ position:static; }
+  .sample-gallery{ grid-template-columns:1fr 1fr; }
+}
+@media(max-width:640px){
+  .banner-slide{ padding:24px; }
+  .banner-slide h2{ font-size:30px; }
+  .banner-visual img{ height:220px; }
+  .review-section{ padding:28px 20px; }
+  .sample-gallery{ grid-template-columns:1fr; }
+}
