@@ -1,1 +1,67 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/production.css"><style>body.auth-page{background:#f8f9f3}</style></head><body class="auth-page"><main class="auth-card"><a href="/" class="auth-brand" aria-label="Reachmark home"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:38px;width:auto;display:block;margin-bottom:22px"></a><h1 style="margin-top:0">Sign in</h1>{% if message %}<p role="alert" class="auth-error">{{message}}</p>{% endif %}<form method="post"><input type="hidden" name="csrf_token" value="{{csrf_token()}}"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="1024" required autofocus placeholder="Enter your password"><button type="submit">Continue →</button></form><p class="auth-note" style="margin-top:18px;text-align:center">Need a website? <a href="/enquire">Get an estimate</a></p></main></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><style>
+*{box-sizing:border-box}body{margin:0;font-family:'Manrope',Arial,sans-serif;background:#eef6d1;color:#1a2315;min-height:100vh;display:grid;place-items:center;padding:24px}
+a{color:inherit}
+.auth-shell{width:min(1020px,100%);display:grid;grid-template-columns:1.05fr .95fr;background:#fff;border:1px solid #e2e7d6;border-radius:24px;overflow:hidden;box-shadow:0 24px 64px rgba(16,24,12,.12);min-height:560px}
+.brand{position:relative;background:#0f1a0a;color:#eaf3de;padding:44px 40px;display:flex;flex-direction:column;overflow:hidden}
+.brand::before{content:'';position:absolute;inset:-40px;background:radial-gradient(ellipse at 30% 20%, #d5f268 0%, transparent 55%),radial-gradient(ellipse at 80% 85%, #2d4a0a 0%, transparent 50%);opacity:.28;pointer-events:none}
+.brand .logo{position:relative;display:inline-flex;align-items:center;gap:10px;text-decoration:none}
+.brand .logo img{height:34px;filter:brightness(0) invert(1)}
+.brand .eyebrow{position:relative;margin-top:36px;font:600 9px 'Manrope',sans-serif;letter-spacing:1.6px;color:#d5f268;display:flex;align-items:center;gap:8px}
+.brand .eyebrow::before{content:'';width:18px;height:1px;background:#d5f268;opacity:.7}
+.brand h1{position:relative;font:700 32px/1.05 'Manrope',sans-serif;letter-spacing:-1.2px;margin:14px 0 14px;max-width:360px}
+.brand h1 span{color:#d5f268}
+.brand p{position:relative;font:400 13px/1.7 'Manrope',sans-serif;color:#9db48f;max-width:360px;margin:0}
+.art{position:relative;margin:28px 0 0;width:100%;aspect-ratio:1.15;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;display:grid;place-items:center;overflow:hidden}
+.art svg{width:72%;height:72%}
+.art-label{position:absolute;left:14px;bottom:14px;background:#ffffff;border:1px solid #e2e7d6;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;font:600 10px 'Manrope',sans-serif;color:#0f1a0a;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.art-label span{width:28px;height:28px;border-radius:8px;background:#eef6d1;display:grid;place-items:center;color:#3a7a0a;font-size:14px}
+.trust{position:relative;margin-top:auto;display:flex;align-items:center;gap:10px;padding:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px}
+.trust .stars{color:#d5f268;letter-spacing:1px;font-size:11px}
+.trust strong{font:700 12px 'Manrope',sans-serif;color:#eaf3de}
+.trust small{font:500 10px 'Manrope',sans-serif;color:#8aa07a}
+.form{padding:44px 42px;display:flex;flex-direction:column;justify-content:center;background:#ffffff}
+.form .top{margin-bottom:18px}
+.form .eyebrow{font:600 9px 'Manrope',sans-serif;letter-spacing:1.4px;color:#8c9c77;display:flex;align-items:center;gap:7px}
+.form .eyebrow::before{content:'';width:14px;height:1px;background:#a7b68e}
+.form h2{font:700 28px 'Manrope',sans-serif;letter-spacing:-1px;margin:10px 0 8px;color:#0f1a0a}
+.form p.lead{font:400 12px/1.6 'Manrope',sans-serif;color:#6b7a5a;margin:0 0 6px}
+.auth-error{background:#f9e7e1;border:1px solid #e9c9bf;color:#8b3524;padding:12px;border-radius:10px;font:600 12px 'Manrope',sans-serif;margin:16px 0}
+label{font:700 11px 'Manrope',sans-serif;letter-spacing:.3px;color:#1a2315;margin:18px 0 7px;display:block}
+input[type=password],input[type=text],input[type=email]{width:100%;padding:14px 16px;border:1px solid #dfe8cc;border-radius:12px;background:#fcfcf8;font:500 14px 'Manrope',sans-serif;color:#1a2315;outline:none;transition:border .2s, box-shadow .2s}
+input:focus{border-color:#cbe85b;box-shadow:0 0 0 4px rgba(213,242,104,.28);background:#fff}
+button[type=submit]{width:100%;margin-top:20px;padding:14px;background:#0f1a0a;color:#eaf3de;border:1px solid #1a3310;border-radius:12px;font:700 13px 'Manrope',sans-serif;cursor:pointer;transition:transform .15s, background .15s, box-shadow .15s}
+button[type=submit]:hover{background:#1a2a12;transform:translateY(-1px);box-shadow:0 8px 20px rgba(16,24,12,.12)}
+.auth-note{font:500 11px 'Manrope',sans-serif;color:#8a9976;margin-top:16px;text-align:center;line-height:1.6}
+.auth-note a{color:#1a3310;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.meta{margin-top:22px;display:flex;justify-content:space-between;align-items:center;font:500 10px 'Manrope',sans-serif;color:#8a9976;gap:12px;flex-wrap:wrap}
+.meta span{display:inline-flex;align-items:center;gap:6px}
+.meta b{font-weight:700;color:#3a7a0a}
+@media(max-width:860px){.auth-shell{grid-template-columns:1fr;max-width:520px}.brand{padding:32px 28px}.art{display:none}.form{padding:32px 26px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="auth-shell">
+  <div class="brand">
+    <a href="/" class="logo" aria-label="Reachmark home"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:32px;filter:none"><span style="position:absolute;left:-9999px">Reachmark</span></a>
+    <div class="eyebrow">OWNER WORKSPACE · PRIVATE</div>
+    <h1>Your workspace,<br><span>secured.</span></h1>
+    <p>One focused studio — leads, previews, outreach, invoices. Sign in to continue where you left off.</p>
+    <div class="art" aria-hidden="true">
+      <svg viewBox="0 0 320 320"><g fill="none" stroke="#4d6a38" stroke-width=".7"><circle cx="160" cy="160" r="118"/><ellipse cx="160" cy="160" rx="58" ry="118"/><ellipse cx="160" cy="160" rx="98" ry="118"/><ellipse cx="160" cy="160" rx="118" ry="40"/><ellipse cx="160" cy="160" rx="118" ry="88"/><path d="M42 160h236M160 42v236"/></g><path d="M78 110Q130 50 210 88M78 110Q60 200 128 232M210 88Q250 145 230 210" fill="none" stroke="#d5f268" stroke-width="1.5" stroke-dasharray="3 4"/><g fill="#d5f268"><circle cx="78" cy="110" r="4.5"/><circle cx="210" cy="88" r="4.5"/><circle cx="128" cy="232" r="4.5"/><circle cx="230" cy="210" r="4.5"/></g></svg>
+      <div class="art-label"><span>◎</span> Global discovery → 1 workspace</div>
+    </div>
+    <div class="trust"><span class="stars">★★★★★</span><div><strong>4.8/5 · Owner trusted</strong><br><small>Secure session · 8h · Strict SameSite</small></div><span style="margin-left:auto;background:#d5f268;color:#0f1a0a;font:700 9px 'Manrope',sans-serif;padding:6px 8px;border-radius:20px">PRIVATE</span></div>
+  </div>
+  <div class="form">
+    <div class="top"><div class="eyebrow">SIGN IN · OWNER</div><h2>Welcome back.</h2><p class="lead">Enter your owner password to access the workspace. Client logins are separate — clients use <a href="/signin">/signin</a>.</p></div>
+    {% if message %}<p role="alert" class="auth-error">{{message}}</p>{% endif %}
+    <form method="post" autocomplete="off">
+      <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+      <label for="password">Owner password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" maxlength="1024" required autofocus placeholder="••••••••••••">
+      <button type="submit">Enter workspace →</button>
+    </form>
+    <p class="auth-note">Client? <a href="/signin">Sign in to client portal</a> · Need a site? <a href="/enquire">Get an estimate</a> · <a href="/">About Reachmark</a></p>
+    <div class="meta"><span><b>◎</b> Global lead finder</span><span><b>⌁</b> Health checks</span><span><b>↗</b> Live previews</span></div>
+  </div>
+</div>
+</body></html>

@@ -22,7 +22,7 @@ Your premium site is **untouched** — `templates/about.html` (Founder story + p
 
 ## 4) Mail outbox & 9 branded templates
 - Table `mail_outbox(id, to_email, subject, body, html, created, state)` — queued when `SMTP_HOST`/`SMTP_FROM` missing or send fails. Seen at `GET /api/outbox` (owner), detail `GET /api/outbox/<id>`, resend `POST /api/outbox/<id>/resend` (uses live SMTP).
-- Branded HTML helper `branded_html(title, body, cta)` — white card, Reachmark header, lime CTA (`#0f1a0a`/`#d5f268`), footer `Lagos → Global`.
+- Branded HTML helper `branded_html(title, body, cta)` — white card, Reachmark header, lime CTA (`#0f1a0a`/`#d5f268`), footer `Global`.
 - `GET /api/mail-templates` — 9 templates: welcome, verify_success, reset_request, reset_done, enquiry_received, enquiry_owner, preview_shared, invoice_sent, project_update — matches Reachmark count.
 
 ## 5) Deploy check & config verifier
@@ -47,7 +47,7 @@ Your premium site is **untouched** — `templates/about.html` (Founder story + p
 - Responsive audit: 0 issues.
 
 ## What wasn’t touched
-- `templates/about.html` — Founder (grid, avatar A, Lagos→Global, signature) + Pricing (3 tiers) + hero + premium.css + tawk config + SEO (ClnMo7..., G-CPSB1EDNFE, GT-M6XWG99J, GTM-M3SJZ8S7, sitemap 12) — all byte-identical.
+- `templates/about.html` — Founder (grid, avatar R, Global, signature) + Pricing (3 tiers) + hero + premium.css + tawk config + SEO (ClnMo7..., G-CPSB1EDNFE, GT-M6XWG99J, GTM-M3SJZ8S7, sitemap 12) — all byte-identical.
 - No demo leads, no invented metrics, no MCP, no SmartSup, real OSM+CSV, real SMTP.
 
 ## Next (optional, not required now)

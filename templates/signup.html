@@ -1,12 +1,86 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create client account · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/production.css"><style>.auth-page{margin:0;background:#e9edde;color:#26351e;min-height:100vh;display:grid;place-items:center;font-family:Manrope,Arial,sans-serif}.auth-card{box-sizing:border-box;width:min(480px,calc(100% - 32px));padding:40px;background:#fff;border:1px solid #d2d8c7;border-radius:22px;box-shadow:0 22px 70px #24311b10}.auth-brand{font-size:25px;font-weight:800;color:#26351e;text-decoration:none}.auth-card h1{font-size:32px;letter-spacing:-1.2px;margin:14px 0 8px}.auth-card p{line-height:1.7;color:#535f4c;font-size:14px}.auth-card label{display:block;margin:14px 0 6px;font-weight:600;font-size:13px}.auth-card input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #a1ad95;border-radius:8px;font-size:15px}.auth-card button{width:100%;margin:18px 0 10px;padding:13px;background:#d2e985;border:0;border-radius:8px;color:#26351e;font-weight:700;font-size:15px;cursor:pointer}.auth-error{background:#f9e7e1;padding:10px;color:#8b3524;border-radius:6px;font-size:13px}.auth-note{font-size:12px;color:#8a9976}.eyebrow{font-size:10px;letter-spacing:2px;color:#8c9c77;margin-top:18px}.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}</style></head><body class="auth-page"><main class="auth-card"><a href="/" class="auth-brand" aria-label="Reachmark home"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:42px;width:auto;display:block;margin-bottom:6px"></a><p class="eyebrow">CLIENT PORTAL</p><h1>Create your account.</h1><p>Track your website project, proposals and invoices in one private portal. Your studio will assign work to your email.</p><div id="msg" role="alert" class="auth-error" style="display:none"></div><form id="signup-form"><label for="name">Your name</label><input id="name" name="name" maxlength="120" placeholder="Ada Lovelace"><label for="email">Work email</label><input id="email" name="email" type="email" required maxlength="250" placeholder="you@company.com" autocomplete="email"><label for="password">Password — at least 8 characters</label><input id="password" name="password" type="password" required minlength="8" maxlength="1024" autocomplete="new-password"><label for="confirm">Confirm password</label><input id="confirm" type="password" required maxlength="1024" autocomplete="new-password"><button type="submit">Create account →</button></form><p class="auth-note">Already have an account? <a href="/signin">Sign in</a> · <a href="/">About Reachmark</a></p>
-<p class="auth-note" id="verify-hint" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:10px;border-radius:8px;color:#2d4a0a">✓ Account created — verification email sent. Check inbox (and spam) for 24h link. <a href="#" onclick="requestVerify(event)">Resend</a></p><p class="auth-note">Your data is kept private to your assigned projects and invoices.</p></main><script>const csrf=document.createElement('input');</script><script>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create client account · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><style>
+*{box-sizing:border-box}body{margin:0;font-family:'Manrope',Arial,sans-serif;background:#eef6d1;color:#1a2315;min-height:100vh;display:grid;place-items:center;padding:24px}
+.auth-shell{width:min(1060px,100%);display:grid;grid-template-columns:.95fr 1.05fr;background:#fff;border:1px solid #e2e7d6;border-radius:24px;overflow:hidden;box-shadow:0 24px 64px rgba(16,24,12,.12);min-height:620px}
+.brand{position:relative;background:#0f1a0a;color:#eaf3de;padding:44px 40px;display:flex;flex-direction:column;overflow:hidden}
+.brand::before{content:'';position:absolute;inset:-40px;background:radial-gradient(ellipse at 28% 18%, #d5f268 0%, transparent 55%),radial-gradient(ellipse at 85% 82%, #1e3a0a 0%, transparent 52%);opacity:.35;pointer-events:none}
+.brand .logo{position:relative;display:inline-flex;align-items:center}
+.brand .logo img{height:34px;filter:brightness(0) invert(1)}
+.eyebrow{position:relative;font:600 9px 'Manrope',sans-serif;letter-spacing:1.6px;color:#d5f268;display:flex;align-items:center;gap:8px;margin-top:34px}
+.eyebrow::before{content:'';width:18px;height:1px;background:#d5f268;opacity:.7}
+.brand h1{position:relative;font:700 32px/1.05 'Manrope',sans-serif;letter-spacing:-1.2px;margin:14px 0 12px;max-width:360px}
+.brand h1 span{color:#d5f268}
+.brand p{position:relative;font:400 12.5px/1.7 'Manrope',sans-serif;color:#9db48f;max-width:360px;margin:0}
+.points{position:relative;margin:22px 0 0;display:grid;gap:10px}
+.point{display:flex;align-items:center;gap:10px;font:600 11px 'Manrope',sans-serif;color:#cde0bc}
+.point span{width:26px;height:26px;border-radius:8px;background:rgba(213,242,104,.14);border:1px solid rgba(213,242,104,.22);display:grid;place-items:center;color:#d5f268;font-size:12px}
+.preview{position:relative;margin-top:22px;background:#ffffff;border:1px solid #e2e7d6;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;box-shadow:0 12px 28px rgba(0,0,0,.18);color:#1a2315}
+.preview img{width:56px;height:56px;border-radius:10px;object-fit:cover;border:1px solid #e2e7d6;background:#f7fbd9}
+.preview strong{font:700 11px 'Manrope',sans-serif;color:#0f1a0a}
+.preview small{font:500 10px 'Manrope',sans-serif;color:#6b7a5a}
+.trust{position:relative;margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px}
+.trust .stars{color:#d5f268;font-size:10px;letter-spacing:1px}
+.trust strong{font:700 11px 'Manrope',sans-serif;color:#eaf3de}
+.trust small{font:500 10px 'Manrope',sans-serif;color:#8aa07a}
+.form{padding:44px 42px;display:flex;flex-direction:column;justify-content:center;background:#fff}
+.form .top .eyebrow{color:#8c9c77;margin:0}
+.form .top .eyebrow::before{background:#a7b68e}
+.form h2{font:700 26px 'Manrope',sans-serif;letter-spacing:-1px;margin:10px 0 8px;color:#0f1a0a}
+.form p.lead{font:400 12px/1.6 'Manrope',sans-serif;color:#6b7a5a;margin:0}
+label{font:700 11px 'Manrope',sans-serif;color:#1a2315;margin:16px 0 7px;display:block}
+input{width:100%;padding:13px 16px;border:1px solid #dfe8cc;border-radius:12px;background:#fcfcf8;font:500 14px 'Manrope',sans-serif;color:#1a2315;outline:none;transition:border .2s, box-shadow .2s}
+input:focus{border-color:#cbe85b;box-shadow:0 0 0 4px rgba(213,242,104,.22);background:#fff}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button[type=submit]{width:100%;margin-top:18px;padding:14px;background:#d5f268;border:1px solid #cbe85b;border-radius:12px;color:#0f1a0a;font:700 13px 'Manrope',sans-serif;cursor:pointer;transition:transform .15s, background .15s}
+button[type=submit]:hover{background:#c7e55b;transform:translateY(-1px)}
+button[type=submit]:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.auth-error{background:#f9e7e1;border:1px solid #e9c9bf;color:#8b3524;padding:12px;border-radius:10px;font:600 12px 'Manrope',sans-serif;display:none;margin-top:14px}
+.auth-ok{background:#eef6d1;border:1px solid #d8e9b8;color:#2d4a0a;padding:12px;border-radius:10px;font:600 12px 'Manrope',sans-serif;display:none;margin-top:14px}
+.auth-note{font:500 11px 'Manrope',sans-serif;color:#8a9976;margin-top:14px;text-align:center;line-height:1.6}
+.auth-note a{color:#1a3310;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.meta{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.meta span{font:600 9px 'Manrope',sans-serif;color:#6b7a5a;background:#f7f9f0;border:1px solid #eef1e4;padding:6px 8px;border-radius:20px}
+@media(max-width:900px){.auth-shell{grid-template-columns:1fr;max-width:540px}.brand{padding:32px 28px}.preview{display:none}.form{padding:32px 26px}.field-row{grid-template-columns:1fr}}
+</style></head><body>
+<div class="auth-shell">
+  <div class="brand">
+    <a href="/" class="logo" aria-label="Reachmark home"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
+    <div class="eyebrow">CLIENT PORTAL · PRIVATE BY EMAIL</div>
+    <h1>Your project,<br><span>all in one place.</span></h1>
+    <p>Proposals, invoices and previews assigned to your email — nothing else. No lead finder, no global tools.</p>
+    <div class="points">
+      <div class="point"><span>✓</span> Proposals & 3D previews linked to you</div>
+      <div class="point"><span>◎</span> Invoices & payment status, instantly</div>
+      <div class="point"><span>↗</span> Private — only your studio can assign</div>
+    </div>
+    <div class="preview"><img src="/static/samples/fintech-pulse-preview.jpg" alt=""><div><strong>Fintech Pulse · Live preview</strong><br><small>Figma → live in 7 days · Global delivery</small></div><span style="margin-left:auto;background:#0f1a0a;color:#d5f268;font:700 9px 'Manrope',sans-serif;padding:6px 8px;border-radius:20px">PREVIEW</span></div>
+    <div class="trust"><span class="stars">★★★★★</span><div><strong>4.8/5 · Client trusted</strong><br><small>Verified previews · 127 reviews</small></div><span style="margin-left:auto;background:#d5f268;color:#0f1a0a;font:700 9px 'Manrope',sans-serif;padding:6px 8px;border-radius:20px">SECURE</span></div>
+  </div>
+  <div class="form">
+    <div class="top"><div class="eyebrow">CREATE YOUR ACCOUNT</div><h2>Let’s get you set up.</h2><p class="lead">Your studio will assign work to this email. Takes 20 seconds.</p></div>
+    <div id="msg" role="alert" class="auth-error"></div>
+    <div id="verify-hint" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:12px;border-radius:10px;color:#2d4a0a;font:600 12px 'Manrope',sans-serif;margin-top:14px">✓ Account created — verification email sent. Check inbox (and spam) for 24h link. <a href="#" onclick="requestVerify(event)" style="color:#1a3310">Resend</a></div>
+    <form id="signup-form" novalidate>
+      <label for="name">Your name</label>
+      <input id="name" name="name" maxlength="120" placeholder="Ada Lovelace" autocomplete="name">
+      <label for="email">Work email</label>
+      <input id="email" name="email" type="email" required maxlength="250" placeholder="you@company.com" autocomplete="email">
+      <div class="field-row">
+        <div><label for="password">Password — 8+ characters</label><input id="password" name="password" type="password" required minlength="8" maxlength="1024" autocomplete="new-password" placeholder="••••••••"></div>
+        <div><label for="confirm">Confirm password</label><input id="confirm" type="password" required maxlength="1024" autocomplete="new-password" placeholder="••••••••"></div>
+      </div>
+      <button type="submit">Create account →</button>
+    </form>
+    <p class="auth-note">Already have an account? <a href="/signin">Sign in</a> · <a href="/">About Reachmark</a></p>
+    <p class="auth-note" style="font-size:10px">Your data is kept private to your assigned projects and invoices.</p>
+    <div class="meta"><span>◎ Global</span><span>⌁ Health checks</span><span>↗ Previews</span><span>✓ No spam</span></div>
+  </div>
+</div>
+<script>
 const form=document.getElementById('signup-form'),msg=document.getElementById('msg');
-function getCsrf(){const m=document.querySelector('meta[name="csrf-token"]');return m?m.content:''}
-async function fetchCsrf(){let r=await fetch('/about');let t=await r.text();let m=t.match(/csrf-token\" content=\"([^\"]+)\"/);return m?m[1]:''}
-async function requestVerify(e){e.preventDefault();const email=document.getElementById('email').value.trim();try{let r=await fetch('/api/auth/request-verification',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});let j=await r.json();alert(j.already_verified?'Already verified.':'Verification email sent.');}catch(err){alert('Could not resend.')}} 
+async function requestVerify(e){e.preventDefault();const email=document.getElementById('email').value.trim();try{let r=await fetch('/api/auth/request-verification',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});let j=await r.json();alert(j.already_verified?'Already verified.':'Verification email sent.');}catch(err){alert('Could not resend.')}}
 let csrfToken='';
 fetch('/api/auth/me').then(()=>{}).catch(()=>{});
-(async()=>{try{let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\"csrf_token\" value=\"([^\"]+)\"/);csrfToken=m?m[1]:''}catch(e){}})();
+(async()=>{try{let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\"csrf_token\" value=\"([^"]+)\"/);csrfToken=m?m[1]:''}catch(e){}})();
 form.onsubmit=async e=>{
   e.preventDefault();
   const name=document.getElementById('name').value.trim();
@@ -18,10 +92,7 @@ form.onsubmit=async e=>{
   msg.style.display='none';
   const btn=form.querySelector('button');btn.disabled=true;btn.textContent='Creating…';
   try{
-    // Ensure csrf
-    if(!csrfToken){
-      let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\"csrf_token\" value=\"([^\"]+)\"/);csrfToken=m?m[1]:'';
-    }
+    if(!csrfToken){let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\"csrf_token\" value=\"([^"]+)\"/);csrfToken=m?m[1]:''}
     let r=await fetch('/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({name,email,password:pw})});
     let j=await r.json();
     if(!r.ok) throw new Error(j.error||'Could not create account.');
@@ -29,4 +100,5 @@ form.onsubmit=async e=>{
     location.href='/dashboard';
   }catch(err){msg.textContent=err.message;msg.style.display='block';btn.disabled=false;btn.textContent='Create account →';}
 };
-</script></body></html>
+</script>
+</body></html>

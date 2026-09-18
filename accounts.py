@@ -40,7 +40,7 @@ def branded_html(title, text_body, cta_url=None, cta_label=None):
 {cta}
 <div style="margin-top:22px;padding-top:16px;border-top:1px solid #eef1e4;font-size:12px;color:#8a9976">If you didn't ask for this, you can ignore this email. Reply to hello@reachmark.co for help.</div>
 </div>
-<div style="text-align:center;margin-top:14px;font-size:11px;color:#8a9976">Reachmark · Lagos → Global · reachmark.co</div>
+<div style="text-align:center;margin-top:14px;font-size:11px;color:#8a9976">Reachmark · Global · reachmark.co</div>
 </div></body></html>"""
     return html
 
@@ -245,7 +245,7 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
             c.execute('UPDATE users SET verification_token=?, verification_expires=?, updated=? WHERE id=?', (token, expires, now_iso(), user_id))
         base = get_base_url()
         link = f"{base}/verify/{token}"
-        text = f"Hi {email},\n\nConfirm your Reachmark account by opening this link (valid 24 hours):\n{link}\n\nIf you didn't create an account, you can ignore this email.\n\n— Reachmark · Lagos → Global\nreachmark.co"
+        text = f"Hi {email},\n\nConfirm your Reachmark account by opening this link (valid 24 hours):\n{link}\n\nIf you didn't create an account, you can ignore this email.\n\n— Reachmark · Global\nreachmark.co"
         send_branded(email, "Confirm your Reachmark account", text, html_title="Confirm your email", cta_url=link, cta_label="Verify email →", db=db)
         return token
 
