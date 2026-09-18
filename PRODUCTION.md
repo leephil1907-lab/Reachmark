@@ -2,7 +2,7 @@
 
 ## What is ready, and what still needs activation
 
-Implemented: studio-owner sessions, **client portal (signup/signin) with assigned-project and invoice visibility**, **branded invoice creator with line items, tax/discount and manual status tracking**, CSRF checks, login throttling, secure production cookies, production startup validation, Docker/Caddy deployment files, persistent SQLite storage, scheduled snapshot service, verified offline restore, optional encrypted offsite copies, optional Sentry integration, CI/deployment workflows and post-deploy verification.
+Implemented: studio-owner sessions, **client portal (signup/signin) with assigned-project and invoice visibility**, **branded invoice creator with line items, tax/discount and manual status tracking**, **Smartsupp Live Chat integration (lazy-loaded only when key is set, visible on About/Showcase/Enquire/Previews and workspace)**, CSRF checks, login throttling, secure production cookies, production startup validation, Docker/Caddy deployment files, persistent SQLite storage, scheduled snapshot service, verified offline restore, optional encrypted offsite copies, optional Sentry integration, CI/deployment workflows and post-deploy verification.
 
 **Not yet activated:** a VPS, domain/DNS, public HTTPS certificates, GitHub deployment secrets/environment, external uptime/error/backup alerts, offsite storage and a dedicated map-data contract. There is no live production deployment to certify yet. Docker is not available in the development sandbox, so the actual container build/start must be checked by CI/on the target host. Local Python/browser/backup tests are not a substitute for that launch test.
 
@@ -46,6 +46,24 @@ You noted no funds right now. Do **not** purchase anything yet. Two safe options
 
 All paid options still need a **domain (~$10–15/yr, e.g., Namecheap/Cloudflare Registrar)** for HTTPS. No purchase is made by this repo.
 
+## 0. Live support chat (Smartsupp) — ready for connection
+
+Reachmark ships with **Smartsupp Live Chat** (https://www.smartsupp.com). The widget is **disabled by default** and loaded only when you provide a key — no tracking scripts, no heavy bundle, no mock data.
+
+**Connect in 3 minutes:**
+
+1. Create account at https://www.smartsupp.com → **Settings → Chat widget → Chat code**. Copy the `key` value (e.g., `abcd1234...`).
+2. **Option A — inside the app (fastest):** Open **Workspace → Settings → Smartsupp Live Chat key**, paste the key, **Save sender profile**. The chat appears immediately on **/about, /showcase, /enquire, /preview/** and the workspace.
+3. **Option B — server env (for Docker/Oracle):** add to `.env.production` on the VPS:
+   ```dotenv
+   SMARTSUPP_KEY=your-key-here
+   ```
+   then `docker compose up -d`. Env takes precedence over the database value.
+
+Verify: open `/about` in a private window — you should see the Smartsupp bubble. If blank, check the key at https://dashboard.smartsupp.com. Leave blank or remove `SMARTSUPP_KEY` to disable. The integration uses the official loader (`https://www.smartsuppchat.com/loader.js`) with `async` — no CSP change needed with the default headers. For strict CSP, allow `script-src https://www.smartsuppchat.com https://*.smartsupp.com`.
+
+**Tip:** In Smartsupp Dashboard → Customize → Chat widget, set your studio name, logo (`static/logo-primary.svg`), and offline form. The widget appears on every public page once enabled — perfect for answering project enquiries live.
+
 ## 1. Accounts and network
 
 1. Choose a VPS provider and a domain registrar. No purchases are made by these files.
@@ -53,6 +71,73 @@ All paid options still need a **domain (~$10–15/yr, e.g., Namecheap/Cloudflare
 3. Install Docker Engine and Compose. Keep the host updated. Allow public TCP 80/443 (UDP 443 optional), restrict SSH, and do not publish port 8000.
 4. Point the domain's A record to the VPS. Only publish AAAA if IPv6 works. Remove conflicting web servers from ports 80/443.
 5. Copy this source to `/opt/reachmark`. Do not copy development `.env`, database files or backup directories through Git.
+
+## 1.5 Oracle Cloud Free Tier — full VM + domain setup (recommended zero-budget 24/7 host)
+
+This is the complete path to get Reachmark on **Oracle Always Free** ARM (4 OCPU, 24 GB RAM, 200 GB) — the same `compose.yaml` you already run locally.
+
+**A. Create the Oracle VM**
+
+1. Create account at https://cloud.oracle.com → **Sign up for Free Tier** (card is verified, no charge if you stay Always Free).
+2. Console → **Compute → Instances → Create instance**
+   - Name: `reachmark`
+   - Image: **Canonical Ubuntu 24.04**
+   - Shape: **Ampere Altra (ARM)** — `VM.Standard.A1.Flex` → **OCPU 4, RAM 24 GB** (free limit total per tenancy)
+   - Add SSH key: paste your *public* key (`cat ~/.ssh/id_ed25519.pub` on your laptop)
+   - VCN: create new VCN with internet gateway (default)
+   - Boot volume: 50 GB (free allowance 200 GB)
+3. **Open firewall:** VCN → your VCN → Security Lists → Default Security List → **Add Ingress Rules** → `0.0.0.0/0` ports **80** and **443** (TCP). Also on VM:
+   ```bash
+   ssh ubuntu@<public-ip>
+   sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+   sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+   sudo netfilter-persistent save
+   ```
+
+**B. Prepare the host (same as any VPS)**
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install docker.io docker-compose-plugin git -y
+sudo usermod -aG docker ubuntu && newgrp docker
+# Optional swap (Oracle ARM is fast enough, skip if RAM >= 12GB)
+sudo mkdir -p /opt/reachmark && sudo chown ubuntu:ubuntu /opt/reachmark
+git clone https://github.com/leephil1907-lab/sitegapreveal.git /opt/reachmark
+cd /opt/reachmark
+```
+
+**C. Domain and DNS (required for HTTPS)**
+
+1. Buy a domain (Namecheap / Cloudflare Registrar ~$10/yr) or use a free Cloudflare-proxied subdomain.
+2. In your registrar: add **A record** `yourstudio.com → <Oracle public IP>` (and `www` if desired). Wait 2–30 min.
+
+**D. First launch with owner password + Smartsupp**
+
+```bash
+cd /opt/reachmark
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python scripts/configure_owner.py
+# prompts for: your FULL domain (e.g., reachmark.studio) + 16+ char owner password
+printf 'DOMAIN=yourstudio.com\n' > .env && chmod 600 .env
+# Optional live chat — paste your Smartsupp key or leave empty:
+# echo 'SMARTSUPP_KEY=your-key' >> .env.production
+# Optional SMTP + SENTRY add to .env.production as well (never .env)
+touch .env.backup && chmod 600 .env.backup
+docker compose build --build-arg RELEASE_SHA="$(git rev-parse HEAD)"
+docker compose up -d
+docker compose logs -f   # watch Caddy fetch LetsEncrypt cert (30–60s)
+```
+
+Visit **https://yourstudio.com/login** → sign in with owner password. No username needed.
+
+**E. Verify + keep it alive**
+
+- `curl -i https://yourstudio.com/healthz` → `200` and `release` SHA
+- Settings → paste **Smartsupp key** → chat appears on `/about`
+- Backups: `docker compose logs backup` should show `Snapshot OK`. Configure `.env.backup` later for offsite restic.
+- Keep Oracle VM Always Free: don't stop for too long, keep boot volume <200 GB, stay in `A1.Flex` shape. Set email alert in Oracle → Billing → Budgets.
+
+To update after a push: `git pull && docker compose build --build-arg RELEASE_SHA="$(git rev-parse HEAD)" && docker compose up -d`.
 
 ## 2. Owner credentials and first launch
 
