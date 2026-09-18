@@ -277,3 +277,71 @@ nav.scrolled .logo, .public-nav.scrolled .public-logo{width:170px !important; tr
 #theme-toggle-public{transition: transform .3s var(--premium-ease), background .3s, border-color .3s;}
 #theme-toggle-public:hover{transform:rotate(15deg) scale(1.05);}
 #theme-toggle-public:active{transform:scale(.95);}
+
+/* ——— Desktop Premium — Modern, Horizontal, Dynamic (not straight like mobile) ——— */
+@media(min-width:1100px){
+  /* Page stays airy, centered but not straight — wider, with breathing */
+  main{max-width:1440px; padding:0 4.5% !important;}
+  nav{max-width:1440px; padding:22px 4.5% !important;}
+
+  /* HERO: more horizontal, asymmetric, premium like banners */
+  .hero{grid-template-columns:1.25fr .95fr !important; gap:56px !important; padding:72px 52px !important; border-radius:28px !important; margin:56px auto 84px !important; position:relative; overflow:visible !important;}
+  .hero::after{content:''; position:absolute; right:-18px; top:-18px; width:120px; height:120px; background:radial-gradient(circle at 30% 30%, #d5f268 0%, transparent 62%); opacity:.28; pointer-events:none; filter:blur(1px);}
+  .hero-copy h1{font-size:68px !important; line-height:.98 !important; letter-spacing:-3.8px !important;}
+  .hero-copy p{font-size:13px !important; max-width:520px !important;}
+  .art{transform:rotate(-1.5deg); transition: transform .6s var(--premium-ease);}
+  .art:hover{transform:rotate(0) scale(1.01);}
+  .art-label{font-size:10px !important; padding:14px 18px !important;}
+  .art-label span{font-size:18px !important;}
+
+  /* RIBBON: horizontal, pill-like, not straight line */
+  .ribbon{padding:28px 24px !important; border:1px solid #d8e9b8; border-radius:16px; background:rgba(255,255,255,.72); backdrop-filter:blur(8px); margin:0 0 88px !important; justify-content:center !important; gap:42px !important;}
+  .ribbon span{font-size:10px !important;}
+
+  /* BANNERS: more cinematic, horizontal, populate the web */
+  .banner-carousel{padding:0 4.5% !important; margin:32px auto 0 !important;}
+  .banner-viewport{border-radius:22px !important;}
+  .banner-slide{grid-template-columns:1.1fr .95fr !important; gap:48px !important; padding:52px 56px !important; min-height:460px;}
+  .banner-slide h2{font-size:42px !important;}
+  .banner-visual img{max-width:600px !important; height:400px !important;}
+
+  /* 3D CAROUSEL: horizontal, not stacked */
+  .carousel-3d{padding:0 4.5% !important; margin:72px auto 88px !important;}
+  .carousel-3d-hero img{height:460px !important;}
+  .carousel-slide{grid-template-columns:1.15fr .85fr !important; gap:48px !important; padding:56px !important;}
+  .carousel-slide h3{font-size:36px !important;}
+
+  /* FEATURES: staggered horizontal, not straight grid */
+  .features{grid-template-columns:repeat(3,1fr) !important; gap:28px !important; margin-bottom:96px !important; align-items:stretch;}
+  .features .card{padding:34px !important; border-radius:18px !important; transform:translateY(0); transition: transform .35s var(--premium-ease), box-shadow .35s;}
+  .features .card:nth-child(2){transform:translateY(14px);}
+  .features .card:hover{transform:translateY(-6px) !important; box-shadow:0 18px 44px rgba(32,45,22,.10) !important;}
+  .features .card:nth-child(2):hover{transform:translateY(8px) !important;}
+
+  /* HONEST: side-by-side, spacious, not straight stack */
+  .honest{grid-template-columns:1.05fr 1.35fr !important; gap:64px !important; padding:56px 52px !important; border-radius:18px !important; margin-bottom:88px !important; align-items:center;}
+  .honest h2{font-size:34px !important;}
+
+  /* SAMPLES: horizontal populating — 3-up with hover lift, not vertical stack */
+  .figma-grid, .sample-gallery{grid-template-columns:repeat(3,1fr) !important; gap:24px !important;}
+  .figma-card, .sample-section .card{border-radius:18px !important;}
+  .figma-card:hover{transform:translateY(-8px) scale(1.015) !important;}
+
+  /* TRUSTPILOT / REVIEW: keep horizontal */
+  .trustpilot-grid{grid-template-columns:repeat(3,1fr) !important;}
+  .review-grid{grid-template-columns:1.2fr .9fr !important;}
+
+  /* CTA: wider, more premium, horizontal */
+  .cta{padding:62px 56px !important; border-radius:20px !important; margin-bottom:80px !important; display:grid !important; grid-template-columns:1.2fr .8fr; align-items:center; gap:32px;}
+  .cta h2{font-size:36px !important;}
+}
+@media(min-width:1440px){
+  main, nav{max-width:1480px;}
+  .hero{padding:84px 64px !important;}
+  .banner-slide{padding:56px 64px !important;}
+}
+@media(max-width:1099px){
+  /* Mobile stays clean straight stack — no premium horizontal */
+  .hero, .banner-slide, .carousel-slide, .honest, .features{transform:none !important;}
+}
+
