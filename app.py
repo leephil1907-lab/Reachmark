@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 from email.message import EmailMessage
 import requests
-from flask import Flask, request, jsonify, render_template, Response, abort
+from flask import Flask, request, jsonify, render_template, Response, abort, redirect
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 3 * 1024 * 1024
@@ -80,6 +80,25 @@ def inject_branding():
     try: s=settings()
     except Exception: s={}
     return {'app_settings': s}
+@app.before_request
+def custom_domain_redirect():
+    # If a custom domain is set via PUBLIC_BASE_URL (e.g. https://reachmark.co), redirect the temporary Railway host to it for SEO/canonical
+    try:
+        base = (os.getenv('PUBLIC_BASE_URL','').strip().rstrip('/') or settings().get('public_base_url','').strip().rstrip('/'))
+        if base and base.startswith('https://') and 'up.railway.app' in request.host:
+            # Only redirect if base is not the railway host itself
+            if 'reachmark.co' in base or 'sitegapreveal' not in base:
+                # Preserve path + query, avoid redirecting healthz via is_json etc? Keep simple: redirect all
+                if request.path.startswith(('/healthz','/static/')):
+                    return None
+                target = base + request.full_path if request.query_string else base + request.path
+                # Fix full_path includes ? already
+                if request.query_string and target.endswith('?'):
+                    target = base + request.path + '?' + request.query_string.decode()
+                return redirect(target, code=301)
+    except Exception:
+        pass
+
 @app.before_request
 def same_origin():
     if request.is_json and request.method in ('POST','PATCH','PUT'):
