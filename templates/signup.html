@@ -40,7 +40,8 @@ button[type=submit]:disabled{opacity:.6;cursor:not-allowed;transform:none}
 .meta{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .meta span{font:600 9px 'Manrope',sans-serif;color:#6b7a5a;background:#f7f9f0;border:1px solid #eef1e4;padding:6px 8px;border-radius:20px}
 @media(max-width:900px){.auth-shell{grid-template-columns:1fr;max-width:540px}.brand{padding:32px 28px}.preview{display:none}.form{padding:32px 26px}.field-row{grid-template-columns:1fr}}
-</style><style>body{ -webkit-font-smoothing:antialiased; } .auth-note{ color:#1e2e15 !important; font-weight:500 !important; } p.lead{ color:#1e2e15 !important; } label{ color:#0f1a0a !important; } small{ color:#2d4a0a !important; }</style>
+</style>
+<script nonce="{{ csp_nonce }}" src="/static/rm-events.js"></script><style>body{ -webkit-font-smoothing:antialiased; } .auth-note{ color:#1e2e15 !important; font-weight:500 !important; } p.lead{ color:#1e2e15 !important; } label{ color:#0f1a0a !important; } small{ color:#2d4a0a !important; }</style>
 </head><body>
 <div class="auth-shell">
   <div class="brand">
@@ -59,7 +60,7 @@ button[type=submit]:disabled{opacity:.6;cursor:not-allowed;transform:none}
   <div class="form">
     <div class="top"><div class="eyebrow">CREATE YOUR ACCOUNT</div><h2>Let’s get you set up.</h2><p class="lead">Your studio will assign work to this email. Takes 20 seconds.</p></div>
     <div id="msg" role="alert" class="auth-error"></div>
-    <div id="verify-hint" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:12px;border-radius:10px;color:#2d4a0a;font:600 12px 'Manrope',sans-serif;margin-top:14px">✓ Account created — verification email sent. Check inbox (and spam) for 24h link. <a href="#" onclick="requestVerify(event)" style="color:#1a3310">Resend</a></div>
+    <div id="verify-hint" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:12px;border-radius:10px;color:#2d4a0a;font:600 12px 'Manrope',sans-serif;margin-top:14px">✓ Account created — verification email sent. Check inbox (and spam) for 24h link. <a href="#" data-rm-click="requestVerify" data-rm-arg="event" style="color:#1a3310">Resend</a></div>
     <form id="signup-form" novalidate>
       <label for="name">Your name</label>
       <input id="name" name="name" maxlength="120" placeholder="Ada Lovelace" autocomplete="name">
@@ -76,7 +77,7 @@ button[type=submit]:disabled{opacity:.6;cursor:not-allowed;transform:none}
     <div class="meta"><span>◎ Global</span><span>⌁ Health checks</span><span>↗ Previews</span><span>✓ No spam</span></div>
   </div>
 </div>
-<script>
+<script nonce="{{ csp_nonce }}">
 const form=document.getElementById('signup-form'),msg=document.getElementById('msg');
 async function requestVerify(e){e.preventDefault();const email=document.getElementById('email').value.trim();try{let r=await fetch('/api/auth/request-verification',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});let j=await r.json();alert(j.already_verified?'Already verified.':'Verification email sent.');}catch(err){alert('Could not resend.')}}
 // Token comes from this page's own meta tag — never scrape another page,

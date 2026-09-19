@@ -13,7 +13,7 @@ class OperationsTests(unittest.TestCase):
         module.DB=os.path.join(self.tmp.name,'test.sqlite3')
         with module.db() as c:
             for sql in schema:c.execute(sql)
-        self.client=module.app.test_client();self.env=patch.dict(os.environ,{'DASHBOARD_PASSWORD':''});self.env.start()
+        self.client=module.app.test_client();self.env=patch.dict(os.environ,{'DASHBOARD_PASSWORD':'','APP_ENV':'development'});self.env.start()
     def tearDown(self):self.env.stop();module.DB=self.old;self.tmp.cleanup()
     def connector(self):
         r=self.client.post('/api/mcp/connectors',json={'name':'Unit-test service','url':'https://provider.example/mcp'});self.assertEqual(r.status_code,201)

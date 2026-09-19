@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 from email.message import EmailMessage
 import requests
-from flask import Flask, request, jsonify, render_template, Response, abort, redirect
+from flask import Flask, request, jsonify, render_template, Response, abort, redirect, session
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 3 * 1024 * 1024
@@ -478,16 +478,23 @@ from standard import register_standard
 register_standard(app, db, log, settings)
 
 
-# Client reviews — leave a review for good job done
+# Client reviews — owner-moderated. Public submissions start unapproved (approved=0);
+# only approved reviews are shown on /reviews and /about.
 @app.route('/api/client-reviews', methods=['GET'])
 def list_client_reviews():
+    # Owner sees all (for moderation); the public gets approved only.
+    if session.get('owner'):
+        with db() as c:
+            rows = [dict(r) for r in c.execute('SELECT * FROM client_reviews ORDER BY created DESC LIMIT 200')]
+        return jsonify(rows)
     with db() as c:
-        rows = [dict(r) for r in c.execute('SELECT * FROM client_reviews WHERE approved=1 ORDER BY created DESC LIMIT 50')]
+        rows = [dict(r) for r in c.execute('SELECT id,name,business,rating,text,created FROM client_reviews WHERE approved=1 ORDER BY created DESC LIMIT 50')]
     return jsonify(rows)
 
 @app.route('/api/client-reviews', methods=['POST'])
 def create_client_review():
-    d = request.get_json() or {}
+    from accounts import check_throttle
+    d = request.get_json(silent=True) or {}
     name = str(d.get('name','')).strip()[:80]
     business = str(d.get('business','')).strip()[:120]
     rating = d.get('rating')
@@ -496,12 +503,37 @@ def create_client_review():
         return jsonify(error='Name, 1-5 rating and review text are required.'), 400
     if len(text) < 12:
         return jsonify(error='Review text should be at least 12 characters.'), 400
-    rid = __import__('uuid').uuid4().hex
+    # Rate-limit submissions (per IP + per identity): the owner moderates what is public.
+    identity = (business or name).strip().lower()
+    if not check_throttle(db, 'review', request.remote_addr, identity, 3, 3600):
+        return jsonify(error='Too many reviews from this connection. Try again later.'), 429
+    rid = uuid.uuid4().hex
     created = now()
     with db() as c:
-        c.execute('INSERT INTO client_reviews VALUES(?,?,?,?,?,?,1)', (rid, name, business, rating, text, created))
-    log('review', f'New client review from {name} ({rating}★)')
-    return jsonify(ok=True, id=rid), 201
+        # Starts unapproved — the owner approves it in the workspace before it is public.
+        c.execute('INSERT INTO client_reviews VALUES(?,?,?,?,?,?,0)', (rid, name, business, rating, text, created))
+    log('review', f'New client review pending moderation: {name} ({rating}★)')
+    return jsonify(ok=True, id=rid, moderation='pending'), 201
+
+@app.route('/api/client-reviews/<rid>/moderate', methods=['POST'])
+def moderate_client_review(rid):
+    # Owner-only moderation: approve / reject / delete.
+    if not session.get('owner'):
+        return jsonify(error='Owner login required.'), 401
+    d = request.get_json(silent=True) or {}
+    action = str(d.get('action','')).strip().lower()
+    if action not in ('approve','reject','delete'):
+        return jsonify(error='Action must be approve, reject or delete.'), 400
+    with db() as c:
+        row = c.execute('SELECT * FROM client_reviews WHERE id=?', (rid,)).fetchone()
+        if not row:
+            return jsonify(error='Review not found.'), 404
+        if action == 'delete':
+            c.execute('DELETE FROM client_reviews WHERE id=?', (rid,))
+        else:
+            c.execute('UPDATE client_reviews SET approved=? WHERE id=?', (1 if action=='approve' else 0, rid))
+    log('review', f'Review {action}d: {row["name"]}')
+    return jsonify(ok=True, action=action)
 
 @app.route('/reviews')
 def reviews_page():

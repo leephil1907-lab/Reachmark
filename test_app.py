@@ -18,7 +18,7 @@ class ProspectTests(unittest.TestCase):
         from services import geocode
         geocode.cache_clear()
         self.client=module.app.test_client()
-        self.env=patch.dict(os.environ,{'SMTP_HOST':'smtp.example.test','SMTP_FROM':'studio@example.test','SMTP_PORT':'587','DASHBOARD_PASSWORD':''});self.env.start()
+        self.env=patch.dict(os.environ,{'SMTP_HOST':'smtp.example.test','SMTP_FROM':'studio@example.test','SMTP_PORT':'587','DASHBOARD_PASSWORD':'','APP_ENV':'development'});self.env.start()
     def tearDown(self):
         self.env.stop();module.DB=self.old;self.tmp.cleanup()
     def create(self):
@@ -180,4 +180,177 @@ class ProspectTests(unittest.TestCase):
             r=self.client.get('/dashboard')
             self.assertEqual(r.status_code,302)
             self.assertEqual(r.headers['Location'],'/signin')
+    # ---- PHASE 1 SECURITY REGRESSIONS ----
+    def _owner_client(self, password='owner-test-pass-123'):
+        from werkzeug.security import generate_password_hash
+        with patch.dict(os.environ,{'OWNER_PASSWORD_HASH':generate_password_hash(password),'DASHBOARD_PASSWORD':''}):
+            page=self.client.get('/login').get_data(as_text=True)
+            import re
+            csrf=re.search(r'name="csrf_token" value="([^"]+)"',page).group(1)
+            r=self.client.post('/login',data={'password':password,'csrf_token':csrf})
+            self.assertEqual(r.status_code,302)
+        return self.client
+    def test_unverified_client_sees_nothing_until_email_confirmed(self):
+        # Victim email receives an unassigned invoice; an account created with that
+        # email must see NOTHING until the mailbox is verified.
+        import re as _re
+        self._owner_client()
+        self.client.post('/api/invoices',json={'client_name':'Victim Co','client_email':'victimco@example.test','currency':'USD','items':[{'description':'Site','quantity':1,'unit_price':500}]})
+        att=module.app.test_client()
+        page=att.get('/signup').get_data(as_text=True)
+        tok=_re.search(r'name="csrf-token" content="([^"]+)"',page).group(1)
+        r=att.post('/api/auth/signup',json={'name':'Attacker','email':'victimco@example.test','password':'password123'},headers={'X-CSRF-Token':tok})
+        self.assertEqual(r.status_code,201)
+        # Unverified: invoices empty, detail 404, projects empty, PDFs 404
+        self.assertEqual(att.get('/api/invoices').json['invoices'],[])
+        self.assertEqual(att.get('/api/projects').json['projects'],[])
+        # find the invoice id via a second owner session
+        c2=module.app.test_client()
+        with patch.dict(os.environ,{'DASHBOARD_PASSWORD':'x'}):
+            with c2.session_transaction() as s: s['owner']=True
+        rows=c2.get('/api/invoices').json['invoices']
+        self.assertEqual(len(rows),1)
+        iid=rows[0]['id']
+        self.assertEqual(att.get('/api/invoices/'+iid).status_code,404)
+        self.assertEqual(att.get('/api/documents/invoice/'+iid+'.pdf').status_code,404)
+        # Verify the mailbox (the /verify flow) — only then is data granted
+        with module.db() as c:
+            row=c.execute('SELECT verification_token FROM users WHERE lower(email)=lower(?)',('victimco@example.test',)).fetchone()
+            token=row['verification_token']
+        v=att.get('/verify/'+token)
+        self.assertEqual(v.status_code,200)
+        self.assertEqual(len(att.get('/api/invoices').json['invoices']),1)
+        self.assertEqual(att.get('/api/invoices/'+iid).status_code,200)
+        self.assertEqual(att.get('/api/documents/invoice/'+iid+'.pdf').status_code,200)
+    def test_owner_routes_fail_closed_without_credentials(self):
+        # No credentials + not explicit development => owner routes refused.
+        # (APP_ENV=None removes the key for the duration of the patch.)
+        saved=os.environ.pop('APP_ENV',None)
+        try:
+            with patch.dict(os.environ,{'OWNER_PASSWORD_HASH':'','DASHBOARD_PASSWORD':''}):
+                self.assertEqual(self.client.get('/api/state').status_code,401)
+                r=self.client.get('/workspace')
+                self.assertEqual(r.status_code,302)
+                self.assertEqual(r.headers['Location'],'/login')
+                # the public site stays available
+                self.assertEqual(self.client.get('/').status_code,200)
+        finally:
+            if saved is None:
+                os.environ.pop('APP_ENV',None)
+            else:
+                os.environ['APP_ENV']=saved
+        # explicit development keeps the open local-dev behaviour
+        self.assertEqual(self.client.get('/api/state').status_code,200)
+    def test_client_reviews_start_unapproved_and_owner_moderates(self):
+        self._owner_client()
+        # public submission
+        r=self.client.post('/api/client-reviews',json={'name':'Real Visitor','business':'Café','rating':5,'text':'Beautiful work, shipped on time.'})
+        self.assertEqual(r.status_code,201)
+        self.assertEqual(r.json['moderation'],'pending')
+        rid=r.json['id']
+        # public list excludes it; /reviews page excludes it
+        pub=module.app.test_client()
+        self.assertEqual(pub.get('/api/client-reviews').json,[])
+        self.assertNotIn('Beautiful work',pub.get('/reviews').get_data(as_text=True))
+        # owner sees it pending
+        rows=self.client.get('/api/client-reviews').json
+        self.assertEqual([x for x in rows if x['id']==rid][0]['approved'],0)
+        # client (non-owner) cannot moderate
+        c2=module.app.test_client()
+        page=c2.get('/signup').get_data(as_text=True)
+        import re as _re
+        tok=_re.search(r'name="csrf-token" content="([^"]+)"',page).group(1)
+        c2.post('/api/auth/signup',json={'name':'Client','email':'moder@example.test','password':'password123'},headers={'X-CSRF-Token':tok})
+        # client sessions are rejected by the owner guard (403); anonymous by the endpoint (401)
+        self.assertEqual(c2.post('/api/client-reviews/'+rid+'/moderate',json={'action':'approve'}).status_code,403)
+        anon=module.app.test_client()
+        self.assertEqual(anon.post('/api/client-reviews/'+rid+'/moderate',json={'action':'approve'}).status_code,401)
+        # owner approves -> public
+        self.assertEqual(self.client.post('/api/client-reviews/'+rid+'/moderate',json={'action':'approve'}).status_code,200)
+        self.assertEqual([x for x in pub.get('/api/client-reviews').json if x['id']==rid][0]['name'],'Real Visitor')
+        # owner rejects -> hidden again
+        self.assertEqual(self.client.post('/api/client-reviews/'+rid+'/moderate',json={'action':'reject'}).status_code,200)
+        self.assertEqual(pub.get('/api/client-reviews').json,[])
+        # owner deletes -> gone
+        self.assertEqual(self.client.post('/api/client-reviews/'+rid+'/moderate',json={'action':'delete'}).status_code,200)
+        self.assertEqual(pub.get('/api/client-reviews').json,[])
+        self.assertEqual(self.client.post('/api/client-reviews/'+rid+'/moderate',json={'action':'approve'}).status_code,404)
+    def test_client_review_rate_limited(self):
+        for i in range(3):
+            self.assertEqual(self.client.post('/api/client-reviews',json={'name':f'Visitor {i}','rating':5,'text':f'Review number {i} here.'},environ_overrides={'REMOTE_ADDR':f'10.9.8.{i}'}).status_code,201)
+        # 4th from a fresh IP but same identity window is per (ip,identity); use same IP
+        base={'name':'Spammer','rating':5,'text':'Spam spam spam spam.'}
+        self.assertEqual(self.client.post('/api/client-reviews',json=dict(base),environ_overrides={'REMOTE_ADDR':'10.1.1.1'}).status_code,201)
+        self.assertEqual(self.client.post('/api/client-reviews',json=dict(base),environ_overrides={'REMOTE_ADDR':'10.1.1.1'}).status_code,201)
+        self.assertEqual(self.client.post('/api/client-reviews',json=dict(base),environ_overrides={'REMOTE_ADDR':'10.1.1.1'}).status_code,201)
+        self.assertEqual(self.client.post('/api/client-reviews',json=dict(base),environ_overrides={'REMOTE_ADDR':'10.1.1.1'}).status_code,429)
+    def test_signup_and_forgot_are_throttled(self):
+        ip='203.0.113.7'
+        for i in range(10):
+            r=self.client.post('/api/auth/signup',json={'name':f'U{i}','email':f'throttle{i}@example.test','password':'password123'},environ_overrides={'REMOTE_ADDR':ip})
+            self.assertEqual(r.status_code,201,i)
+        self.assertEqual(self.client.post('/api/auth/signup',json={'name':'U99','email':'throttle99@example.test','password':'password123'},environ_overrides={'REMOTE_ADDR':ip}).status_code,429)
+        # forgot: 3 per email per hour (generic ok response on both paths)
+        self.assertEqual(self.client.post('/api/auth/forgot',json={'email':'throttle0@example.test'},environ_overrides={'REMOTE_ADDR':'203.0.113.9'}).status_code,200)
+        self.assertEqual(self.client.post('/api/auth/forgot',json={'email':'throttle0@example.test'},environ_overrides={'REMOTE_ADDR':'203.0.113.9'}).status_code,200)
+        self.assertEqual(self.client.post('/api/auth/forgot',json={'email':'throttle0@example.test'},environ_overrides={'REMOTE_ADDR':'203.0.113.9'}).status_code,200)
+        # 4th returns the generic ok (no enumeration) but no email is queued
+        self.assertEqual(self.client.post('/api/auth/forgot',json={'email':'throttle0@example.test'},environ_overrides={'REMOTE_ADDR':'203.0.113.9'}).status_code,200)
+        with module.db() as c:
+            self.assertEqual(c.execute("SELECT count(*) FROM mail_outbox WHERE subject LIKE 'Reset%'").fetchone()[0],3)
+    def test_captcha_hook_enforces_registered_verifier(self):
+        import accounts
+        def verifier(token,ip): return token=='good-token'
+        accounts.register_captcha_verifier('testcap',verifier)
+        try:
+            with patch.dict(os.environ,{'CAPTCHA_PROVIDER':'testcap'}):
+                page=self.client.get('/signup').get_data(as_text=True)
+                import re as _re
+                tok=_re.search(r'name="csrf-token" content="([^"]+)"',page).group(1)
+                r=self.client.post('/api/auth/signup',json={'name':'C','email':'cap1@example.test','password':'password123','captcha_token':'bad'},headers={'X-CSRF-Token':tok})
+                self.assertEqual(r.status_code,400)
+                r=self.client.post('/api/auth/signup',json={'name':'C','email':'cap2@example.test','password':'password123','captcha_token':'good-token'},headers={'X-CSRF-Token':tok})
+                self.assertEqual(r.status_code,201)
+        finally:
+            accounts._CAPTCHA_VERIFIERS.pop('testcap',None)
+    def test_trusted_proxies_strip_untrusted_xff(self):
+        # Observe the header while the request is in flight (the response's .request
+        # is a snapshot, so probe it with a temporary before_request registered after
+        # the stripping hook).
+        from flask import request as live_request
+        seen=[]
+        def probe():
+            seen.append(live_request.headers.get('X-Forwarded-For'))
+        funcs=module.app.before_request_funcs[None]
+        funcs.append(probe)  # appended last: runs after the stripping hook
+        try:
+            with patch.dict(os.environ,{'TRUSTED_PROXIES':'198.51.100.0/24'}):
+                self.client.get('/api/state',environ_overrides={'REMOTE_ADDR':'203.0.113.50','HTTP_X_FORWARDED_FOR':'9.9.9.9'})
+                self.assertIsNone(seen[-1],'untrusted peer XFF must be stripped')
+                self.client.get('/api/state',environ_overrides={'REMOTE_ADDR':'198.51.100.7','HTTP_X_FORWARDED_FOR':'9.9.9.9'})
+                self.assertEqual(seen[-1],'9.9.9.9','trusted proxy XFF must be kept')
+        finally:
+            funcs.remove(probe)
+    def test_session_cookie_lifetimes_owner_12h_client_30d(self):
+        import re as _re
+        from email.utils import parsedate_to_datetime
+        from datetime import datetime,timezone,timedelta
+        # owner
+        self._owner_client()
+        sc=self.client.get('/api/state').headers.get('Set-Cookie','')
+        m=_re.search(r'session=([^;]+);.*Expires=([^;]+);',sc)
+        self.assertIsNotNone(m,'owner response should refresh session cookie')
+        owner_exp=parsedate_to_datetime(m.group(2).strip())
+        now=datetime.now(timezone.utc)
+        self.assertTrue(timedelta(hours=10) < (owner_exp-now) < timedelta(hours=13),f'owner expiry ~12h, got {owner_exp-now}')
+        # client
+        c=module.app.test_client()
+        page=c.get('/signup').get_data(as_text=True)
+        tok=_re.search(r'name="csrf-token" content="([^"]+)"',page).group(1)
+        c.post('/api/auth/signup',json={'name':'L','email':'life@example.test','password':'password123'},headers={'X-CSRF-Token':tok})
+        sc2=c.get('/api/auth/me').headers.get('Set-Cookie','')
+        m2=_re.search(r'session=([^;]+);.*Expires=([^;]+);',sc2)
+        self.assertIsNotNone(m2)
+        client_exp=parsedate_to_datetime(m2.group(2).strip())
+        self.assertTrue(timedelta(days=28) < (client_exp-now) < timedelta(days=32),f'client expiry ~30d, got {client_exp-now}')
 if __name__=='__main__':unittest.main(verbosity=2)

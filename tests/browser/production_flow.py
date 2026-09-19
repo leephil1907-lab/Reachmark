@@ -15,7 +15,8 @@ with tempfile.TemporaryDirectory() as tmp:
     try:
         with sync_playwright() as p:
             b=p.chromium.launch();page=b.new_page(viewport={'width':1440,'height':1000});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.on('dialog',lambda d:d.accept())
-            page.goto(base);expect(page).to_have_url(base+'/login');page.locator('#password').fill('test-owner-password');page.get_by_role('button',name='Sign in securely').click();expect(page.locator('#stat-total')).to_have_text('2')
+            # '/' is the public marketing page; owner sign-in lives at /login
+            page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.get_by_role('button',name='Enter workspace').click();expect(page).to_have_url(base+'/workspace');expect(page.locator('#stat-total')).to_have_text('2')
             page.locator('.nav[data-page="leads"]').click();page.locator('#filter-contact').select_option('email');expect(page.locator('#lead-table tr')).to_have_count(1);page.locator('#lead-table button').click()
             page.get_by_text('Manual verification and evidence',exact=True).click();page.locator('#review-form [name="verification"]').select_option('NO_SITE_FOUND');page.locator('#review-form [name="evidence_url"]').fill('https://example.test/research');page.locator('#review-form [name="note"]').fill('Manually searched the business name and checked the source listing.');page.locator('#review-form [type="submit"]').click();expect(page.locator('#review-time')).to_contain_text('Manual review:')
             with page.expect_download() as download:page.get_by_role('link',name='Audit report PDF').click()

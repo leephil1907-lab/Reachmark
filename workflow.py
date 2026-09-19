@@ -66,10 +66,11 @@ def register_workflow(app,db,now,log):
             rows=[dict(r) for r in c.execute('SELECT p.*,u.email as client_email FROM projects p LEFT JOIN users u ON u.id=p.client_user_id ORDER BY p.updated DESC')]
         if session.get('client_id') and session.get('role')=='client' and not session.get('owner'):
             cid=session.get('client_id')
-            user_email=None
-            with db() as cc:
-                r=cc.execute('SELECT email FROM users WHERE id=?',(cid,)).fetchone()
-                user_email=r['email'].lower() if r else None
+            from accounts import verified_client
+            user_email,verified=verified_client(db,cid)
+            if not verified:
+                # Unverified clients see no projects at all until they confirm their email.
+                return jsonify(projects=[],stages=STAGES,currencies=CURRENCIES,today=date.today().isoformat())
             filtered=[]
             for p in rows:
                 if p.get('client_user_id')==cid:

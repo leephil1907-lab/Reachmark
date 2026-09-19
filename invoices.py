@@ -90,21 +90,20 @@ def register_invoices(app, db, now, log):
         return None
 
     def client_email_for_id(cid):
-        if not cid:
-            return None
-        with db() as cc:
-            r = cc.execute('SELECT email FROM users WHERE id=?', (cid,)).fetchone()
-            return r['email'].lower() if r else None
+        # (email, verified). Unverified accounts access NOTHING until they confirm
+        # their mailbox — including directly-assigned invoices (verified_client gate).
+        from accounts import verified_client
+        return verified_client(db, cid)
 
-    def can_access_invoice(row, cid, user_email):
+    def can_access_invoice(row, cid, user_email, verified=False):
         if is_owner():
             return True
-        if not cid:
+        if not cid or not verified:
             return False
         # Direct assignment
         if row['client_user_id'] == cid:
             return True
-        # Email match for unassigned invoices
+        # Email match for unassigned invoices (only after mailbox verification)
         if row['client_user_id'] is None and row['client_email'] and user_email and row['client_email'].strip().lower() == user_email.lower():
             return True
         return False
@@ -182,8 +181,8 @@ def register_invoices(app, db, now, log):
             rows = [dict(r) for r in c.execute('SELECT * FROM invoices ORDER BY updated DESC')]
             # For clients, filter
             if cid and not is_own:
-                user_email = client_email_for_id(cid)
-                rows = [r for r in rows if can_access_invoice(r, cid, user_email)]
+                user_email, verified = client_email_for_id(cid)
+                rows = [r for r in rows if can_access_invoice(r, cid, user_email, verified)]
             # Attach items
             result = []
             for r in rows:
@@ -202,8 +201,8 @@ def register_invoices(app, db, now, log):
             if not r:
                 abort(404)
             row = dict(r)
-            user_email = client_email_for_id(cid) if cid else None
-            if not can_access_invoice(row, cid, user_email):
+            user_email, verified = client_email_for_id(cid) if cid else (None, False)
+            if not can_access_invoice(row, cid, user_email, verified):
                 return jsonify(error='Not found.'),404
             items = [dict(it) for it in c.execute('SELECT * FROM invoice_items WHERE invoice_id=? ORDER BY created', (iid,))]
             row['items'] = items

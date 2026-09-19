@@ -124,7 +124,7 @@ function renderInvoices(){
         <div style="font:600 18px Manrope,sans-serif">${esc(total)}</div>
         <div class="small muted">Issue ${esc(r.issue_date||'—')}</div>
         <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
-          <button class="secondary" style="padding:7px 10px;font-size:12px" onclick="editInvoice('${r.id}')">Edit${sessionRole==='client'?' / view':''} ↗</button>
+          <button class="secondary" style="padding:7px 10px;font-size:12px" data-rm-click="editInvoice" data-rm-arg="${r.id}">Edit${sessionRole==='client'?' / view':''} ↗</button>
           <a class="secondary" style="padding:7px 10px;font-size:12px;text-decoration:none" href="/api/documents/invoice/${r.id}.pdf" target="_blank">PDF ↓</a>
         </div>
       </div>
@@ -141,13 +141,17 @@ function addInvoiceRow(data={}){
     <label>Description<input name="item_desc" maxlength="500" required placeholder="Website design — homepage" value="${esc(data.description||'')}"></label>
     <label>Qty<input name="item_qty" inputmode="decimal" required value="${esc(data.quantity||1)}"></label>
     <label>Unit price<input name="item_price" inputmode="decimal" required placeholder="500.00" value="${esc(data.unit_price||'')}"></label>
-    <button type="button" class="secondary" style="padding:8px" onclick="this.closest('.invoice-row').remove();updateInvoiceTotals()">×</button>
+    <button type="button" class="secondary" style="padding:8px" data-rm-click="removeInvoiceRow" data-rm-arg="this">×</button>
   `;
   list.appendChild(row);
   row.querySelectorAll('input').forEach(i=>i.addEventListener('input', updateInvoiceTotals));
   updateInvoiceTotals();
 }
 
+function removeInvoiceRow(el){
+  var row=el.closest('.invoice-row');
+  if(row){row.remove();updateInvoiceTotals();}
+}
 function updateInvoiceTotals(){
   const currency=document.querySelector('#invoice-form [name="currency"]')?.value||'USD';
   const decimals=invoiceData.currencies[currency] ?? 2;
@@ -227,11 +231,11 @@ async function editInvoice(id=null){
       form.querySelectorAll('input,select,textarea,button[type="submit"]').forEach(el=>{
         if(el.type!=='hidden') el.disabled=true;
       });
-      document.querySelector('#invoice-modal button.secondary[onclick*="addInvoiceRow"]')?.setAttribute('disabled','');
+      document.querySelector('#invoice-modal button.secondary[data-rm-click="addInvoiceRow"]')?.setAttribute('disabled','');
     } else {
       form.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=false);
     }
-    document.getElementById('invoice-documents').innerHTML=`<a href="/api/documents/invoice/${data.id}.pdf" target="_blank">↓ Invoice PDF</a>${!sessionRole||sessionRole==='owner'?`<button type="button" class="danger-link" onclick="deleteInvoice('${data.id}')">Delete invoice</button>`:''}`;
+    document.getElementById('invoice-documents').innerHTML=`<a href="/api/documents/invoice/${data.id}.pdf" target="_blank">↓ Invoice PDF</a>${!sessionRole||sessionRole==='owner'?`<button type="button" class="danger-link" data-rm-click="deleteInvoice" data-rm-arg="${data.id}">Delete invoice</button>`:''}`;
     document.getElementById('invoice-modal-title').textContent= sessionRole==='client' ? 'Invoice — view only' : 'Edit invoice';
   } else {
     form.elements.id.value='';

@@ -68,9 +68,12 @@ def register_documents(app,db,now,settings):
             # Client access check for invoice/proposal/brief
             if session.get('client_id') and session.get('role')=='client' and not session.get('owner'):
                 cid=session.get('client_id')
-                u=c.execute('SELECT email FROM users WHERE id=?',(cid,)).fetchone()
-                user_email=u['email'].lower() if u else ''
+                from accounts import verified_client
+                user_email,verified=verified_client(db,cid)
                 allowed=False
+                if not verified:
+                    # Unverified clients cannot download any document until email confirmed.
+                    abort(404)
                 if kind=='invoice':
                     if r.get('client_user_id')==cid or (not r.get('client_user_id') and r.get('client_email','').lower()==user_email):
                         allowed=True

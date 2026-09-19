@@ -1,7 +1,8 @@
 """Single-owner login; production refuses to boot without explicit secure configuration."""
 import os, secrets, time, hmac, hashlib
 from datetime import timedelta
-from flask import request, session, jsonify, redirect, render_template, url_for
+from ipaddress import ip_address, ip_network
+from flask import request, session, g, jsonify, redirect, render_template, url_for
 from werkzeug.security import check_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -13,6 +14,42 @@ def install_security(app, db):
         if not os.getenv('PUBLIC_BASE_URL','').startswith('https://'): raise RuntimeError('Production requires an HTTPS PUBLIC_BASE_URL.')
         if not os.path.isabs(os.getenv('DATABASE_PATH','')): raise RuntimeError('Production requires an absolute persistent DATABASE_PATH.')
         app.wsgi_app=ProxyFix(app.wsgi_app,x_for=1,x_proto=1,x_host=0)
+    def trusted_proxy_nets():
+        # Read per request so ops can adjust TRUSTED_PROXIES without code changes.
+        raw=os.getenv('TRUSTED_PROXIES','').strip()
+        if not raw:
+            return None
+        nets=[]
+        for part in raw.split(','):
+            part=part.strip()
+            if not part: continue
+            try:
+                nets.append(ip_network(part,strict=False))
+            except ValueError:
+                pass
+        return nets or None
+    if not production and trusted_proxy_nets():
+        # Behind a proxy (Railway/Vercel/Caddy): honor X-Forwarded-* so real client
+        # IPs reach login throttling and audit logs.
+        app.wsgi_app=ProxyFix(app.wsgi_app,x_for=1,x_proto=1,x_host=0)
+    @app.before_request
+    def strip_untrusted_forwarded():
+        # X-Forwarded-For may only be honored when the direct peer is a trusted proxy.
+        if request.headers.get('X-Forwarded-For'):
+            nets=trusted_proxy_nets()
+            if nets is None:
+                return
+            peer=request.environ.get('REMOTE_ADDR','') or ''
+            try:
+                addr=ip_address(peer)
+                if not any(addr in net for net in nets):
+                    request.environ.pop('HTTP_X_FORWARDED_FOR', None)
+            except ValueError:
+                request.environ.pop('HTTP_X_FORWARDED_FOR', None)
+    @app.before_request
+    def csp_nonce_request():
+        # One fresh CSP nonce per request; exposed to templates as {{ csp_nonce }}.
+        g.csp_nonce=secrets.token_urlsafe(16)
     app.secret_key=key or secrets.token_hex(32)
     # Lax: keep the session across top-level navigation from emails, Tawk.to and shared links
     # (Strict silently drops the cookie on those, which looked like an automatic logout).
@@ -34,7 +71,7 @@ def install_security(app, db):
         if session.get('client_id') and session.get('role')=='client':
             return 'client'
         return 'none'
-    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),client_logged_in=bool(session.get('client_id')),current_role=current_role(),production_mode=production))
+    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),client_logged_in=bool(session.get('client_id')),current_role=current_role(),production_mode=production,csp_nonce=getattr(g,'csp_nonce','')))
     @app.before_request
     def owner_guard():
         if public():return
@@ -64,7 +101,12 @@ def install_security(app, db):
                         return
             except Exception:
                 pass
+        # Fail closed: unless APP_ENV=development is set explicitly, owner routes always
+        # require configured owner credentials — an unconfigured deployment serves the
+        # public site but never the workspace.
         configured=bool(os.getenv('OWNER_PASSWORD_HASH') or os.getenv('DASHBOARD_PASSWORD'))
+        if not configured and os.getenv('APP_ENV')!='development':
+            configured=True
         # Credential rotation invalidates existing sessions as well as future logins.
         revision=hashlib.sha256((os.getenv('OWNER_PASSWORD_HASH') or os.getenv('DASHBOARD_PASSWORD','')).encode()).hexdigest()
         authenticated=session.get('owner') and session.get('revision')==revision
@@ -76,7 +118,10 @@ def install_security(app, db):
             auth=request.authorization; legacy=os.getenv('DASHBOARD_PASSWORD')
             if not production and legacy and auth and auth.username=='admin' and hmac.compare_digest(auth.password or '',legacy):return
             if request.path.startswith('/api/'):return jsonify(error='Owner login required.'),401
-            # Clients (or expired sessions) belong on the client sign-in, not the hidden owner login.
+            # The workspace is the owner's area (hidden login); the client dashboard and
+            # everything else belong on the client sign-in.
+            if request.path.startswith('/workspace'):
+                return redirect('/login')
             return redirect('/signin')
         # CSRF for owner writes
         check_csrf = authenticated or (session.get('client_id') and session.get('role')=='client')
@@ -107,9 +152,24 @@ def install_security(app, db):
     @app.post('/logout')
     def owner_logout():session.clear();return redirect('/login')
     @app.after_request
+    def session_lifetime(response):
+        # Owner sessions: 12h idle. Client sessions: 30d sliding (refreshed each request).
+        app.config['PERMANENT_SESSION_LIFETIME']=timedelta(hours=12) if session.get('owner') else timedelta(days=30)
+        return response
+    @app.after_request
     def security_headers(response):
         if production:response.headers['X-Frame-Options']='SAMEORIGIN'
-        response.headers['Content-Security-Policy']="default-src 'self'; script-src 'self' 'unsafe-inline' https://embed.tawk.to https://va.tawk.to https://*.tawk.to; style-src 'self' 'unsafe-inline' https://embed.tawk.to https://*.tawk.to; img-src 'self' data: https://tile.openstreetmap.org https://*.tawk.to https://embed.tawk.to https://va.tawk.to; font-src 'self' https://*.tawk.to; connect-src 'self' https://*.tawk.to https://embed.tawk.to https://va.tawk.to wss://*.tawk.to; frame-src 'self' https://*.tawk.to https://embed.tawk.to https://va.tawk.to; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'" if production else "default-src 'self'; script-src 'self' 'unsafe-inline' https://embed.tawk.to https://va.tawk.to https://*.tawk.to; style-src 'self' 'unsafe-inline' https://embed.tawk.to https://*.tawk.to; img-src 'self' data: https://tile.openstreetmap.org https://*.tawk.to https://embed.tawk.to https://va.tawk.to; font-src 'self' https://*.tawk.to; connect-src 'self' https://*.tawk.to https://embed.tawk.to https://va.tawk.to wss://*.tawk.to; frame-src 'self' https://*.tawk.to https://embed.tawk.to https://va.tawk.to; object-src 'none'; base-uri 'self'; form-action 'self'"
+        nonce=getattr(g,'csp_nonce','')
+        # script-src: no 'unsafe-inline' — inline <script> blocks carry the per-request
+        # nonce and inline on* handlers were replaced by data-rm-* delegation (rm-events.js).
+        response.headers['Content-Security-Policy']=("default-src 'self'; "
+        f"script-src 'self' 'nonce-{nonce}' https://embed.tawk.to https://va.tawk.to https://*.tawk.to https://www.googletagmanager.com; "
+        "style-src 'self' 'unsafe-inline' https://embed.tawk.to https://*.tawk.to; "
+        "img-src 'self' data: https://tile.openstreetmap.org https://*.tawk.to https://embed.tawk.to https://va.tawk.to https://www.google-analytics.com https://stats.g.doubleclick.net https://www.googletagmanager.com; "
+        "font-src 'self' https://*.tawk.to; "
+        "connect-src 'self' https://*.tawk.to https://embed.tawk.to https://va.tawk.to wss://*.tawk.to https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net; "
+        "frame-src 'self' https://*.tawk.to https://embed.tawk.to https://va.tawk.to; object-src 'none'; base-uri 'self'; form-action 'self'"
+        + ("; frame-ancestors 'self'" if production else ""))
         if production:response.headers['Strict-Transport-Security']='max-age=31536000'
         if request.path in ('/login','/logout'):response.headers['Cache-Control']='no-store';response.headers['X-Robots-Tag']='noindex, nofollow'
         return response

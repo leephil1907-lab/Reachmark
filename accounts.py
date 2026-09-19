@@ -1,11 +1,20 @@
 """Client accounts: signup, login, session, plus Reachmark-standard hardening: email verification, password reset, export & close."""
 import re, uuid, time, hashlib, hmac, secrets, os, ssl, smtplib
 from datetime import datetime, timezone, timedelta
-from flask import request, jsonify, session, render_template, redirect, url_for, Response
+from flask import request, jsonify, session, render_template, redirect, url_for, Response, g as flask_g
 from werkzeug.security import generate_password_hash, check_password_hash
 from email.message import EmailMessage
 
 EMAIL_RE = re.compile(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+')
+
+def _with_csp_nonce(html):
+    """Add the per-request CSP nonce to bare inline <script> tags in fallback HTML pages."""
+    try:
+        nonce = flask_g.csp_nonce
+    except Exception:
+        nonce = ''
+    return html.replace('<script>', '<script nonce="%s">' % nonce)
+
 
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
@@ -104,6 +113,58 @@ def send_branded(to_email, subject, text_body, html_title=None, cta_url=None, ct
                 pass
         return False, outbox_id
 
+def verified_client(db, cid):
+    """Return (email, is_verified) for a client user id.
+
+    Gate for ALL client data access: an unverified account (email_verified=0)
+    must see nothing, because the account holder has not proven mailbox control.
+    Returns (None, False) for missing or unverified users."""
+    if not cid:
+        return None, False
+    with db() as c:
+        r = c.execute('SELECT email, email_verified FROM users WHERE id=?', (cid,)).fetchone()
+    if not r:
+        return None, False
+    return r['email'].lower(), bool(r['email_verified'])
+
+_CAPTCHA_VERIFIERS = {}
+
+def register_captcha_verifier(provider, fn):
+    """Register a CAPTCHA verifier fn(token, ip) -> bool. CAPTCHA-ready hook:
+    set CAPTCHA_PROVIDER=<name> in env to enforce the registered verifier."""
+    _CAPTCHA_VERIFIERS[provider.strip().lower()] = fn
+
+def captcha_ok(token, ip):
+    """No-op (True) until CAPTCHA_PROVIDER is set. When a provider is configured
+    but no verifier is registered, fail closed."""
+    provider = os.getenv('CAPTCHA_PROVIDER','').strip().lower()
+    if not provider:
+        return True
+    fn = _CAPTCHA_VERIFIERS.get(provider)
+    if fn is None:
+        return False
+    try:
+        return bool(fn(token or '', ip or ''))
+    except Exception:
+        return False
+
+def check_throttle(db, kind, ip, email, max_hits, window_seconds):
+    """Per-IP + per-email sliding throttle. Returns False when over the limit.
+    Used by signup and forgot-password."""
+    now = time.time()
+    key = f'{kind}|{(ip or "unknown")[:64]}|{(email or "").lower()[:250]}'
+    with db() as c:
+        c.execute('CREATE TABLE IF NOT EXISTS auth_throttle(key TEXT PRIMARY KEY, hits INTEGER, first REAL)')
+        c.execute('DELETE FROM auth_throttle WHERE first < ?', (now - window_seconds,))
+        row = c.execute('SELECT hits, first FROM auth_throttle WHERE key=?', (key,)).fetchone()
+        if row:
+            if row['hits'] >= max_hits:
+                return False
+            c.execute('UPDATE auth_throttle SET hits=hits+1 WHERE key=?', (key,))
+        else:
+            c.execute('INSERT INTO auth_throttle(key,hits,first) VALUES(?,?,?)', (key, 1, now))
+    return True
+
 def register_accounts(app, db, log):
     with db() as c:
         c.executescript('''CREATE TABLE IF NOT EXISTS users(
@@ -183,7 +244,7 @@ def register_accounts(app, db, log):
 
     @app.get('/forgot')
     def forgot_page():
-        return render_template('forgot.html') if os.path.exists(os.path.join(app.root_path,'templates','forgot.html')) else Response("""
+        return render_template('forgot.html') if os.path.exists(os.path.join(app.root_path,'templates','forgot.html')) else Response(_with_csp_nonce("""
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reset password · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><style>
 .auth-page{margin:0;background:#e9edde;color:#26351e;min-height:100vh;display:grid;place-items:center;font-family:Manrope,Arial,sans-serif}.auth-card{box-sizing:border-box;width:min(480px,calc(100% - 32px));padding:40px;background:#fff;border:1px solid #d2d8c7;border-radius:22px;box-shadow:0 22px 70px #24311b10}
 .auth-card h1{font-size:28px;letter-spacing:-1px;margin:14px 0 8px}.auth-card p{line-height:1.7;color:#535f4c;font-size:14px}
@@ -195,11 +256,11 @@ def register_accounts(app, db, log):
 let csrf='';(async()=>{try{let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\\"csrf_token\\" value=\\"([^\\"]+)\\"/);csrf=m?m[1]:''}catch(e){}})();
 const f=document.getElementById('f'),msg=document.getElementById('msg'),ok=document.getElementById('ok');
 f.onsubmit=async e=>{e.preventDefault();msg.style.display='none';ok.style.display='none';try{let r=await fetch('/api/auth/forgot',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({email:document.getElementById('email').value.trim()})});let j=await r.json();if(!r.ok) throw new Error(j.error||'Could not send link');ok.textContent='If an account exists, a reset link has been sent. Check your email (and spam).';ok.style.display='block';}catch(err){msg.textContent=err.message;msg.style.display='block';}};
-</script></body></html>""", mimetype='text/html')
+</script></body></html>"""), mimetype='text/html')
 
     @app.get('/reset/<token>')
     def reset_page(token):
-        return render_template('reset.html', token=token) if os.path.exists(os.path.join(app.root_path,'templates','reset.html')) else Response(f"""
+        return render_template('reset.html', token=token) if os.path.exists(os.path.join(app.root_path,'templates','reset.html')) else Response(_with_csp_nonce(f"""
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Choose new password · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><style>
 .auth-page{{margin:0;background:#e9edde;color:#26351e;min-height:100vh;display:grid;place-items:center;font-family:Manrope,Arial,sans-serif}}.auth-card{{box-sizing:border-box;width:min(480px,calc(100% - 32px));padding:40px;background:#fff;border:1px solid #d2d8c7;border-radius:22px;box-shadow:0 22px 70px #24311b10}}
 .auth-card h1{{font-size:28px;letter-spacing:-1px;margin:14px 0 8px}}.auth-card p{{line-height:1.7;color:#535f4c;font-size:14px}}
@@ -211,7 +272,7 @@ f.onsubmit=async e=>{e.preventDefault();msg.style.display='none';ok.style.displa
 let csrf='';(async()=>{{try{{let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\\"csrf_token\\" value=\\"([^\\"]+)\\"/);csrf=m?m[1]:''}}catch(e){{}}}})();
 const f=document.getElementById('f'),msg=document.getElementById('msg'),ok=document.getElementById('ok');
 f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=document.getElementById('pw').value, pw2=document.getElementById('pw2').value; if(pw!==pw2){{msg.textContent='Passwords do not match.';msg.style.display='block';return}}; try{{let r=await fetch('/api/auth/reset',{{method:'POST',headers:{{'Content-Type':'application/json','X-CSRF-Token':csrf}},body:JSON.stringify({{token:"{token}",password:pw}})}});let j=await r.json();if(!r.ok) throw new Error(j.error||'Could not reset'); ok.textContent='Password updated. Redirecting to sign in…';ok.style.display='block'; setTimeout(()=>location.href='/signin',1200);}}catch(err){{msg.textContent=err.message;msg.style.display='block';}} }};
-</script></body></html>""", mimetype='text/html')
+</script></body></html>"""), mimetype='text/html')
 
     @app.get('/verify/<token>')
     def verify_page(token):
@@ -270,6 +331,11 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
             row = c.execute('SELECT * FROM login_attempts WHERE client=?', (client_hash,)).fetchone()
             if row and row['failures'] >= 10 and row['blocked_until'] > time.time():
                 return jsonify(error='Too many attempts. Wait a few minutes.'),429
+        # Throttle on both dimensions: per-IP cap and per-IP+email cap.
+        if not check_throttle(db, 'signup-ip', request.remote_addr, '', 10, 3600) or not check_throttle(db, 'signup', request.remote_addr, email, 5, 3600):
+            return jsonify(error='Too many account attempts from this connection. Try again in an hour.'),429
+        if not captcha_ok(str(data.get('captcha_token','')), request.remote_addr):
+            return jsonify(error='Verification challenge failed. Reload the page and try again.'),400
         uid = uuid.uuid4().hex
         hashed = generate_password_hash(password)
         stamp = now_iso()
@@ -388,6 +454,12 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
         email = str(data.get('email','')).strip()
         if not valid_email(email):
             return jsonify(error='Enter a valid email address.'),400
+        # Throttle + CAPTCHA-ready hook. Keep the generic ok response on both failure
+        # paths so rate limits and challenges do not leak which emails exist.
+        if not check_throttle(db, 'forgot-ip', request.remote_addr, '', 10, 3600) or not check_throttle(db, 'forgot', request.remote_addr, email, 3, 3600):
+            return jsonify(ok=True)
+        if not captcha_ok(str(data.get('captcha_token','')), request.remote_addr):
+            return jsonify(ok=True)
         user = get_user_by_email(email)
         # Always return ok to avoid enumeration
         if user and user['is_active']:
