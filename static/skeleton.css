@@ -1,0 +1,12 @@
+/* Skeleton loaders: shimmer placeholders while live data arrives. Each block is
+   replaced by real content on load — it never pretends to be data. */
+.sk{display:grid;gap:10px;padding:6px 0}
+.sk i{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,#edf1e3 25%,#dde5cb 50%,#edf1e3 75%);background-size:200% 100%;animation:sk-shimmer 1.3s infinite}
+.sk i:nth-child(2n){width:82%}
+.sk i:nth-child(3n){width:64%}
+@keyframes sk-shimmer{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.sk i{animation:none}}
+/* Sortable directory columns. */
+th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+th.sortable:hover{color:#5a7247}
+.sort-arrow{font-size:9px;color:#8ca650;margin-left:4px}

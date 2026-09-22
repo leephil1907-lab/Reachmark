@@ -1,0 +1,4 @@
+/* Scroll reveals: visible by default; JS adds .will-reveal only when it can animate. */
+[data-reveal].will-reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+[data-reveal].will-reveal.revealed{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){[data-reveal].will-reveal{opacity:1;transform:none;transition:none}}

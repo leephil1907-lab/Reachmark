@@ -1,0 +1,27 @@
+{
+  "note": "Vendored, unmodified skill playbooks used by the Reachmark AI crew. Skills are read at runtime by skills_loader.py; they are never executed. Full upstream licences are kept in ./licenses/.",
+  "vendored_for": "Reachmark AI crew (agent playbooks: outreach copy, qualification, page review, discovery)",
+  "sources": [
+    {
+      "repo": "https://github.com/coreyhaines31/marketingskills",
+      "author": "Corey Haines",
+      "license": "MIT",
+      "license_file": "licenses/marketingskills-LICENSE.txt",
+      "upstream_version": "2.11.1 (plugin.json)",
+      "vendored_commit": "5b2c0007766c6a1cf1d53fd8fc73e979e0821022",
+      "vendored_commit_date": "2026-09-04",
+      "skills": ["cold-email", "copywriting", "cro", "prospecting", "ai-seo", "seo-audit"],
+      "modifications": "none — SKILL.md and references/*.md copied verbatim; evals/ omitted to keep the image small"
+    },
+    {
+      "repo": "https://github.com/latent-spaces/brag",
+      "author": "Shunit Haviv Hakimi",
+      "license": "MIT",
+      "license_file": "licenses/brag-LICENSE.txt",
+      "vendored_commit": "57ce4c9bb912f01a0078b154318bf67c5cbf780f",
+      "vendored_commit_date": "2026-09-21",
+      "skills": ["brag"],
+      "modifications": "none — SKILL.md copied verbatim; music/sfx/render assets omitted (rendering stays an external step)"
+    }
+  ]
+}

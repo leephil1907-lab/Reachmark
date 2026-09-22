@@ -1,0 +1,32 @@
+{
+  "_note": "Offline demo fixtures for the Reachmark AI crew. These are FICTIONAL test records used only when the owner switches on 'offline demo' in the crew console. They are stored with source='Fixture (offline demo)', are never counted as real discoveries, and can be removed with one click (POST /api/crew/demo/purge). Domains use example.com / example.org, reserved for documentation, so no real business is contacted.",
+  "records": [
+    {"name": "Riverside Barbers (demo fixture)", "category": "Hair salon", "city": "Demo City, Demo Country",
+     "address": "12 Example Street", "phone": "+1 555 0100", "email": "", "website": "https://barbers.example.com",
+     "source": "Fixture (offline demo)", "source_url": "https://example.org/fixture/riverside-barbers",
+     "latitude": 0.0, "longitude": 0.0, "opening_hours": "Mon-Fri 09:00-18:00", "social_url": "https://facebook.com/example",
+     "source_tags": {"fixture": "yes", "note": "fictional record for offline demonstration"}},
+    {"name": "Meadow Lane Bakery (demo fixture)", "category": "Bakery", "city": "Demo City, Demo Country",
+     "address": "48 Example Lane", "phone": "", "email": "", "website": "https://facebook.com/example-bakery",
+     "source": "Fixture (offline demo)", "source_url": "https://example.org/fixture/meadow-lane-bakery",
+     "latitude": 0.0, "longitude": 0.0, "opening_hours": "", "social_url": "https://facebook.com/example-bakery",
+     "source_tags": {"fixture": "yes", "note": "social-only listing"}},
+    {"name": "Northgate Dental Studio (demo fixture)", "category": "Dentist", "city": "Demo City, Demo Country",
+     "address": "9 Example Road", "phone": "+1 555 0142", "email": "hello@northgate.example.org",
+     "website": "https://northgate-dental.example.org", "source": "Fixture (offline demo)",
+     "source_url": "https://example.org/fixture/northgate-dental", "latitude": 0.0, "longitude": 0.0,
+     "opening_hours": "Mon-Sat 08:30-17:00", "social_url": "",
+     "source_tags": {"fixture": "yes", "note": "listed website to observe"}},
+    {"name": "Halcyon Physio (demo fixture)", "category": "Physiotherapist", "city": "Demo City, Demo Country",
+     "address": "301 Example Avenue", "phone": "+1 555 0188", "email": "", "website": "",
+     "source": "Fixture (offline demo)", "source_url": "https://example.org/fixture/halcyon-physio",
+     "latitude": 0.0, "longitude": 0.0, "opening_hours": "", "social_url": "",
+     "source_tags": {"fixture": "yes", "note": "no website listed at all"}},
+    {"name": "Copper Kettle Cafe (demo fixture)", "category": "Café", "city": "Demo City, Demo Country",
+     "address": "5 Example Square", "phone": "+1 555 0121", "email": "team@copperkettle.example.org",
+     "website": "https://copperkettle.example.org", "source": "Fixture (offline demo)",
+     "source_url": "https://example.org/fixture/copper-kettle", "latitude": 0.0, "longitude": 0.0,
+     "opening_hours": "Daily 07:30-16:00", "social_url": "https://instagram.com/example-cafe",
+     "source_tags": {"fixture": "yes", "note": "listed website, published contact e-mail"}}
+  ]
+}

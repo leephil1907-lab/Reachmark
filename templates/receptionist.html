@@ -1,0 +1,25 @@
+{# AI receptionist widget — include on any public page with: {% include 'receptionist.html' %} #}
+<button id="rm-receptionist-launch" type="button" aria-label="Open the studio assistant" aria-expanded="false">
+  <span class="rm-dot"></span> Ask the studio
+</button>
+<section id="rm-receptionist" class="rm-panel" hidden aria-label="Studio assistant">
+  <header class="rm-head">
+    <div><b>Reachmark front desk</b><small>Answers from published facts only · hands over to a human on request</small></div>
+    <button type="button" id="rm-close" aria-label="Close assistant">×</button>
+  </header>
+  <div class="rm-log" id="rm-log" role="log" aria-live="polite">
+    <div class="rm-msg assistant">Hello — I can explain what the studio does, what the published tiers cost, how long a build takes, or how to start. What would you like to know?</div>
+  </div>
+  <form class="rm-form" id="rm-form">
+    <label class="rm-sr" for="rm-input">Your message</label>
+    <input id="rm-input" name="message" type="text" maxlength="600" autocomplete="off"
+           placeholder="Ask about pricing, timing, samples…"/>
+    <input id="rm-name" name="name" type="text" maxlength="120" autocomplete="name" placeholder="Your name (optional)" hidden/>
+    <input id="rm-email" name="email" type="email" maxlength="200" autocomplete="email" placeholder="E-mail (optional)" hidden/>
+    <input id="rm-hp" name="company_url" type="text" class="rm-hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>
+    <button type="submit" id="rm-send">Send</button>
+  </form>
+  <p class="rm-note">No invented answers: if it is not a verified fact, the owner is asked. <a href="/enquire">Full enquiry form ↗</a></p>
+</section>
+<link rel="stylesheet" href="/static/receptionist.css"/>
+<script src="/static/receptionist.js" defer></script>

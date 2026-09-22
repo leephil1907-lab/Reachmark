@@ -1,0 +1,59 @@
+services:
+  app:
+    image: ${REACHMARK_IMAGE:-reachmark:local}
+    build: .
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      APP_ENV: production
+      DATABASE_PATH: /data/reachmark.sqlite3
+      BACKUP_DIR: /backups
+    volumes:
+      - reachmark_data:/data
+      - reachmark_backups:/backups:ro
+    expose: ["8000"]
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    logging:
+      options: {max-size: "10m", max-file: "3"}
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app: {condition: service_healthy}
+  backup:
+    image: ${REACHMARK_IMAGE:-reachmark:local}
+    restart: unless-stopped
+    env_file: .env.backup
+    environment:
+      DATABASE_PATH: /data/reachmark.sqlite3
+      BACKUP_DIR: /backups
+    volumes:
+      - reachmark_data:/data
+      - reachmark_backups:/backups
+    command: ["python", "scripts/backup.py", "loop"]
+    healthcheck:
+      test: ["CMD", "python", "scripts/backup.py", "check"]
+      interval: 5m
+      timeout: 10s
+      start_period: 2m
+    depends_on:
+      app: {condition: service_healthy}
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    logging:
+      options: {max-size: "10m", max-file: "3"}
+volumes:
+  reachmark_data:
+  reachmark_backups:
+  caddy_data:
+  caddy_config:

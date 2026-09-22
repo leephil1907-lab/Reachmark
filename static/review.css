@@ -1,0 +1,95 @@
+/* Review link page — the concept a business is asked to answer.
+   Charcoal/lime studio system, single column on phones, no external assets. */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#F5F5EF;color:#20251F;font:16px/1.65 'DM Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.theme-ember{--accent:#9D452A;--soft:#F3E7DF}
+.theme-sage{--accent:#6E7F55;--soft:#ECF1E2}
+.theme-clinic{--accent:#2A9D8F;--soft:#E3F2EF}
+.theme-clay{--accent:#A9713C;--soft:#F5EBDD}
+.theme-navy{--accent:#1A2A4A;--soft:#E7EAF2}
+.theme-market{--accent:#E76F51;--soft:#FDECE4}
+.theme-pulse{--accent:#4C6EF5;--soft:#EAEEFE}
+.theme-steel{--accent:#3F5A66;--soft:#E7EEF1}
+.theme-charcoal{--accent:#20251F;--soft:#EDEFE6}
+body{--accent:#20251F;--soft:#EDEFE6}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+.bar{background:#20251F;color:#dbe4cb;font:600 11px/1.6 'Manrope','DM Sans',sans-serif;letter-spacing:.02em;padding:10px 22px;
+  display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}
+.bar strong{color:#D5F268;letter-spacing:.1em}
+.bar span{font-weight:400;color:#a9b894;font-size:11px}
+.top{border-bottom:1px solid #e4e7d8;background:#fff}
+.top-inner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 22px}
+.brand{font:700 19px 'Manrope','DM Sans',sans-serif;letter-spacing:-.4px}
+.brand i{color:var(--accent);font-style:normal}
+.chip{font:600 11px 'Manrope','DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.08em;background:var(--soft);color:var(--accent);
+  padding:6px 11px;border-radius:999px;white-space:nowrap}
+.hero{padding:52px 0 30px;max-width:760px}
+.eyebrow{font:700 11px 'Manrope','DM Sans',sans-serif;letter-spacing:.14em;color:#7b866c;margin:0 0 14px}
+h1{font:400 clamp(30px,5.2vw,50px)/1.08 Georgia,'Times New Roman',serif;letter-spacing:-1.4px;margin:0 0 18px}
+h2{font:400 clamp(22px,3vw,30px)/1.2 Georgia,serif;letter-spacing:-.7px;margin:0 0 14px}
+.lead{font-size:17px;color:#4b5544;margin:0 0 22px}
+.lead.small{font-size:15px;color:#68735c}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.btn{display:inline-flex;align-items:center;gap:22px;border-radius:12px;padding:14px 20px;font:700 13.5px 'Manrope','DM Sans',sans-serif;
+  text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .16s ease,background .16s ease}
+.btn.primary{background:#20251F;color:#F5F5EF}
+.btn.primary:hover{transform:translateY(-2px)}
+.btn.ghost{background:#fff;border-color:#dde2cf;color:#20251F}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.fineprint{font-size:12.5px;color:#7b866c;line-height:1.7;max-width:720px}
+.block{padding:34px 0;border-top:1px solid #e4e7d8}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:#fff;border:1px solid #e4e7d8;border-radius:16px;padding:22px}
+.card .num{font:700 11px 'Manrope',sans-serif;color:var(--accent);letter-spacing:.1em}
+.card h3{font:600 17px 'Manrope','DM Sans',sans-serif;margin:12px 0 8px}
+.card p{margin:0;color:#5c6752;font-size:14px}
+.facts{margin:0 0 14px;padding-left:20px;color:#4b5544}
+.facts li{margin:5px 0;font-size:14.5px}
+.answer{background:#fff;border:1px solid #dde2cf;border-radius:20px;padding:28px 22px;margin:34px 0;scroll-margin-top:16px}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0 6px}
+.choice{text-align:left;background:#fbfcf7;border:1.5px solid #dfe5d2;border-radius:14px;padding:16px;cursor:pointer;font:inherit;transition:border-color .16s,transform .16s,background .16s}
+.choice:hover{border-color:var(--accent);transform:translateY(-2px)}
+.choice.selected{border-color:var(--accent);background:var(--soft)}
+.choice b{display:block;font:700 14.5px 'Manrope','DM Sans',sans-serif;margin-bottom:5px}
+.choice span{display:block;font-size:12.5px;color:#6d7761}
+.form{display:grid;gap:13px;margin-top:18px;max-width:620px}
+.form label{display:grid;gap:6px;font:600 12.5px 'Manrope','DM Sans',sans-serif;color:#3c4634}
+.form input,.form textarea{border:1px solid #dfe5d2;border-radius:11px;padding:12px 13px;font:15px 'DM Sans',system-ui,sans-serif;background:#fbfcf7;width:100%}
+.form input:focus,.form textarea:focus{outline:2px solid var(--accent);outline-offset:1px;background:#fff}
+.form .hp{position:absolute;left:-9999px;width:1px;height:1px}
+.chosen{font:700 13px 'Manrope','DM Sans',sans-serif;color:var(--accent);margin:0}
+#send-answer{justify-self:start}
+.done{background:var(--soft);border:1px solid #d8e0c8;border-radius:16px;padding:20px;margin-top:16px}
+.done b{font:700 16px 'Manrope','DM Sans',sans-serif;display:block;margin-bottom:6px}
+.done p{margin:0;color:#4b5544}
+.contact{display:grid;grid-template-columns:auto 1fr;gap:8px 22px;margin:0 0 12px}
+.contact dt{font:600 11px 'Manrope','DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.06em;color:#7b866c;padding-top:3px}
+.contact dd{margin:0;font-size:15px;overflow-wrap:anywhere}
+.contact a{color:var(--accent)}
+.close p{color:#4b5544;max-width:760px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding:26px 22px 90px;color:#7b866c;font-size:12px}
+@media(max-width:760px){.cards{grid-template-columns:1fr}.choices{grid-template-columns:1fr}.contact{grid-template-columns:1fr;gap:4px}
+  .contact dt{padding-top:10px}.hero{padding-top:36px}.answer{padding:22px 16px;border-radius:16px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* Measured site faults backing the proposal — same card language as .facts. */
+.faults{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.faults li{background:#f4f6ec;border:1px solid #e2e7d2;border-radius:8px;padding:10px 14px;font-size:13px;line-height:1.6;color:#3c4634}
+.faults .src{color:#68735c;font-size:11px;white-space:nowrap}
+
+/* Optional concept rating: keyboard-friendly star radios, CSS-only fill. */
+.stars-field{border:0;padding:0;margin:16px 0 4px}
+.stars-field legend{font-size:12px;color:#5c6752;margin-bottom:6px}
+.stars{display:inline-flex;flex-direction:row-reverse;gap:2px}
+.stars input{position:absolute;width:1px;height:1px;opacity:0}
+.stars label{font-size:26px;line-height:1;color:#cfd6c2;cursor:pointer;padding:0 1px}
+.stars label:hover,.stars label:hover~label,.stars input:checked~label{color:#8ca650}
+.stars input:focus-visible+label{outline:2px solid #8ca650;outline-offset:2px;border-radius:4px}
+
+/* Aurora header: the same slow brand drift on the review page. */
+.review-aurora{position:relative;overflow:hidden}
+.review-aurora::before{content:'';position:absolute;inset:-30% -10%;background:radial-gradient(45% 60% at 20% 40%,rgba(213,242,104,.30),transparent 70%),radial-gradient(45% 60% at 80% 30%,rgba(140,166,80,.28),transparent 70%);animation:review-aurora-drift 14s ease-in-out infinite alternate;pointer-events:none}
+.review-aurora>*{position:relative}
+@keyframes review-aurora-drift{from{transform:translate3d(-2%,0,0)}to{transform:translate3d(2%,1%,0)}}
+@media (prefers-reduced-motion:reduce){.review-aurora::before{animation:none}}

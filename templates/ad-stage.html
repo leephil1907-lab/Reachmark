@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Concept ad — {{ business }} · Reachmark</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="/static/fonts.css">
+<style>
+/* ---------------------------------------------------------------------------
+   The ad stage. The window in the middle is the real concept page (/r/<token>),
+   panned by this page's own timeline — no frames are faked and no mockups are
+   drawn. The overlays carry only saved facts and the card list repeats the
+   honest disclaimer. Layout is a 3-row grid so nothing ever overlaps or clips:
+   [chip row] [browser window] [caption band].
+   --------------------------------------------------------------------------- */
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#161a15;color:#F5F5EF;
+  font:16px/1.6 Manrope,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+#stage{position:relative;width:100vw;height:100vh;display:grid;
+  grid-template-rows:auto minmax(0,1fr) var(--band);gap:var(--gap);padding:var(--pad);
+  background:radial-gradient(120% 100% at 15% 0%,#232a20 0%,#161a15 62%)}
+body.wide{--band:290px;--gap:22px;--pad:20px 52px 34px}
+body.tall{--band:400px;--gap:24px;--pad:64px 40px 52px}
+
+/* progress rail along the very bottom */
+#bar{position:absolute;left:0;right:0;bottom:0;height:4px;background:#2b3327;z-index:8}
+#bar i{display:block;height:100%;width:0;background:#D5F268}
+
+/* row 1 — the honest labels, top-left and top-right */
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
+.chip{display:inline-flex;align-items:center;gap:10px;background:rgba(22,26,21,.78);
+  border:1px solid #333c2d;border-radius:999px;padding:9px 16px;
+  font:600 13px 'Manrope',sans-serif;letter-spacing:.02em;opacity:0;animation:in .6s .3s forwards}
+.chip b{color:#D5F268;font-weight:700}
+.disclaimer{max-width:46ch;text-align:right;font-size:12px;line-height:1.5;color:#9fae8e;
+  opacity:0;animation:in .6s .5s forwards}
+body.tall .disclaimer{font-size:11px;max-width:30ch}
+
+/* row 2 — the real page, in a window frame, panned by the mask */
+#window{position:relative;min-height:0;border-radius:16px;overflow:hidden;background:#0f120e;
+  border:1px solid #38422f;box-shadow:0 30px 80px rgba(0,0,0,.55);opacity:0;animation:in .7s .15s forwards}
+#chrome{position:absolute;top:0;left:0;right:0;height:34px;z-index:3;display:flex;align-items:center;gap:8px;
+  padding:0 12px;background:linear-gradient(#2a3324,#212a1c);border-bottom:1px solid #38422f}
+#chrome i{width:9px;height:9px;border-radius:50%;background:#5c6b4d;display:block}
+#chrome .url{margin-left:10px;flex:1;height:18px;border-radius:9px;background:rgba(0,0,0,.35);
+  border:1px solid #3d4834;color:#93a381;font-size:11px;line-height:16px;padding:0 10px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.tall #chrome{height:30px}
+#mask{position:absolute;top:34px;left:0;right:0;bottom:0;overflow:hidden;background:#fff;
+  display:flex;align-items:flex-start;justify-content:center}
+body.tall #mask{top:30px}
+/* The camera pans this container, not a transformed layer: scrolling a box records
+   cleanly in headless capture, while translating a promoted layer leaves ghost pixels. */
+#mask{scroll-behavior:auto}
+#frame{position:relative;display:block;flex:0 0 auto;border:0;background:#fff}
+
+/* row 3 — the caption band: a fixed-height stage, cards stack from the bottom */
+#band{position:relative;min-height:0;opacity:0;animation:in .7s .35s forwards}
+.cap{position:absolute;left:0;right:0;bottom:0;opacity:0;transform:translateY(16px);
+  transition:opacity .5s ease,transform .5s ease;background:rgba(19,23,18,.88);
+  border:1px solid #333c2d;border-radius:18px;padding:22px 30px;backdrop-filter:blur(8px)}
+.cap.on{opacity:1;transform:none}
+.cap .kicker{font:700 11px 'Manrope',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#D5F268}
+.cap h2{font:600 clamp(22px,2.4vw,38px)/1.16 'Manrope',sans-serif;letter-spacing:-.02em;margin:8px 0 0}
+.cap p{margin:8px 0 0;color:#c9d5b8;font-size:15px;max-width:76ch}
+.cap .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.cap .facts span{background:#242c20;border:1px solid #3a4433;border-radius:999px;padding:5px 12px;
+  font-size:12px;color:#d9e5c6}
+body.tall .cap{padding:20px 22px}
+body.tall .cap h2{font-size:30px}
+body.tall .cap p{font-size:14px}
+
+/* the close: covers everything, ends on the one question */
+#end{position:absolute;inset:0;z-index:9;display:grid;place-items:center;text-align:center;
+  background:linear-gradient(160deg,#1d231a,#12160f);opacity:0;transition:opacity .7s ease;pointer-events:none}
+#end.on{opacity:1}
+#end .inner{max-width:min(920px,86vw)}
+#end .tag{display:inline-block;background:#D5F268;color:#1b201a;font:700 12px 'Manrope',sans-serif;
+  letter-spacing:.1em;text-transform:uppercase;padding:8px 16px;border-radius:999px}
+#end h1{font:650 clamp(30px,5vw,70px)/1.06 'Manrope',sans-serif;letter-spacing:-.03em;margin:22px 0 14px}
+#end h1 i{font-style:normal;color:#D5F268}
+#end p{color:#a9b998;font-size:clamp(14px,1.4vw,19px);margin:0 auto;max-width:44ch}
+#end .brand{margin-top:26px;font:700 14px 'Manrope',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#e6f0d6}
+#end .small{margin-top:10px;font-size:12px;color:#7f8d70}
+
+@keyframes in{to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.chip,.disclaimer,#window,#band{animation:none;opacity:1}}
+</style>
+</head>
+<body class="{{ fmt }}">
+<div id="stage">
+  <div class="top">
+    <span class="chip"><b>◨</b> Independent concept · prepared by {{ studio }}</span>
+    <span class="disclaimer">Not the official website of {{ business }}.<br>Nothing is published under their name unless they say yes.</span>
+  </div>
+
+  <div id="window">
+    <div id="chrome"><i></i><i></i><i></i><span class="url">{{ business }} — concept page · {{ studio }}</span></div>
+    <div id="mask"><iframe id="frame" title="Concept page" scrolling="no" src="/r/{{ token }}"></iframe></div>
+  </div>
+
+  <div id="band">
+    {% for cap in captions %}
+    <div class="cap" data-at="{{ cap.at }}" data-until="{{ cap.until }}">
+      <div class="kicker">{{ cap.kicker }}</div>
+      <h2>{{ cap.title }}</h2>
+      {% if cap.body %}<p>{{ cap.body }}</p>{% endif %}
+      {% if cap.facts %}<div class="facts">{% for f in cap.facts %}<span>{{ f }}</span>{% endfor %}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div id="bar"><i id="progress"></i></div>
+</div>
+
+<div id="end"><div class="inner">
+  <span class="tag">One question, one tap</span>
+  <h1>{{ business }} — <i>would you like this built?</i></h1>
+  <p>{{ end_note }}</p>
+  <div class="brand">{{ studio }}</div>
+  <div class="small">Concept first. Ask second. Build when they say yes.</div>
+</div></div>
+
+<script>
+(function () {
+  var qs = new URLSearchParams(location.search);
+  var seconds = Number(qs.get('seconds') || {{ seconds }});
+  var frame = document.getElementById('frame');
+  var mask = document.getElementById('mask');
+  var bar = document.getElementById('progress');
+  var caps = [].slice.call(document.querySelectorAll('.cap'));
+  var end = document.getElementById('end');
+  var doc = null, mode = 'pause', travel = 0, aimAt = 0;
+  var panFrom = 0.8, panTo = Math.max(4, seconds * 0.62);
+
+  /* Camera, in order of fidelity:
+     'natural' — the page keeps its own viewport-sized layout and scrolls itself, the way a
+                 visitor scrolls it. Small layer, clean capture, no ghosted pixels.
+     'mask'    — if the page cannot scroll itself, it is laid out at full height and the
+                 frame around it pans instead. Still the real page, never a mockup. */
+  function measure() {
+    try {
+      doc = frame.contentDocument;
+      if (!doc || !doc.body) return;
+      /* The floating assistant is part of the real page, but in a 16-second cut it sits on
+         top of the very card the ad is about. Hidden here for the recording only — the page
+         itself is untouched and still ships the widget. */
+      if (!doc.__adClean) {
+        var style = doc.createElement('style');
+        style.textContent = '#rm-receptionist-launch,#rm-receptionist{display:none!important}';
+        (doc.head || doc.documentElement).appendChild(style);
+        doc.__adClean = true;
+      }
+      var vw = mask.clientWidth, vh = mask.clientHeight;
+      frame.style.width = vw + 'px';
+      frame.style.height = vh + 'px';
+      setTimeout(function () {
+        try {
+          var d = frame.contentDocument, w = frame.contentWindow;
+          var scrollable = d.documentElement.scrollHeight - d.documentElement.clientHeight;
+          if (scrollable > 60) {
+            mode = 'natural';
+            travel = scrollable;
+            aimAt = aim(d, vh, travel);
+            w.scrollTo(0, 0);
+            return;
+          }
+          /* fall back: lay the page out at full height and pan the mask */
+          var full = Math.max(d.documentElement.scrollHeight, d.body.scrollHeight);
+          frame.style.height = full + 'px';
+          mode = 'mask';
+          travel = Math.max(0, full - vh);
+          aimAt = aim(d, vh, travel);
+        } catch (err) { mode = 'pause'; travel = 0; }
+      }, 420);
+    } catch (err) { mode = 'pause'; travel = 0; }
+  }
+
+  /* Aim at the real "answer" controls when the page has them, so the cut finishes on the
+     one thing being asked for. Otherwise: the foot of the page. */
+  function aim(d, vh, max) {
+    var wanted = /not right now|already have a website/i, hit = null;
+    var all = d.querySelectorAll('button,a,h3,label');
+    for (var i = 0; i < all.length && !hit; i++) {
+      if (wanted.test((all[i].textContent || '').trim())) hit = all[i];
+    }
+    if (!hit) return max;
+    var top = 0, node = hit;
+    while (node) { top += node.offsetTop || 0; node = node.offsetParent; }
+    return Math.max(0, Math.min(max, top - vh * 0.5));
+  }
+
+  function pan(p) {
+    if (!travel) return;
+    var eased = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    var y = aimAt * eased;
+    try {
+      if (mode === 'natural') { frame.contentWindow.scrollTo(0, y); }
+      else if (mode === 'mask') { mask.scrollTop = y; }
+    } catch (err) { /* same origin by construction */ }
+  }
+
+  function show(index) { caps.forEach(function (c, i) { c.classList.toggle('on', i === index); }); }
+  show(0);
+
+  var started = null, done = false;
+  function tick(now) {
+    if (started === null) started = now;
+    var t = (now - started) / 1000;
+    bar.style.width = (Math.min(1, t / seconds) * 100).toFixed(2) + '%';
+    pan(Math.max(0, Math.min(1, (t - panFrom) / Math.max(1, panTo - panFrom))));
+    for (var i = 0; i < caps.length; i++) {
+      var at = Number(caps[i].dataset.at || 0), until = Number(caps[i].dataset.until || 0);
+      if (t >= at && t < until) { show(i); }
+    }
+    if (t >= seconds - 3.2) { end.classList.add('on'); }
+    if (t >= seconds) { if (!done) { done = true; window.__adDone = true; document.title = 'ad-done'; } return; }
+    requestAnimationFrame(tick);
+  }
+
+  /* Start the cut as soon as the real page is readable — waiting for window.load on a page
+     that carries a chat widget means seconds of dead air at the top of the recording. */
+  function ready() {
+    try {
+      var d = frame.contentDocument;
+      if (!d || !d.body) return false;
+      return d.readyState !== 'loading' && !!d.querySelector('h1,h2');
+    } catch (err) { return false; }
+  }
+  var waited = 0;
+  function begin() {
+    measure();
+    setTimeout(function () { if (started === null) requestAnimationFrame(tick); }, 700);
+  }
+  var poll = setInterval(function () {
+    waited += 150;
+    if (ready() || waited > 5000) {
+      clearInterval(poll);
+      if (started === null) begin();
+    }
+  }, 150);
+  frame.addEventListener('load', function () { if (started === null && ready()) { clearInterval(poll); begin(); } });
+})();
+</script>
+</body>
+</html>

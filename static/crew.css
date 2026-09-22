@@ -1,0 +1,79 @@
+/* AI crew console — same charcoal/lime system as the workspace. */
+.crew-hero{display:grid;grid-template-columns:minmax(260px,1fr) minmax(280px,1.15fr);gap:20px;margin:22px 0 26px}
+.crew-orb{position:relative;min-height:260px;border-radius:20px;background:
+  radial-gradient(120% 90% at 20% 0%,#2b3325 0%,#1c211a 60%,#171b15 100%);
+  border:1px solid #333c2d;overflow:hidden}
+.crew-orb canvas{border-radius:20px}
+.crew-hero-side{display:grid;gap:16px}
+.crew-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:12px}
+.crew-stat{background:#fff;border:1px solid #e4e7d8;border-radius:14px;padding:13px 15px}
+.crew-stat b{display:block;font:800 22px 'Manrope','DM Sans',sans-serif;letter-spacing:-.6px}
+.crew-stat span{font:600 10.5px 'Manrope','DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#7b866c}
+.crew-guardrails{background:#20251F;border-radius:16px;padding:16px 18px;color:#dbe4cb;font-size:12.5px;line-height:1.7}
+.crew-guardrails b{color:#D5F268;display:block;font:700 11px 'Manrope','DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+.crew-guardrails p{margin:0 0 8px}
+.crew-guardrails p:last-child{margin-bottom:0}
+.crew-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:20px;margin:20px 0}
+.crew-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.crew-check{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:#4b5544;margin-top:9px}
+.crew-check input{margin-top:3px}
+.crew-run label{display:grid;gap:6px;font:600 12px 'Manrope','DM Sans',sans-serif;color:#3c4634;margin-top:12px}
+.crew-run select,.crew-run input{border:1px solid #dfe5d2;border-radius:10px;padding:10px 12px;font:14px 'DM Sans',system-ui,sans-serif;background:#fbfcf7;width:100%}
+.crew-run select:focus,.crew-run input:focus{outline:2px solid #8CA650;outline-offset:1px}
+.crew-run-status{display:flex;flex-direction:column}
+.crew-run-body{flex:1;max-height:420px;overflow-y:auto;margin-top:10px}
+.crew-step{border-left:2px solid #dfe5d2;padding:8px 0 8px 13px;margin:10px 0}
+.crew-step.ok{border-color:#8CA650}
+.crew-step.running{border-color:#D5F268}
+.crew-step.failed,.crew-step.blocked{border-color:#e0a1a1}
+.crew-step.awaiting_approval{border-color:#e8c65a}
+.crew-step b{font:700 12.5px 'Manrope','DM Sans',sans-serif}
+.crew-step small{color:#7b866c;display:block}
+.crew-step .crew-receipt{margin:6px 0 0;padding:0;list-style:none}
+.crew-step .crew-receipt li{font-size:11.5px;color:#5c6752;border-top:1px dashed #eef1e4;padding:5px 0}
+.crew-step .crew-receipt li b{color:#42502f;font-weight:600}
+.crew-step .crew-receipt a{color:#42502f;text-decoration:underline;overflow-wrap:anywhere}
+.crew-agent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:14px;margin-top:12px}
+.crew-agent{border:1px solid #e4e7d8;border-radius:16px;padding:16px;background:#fbfcf7}
+.crew-agent.active{border-color:#D5F268;box-shadow:0 8px 24px rgba(140,166,80,.18);background:#fff}
+.crew-agent .tag{display:inline-block;font:700 9.5px 'Manrope',sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#42502f;background:#EDF3E1;border-radius:999px;padding:4px 9px;margin-bottom:9px}
+.crew-agent h4{margin:0 0 6px;font:700 15px 'Manrope','DM Sans',sans-serif}
+.crew-agent p{margin:0 0 9px;font-size:12.5px;color:#5c6752;line-height:1.6}
+.crew-agent ul{margin:0;padding-left:16px;font-size:11.5px;color:#6d7761}
+.crew-agent ul li{margin:3px 0}
+.crew-approval{border:1px solid #e4e7d8;border-radius:16px;padding:16px;margin:12px 0;background:#fff}
+.crew-approval header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.crew-approval h4{margin:0;font:700 14.5px 'Manrope','DM Sans',sans-serif}
+.crew-approval pre{white-space:pre-wrap;background:#fbfcf7;border:1px solid #eef1e4;border-radius:11px;padding:12px;font:12.5px/1.65 'DM Sans',system-ui,sans-serif;max-height:240px;overflow:auto;margin:11px 0}
+.crew-approval .actions{display:flex;gap:9px;flex-wrap:wrap}
+.crew-approval .warn{font-size:12px;color:#8a6d1f;background:#fffbe6;border:1px solid #f0e0a0;border-radius:9px;padding:8px 10px;margin:9px 0}
+.crew-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border-top:1px solid #eff1e7;padding:11px 0;font-size:12.5px}
+.crew-row:first-child{border-top:0}
+.crew-row .grow{flex:1;min-width:0}
+.crew-row b{display:block;font:600 13px 'Manrope','DM Sans',sans-serif}
+.crew-row small{color:#7b866c;display:block;overflow-wrap:anywhere}
+.crew-row .pill{font:700 10px 'Manrope',sans-serif;text-transform:uppercase;letter-spacing:.06em;border-radius:999px;padding:4px 9px;background:#EDF3E1;color:#42502f;white-space:nowrap}
+.crew-row .pill.amber{background:#fff3d6;color:#7a5c12}
+.crew-row .pill.red{background:#fdeceb;color:#8a3226}
+.crew-row .pill.green{background:#E7F2DC;color:#3d5b1e}
+.crew-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}
+.crew-actions button{font:600 11.5px 'Manrope','DM Sans',sans-serif;border:1px solid #dfe5d2;background:#fff;border-radius:9px;padding:7px 11px;cursor:pointer}
+.crew-actions button:hover{border-color:#8CA650;color:#42502f}
+.crew-actions button.primary{background:#20251F;color:#F5F5EF;border-color:#20251F}
+.crew-skill-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px;margin-top:12px}
+.crew-skill{border:1px solid #e4e7d8;border-radius:13px;padding:12px 13px;background:#fbfcf7}
+.crew-skill b{display:block;font:700 13px 'Manrope','DM Sans',sans-serif}
+.crew-skill small{color:#7b866c;font-size:11px}
+.crew-skill p{margin:7px 0 0;font-size:11.5px;color:#5c6752}
+.crew-event{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid #f0f2e8;font-size:12px}
+.crew-event:first-child{border-top:0}
+.crew-event time{color:#9aa48c;font-size:11px;white-space:nowrap}
+.crew-event .who{font:700 11px 'Manrope',sans-serif;color:#42502f;white-space:nowrap}
+.crew-event.warn .msg{color:#7a5c12}
+.crew-event.error .msg{color:#8a3226}
+.crew-transcript{max-height:340px;overflow:auto;background:#fbfcf7;border:1px solid #eef1e4;border-radius:12px;padding:12px;margin-top:10px}
+.crew-transcript div{margin:7px 0;font-size:12.5px}
+.crew-transcript .visitor b{color:#20251F}
+.crew-transcript .assistant b{color:#42502f}
+.crew-demo-note{font-size:12px;color:#7a5c12;background:#fffbe6;border:1px solid #f0e0a0;border-radius:10px;padding:9px 11px;margin-top:10px}
+@media(max-width:900px){.crew-hero{grid-template-columns:1fr}.crew-two{grid-template-columns:1fr}}

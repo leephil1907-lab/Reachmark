@@ -1,0 +1,62 @@
+name: Deploy approved production release
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Test and build"]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: reachmark-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (vars.ENABLE_AUTO_DEPLOY == 'true' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      RELEASE_COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - run: pip install -r requirements.txt && python -m unittest tests.test_app tests.test_operations tests.test_maps.MapTests tests.test_production tests.test_crew tests.test_video tests.test_receptionist_page tests.test_brain -q
+      - uses: actions/setup-node@v4
+        with: {node-version: '22', cache: npm}
+      - run: npm ci && npm run build
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}:${RELEASE_COMMIT}"
+          docker build --build-arg RELEASE_SHA="$RELEASE_COMMIT" -t "$IMAGE" .
+          docker push "$IMAGE"
+      - name: Deploy exact commit and verify HTTPS release
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER: ${{ secrets.DEPLOY_USER }}
+          URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          trap 'rm -f ~/.ssh/deploy' EXIT
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}:${RELEASE_COMMIT}"
+          # /opt/reachmark and its protected environment files are provisioned once by the owner.
+          ssh -i ~/.ssh/deploy "$USER@$HOST" 'cd /opt/reachmark && docker compose exec -T backup python scripts/backup.py backup'
+          scp -i ~/.ssh/deploy compose.yaml "$USER@$HOST:/opt/reachmark/compose.yaml"
+          scp -i ~/.ssh/deploy deploy/Caddyfile "$USER@$HOST:/opt/reachmark/deploy/Caddyfile"
+          ssh -i ~/.ssh/deploy "$USER@$HOST" "cd /opt/reachmark && REACHMARK_IMAGE='$IMAGE' docker compose pull app backup && printf '\nREACHMARK_IMAGE=%s\n' '$IMAGE' >> .env && docker compose up -d --no-build && docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile"
+          python scripts/verify_release.py "$URL" "$RELEASE_COMMIT"

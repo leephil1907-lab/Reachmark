@@ -1,0 +1,154 @@
+/* Reachmark AI receptionist page — charcoal / lime / warm white, no dependencies. */
+:root{
+  --ink:#20251f; --lime:#d5f268; --lime-deep:#b8d94a; --paper:#f5f5ef; --card:#ffffff;
+  --line:#e2e6d8; --muted:#5c6752; --soft:#eef3e2; --dark:#161a15;
+}
+*{box-sizing:border-box}
+.rx-page{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.rx-page h1,.rx-page h2{letter-spacing:-.02em;line-height:1.12;margin:0 0 14px}
+.rx-page h1{font-size:clamp(34px,5vw,58px)}
+.rx-page h2{font-size:clamp(26px,3.4vw,38px)}
+.rx-eyebrow{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#4c5a2e;background:var(--lime);border-radius:999px;padding:5px 14px;margin:0 0 14px}
+.rx-sub{font-size:18px;color:#3c4636;max-width:34em}
+.rx-micro{font-size:13px;color:var(--muted)}
+.rx-micro em{font-style:normal;border-bottom:2px solid var(--lime)}
+.rx-btn{display:inline-block;background:var(--ink);color:#fff;font-weight:800;font-size:16px;border:1px solid var(--ink);border-radius:12px;padding:13px 26px;cursor:pointer;text-decoration:none;font-family:inherit}
+.rx-btn:hover{background:#313830}
+.rx-btn.ghost{background:transparent;color:var(--ink)}
+.rx-btn.ghost:hover{background:var(--soft)}
+.rx-btn.small{font-size:14px;padding:9px 18px;border-radius:10px}
+.rx-cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0 10px}
+.rx-demo-tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6b765c;border:1px dashed #b9c2a8;border-radius:999px;padding:3px 12px;margin:0 0 12px}
+
+/* nav */
+.rx-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 28px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.rx-brand img{height:30px;display:block}
+.rx-links{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.rx-links a{color:var(--ink);text-decoration:none;font-weight:700;font-size:15px}
+.rx-links a:hover{color:#6d7c2c}
+.rx-links a[aria-current]{border-bottom:3px solid var(--lime);padding-bottom:2px}
+.rx-links .rx-btn{color:#fff}
+
+/* hero */
+.rx-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;max-width:1180px;margin:0 auto;padding:64px 28px 48px}
+.rx-checks{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:10px}
+.rx-checks li{padding-left:32px;position:relative;font-weight:600}
+.rx-checks li::before{content:"✓";position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:var(--lime);color:var(--ink);font-size:13px;font-weight:900;display:grid;place-items:center}
+.rx-hero-art{min-width:0}
+.rx-inbox{background:var(--dark);color:#eef3e2;border-radius:22px;padding:26px;box-shadow:0 24px 60px rgba(22,26,21,.28)}
+.rx-inbox .rx-demo-tag{color:#a9b394;border-color:#3a4536}
+.rx-inbox h2{font-size:20px;color:#fff;margin-bottom:16px}
+.rx-inbox-grid{display:grid;gap:12px}
+.rx-inbox-grid section{background:#222a20;border:1px solid #313b2e;border-radius:14px;padding:14px 16px}
+.rx-inbox-grid h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);margin:0 0 8px}
+.rx-inbox-grid ul{margin:0;padding-left:18px;font-size:14px;color:#d7dfc9}
+.rx-inbox-grid b{color:#fff}
+.rx-inbox-foot{font-size:12.5px;color:#8f9a86;margin:14px 0 0}
+
+/* trade strip */
+.rx-strip{background:var(--ink);color:#dfe7d2;text-align:center;padding:26px 20px}
+.rx-strip p{margin:0 0 12px;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#9aa686}
+.rx-strip ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.rx-strip li{border:1px solid #3a4436;border-radius:999px;padding:7px 18px;font-size:14px;font-weight:600}
+
+/* demo */
+.rx-demo{display:grid;grid-template-columns:1fr 1fr;gap:44px;max-width:1180px;margin:0 auto;padding:72px 28px;align-items:start}
+.rx-steps{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:10px}
+.rx-steps button{display:flex;gap:14px;align-items:flex-start;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;font-family:inherit;color:var(--ink)}
+.rx-steps button>span:first-child{font-weight:900;font-size:13px;background:var(--soft);border-radius:8px;padding:4px 9px;white-space:nowrap}
+.rx-steps button>span:last-child{font-weight:800;font-size:16px}
+.rx-steps small{display:block;font-weight:600;font-size:13px;color:var(--muted)}
+.rx-steps button[aria-selected="true"]{border-color:var(--ink);box-shadow:0 8px 24px rgba(32,37,31,.12)}
+.rx-steps button[aria-selected="true"]>span:first-child{background:var(--lime)}
+.rx-phone{background:var(--dark);border-radius:26px;padding:26px;color:#eef3e2;box-shadow:0 24px 60px rgba(22,26,21,.28);position:sticky;top:84px}
+.rx-phone .rx-demo-tag{color:#a9b394;border-color:#3a4536}
+.rx-chat{display:grid;gap:10px;margin-bottom:14px}
+.rx-chat p{margin:0;padding:11px 15px;border-radius:16px;font-size:14.5px;max-width:92%}
+.rx-chat .them{background:#2c352a;justify-self:start;border-bottom-left-radius:4px}
+.rx-chat .us{background:var(--lime);color:var(--ink);font-weight:600;justify-self:end;border-bottom-right-radius:4px}
+.rx-chat .owner{background:#31402f;border:1px solid #46543f;justify-self:start;border-bottom-left-radius:4px}
+.rx-card{background:#222a20;border:1px solid #313b2e;border-radius:16px;padding:18px;margin-bottom:14px}
+.rx-card h3{margin:0 0 10px;font-size:16px;color:#fff}
+.rx-card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px}
+.rx-card dt{color:#9aa686}
+.rx-card dd{margin:0;color:#eef3e2}
+.rx-card p{font-size:14.5px;color:#d7dfc9}
+.rx-draft{border-left:3px solid var(--lime);padding-left:12px;font-style:italic}
+.rx-screen-cap{font-size:13px;color:#8f9a86;margin:0}
+
+/* features */
+.rx-features{max-width:1180px;margin:0 auto;padding:24px 28px 72px}
+.rx-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}
+.rx-cards article{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px}
+.rx-cards h3{margin:0 0 8px;font-size:18px}
+.rx-cards p{margin:0;color:#43503a;font-size:15px}
+.rx-cards.three{grid-template-columns:repeat(3,1fr)}
+
+/* industries */
+.rx-industries{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:72px 28px}
+.rx-industries>.rx-eyebrow,.rx-industries>h2{max-width:1180px;margin-left:auto;margin-right:auto;display:block;width:fit-content}
+.rx-industries>h2{width:auto;text-align:center}
+.rx-industries>.rx-eyebrow{margin:0 auto 14px}
+.rx-tabs{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:28px 0 22px}
+.rx-tabs button{font-family:inherit;font-weight:800;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:10px 20px;cursor:pointer}
+.rx-tabs button[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.rx-tabpanels{max-width:760px;margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:30px 32px}
+.rx-tabpanels h3{margin:0 0 6px;font-size:21px}
+.rx-tabpanels p{margin:0 0 12px;color:#43503a}
+.rx-tabpanels ul{margin:0;padding-left:20px;color:#2c352a;display:grid;gap:8px}
+
+/* tones */
+.rx-tones{max-width:1180px;margin:0 auto;padding:72px 28px}
+.rx-tones-sub{max-width:44em;color:#43503a}
+.rx-tone-for{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#6d7c2c!important}
+.rx-tones blockquote{margin:14px 0 18px;padding:0 0 0 16px;border-left:3px solid var(--lime);font-size:16.5px;color:var(--ink)}
+.rx-tones [data-say][disabled]{opacity:.55;cursor:wait}
+
+/* pricing band */
+.rx-pricing{background:var(--ink);color:#eef3e2;text-align:center;padding:72px 28px}
+.rx-pricing h2{color:#fff}
+.rx-pricing>p{color:#b9c4ab;max-width:40em;margin:0 auto 8px}
+.rx-tiers{list-style:none;margin:30px auto;padding:0;display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.rx-tiers li{background:#222a20;border:1px solid #313b2e;border-radius:16px;padding:20px 28px;min-width:220px}
+.rx-tiers b{display:block;font-size:19px;color:var(--lime)}
+.rx-tiers span{font-size:14px;color:#b9c4ab}
+.rx-pricing .rx-btn{background:var(--lime);border-color:var(--lime);color:var(--ink);margin-top:18px}
+.rx-pricing .rx-btn:hover{background:var(--lime-deep)}
+
+/* faq */
+.rx-faq{max-width:820px;margin:0 auto;padding:72px 28px}
+.rx-faq-sub{color:var(--muted);margin-top:-6px}
+.rx-faq-list{display:grid;gap:10px;margin-top:24px}
+.rx-faq details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px}
+.rx-faq summary{font-weight:800;cursor:pointer;font-size:16.5px}
+.rx-faq details p{margin:10px 0 0;color:#43503a}
+
+/* final + footer */
+.rx-final{text-align:center;padding:24px 28px 72px}
+.rx-final .rx-cta-row{justify-content:center}
+.rx-footer{border-top:1px solid var(--line);padding:26px 28px;text-align:center;color:var(--muted);font-size:14px}
+.rx-footer a{color:var(--ink);font-weight:700;text-decoration:none;margin:0 8px}
+
+@media (max-width:960px){
+  .rx-hero,.rx-demo{grid-template-columns:1fr}
+  .rx-cards{grid-template-columns:1fr 1fr}
+  .rx-cards.three{grid-template-columns:1fr}
+  .rx-phone{position:static}
+}
+@media (max-width:600px){
+  .rx-nav{padding:12px 16px}
+  .rx-links{gap:12px;font-size:14px}
+  .rx-hero,.rx-demo,.rx-features,.rx-tones{padding-left:18px;padding-right:18px}
+  .rx-cards{grid-template-columns:1fr}
+  .rx-tabpanels{padding:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  .rx-page *{scroll-behavior:auto!important;transition:none!important}
+}
+
+/* Aurora hero: slow brand-tinted drift behind the content. */
+.rx-aurora{position:relative;overflow:hidden}
+.rx-aurora::before{content:'';position:absolute;inset:-20%;background:radial-gradient(42% 55% at 18% 30%,rgba(213,242,104,.35),transparent 70%),radial-gradient(45% 60% at 82% 25%,rgba(140,166,80,.30),transparent 70%),radial-gradient(50% 55% at 55% 90%,rgba(213,242,104,.22),transparent 70%);animation:rx-aurora-drift 14s ease-in-out infinite alternate;pointer-events:none}
+.rx-aurora>*{position:relative}
+@keyframes rx-aurora-drift{from{transform:translate3d(-2%,-1%,0) scale(1)}to{transform:translate3d(2%,2%,0) scale(1.06)}}
+@media (prefers-reduced-motion:reduce){.rx-aurora::before{animation:none}}

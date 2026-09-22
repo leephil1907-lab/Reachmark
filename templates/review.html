@@ -1,0 +1,117 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>{% if lead.name %}A website concept for {{ lead.name }}{% else %}Website concept{% endif %} — {{ studio }}</title>
+<meta name="description" content="An independent website concept prepared by {{ studio }}, with one simple question at the end."/>
+<meta name="robots" content="noindex,nofollow,noarchive"/><meta name="theme-color" content="#20251F"/><link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml"/>
+<link rel="stylesheet" href="/static/fonts.css"/><link rel="stylesheet" href="/static/review.css"/><link rel="stylesheet" href="/static/reveal.css"/>
+<meta name="csrf-token" content=""/>
+</head><body class="theme-{{ link.theme or 'charcoal' }}" data-token="{{ link.token }}">
+
+<div class="bar">
+  <strong>INDEPENDENT CONCEPT</strong>
+  <span>Prepared by {{ studio }} — not the official website of {{ lead.name }}. Nothing here is published under your name.</span>
+</div>
+
+<header class="top review-aurora">
+  <div class="wrap top-inner">
+    <span class="brand">{{ lead.name }}<i>.</i></span>
+    <span class="chip">{{ lead.category or 'local business' }}{% if lead.city %} · {{ lead.city }}{% endif %}</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <section data-reveal class="hero">
+    <p class="eyebrow">A QUICK LOOK, ABOUT A MINUTE</p>
+    <h1>{{ link.headline }}</h1>
+    <p class="lead">{{ link.intro }}</p>
+    <div class="hero-actions">
+      <a data-magnet class="btn primary" href="#answer">Answer the one question <span>↓</span></a>
+      <a data-magnet class="btn ghost" href="#idea">See the page idea</a>
+    </div>
+    <p class="fineprint">This link is private and unlisted. It carries only details that are already publicly listed about {{ lead.name }} — no reviews, prices, photographs or claims have been invented.</p>
+  </section>
+
+  <section data-reveal id="idea" class="block">
+    <h2>What the page would give you</h2>
+    <div class="cards">
+      {% for section in link.sections %}
+      <article class="card"><span class="num">{{ '%02d'|format(loop.index) }}</span><h3>{{ section.title }}</h3><p>{{ section.body }}</p></article>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if link.concept.facts %}
+  <section data-reveal class="block">
+    <h2>Details used for this concept</h2>
+    <ul class="facts">{% for fact in link.concept.facts %}<li>{{ fact }}</li>{% endfor %}</ul>
+    <p class="fineprint">These come from a public listing plus anything already saved about you. If something is wrong, say so in the box below and it gets corrected before anything is built.</p>
+  </section>
+  {% endif %}
+
+  {% if link.concept.site_faults %}
+  <section data-reveal class="block">
+    <h2>What we noticed on your current site</h2>
+    <ul class="faults">{% for fault in link.concept.site_faults %}<li>{{ fault.reason }} <span class="src">({{ fault.source }})</span></li>{% endfor %}</ul>
+    <p class="fineprint">Measured {{ link.concept.faults_checked_at }} from your public pages — not a verdict, just what we saw. If anything has changed, say so below.</p>
+  </section>
+  {% endif %}
+
+  <section data-reveal class="block answer" id="answer">
+    <h2>Would you like this built for {{ lead.name }}?</h2>
+    <p class="lead small">Pick one. The studio owner sees your answer straight away — nothing else happens without you.</p>
+    <div class="choices" role="group" aria-label="Your answer">
+      <button type="button" class="choice" data-choice="want"><b>Yes — build my website</b><span>Scope and a fixed price come back to you.</span></button>
+      <button type="button" class="choice" data-choice="later"><b>Not right now</b><span>Kept on file, no follow-ups.</span></button>
+      <button type="button" class="choice" data-choice="have"><b>I already have a website</b><span>Tell us what to improve instead.</span></button>
+    </div>
+    <form id="answer-form" class="form" hidden>
+      <p class="chosen" id="chosen-label"></p>
+      <label>Your name<input type="text" name="name" maxlength="120" autocomplete="name" placeholder="Optional"/></label>
+      <label>E-mail<input type="email" name="email" maxlength="200" autocomplete="email" placeholder="Optional — only if you want a reply"/></label>
+      <label>Anything to add?<textarea name="note" rows="3" maxlength="1200" placeholder="For example: we do need the booking page, and the phone number is wrong."></textarea></label>
+      <input type="text" name="company_url" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>
+            <fieldset class="stars-field"><legend>How is the concept? (optional)</legend><div class="stars">
+      <input type="radio" id="st5" name="rating" value="5"/><label for="st5" title="5 — love it">★</label>
+      <input type="radio" id="st4" name="rating" value="4"/><label for="st4" title="4">★</label>
+      <input type="radio" id="st3" name="rating" value="3"/><label for="st3" title="3">★</label>
+      <input type="radio" id="st2" name="rating" value="2"/><label for="st2" title="2">★</label>
+      <input type="radio" id="st1" name="rating" value="1"/><label for="st1" title="1">★</label>
+      </div></fieldset>
+      <button data-magnet type="submit" class="btn primary" id="send-answer">Send my answer <span>↗</span></button>
+      <p class="fineprint">Your answer is stored with the studio so they can reply. Leave the e-mail box empty if you would rather not be contacted.</p>
+    </form>
+    <div id="answer-done" class="done" hidden>
+      <b>Thank you — that is all you needed to do.</b>
+      <p id="done-copy">The studio owner has your answer.</p>
+    </div>
+  </section>
+
+  {% if lead.phone or lead.email or lead.address or lead.opening_hours %}
+  <section data-reveal class="block">
+    <h2>Your listed details</h2>
+    <dl class="contact">
+      {% if lead.phone %}<dt>Phone on the listing</dt><dd><a href="tel:{{ lead.phone|replace(' ','') }}">{{ lead.phone }}</a></dd>{% endif %}
+      {% if lead.email %}<dt>E-mail published by you</dt><dd>{{ lead.email }}</dd>{% endif %}
+      {% if lead.address %}<dt>Address on the listing</dt><dd>{{ lead.address }}</dd>{% endif %}
+      {% if lead.opening_hours %}<dt>Listed hours</dt><dd>{{ lead.opening_hours }}</dd>{% endif %}
+    </dl>
+    <p class="fineprint">Taken from a public listing — please correct anything that is out of date.</p>
+  </section>
+  {% endif %}
+
+  <section data-reveal class="block close">
+    <h2>Why this link exists</h2>
+    <p>{{ studio }} looks for businesses whose public listing makes it hard for customers to reach them, sketches an independent concept, and asks once. If the answer is no, that is the end of it: no calls, no sequence, no follow-ups. Every message carries an opt-out.</p>
+    <p class="fineprint">{{ link.concept.disclaimer }}</p>
+  </section>
+</main>
+
+<footer class="foot wrap">
+  <span>{{ studio }}{% if reply_email %} · {{ reply_email }}{% endif %}</span>
+  <span>Independent concept · noindex · unlisted link</span>
+</footer>
+
+{% include 'receptionist.html' %}
+<script src="/static/review.js" defer></script><script src="/static/reveal.js" defer></script><script src="/static/magnet.js" defer></script><script src="/static/pwa.js" defer></script>
+</body></html>

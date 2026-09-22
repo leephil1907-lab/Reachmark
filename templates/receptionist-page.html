@@ -1,0 +1,133 @@
+<!DOCTYPE html><html lang="en"><head>
+{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ gtm_id }}');</script><!-- End Google Tag Manager -->{% endif %}
+{% if ga_id is defined and ga_id %}<!-- Global site tag (gtag.js) - Google Analytics --><script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ seo.title if seo is defined and seo.title else 'AI Receptionist — Reachmark' }}</title><meta name="description" content="{{ seo.description if seo is defined and seo.description else 'The Reachmark AI receptionist: a facts-only front desk for your website.' }}">{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">{% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}<meta property="og:type" content="website"><meta property="og:title" content="{{ seo.title if seo is defined else 'AI Receptionist — Reachmark' }}"><meta property="og:description" content="{{ seo.description if seo is defined else '' }}"><meta property="og:image" content="{{ seo.og_image if seo is defined else '/static/social-card.png' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}<meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script>
+<meta name="theme-color" content="#20251f"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180">
+<link rel="stylesheet" href="/static/fonts.css">
+<link rel="stylesheet" href="/static/receptionist-page.css">
+<link rel="stylesheet" href="/static/reveal.css">
+</head><body class="rx-page">
+{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}
+<nav class="rx-nav" aria-label="Public pages"><a href="/" class="rx-brand"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
+<div class="rx-links"><a href="/">About</a><a href="/showcase">Samples</a><a href="/receptionist" aria-current="page">AI Receptionist</a><a href="/about#pricing">Pricing</a><a data-magnet class="rx-btn small" href="/enquire">Enquire ↗</a></div></nav>
+<main>
+<header class="rx-hero rx-aurora"><div class="rx-hero-copy">
+<p class="rx-eyebrow">Reachmark AI Receptionist</p>
+<h1>Every chat, enquiry and booking — handled.</h1>
+<p class="rx-sub">A front desk for your website that answers visitors from published facts, captures every enquiry as real work, and hands over to you with the context attached — day and night.</p>
+<ul class="rx-checks">
+<li>Answers from your published facts only — never a guess</li>
+<li>Captures every enquiry into your inbox and lead list</li>
+<li>Hands over to you with a summary and a draft reply</li>
+<li>Lives on every page of your Reachmark website</li>
+</ul>
+<div class="rx-cta-row"><button type="button" data-magnet class="rx-btn" data-open-widget>Try it live</button><a data-magnet class="rx-btn ghost" href="/about#pricing">See pricing</a></div>
+<p class="rx-micro">The chat bubble on this page <em>is</em> the receptionist. Ask it anything.</p>
+<p class="rx-micro" data-frontdesk-status>Front desk status: checking…</p>
+</div>
+<div class="rx-hero-art" aria-label="Example of the owner's inbox view">
+<div class="rx-inbox"><p class="rx-demo-tag">Example view</p>
+<h2>Overnight, while you slept</h2>
+<div class="rx-inbox-grid">
+<section><h3>Key updates</h3><ul><li><b>2</b> new enquiries captured</li><li><b>1</b> visitor asked for a human</li></ul></section>
+<section><h3>Action items</h3><ul><li>Reply drafted for the pricing question</li><li>Concept preview requested — 1 business</li></ul></section>
+<section><h3>Handoffs</h3><ul><li>“Can I talk to a person?” — with transcript</li></ul></section>
+</div>
+<p class="rx-inbox-foot">Nothing invented: every line traces back to a saved conversation.</p>
+</div></div></header>
+
+<section data-reveal class="rx-strip" aria-label="Trades this suits"><p>At home in any local business — for example:</p>
+<ul><li>Barbers &amp; salons</li><li>Bakeries &amp; cafés</li><li>Dental studios</li><li>Clinics &amp; physios</li><li>Law firms</li><li>Trades</li><li>Retail</li></ul></section>
+
+<section data-reveal class="rx-demo" id="demo" aria-label="Example conversation">
+<div class="rx-demo-copy">
+<p class="rx-eyebrow">How it works</p>
+<h2>Watch the front desk work an example conversation</h2>
+<p>A visitor lands at 11&nbsp;pm with a pricing question. This is what happens next — an illustrated example, using real answers from the knowledge base.</p>
+<ol class="rx-steps" role="tablist" aria-label="Conversation steps">
+<li><button type="button" role="tab" aria-selected="true" data-step="0"><span>01</span><span>Chat answered<small>From published facts</small></span></button></li>
+<li><button type="button" role="tab" aria-selected="false" data-step="1"><span>02</span><span>Enquiry captured<small>Inbox + lead record</small></span></button></li>
+<li><button type="button" role="tab" aria-selected="false" data-step="2"><span>03</span><span>Owner summary<small>Context attached</small></span></button></li>
+<li><button type="button" role="tab" aria-selected="false" data-step="3"><span>04</span><span>Follow-up sent<small>You reply personally</small></span></button></li>
+</ol></div>
+<div class="rx-phone" aria-live="polite">
+<p class="rx-demo-tag">Example conversation</p>
+<div class="rx-screen" data-screen="0">
+<div class="rx-chat"><p class="them">How much for a 5-page site with a blog?</p>
+<p class="us">{{ tiers.growth.name }} is {{ tiers.growth.price_label }} — up to 5 pages plus a blog, a CMS for your own updates, SEO plus analytics, {{ tiers.growth.revisions }} revisions and priority support.</p>
+<p class="them">That fits. I’m Amara — amara@example.test</p>
+<p class="us">Thanks Amara — I’ve passed your details to the studio owner, who replies personally.</p></div>
+<p class="rx-screen-cap">Answered in seconds, quoted from the published tiers — no guessing.</p></div>
+<div class="rx-screen" data-screen="1" hidden>
+<div class="rx-card"><h3>New enquiry · 11:04 pm</h3><dl><dt>From</dt><dd>Amara (amara@example.test)</dd><dt>Intent</dt><dd>Pricing — Growth tier</dd><dt>Saved to</dt><dd>Studio inbox ✓ · Lead list ✓ · Transcript ✓</dd></dl></div>
+<p class="rx-screen-cap">An address means real work: enquiry, lead record and full transcript.</p></div>
+<div class="rx-screen" data-screen="2" hidden>
+<div class="rx-card"><h3>Morning summary for the owner</h3><p>Amara asked about a 5-page site with a blog, heard the {{ tiers.growth.name }} tier ({{ tiers.growth.price_label }}), and left an email. Suggested reply drafted — edit and send.</p><p class="rx-draft">“Thanks Amara — Growth covers exactly that. If you tell me…”</p></div>
+<p class="rx-screen-cap">You wake up to context, not a cold “someone messaged”.</p></div>
+<div class="rx-screen" data-screen="3" hidden>
+<div class="rx-chat"><p class="owner">Hi Amara — yes, Growth covers a 5-page site plus blog. I’ve attached a tailored estimate; nothing is charged until you approve scope.</p>
+<p class="owner">If it helps, I can prepare a one-page concept preview first — takes a minute to look at. ✓✓ Read 8:02 am</p></div>
+<p class="rx-screen-cap">The human closes it. The receptionist did the night shift.</p></div>
+</div></section>
+
+<section data-reveal class="rx-features" aria-label="What it does"><p class="rx-eyebrow">Why it works</p>
+<h2>A front desk that never guesses</h2>
+<div class="rx-cards">
+<article><h3>Answers from facts only</h3><p>Every answer is quoted from your published pages. Anything unverified becomes an honest “I don’t have that to hand” — plus a handoff to you.</p></article>
+<article><h3>Captures every lead</h3><p>The moment a visitor shares an email, it becomes an enquiry in your inbox and a record in your lead list. No chat ever ends in a dead end.</p></article>
+<article><h3>Hands over with context</h3><p>“I want a human” arrives with the transcript, the intent and a suggested reply already drafted. You edit, you send.</p></article>
+<article><h3>On duty on every page</h3><p>The same assistant sits on your home page, samples and enquiry form — after hours, weekends, holidays included.</p></article>
+</div></section>
+
+<section data-reveal class="rx-industries" aria-label="Industries"><p class="rx-eyebrow">Where it fits</p>
+<h2>Made for the way local businesses work</h2>
+<div class="rx-tabs" role="tablist" aria-label="Industry examples">
+<button type="button" role="tab" aria-selected="true" data-tab="0">Clinics &amp; health</button>
+<button type="button" role="tab" aria-selected="false" data-tab="1">Home services</button>
+<button type="button" role="tab" aria-selected="false" data-tab="2">Professional services</button>
+<button type="button" role="tab" aria-selected="false" data-tab="3">Cafés &amp; retail</button>
+<button type="button" role="tab" aria-selected="false" data-tab="4">Trades &amp; studios</button>
+</div>
+<div class="rx-tabpanels">
+<div role="tabpanel" data-panel="0"><h3>Clinics, dental studios, physios</h3><p>Takes the booking question at midnight and turns it into a morning appointment request.</p><ul><li>“Do you take bookings online?” → explains the route, captures the request</li><li>“What does the first visit cost?” → quotes only published prices</li><li>Anything clinical → straight to a human, with the transcript</li></ul></div>
+<div role="tabpanel" data-panel="1" hidden><h3>Plumbers, electricians, cleaners</h3><p>On a job with dirty hands is exactly when the phone rings. The chat takes it instead.</p><ul><li>“Can you come this week?” → captures area, job and callback details</li><li>“How much for…?” → published rates or an honest “the owner quotes that”</li><li>Emergencies → flags as urgent in the handoff</li></ul></div>
+<div role="tabpanel" data-panel="2" hidden><h3>Lawyers, accountants, consultants</h3><p>Screens the vague “quick question” and arrives with the facts sorted.</p><ul><li>“Do you handle…?” → answers from the services page only</li><li>“Can I book a consultation?” → captures details for a callback</li><li>Anything resembling advice → refused, handed to the professional</li></ul></div>
+<div role="tabpanel" data-panel="3" hidden><h3>Cafés, bakeries, shops</h3><p>Answers the regulars’ questions while the queue is out of the door.</p><ul><li>“Are you open Sunday?” → published hours, nothing assumed</li><li>“Do you do orders for events?” → captures date, size and contact</li><li>“Where are you?” → the published address, never a guess</li></ul></div>
+<div role="tabpanel" data-panel="4" hidden><h3>Barbers, salons, builders, studios</h3><p>Keeps the chair full and the diary honest.</p><ul><li>“How much for…?” → published price list or owner quote</li><li>“Can I move my appointment?” → captured with name and details</li><li>Portfolio questions → points at real samples, never mock clients</li></ul></div>
+</div></section>
+
+<section data-reveal class="rx-tones" aria-label="Tones of voice"><p class="rx-eyebrow">Tone of voice</p>
+<h2>Pick the tone that fits the business</h2>
+<p class="rx-tones-sub">Same facts, different manner. Press play to hear each one — spoken live by your own browser, so what you hear is exactly what the words say.</p>
+<div class="rx-cards three">
+<article data-tone="warm"><h3>Warm &amp; friendly</h3><p class="rx-tone-for">Cafés · salons · studios</p><blockquote>Hello and welcome — lovely to see you! Ask me anything about prices, timing or booking, and I’ll look it up for you.</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>Hear it</button></p></article>
+<article data-tone="brief"><h3>Brief &amp; professional</h3><p class="rx-tone-for">Clinics · firms · consultancies</p><blockquote>Good day. I can help with prices, timelines or arranging a callback. How may I help?</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>Hear it</button></p></article>
+<article data-tone="patient"><h3>Patient &amp; plain-spoken</h3><p class="rx-tone-for">Trades · services · everyone</p><blockquote>No rush at all — tell me what you need in your own words, and we’ll take it from there, one step at a time.</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>Hear it</button></p></article>
+</div>
+<p class="rx-micro" data-tts-note hidden>Your browser has no speech available right now — the words above are the whole script.</p></section>
+
+<section data-reveal class="rx-pricing" aria-label="Pricing"><p class="rx-eyebrow">Pricing</p>
+<h2>Included with every Reachmark build</h2>
+<p>The receptionist is part of the website, not an add-on. Same published tiers as everything else:</p>
+<ul class="rx-tiers">{% for t in brand.tiers %}<li><b>{{ t.line }}</b><span>{{ tier_notes[t.id] }}</span></li>{% endfor %}</ul>
+<p><a data-magnet class="rx-btn" href="/about#pricing">Full pricing on the about page</a></p></section>
+
+<section data-reveal class="rx-faq" aria-label="Frequently asked questions"><p class="rx-eyebrow">Straight answers</p>
+<h2>Asked all the time — answered from published facts</h2>
+<p class="rx-faq-sub">These are the same answers the chat gives. Same file, same words, no exceptions.</p>
+<div class="rx-faq-list">
+{% for item in faqs %}<details><summary>{{ item.q[0]|upper }}{{ item.q[1:] }}?</summary><p>{{ item.a }}</p></details>
+{% endfor %}</div></section>
+
+<section data-reveal class="rx-final"><h2>Let AI run your front desk.</h2>
+<p>Try the chat on this page right now — or send an enquiry and the studio replies with a tailored estimate.</p>
+<p class="rx-cta-row"><button type="button" data-magnet class="rx-btn" data-open-widget>Try it live</button><a data-magnet class="rx-btn ghost" href="/enquire">Send an enquiry</a></p></section>
+
+<footer class="rx-footer"><p>© <span data-year>2026</span> Reachmark · <a href="/">About</a> · <a href="/showcase">Samples</a> · <a href="/about#pricing">Pricing</a> · <a href="/enquire">Enquire</a></p></footer>
+</main>
+{% include 'receptionist.html' %}
+<script src="/static/receptionist-page.js" defer></script>
+<script src="/static/reveal.js" defer></script>
+<script src="/static/magnet.js" defer></script>
+</body></html>

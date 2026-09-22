@@ -1,0 +1,74 @@
+<!-- Tawk.to Live Chat — Reachmark support bubble (ultra-compact preview, not full-page, logo avatar, no branding) -->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/6aaca9204636c23448aaa757/default';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+Tawk_API.onLoad = function(){
+  try{
+    if(Tawk_API.minimize) Tawk_API.minimize();
+    var css=document.createElement('style');
+    css.id='tawk-custom-style';
+    css.textContent=[
+      '/* Hide Tawk branding */',
+      'a[class*="tawk-branding"], div[class*="tawk-branding"], .tawk-branding, a[href*="tawk.to"]{display:none !important; visibility:hidden !important; opacity:0 !important; height:0 !important; pointer-events:none !important;}',
+      '/* Keep launcher bubble small, bottom-right */',
+      '#tawkchat-container{position:fixed !important; z-index:9999 !important; inset:auto 10px 10px auto !important; pointer-events:auto !important;}',
+      '#tawkchat-container > div, #tawkchat-minified-wrapper{width:auto !important; height:auto !important; right:0 !important; bottom:0 !important; left:auto !important; top:auto !important;}',
+      '/* Chat window as ultra-compact card, not fullscreen — user can still use site */',
+      'iframe[title*="chat"] , iframe[title*="Tawk"], iframe[src*="tawk.to"], #tawkchat-maximized-wrapper, .tawk-max-container iframe{',
+      '  position:fixed !important; width:300px !important; height:360px !important; max-width:300px !important; max-height:58vh !important;',
+      '  right:12px !important; bottom:12px !important; left:auto !important; top:auto !important;',
+      '  border-radius:16px !important; box-shadow:0 18px 48px rgba(16,24,12,.24), 0 4px 18px rgba(16,24,12,.12) !important;',
+      '  border:1px solid #e2e7d6 !important; overflow:hidden !important; margin:0 !important;',
+      '}',
+      'div[id*="tawk"][style*="position: fixed"][style*="inset: 0"], div[style*="background: rgba(0,0,0"]{display:none !important;}',
+      '@media(max-width:640px){',
+      '  iframe[title*="chat"], iframe[title*="Tawk"], iframe[src*="tawk.to"], #tawkchat-maximized-wrapper, .tawk-max-container iframe{',
+      '    width:78vw !important; height:42vh !important; max-width:300px !important; max-height:44vh !important; right:4vw !important; bottom:8px !important; left:auto !important;',
+      '  }',
+      '  #tawkchat-container{ right:10px !important; bottom:10px !important;}',
+      '}',
+      'html.tawk-open, body.tawk-open{overflow:auto !important; height:auto !important;}',
+      '.tawk-button, [id*="tawk"][id*="launcher"]{box-shadow:0 8px 24px rgba(16,24,12,.18) !important; border-radius:999px !important;}'
+    ].join('\n');
+    document.head.appendChild(css);
+    var tries=0; var rep=setInterval(function(){
+      tries++;
+      try{
+        var imgs=document.querySelectorAll('img[src*="tawk"]');
+        for(var i=0;i<imgs.length;i++){
+          var im=imgs[i];
+          if(im.width<80 && im.height<80){
+            im.src='/static/logo-primary.svg';
+            im.alt='Reachmark';
+            im.style.objectFit='contain';
+            im.style.background='#ffffff';
+            im.style.borderRadius='50%';
+            im.style.padding='4px';
+          }
+        }
+        var launcher=document.querySelector('[id*="tawk"][id*="launcher"], .tawk-min-container');
+        if(launcher){ launcher.style.background='#d5f268'; }
+      }catch(e){}
+      if(tries>18) clearInterval(rep);
+    }, 700);
+    var obs=new MutationObserver(function(){
+      document.querySelectorAll('div[style*="z-index: 100000"]', 'div[style*="inset: 0"]').forEach(function(el){
+        var s=(el.getAttribute('style')||'');
+        if(s.includes('inset: 0') && s.includes('position: fixed') && el.querySelector('iframe')===null){
+          el.style.display='none';
+          el.style.pointerEvents='none';
+        }
+      });
+    });
+    try{ obs.observe(document.body,{childList:true, subtree:true}); }catch(e){}
+  }catch(e){}
+};
+Tawk_API.onBeforeLoad = function(){};
+</script>
