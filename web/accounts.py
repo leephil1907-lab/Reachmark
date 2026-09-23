@@ -21,10 +21,17 @@ def valid_email(e):
     return bool(EMAIL_RE.fullmatch(e.strip())) and len(e) <= 250
 
 def get_base_url():
-    # Public base from env or request, for emails
+    # Public base from env, workspace Settings, or request — for emails.
     base = os.getenv('PUBLIC_BASE_URL','').strip().rstrip('/')
     if base:
         return base
+    try:
+        from web.app import settings
+        s = settings()
+        if (s.get('public_base_url') or '').strip():
+            return s['public_base_url'].strip().rstrip('/')
+    except Exception:
+        pass
     try:
         # fallback to request host
         return request.host_url.rstrip('/')

@@ -30,10 +30,13 @@ SMTP_SECURITY=starttls        # or: ssl (port 465)
 SMTP_USER=you@yourdomain.com  # Brevo: your login e-mail. Gmail: your gmail address.
 SMTP_PASSWORD=<the smtp key / app password, never your normal password>
 SMTP_FROM=noreply@yourdomain.com   # must be a sender you verified at the provider
+PUBLIC_BASE_URL=https://YOUR-DOMAIN   # so logos + buttons in e-mails always point at you
 ```
 
 `SMTP_HOST` + `SMTP_FROM` are the minimum the app checks; without them the
 workspace shows "Not connected" on the SMTP badge.
+(No `PUBLIC_BASE_URL`? The app falls back to the **Public base URL** field on the
+Settings page, then to the current request host.)
 
 ### Step C — fill the sender profile (workspace → Settings)
 
