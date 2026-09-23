@@ -20,7 +20,7 @@
 .sidebar.collapsed .brand{margin:0 8px 32px;justify-content:center}
 .sidebar.collapsed .brand .brand-wordmark{display:none}
 .sidebar.collapsed .brand .brand-compact{display:block!important;width:36px;height:36px}
-.sidebar.collapsed .workspace, .sidebar.collapsed .nav-label, .sidebar.collapsed .sidebar-bottom, .sidebar.collapsed .profile{ display:none }
+.sidebar.collapsed .workspace, .sidebar.collapsed .nav-label, .sidebar.collapsed .sidebar-bottom, .sidebar.collapsed .profile, .sidebar.collapsed .adsense-sidebar{ display:none }
 .sidebar.collapsed .nav{justify-content:center;padding:14px 10px;font-size:0;gap:0}
 .sidebar.collapsed .nav>span{font-size:17px;width:auto}
 .sidebar.collapsed .nav b{display:none}
@@ -41,3 +41,10 @@
 [data-theme="dark"] #theme-toggle{background:#1e2a1c;border-color:#2a3528;color:#6a7559}
 /* Simplify: reduce clutter on small screens */
 @media(max-width:640px){#sidebar-toggle{display:none} #theme-toggle{width:32px;height:32px}}
+.adsense-sidebar{padding:14px 4px 2px;border-top:1px solid #343b2e;margin-top:8px}
+@media(max-width:1000px){.adsense-sidebar{display:none}}
+.sidebar nav,.sidebar .workspace,.sidebar .profile,.sidebar-bottom,.adsense-sidebar{flex-shrink:0}
+.sidebar{overflow-y:auto;scrollbar-width:thin;scrollbar-color:#4a5442 transparent}
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-thumb{background:#4a5442;border-radius:3px}
+.sidebar::-webkit-scrollbar-track{background:transparent}

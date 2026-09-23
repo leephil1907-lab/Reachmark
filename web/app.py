@@ -129,15 +129,15 @@ def headers(r):
     return r
 
 ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-3894582071697384').strip()
-ADSENSE_PATHS = {'/', '/about', '/showcase', '/enquire', '/receptionist'}
+ADSENSE_PATHS = {'/', '/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/workspace'}
 
 @app.after_request
 def adsense_tags(response):
     """Serve the AdSense loader + account meta on public marketing pages.
 
     Injected at serve time so templates -- including about.html, which must stay
-    byte-identical -- are never touched. Workspace, APIs, review links and the ad
-    recording stage are excluded.
+    byte-identical -- are never touched. /workspace is included for the sidebar
+    unit; APIs, review links and the ad recording stage stay excluded.
     """
     try:
         if not ADSENSE_CLIENT or request.path not in ADSENSE_PATHS:

@@ -1,4 +1,4 @@
-"""AdSense: the loader + account meta are served on public pages only.
+"""AdSense: the loader + account meta are served on marketing pages + workspace.
 
 The tags are injected at serve time, so templates — including about.html, which
 must stay byte-identical — are never touched.
@@ -20,14 +20,14 @@ class AdSenseTests(unittest.TestCase):
     tearDown = test_app.ProspectTests.tearDown
 
     def test_public_pages_carry_the_tags_exactly_once(self):
-        for path in ('/', '/about', '/showcase', '/enquire', '/receptionist'):
+        for path in ('/', '/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/workspace'):
             body = self.client.get(path).get_data(as_text=True)
             self.assertIn(META, body, path)
             self.assertIn(LOADER, body, path)
             self.assertEqual(body.count('adsbygoogle.js'), 1, f'double injection on {path}')
 
     def test_private_pages_and_apis_are_excluded(self):
-        for path in ('/workspace', '/login'):
+        for path in ('/login',):
             body = self.client.get(path).get_data(as_text=True)
             self.assertNotIn('adsbygoogle', body, path)
             self.assertNotIn('google-adsense-account', body, path)
@@ -52,20 +52,26 @@ class AdSenseTests(unittest.TestCase):
         policy = self.client.get('/').headers.get('Content-Security-Policy', '')
         self.assertIn('https://tpc.googlesyndication.com', policy)
 
-    def test_display_placements_render_when_slot_configured(self):
-        with patch.dict(os.environ, {'ADSENSE_DISPLAY_SLOT': '1234567890'}):
-            for path in ('/', '/showcase'):
-                body = self.client.get(path).get_data(as_text=True)
-                self.assertIn('ADVERTISEMENT', body, path)
-                self.assertIn('data-ad-slot="1234567890"', body, path)
-                self.assertIn(f'data-ad-client="{CLIENT}"', body, path)
+    def test_real_ad_units_render_in_place(self):
+        home = self.client.get('/').get_data(as_text=True)
+        self.assertIn('adsense-homepage-banner', home)
+        self.assertIn('data-ad-slot="1905478104"', home)
+        self.assertIn('adsense-footer', home)
+        self.assertIn('data-ad-slot="6774661404"', home)
+        # Banner sits between the hero and the rest of the homepage.
+        self.assertLess(home.index('1905478104'), home.index('Fresh from the gallery'))
+        for path in ('/showcase', '/enquire', '/pricing', '/receptionist'):
+            body = self.client.get(path).get_data(as_text=True)
+            self.assertIn('data-ad-slot="6774661404"', body, path)
+        desk = self.client.get('/workspace').get_data(as_text=True)
+        self.assertIn('adsense-sidebar', desk)
+        self.assertIn('data-ad-slot="2566903210"', desk)
 
-    def test_display_placements_hidden_without_slot(self):
+    def test_real_units_ignore_the_old_display_slot_env(self):
         with patch.dict(os.environ, {'ADSENSE_DISPLAY_SLOT': ''}):
-            for path in ('/', '/showcase'):
-                body = self.client.get(path).get_data(as_text=True)
-                self.assertNotIn('data-ad-slot', body, path)
-                self.assertNotIn('ADVERTISEMENT', body, path)
+            body = self.client.get('/').get_data(as_text=True)
+            self.assertIn('data-ad-slot="1905478104"', body)
+            self.assertIn('data-ad-slot="6774661404"', body)
 
     def test_about_template_file_is_untouched(self):
         with open(os.path.join(ROOT, 'templates', 'about.html'), encoding='utf-8') as handle:
