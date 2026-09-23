@@ -35,6 +35,17 @@ def register_standard(app, db, log, settings_fn=None):
     def is_owner():
         return bool(session.get('owner'))
 
+    def pro_or_owner():
+        if is_owner():
+            return True
+        if session.get('client_id') and session.get('role') == 'client':
+            from web.billing import tier_status
+            with db() as c:
+                row = c.execute('SELECT * FROM users WHERE id=?', (session.get('client_id'),)).fetchone()
+            tier, active, _ = tier_status(dict(row) if row else None)
+            return tier == 'pro' and active
+        return False
+
     def now():
         return datetime.now(timezone.utc).isoformat()
 
@@ -101,7 +112,9 @@ def register_standard(app, db, log, settings_fn=None):
     # --- Outbox: queued mail when SMTP not configured (Reachmark parity) ---
     @app.get('/api/outbox')
     def list_outbox():
-        if not is_owner():
+        if not pro_or_owner():
+            if session.get('client_id'):
+                return jsonify(error='The Pro plan opens the outbox.', upgrade='/pricing', required='pro'), 402
             return jsonify(error='Owner login required.'),401
         with db() as c:
             rows = [dict(r) for r in c.execute('SELECT id, to_email, subject, created, state FROM mail_outbox ORDER BY created DESC LIMIT 100')]
@@ -109,7 +122,9 @@ def register_standard(app, db, log, settings_fn=None):
 
     @app.get('/api/outbox/<oid>')
     def get_outbox(oid):
-        if not is_owner():
+        if not pro_or_owner():
+            if session.get('client_id'):
+                return jsonify(error='The Pro plan opens the outbox.', upgrade='/pricing', required='pro'), 402
             return jsonify(error='Owner login required.'),401
         with db() as c:
             r = c.execute('SELECT * FROM mail_outbox WHERE id=?', (oid,)).fetchone()
@@ -119,7 +134,9 @@ def register_standard(app, db, log, settings_fn=None):
 
     @app.post('/api/outbox/<oid>/resend')
     def resend_outbox(oid):
-        if not is_owner():
+        if not pro_or_owner():
+            if session.get('client_id'):
+                return jsonify(error='The Pro plan opens the outbox.', upgrade='/pricing', required='pro'), 402
             return jsonify(error='Owner login required.'),401
         with db() as c:
             r = c.execute('SELECT * FROM mail_outbox WHERE id=?', (oid,)).fetchone()
@@ -278,7 +295,9 @@ def register_standard(app, db, log, settings_fn=None):
     # --- Branded mail templates endpoint for owner (preview 9 templates) ---
     @app.get('/api/mail-templates')
     def mail_templates():
-        if not is_owner():
+        if not pro_or_owner():
+            if session.get('client_id'):
+                return jsonify(error='The Pro plan opens mail templates.', upgrade='/pricing', required='pro'), 402
             return jsonify(error='Owner login required.'),401
         # 9 branded templates matching Reachmark count, adapted to Reachmark context
         templates = [

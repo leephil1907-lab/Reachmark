@@ -345,7 +345,9 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
         if cid and session.get('role') == 'client':
             user = get_user_by_id(cid)
             if user:
-                return jsonify(role='client', authenticated=True, email=user['email'], name=user['name'], id=user['id'], email_verified=bool(user['email_verified']), is_active=bool(user['is_active']))
+                from web.billing import tier_status
+                tier, tier_active, tier_expires = tier_status(user)
+                return jsonify(role='client', authenticated=True, email=user['email'], name=user['name'], id=user['id'], email_verified=bool(user['email_verified']), is_active=bool(user['is_active']), tier=tier, tier_active=tier_active, tier_expires=tier_expires)
         return jsonify(role='none', authenticated=False),401
 
     @app.post('/api/auth/request-verification')

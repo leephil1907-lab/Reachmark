@@ -557,8 +557,16 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
     from crew.skills_loader import playbook_index
 
     def owner_only():
-        if session.get('client_id') and not session.get('owner'):
-            return jsonify(error='Only the studio owner can run the AI crew.'), 403
+        if session.get('owner'):
+            return None
+        if session.get('client_id') and session.get('role') == 'client':
+            from web.billing import tier_status
+            with db() as c:
+                row = c.execute('SELECT * FROM users WHERE id=?', (session.get('client_id'),)).fetchone()
+            tier, active, _ = tier_status(dict(row) if row else None)
+            if tier == 'pro' and active:
+                return None
+            return jsonify(error='The Pro plan runs the AI crew.', upgrade='/pricing', required='pro'), 402
         return None
 
     @app.get('/api/crew')

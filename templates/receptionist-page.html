@@ -1,4 +1,5 @@
 <!DOCTYPE html><html lang="en"><head>
+<meta name="csrf-token" content="{{ csrf_token() }}">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ gtm_id }}');</script><!-- End Google Tag Manager -->{% endif %}
 {% if ga_id is defined and ga_id %}<!-- Global site tag (gtag.js) - Google Analytics --><script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -10,7 +11,7 @@
 </head><body class="rx-page">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}
 <nav class="rx-nav" aria-label="Public pages"><a href="/" class="rx-brand"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
-<div class="rx-links"><a href="/">About</a><a href="/showcase">Samples</a><a href="/receptionist" aria-current="page">AI Receptionist</a><a href="/about#pricing">Pricing</a><a data-magnet class="rx-btn small" href="/enquire">Enquire ↗</a></div></nav>
+<div class="rx-links"><a href="/">About</a><a href="/showcase">Samples</a><a href="/receptionist" aria-current="page">AI Receptionist</a><a href="/about#pricing">Pricing</a><a href="/pricing">Plans</a><a data-magnet class="rx-btn small" href="/enquire">Enquire ↗</a></div></nav>
 <main>
 <header class="rx-hero rx-aurora"><div class="rx-hero-copy">
 <p class="rx-eyebrow">Reachmark AI Receptionist</p>
@@ -124,9 +125,87 @@
 <p>Try the chat on this page right now — or send an enquiry and the studio replies with a tailored estimate.</p>
 <p class="rx-cta-row"><button type="button" data-magnet class="rx-btn" data-open-widget>Try it live</button><a data-magnet class="rx-btn ghost" href="/enquire">Send an enquiry</a></p></section>
 
-<footer class="rx-footer"><p>© <span data-year>2026</span> Reachmark · <a href="/">About</a> · <a href="/showcase">Samples</a> · <a href="/about#pricing">Pricing</a> · <a href="/enquire">Enquire</a></p></footer>
+<footer class="rx-footer"><p>© <span data-year>2026</span> Reachmark · <a href="/">About</a> · <a href="/showcase">Samples</a> · <a href="/about#pricing">Pricing</a> · <a href="/pricing">Plans</a> · <a href="/enquire">Enquire</a></p></footer>
 </main>
 {% include 'receptionist.html' %}
+
+{% if owner_logged_in %}
+<section class="rx-agent" aria-label="Owner agent console">
+<style>
+.rx-agent{max-width:920px;margin:34px auto;padding:30px;background:#14210f;color:#e9f2da;border-radius:18px;border:1px solid #2c3d22}
+.rx-agent h2{margin:0 0 4px;font-size:22px}.rx-agent>p{margin:0 0 18px;color:#a9bc93;font-size:13.5px}
+.rx-agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.rx-agent-card{background:#1d2f16;border:1px solid #33482a;border-radius:12px;padding:16px}
+.rx-agent-card h3{margin:0 0 10px;font-size:14px;letter-spacing:.4px;color:#cfe39f}
+.rx-agent-card input,.rx-agent-card select,.rx-agent-card textarea{width:100%;margin:0 0 8px;padding:9px 10px;border-radius:8px;border:1px solid #3d5530;background:#101b0c;color:#eef5e2;font-size:13px}
+.rx-agent-card textarea{min-height:56px;resize:vertical}
+.rx-agent-row{display:flex;gap:8px;flex-wrap:wrap}
+.rx-agent button{background:#a9c93f;color:#16210f;border:0;border-radius:9px;padding:9px 14px;font-weight:800;font-size:13px;cursor:pointer}
+.rx-agent button.ghost{background:transparent;color:#cfe39f;border:1px solid #3d5530}
+.rx-agent button.danger{background:#7d2f22;color:#fff}
+#rx-agent-out{margin:16px 0 0;background:#0d160a;border:1px solid #33482a;border-radius:10px;padding:14px;font:12px/1.65 ui-monospace,Consolas,monospace;color:#cfe39f;white-space:pre-wrap;max-height:320px;overflow:auto;min-height:60px}
+@media(max-width:700px){.rx-agent-grid{grid-template-columns:1fr}}
+</style>
+<h2>Owner agent console</h2>
+<p>Signed in as the studio owner — the front desk works for you here. Reads are instant; sends need a lawful basis and a ticked approval. Every run is logged.</p>
+<div class="rx-agent-grid">
+<div class="rx-agent-card"><h3>STATUS</h3><div class="rx-agent-row">
+<button type="button" data-act="stats">Workspace stats</button>
+<button type="button" class="ghost" data-act="enquiry_list" data-params='{"status":"New"}'>New enquiries</button>
+<button type="button" class="ghost" data-act="invoice_list">Invoices</button>
+<button type="button" class="ghost" data-act="project_list">Projects</button>
+</div></div>
+<div class="rx-agent-card"><h3>FIND LEADS</h3>
+<input id="ag-q" placeholder="Name, email or city" maxlength="120">
+<div class="rx-agent-row"><button type="button" id="ag-find">Search</button></div></div>
+<div class="rx-agent-card"><h3>ADD LEAD</h3>
+<input id="ag-name" placeholder="Business name *" maxlength="200">
+<input id="ag-email" placeholder="Email" maxlength="250">
+<input id="ag-city" placeholder="City" maxlength="200">
+<input id="ag-web" placeholder="Website" maxlength="1000">
+<div class="rx-agent-row"><button type="button" id="ag-add">Add lead</button></div></div>
+<div class="rx-agent-card"><h3>LEAD DETAIL</h3>
+<input id="ag-id" placeholder="Lead id">
+<select id="ag-stage"><option value="">— stage —</option><option>New</option><option>Drafted</option><option>Contacted</option><option>Replied</option><option>Won</option><option>Not a fit</option></select>
+<textarea id="ag-note" placeholder="Note" maxlength="2000"></textarea>
+<div class="rx-agent-row"><button type="button" id="ag-get">Open</button><button type="button" id="ag-save">Save</button><button type="button" class="ghost" id="ag-audit">Run audit</button><button type="button" class="danger" id="ag-del">Delete</button></div></div>
+<div class="rx-agent-card"><h3>SEND OUTREACH</h3>
+<input id="ag-send-id" placeholder="Lead id">
+<input id="ag-basis" placeholder="Lawful basis (10+ characters)" maxlength="300">
+<label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:8px"><input type="checkbox" id="ag-ok" style="width:auto;margin:0"> I reviewed the message and basis</label>
+<div class="rx-agent-row"><button type="button" id="ag-send">Send now</button></div></div>
+<div class="rx-agent-card"><h3>DISCOVER &amp; FOLLOW-UPS</h3>
+<input id="ag-disc-city" placeholder="City, Country" maxlength="150">
+<input id="ag-disc-cat" placeholder="Category (e.g. Bakery)" maxlength="60">
+<div class="rx-agent-row"><button type="button" id="ag-disc">Run discovery</button></div>
+<input id="ag-eq-id" placeholder="Enquiry id" style="margin-top:10px">
+<select id="ag-eq-status"><option>New</option><option>In progress</option><option>Answered</option><option>Closed</option></select>
+<div class="rx-agent-row"><button type="button" id="ag-eq">Save enquiry</button></div></div>
+</div>
+<pre id="rx-agent-out">Results appear here.</pre>
+<script>
+(function(){
+  var out=document.getElementById('rx-agent-out');
+  var csrf=(document.querySelector('meta[name=csrf-token]')||{}).content||'';
+  function show(x){out.textContent=typeof x==='string'?x:JSON.stringify(x,null,2);}
+  function act(tool,params){show('Running '+tool+' …');
+    return fetch('/api/receptionist/act',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tool:tool,params:params||{}})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(o){show(o.j);return o;}).catch(function(e){show('Error: '+e.message);});}
+  function v(id){return (document.getElementById(id).value||'').trim();}
+  document.querySelectorAll('[data-act]').forEach(function(b){b.onclick=function(){var p={};try{p=JSON.parse(b.dataset.params||'{}');}catch(e){}act(b.dataset.act,p);};});
+  document.getElementById('ag-find').onclick=function(){act('lead_list',{q:v('ag-q'),limit:10});};
+  document.getElementById('ag-add').onclick=function(){act('lead_create',{name:v('ag-name'),email:v('ag-email'),city:v('ag-city'),website:v('ag-web')});};
+  document.getElementById('ag-get').onclick=function(){act('lead_get',{id:v('ag-id')});};
+  document.getElementById('ag-save').onclick=function(){var p={id:v('ag-id')};if(v('ag-stage'))p.stage=v('ag-stage');if(v('ag-note'))p.note=v('ag-note');act('lead_update',p);};
+  document.getElementById('ag-audit').onclick=function(){act('lead_audit',{id:v('ag-id')});};
+  document.getElementById('ag-del').onclick=function(){if(confirm('Delete this lead?'))act('lead_delete',{id:v('ag-id')});};
+  document.getElementById('ag-send').onclick=function(){if(!document.getElementById('ag-ok').checked){show('Tick the approval box first.');return;}if(!confirm('Send this outreach email now?'))return;act('lead_send',{id:v('ag-send-id'),basis:v('ag-basis')});};
+  document.getElementById('ag-disc').onclick=function(){act('discover_run',{city:v('ag-disc-city'),category:v('ag-disc-cat')});};
+  document.getElementById('ag-eq').onclick=function(){act('enquiry_update',{id:v('ag-eq-id'),status:v('ag-eq-status'),notes:''});};
+})();
+</script>
+</section>
+{% endif %}
+
 <script src="/static/receptionist-page.js" defer></script>
 <script src="/static/reveal.js" defer></script>
 <script src="/static/magnet.js" defer></script>

@@ -38,6 +38,10 @@ HUMAN_LINE = ('Of course. I have flagged this for the studio owner — they read
 # --------------------------------------------------------------------------- #
 # Storage
 # --------------------------------------------------------------------------- #
+from web.agent_tools import (ACT_TOOLS, ToolError, owner_locked, run_tool, tool_enquiry_list,
+                                 tool_invoice_list, tool_lead_list, tool_project_list, tool_stats)
+
+
 def ensure_tables(db):
     with db() as c:
         c.execute('''CREATE TABLE IF NOT EXISTS receptionist_threads(
@@ -217,6 +221,53 @@ def answer(db, now, message, thread_token=None, visitor_hash='', page='', settin
             'sources': ['knowledge/reachmark.md'] if kb_answer else []}
 
 
+OWNER_HELP = ('Owner commands — /stats · /leads [search] · /enquiries [status] · /invoices · /projects.\n'
+              'Writes (add, update, send, audit, discover) run from the owner panel below or POST /api/receptionist/act.')
+
+
+def _money(minor, currency):
+    try:
+        return f'{(minor or 0) / 100:,.2f} {currency or ""}'.strip()
+    except (TypeError, ValueError):
+        return str(minor or 0)
+
+
+def owner_command(db, now, text, thread_token, visitor_hash):
+    """Run a `/command` from the signed-in owner inside the chat flow."""
+    parts = (text or '').split(None, 1)
+    cmd = parts[0].lower() if parts else ''
+    arg = parts[1].strip()[:120] if len(parts) > 1 else ''
+    thread = _thread(db, now, thread_token, visitor_hash, 'owner-console')
+    _store(db, now, thread['id'], 'visitor', text)
+    if cmd == '/stats':
+        st = tool_stats(db, now, None, {}, {})
+        inv = ', '.join(f'{k}: {v}' for k, v in st['invoices_by_status'].items()) or 'none yet'
+        reply = (f"Leads: {st['leads']} · New enquiries: {st['new_enquiries']} · Projects: {st['projects']} · "
+                 f'Open chats: {st["open_threads"]}\nInvoices — {inv}.')
+    elif cmd == '/leads':
+        rows = tool_lead_list(db, now, None, {'q': arg, 'limit': 10}, {})['leads']
+        reply = ('No leads match.' if not rows else '\n'.join(
+            f"\u2022 {r['name']} — {r.get('stage') or 'New'} ({r.get('city') or 'no city'}) [{r['id'][:8]}]" for r in rows))
+    elif cmd == '/enquiries':
+        rows = tool_enquiry_list(db, now, None, {'status': arg or 'New'}, {})['enquiries']
+        reply = ('Nothing there.' if not rows else '\n'.join(
+            f"\u2022 {r['name']} — {r.get('business') or r.get('email') or ''} [{r['status']}]".rstrip() for r in rows))
+    elif cmd == '/invoices':
+        rows = tool_invoice_list(db, now, None, {}, {})['invoices']
+        reply = ('No invoices yet.' if not rows else '\n'.join(
+            f"\u2022 {r.get('number') or r['id'][:8]} · {r.get('client_name') or ''} · "
+            f"{_money(r.get('total_minor'), r.get('currency'))} · {r.get('status') or 'unset'}" for r in rows))
+    elif cmd == '/projects':
+        rows = tool_project_list(db, now, None, {}, {})['projects']
+        reply = ('No projects yet.' if not rows else '\n'.join(
+            f"\u2022 {r['title']} — {r.get('stage') or ''}".rstrip() for r in rows))
+    else:
+        reply = OWNER_HELP
+    _store(db, now, thread['id'], 'assistant', reply, 'owner_command', {'command': cmd})
+    return {'ok': True, 'reply': reply, 'intent': 'owner_command', 'topic': '', 'score': 1.0,
+            'actions': ['owner_command'], 'thread': thread['token'], 'handoff': False, 'sources': []}
+
+
 def register_receptionist(app, db, now, log, settings):
     from flask import request, jsonify, session, render_template
     ensure_tables(db)
@@ -289,6 +340,9 @@ def register_receptionist(app, db, now, log, settings):
         fingerprint = hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()[:32]
         if body.get('company_url'):
             return jsonify(error='Unable to accept this message.'), 400
+        if session.get('owner') and str(body.get('message', '')).strip().startswith('/'):
+            return jsonify(owner_command(db, now, str(body.get('message', ''))[:2000],
+                                         str(body.get('thread', ''))[:64] or None, fingerprint))
         if not rate_ok(fingerprint):
             return jsonify(error='That is a lot of messages in one hour. Please use the enquiry form at /enquire and the studio will reply directly.'), 429
         result = answer(db, now, str(body.get('message', ''))[:2000], str(body.get('thread', ''))[:64] or None,
@@ -313,6 +367,21 @@ def register_receptionist(app, db, now, log, settings):
         return jsonify(ok=True, reply=(f'Happy to do that for {business}. I have passed the name to the studio — '
                                        'they prepare the concept and send you one private review link. Leave an e-mail '
                                        'address in this chat and it will reach them straight away.'))
+
+    @app.post('/api/receptionist/act')
+    def receptionist_act():
+        """Owner-only agent actions: the front desk doing real work."""
+        if owner_locked() and not session.get('owner'):
+            return jsonify(error='Owner login required.'), 403
+        body = request.get_json(silent=True)
+        if not isinstance(body, dict):
+            return jsonify(error='Send a JSON object.'), 400
+        try:
+            result = run_tool(app, db, now, log, str(body.get('tool', '')), body.get('params') or {})
+        except ToolError as e:
+            return jsonify(error=str(e)), e.code
+        log('receptionist', 'Owner agent ran ' + str(body.get('tool', '')))
+        return jsonify(ok=True, tool=str(body.get('tool', '')), result=result)
 
     @app.get('/api/receptionist/threads')
     def receptionist_threads_route():

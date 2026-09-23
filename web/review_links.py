@@ -239,7 +239,12 @@ def register_review_links(app, db, now, log, settings):
     @app.get('/api/review-links')
     def review_link_list():
         if session.get('client_id') and not session.get('owner'):
-            return jsonify(error='Owner login required.'), 403
+            from web.billing import tier_status
+            with db() as c:
+                row = c.execute('SELECT * FROM users WHERE id=?', (session.get('client_id'),)).fetchone()
+            tier, active, _ = tier_status(dict(row) if row else None)
+            if tier != 'pro' or not active:
+                return jsonify(error='The Pro plan manages review links.', upgrade='/pricing', required='pro'), 402
         return jsonify(link_overview(db), responses=responses_for(db))
 
     @app.post('/api/review-links/<link_id>/handled')

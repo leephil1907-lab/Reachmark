@@ -254,7 +254,7 @@ is not.</p>
 @app.route('/robots.txt')
 def robots():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
-    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /showcase\nAllow: /enquire\nAllow: /receptionist\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
+    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /showcase\nAllow: /enquire\nAllow: /receptionist\nAllow: /pricing\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
 @app.route('/sitemap.xml')
 def sitemap():
     from xml.sax.saxutils import escape
@@ -262,7 +262,7 @@ def sitemap():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
     now = datetime.now(timezone.utc).date().isoformat()
     # Core public pages + all 8 showcase samples — every indexable route for Google
-    paths = ['/','/about','/showcase','/enquire','/receptionist'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
+    paths = ['/','/about','/showcase','/enquire','/receptionist','/pricing'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
     urls = []
     for path in paths:
         loc = escape(base+path)
@@ -293,9 +293,15 @@ def google_verify_file_generic(filename):
 def state():
     from flask import session
     is_client = bool(session.get('client_id') and session.get('role')=='client')
+    paid_tools = False
+    if is_client:
+        from web.billing import tier_status
+        with db() as c:
+            urow = c.execute('SELECT * FROM users WHERE id=?', (session.get('client_id'),)).fetchone()
+        paid_tools = tier_status(dict(urow) if urow else None)[0] in ('starter', 'pro')
     with db() as c:
-        if is_client:
-            # Clients see no leads/jobs; they have filtered invoices/projects elsewhere
+        if is_client and not paid_tools:
+            # Free clients see no leads/jobs; paid plans unlock the shared workspace tools
             leads=[]
             activity=[]
             sent=0
@@ -304,9 +310,9 @@ def state():
             jobs=[]
         else:
             leads=[dict(r) for r in c.execute("SELECT l.*,r.verification,r.reviewed_at FROM leads l LEFT JOIN lead_reviews r ON r.lead_id=l.id ORDER BY l.created DESC")]
-            activity=[dict(r) for r in c.execute('SELECT * FROM activity ORDER BY id DESC LIMIT 12')]
+            activity=([] if is_client else [dict(r) for r in c.execute('SELECT * FROM activity ORDER BY id DESC LIMIT 12')])
             sent=c.execute("SELECT count(*) FROM sends WHERE state='sent'").fetchone()[0]
-            suppressed=[r[0] for r in c.execute('SELECT email FROM suppression')]
+            suppressed=([] if is_client else [r[0] for r in c.execute('SELECT email FROM suppression')])
             enquiry_count=c.execute("SELECT count(*) FROM enquiries WHERE status='New'").fetchone()[0]
             jobs=[dict(r) for r in c.execute('SELECT * FROM jobs ORDER BY created DESC LIMIT 15')]
     role='client' if is_client else 'owner' if session.get('owner') else 'none'
@@ -556,6 +562,8 @@ from web.review_links import register_review_links
 register_review_links(app, db, now, log, settings)
 from web.receptionist import register_receptionist
 register_receptionist(app, db, now, log, settings)
+from web.billing import register_billing
+register_billing(app, db, now, log)
 
 
 # Client reviews — leave a review for good job done

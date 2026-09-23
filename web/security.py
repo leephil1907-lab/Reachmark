@@ -3,6 +3,7 @@ import os, secrets, time, hmac, hashlib
 from datetime import timedelta
 from flask import request, session, jsonify, redirect, render_template, url_for
 from werkzeug.security import check_password_hash
+from web.billing import check_client_path, tier_status
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 def install_security(app, db):
@@ -21,7 +22,7 @@ def install_security(app, db):
     with db() as c:c.execute('CREATE TABLE IF NOT EXISTS login_attempts(client TEXT PRIMARY KEY,failures INTEGER,blocked_until REAL)')
     def public():
         p=request.path
-        if p in ('/','/login','/healthz','/about','/offline','/robots.txt','/sitemap.xml','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/signup','/signin','/client-login','/forgot','/reset','/verify'): return True
+        if p in ('/','/login','/healthz','/about','/offline','/robots.txt','/sitemap.xml','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/signup','/signin','/client-login','/forgot','/reset','/verify','/pricing','/billing/callback','/api/billing/status','/api/billing/webhook'): return True
         if p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/','/verify/','/reset/','/forgot')): return True
         # Quick review links a business is invited to answer, and the public AI receptionist.
         if p.startswith(('/r/','/api/r/')): return True
@@ -46,19 +47,21 @@ def install_security(app, db):
             # Validate client still active
             try:
                 with db() as c:
-                    row=c.execute('SELECT id FROM users WHERE id=? AND is_active=1',(session.get('client_id'),)).fetchone()
+                    row=c.execute('SELECT * FROM users WHERE id=? AND is_active=1',(session.get('client_id'),)).fetchone()
                     if not row:
                         session.clear()
                     else:
                         # Allow client-allowed APIs and all non-API pages
-                        allowed_prefixes=('/api/auth/me','/api/auth/logout','/api/auth/export','/api/auth/close','/api/auth/request-verification','/api/invoices','/api/projects','/api/documents/invoice','/api/documents/brief','/api/documents/proposal')
+                        tier,_,_=tier_status(dict(row))
+                        verdict,need=check_client_path(request.path,tier)
                         if request.path.startswith('/api/'):
-                            if any(request.path.startswith(p) for p in allowed_prefixes) or request.path=='/api/state':
+                            if verdict=='ok':
                                 # For /api/state, clients get filtered view elsewhere; allow but check CSRF for writes
                                 if request.method in ('POST','PATCH','DELETE','PUT'):
                                     supplied=request.headers.get('X-CSRF-Token') or request.form.get('csrf_token','')
                                     if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error='Session verification failed. Reload the page and try again.'),403
                                 return
+                            if verdict=='upgrade':return jsonify(error='This needs the '+need.title()+' plan.',upgrade='/pricing',required=need,tier=tier),402
                             return jsonify(error='Client access is limited to assigned projects and invoices.'),403
                         # Non-API page like '/' — allow client to view portal
                         if request.method in ('POST','PATCH','DELETE','PUT'):

@@ -603,9 +603,10 @@ class AccessControlTests(CrewBase):
             flask_session['client_id'] = 'client-1'
             flask_session['role'] = 'client'
         response = self.client.get('/api/crew')
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 402)
+        self.assertEqual(response.get_json().get('upgrade'), '/pricing')
         response = self.client.post('/api/crew/run', json={'mode': 'single', 'agent': 'scout'})
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 402)
 
     def test_owner_guard_still_protects_crew_apis_when_a_password_is_set(self):
         with patch.dict(os.environ, {'DASHBOARD_PASSWORD': 'secret-owner-pass'}):
