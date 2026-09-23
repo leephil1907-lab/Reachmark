@@ -53,7 +53,6 @@
       </div>
       <label class="crew-check"><input type="checkbox" id="crew-link" checked/> Build a quick review link for each business</label>
       <label class="crew-check"><input type="checkbox" id="crew-sms"/> Also prepare a short SMS / WhatsApp note</label>
-      <label class="crew-check"><input type="checkbox" id="crew-fixtures"/> Offline demo (fictional test records, no network, purgeable)</label>
       <button class="primary" type="submit" id="crew-submit">Run the crew ↗</button>
       <p class="small muted" id="crew-run-hint">Nothing is ever sent to a business from here. The run stops at an approval queue and every message needs your separate yes.</p>
     </form>
@@ -62,6 +61,7 @@
       <div class="section-top"><h3 id="crew-run-title">Latest run</h3><span class="badge" id="crew-run-state">idle</span></div>
       <div id="crew-run-body" class="crew-run-body"></div>
       <button class="text-link" id="crew-cancel" hidden onclick="crewCancel()">Cancel this run</button>
+      <button class="text-link" id="crew-purge" onclick="crewPurgeDemo()">Remove demo records</button>
     </div>
   </div>
 

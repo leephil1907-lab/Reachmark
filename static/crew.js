@@ -202,7 +202,7 @@
       tone: $('crew-tone').value,
       include_review_link: $('crew-link').checked,
       sms_note: $('crew-sms').checked,
-      fixtures: $('crew-fixtures').checked
+      fixtures: false
     };
     button.disabled = true;
     button.textContent = 'Crew starting…';
@@ -220,10 +220,18 @@
   window.crewRunAgent = function (agentId) {
     var body = { mode: 'single', agent: agentId, limit: parseInt($('crew-limit').value, 10) || 6,
       location: $('crew-location').value, category: $('crew-category').value,
-      tone: $('crew-tone').value, fixtures: $('crew-fixtures').checked,
+      tone: $('crew-tone').value, fixtures: false,
       include_review_link: $('crew-link').checked };
     api('/api/crew/run', 'POST', body).then(function () {
       toast(agentId + ' is starting.');
+      return window.loadCrew();
+    }).catch(function (error) { toast(error.message, true); });
+  };
+
+  window.crewPurgeDemo = function () {
+    if (!confirm('Remove all offline demo records? Live businesses are never touched.')) return;
+    api('/api/crew/demo/purge', 'POST', {}).then(function (result) {
+      toast('Removed ' + result.removed + ' demo record' + (result.removed === 1 ? '' : 's') + '. Metrics now reflect live data only.');
       return window.loadCrew();
     }).catch(function (error) { toast(error.message, true); });
   };
@@ -246,7 +254,7 @@
     if (!run) {
       if (title) title.textContent = 'Latest run';
       if (badge) badge.textContent = 'no runs yet';
-      if (body) body.innerHTML = '<p class="small muted">Run the crew with the offline demo switched on to see the whole loop without touching the network.</p>';
+      if (body) body.innerHTML = '<p class="small muted">Run the crew live — pick a pipeline, a location and a category. Every outbound item stops at your approval queue.</p>';
       if (cancel) cancel.hidden = true;
       return;
     }

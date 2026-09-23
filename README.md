@@ -28,7 +28,7 @@ concept → ask one question → follow up when they answer → never send anyth
 
 | Agent | Job |
 |---|---|
-| ◎ Scout | Finds real businesses (OpenStreetMap / CSV / offline demo), reads ≤3 public pages each. |
+| ◎ Scout | Finds real businesses (OpenStreetMap / CSV), reads ≤3 public pages each. |
 | ⌁ Auditor | Records measured website facts + a ranked list of observed gaps, each with its source. |
 | ◨ Builder | Composes the concept page and issues the unguessable quick review link `/r/<token>`. |
 | ✦ Scribe | Drafts the first message, two follow-ups and an SMS note from saved facts only. Drafts only. |
@@ -43,7 +43,7 @@ Answers land in the console; an e-mail reply also lands in the enquiry inbox.
 Guardrails (enforced in code): nothing outbound is automatic · one message per business per
 day, five dispatches per run · permanent opt-outs · no invented facts, prices or claims ·
 bounded runs (14 steps, 240 s, 25 leads), one at a time, cancellable, fully audited ·
-`robots.txt` honoured · an offline demo that makes no network calls and purges in one click.
+`robots.txt` honoured · live runs only (the offline demo needs `ALLOW_CREW_DEMO=1` and purges in one click).
 No API key needed: every agent has a deterministic engine, and a configured model only
 improves phrasing under the same guardrails (Ollama works with no key — see `.env.example`).
 
@@ -415,7 +415,7 @@ tests/        isolated unittest suites + headless browser flows
 scripts/      smoke proof, backups, owner setup, PWA assets, release verification
 skills/       vendored MIT playbooks + licences (see below)
 knowledge/    reachmark.md — the only facts the front desk may quote
-fixtures/     purgeable offline demo records
+fixtures/     offline demo records, dev-only behind ALLOW_CREW_DEMO=1
 templates/ static/   pages, PWA assets, JS/CSS (no CDN at runtime)
 ```
 

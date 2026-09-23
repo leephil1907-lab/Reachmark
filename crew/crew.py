@@ -29,7 +29,7 @@ AGENTS = [
         'mission': 'Find real businesses from public sources, and read the public pages they publish '
                    'to collect the contact details they already made public.',
         'tools': ['OpenStreetMap · Nominatim + Overpass', 'Bounded public-page contact harvest (robots-aware)',
-                  'CSV import', 'Offline fixtures (demo only)'],
+                  'CSV import'],
         'skills': ['prospecting'], 'handler': 'agents.agent_scout:run',
         'inputs': ['location(s), category, or your own CSV', 'optional: existing lead id'],
         'outputs': ['saved businesses with source receipts', 'public contact fields found on their own site'],
@@ -644,6 +644,9 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
         body = request.get_json(silent=True) or {}
         mode = str(body.get('mode', 'campaign'))
         agent_id = str(body.get('agent', '')).strip() or None
+        if body.get('fixtures') and os.getenv('ALLOW_CREW_DEMO') != '1':
+            return jsonify(error='The offline demo is disabled on this server. '
+                                 'Run the crew live with a location or a saved lead.'), 400
         params = {
             'location': str(body.get('location', ''))[:120].strip(),
             'category': str(body.get('category', ''))[:80].strip(),
@@ -661,7 +664,7 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
         if mode != 'single' and mode not in PIPELINES:
             return jsonify(error='Unknown crew pipeline.'), 400
         if mode in ('campaign', 'research') and not params['fixtures'] and not params['location'] and not params['lead_ids'] and not params['lead_id']:
-            return jsonify(error='Give the crew a location ("City, Country"), a saved lead, or switch on the offline demo.'), 400
+            return jsonify(error='Give the crew a location ("City, Country") or a saved lead to run live.'), 400
         mine = run_owner()
         if mine:
             want = ([params['lead_id']] if params['lead_id'] else []) + params['lead_ids']

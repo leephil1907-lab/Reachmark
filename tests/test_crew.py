@@ -1,7 +1,8 @@
 """Isolated checks for the AI crew, review links and the receptionist.
 
 No message is ever sent and no public endpoint is called: the crew runs in offline
-demo mode (fixtures), SMTP variables are set to a fake host, and every network call
+demo mode (fixtures, enabled here via ALLOW_CREW_DEMO=1), SMTP variables are set to
+a fake host, and every network call
 that could leave the process is mocked. The suite is what keeps the guardrails true.
 """
 import json, os, tempfile, time, unittest, uuid
@@ -40,7 +41,8 @@ class CrewBase(unittest.TestCase):
             for sql in schema:
                 c.execute(sql)
         self.client = module.app.test_client()
-        self.env = patch.dict(os.environ, {'DASHBOARD_PASSWORD': '', 'SMTP_HOST': '', 'SMTP_FROM': ''})
+        self.env = patch.dict(os.environ, {'DASHBOARD_PASSWORD': '', 'SMTP_HOST': '', 'SMTP_FROM': '',
+                                           'ALLOW_CREW_DEMO': '1'})
         self.env.start()
         self.crew = module.app.extensions['reachmark_crew']
 
@@ -215,6 +217,32 @@ class OfflinePipelineTests(CrewBase):
         purge = self.client.post('/api/crew/demo/purge').get_json()
         self.assertGreaterEqual(purge['removed'], 1)
         self.assertEqual(self.client.get('/api/state').get_json()['leads'], [])
+
+    def test_demo_requests_are_rejected_without_the_flag(self):
+        with patch.dict(os.environ):
+            os.environ.pop('ALLOW_CREW_DEMO', None)
+            response = self.client.post('/api/crew/run', json={'mode': 'campaign', 'fixtures': True})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('disabled', response.get_json()['error'])
+        leads = self.client.get('/api/state').get_json()['leads']
+        self.assertFalse(any(lead['source'] == 'Fixture (offline demo)' for lead in leads))
+
+    def test_admin_page_has_no_demo_toggle(self):
+        root = os.path.join(os.path.dirname(__file__), '..')
+        with open(os.path.join(root, 'templates', 'crew-panel.html'), encoding='utf-8') as handle:
+            panel = handle.read()
+        with open(os.path.join(root, 'static', 'crew.js'), encoding='utf-8') as handle:
+            script = handle.read()
+        self.assertNotIn('crew-fixtures', panel)
+        self.assertNotIn('crew-fixtures', script)
+        self.assertNotIn('Offline demo', panel)
+        self.assertIn('crewPurgeDemo', panel)
+        self.assertIn('crewPurgeDemo', script)
+
+    def test_scout_tools_list_no_demo_source(self):
+        agents = self.client.get('/api/crew').get_json()['agents']
+        scout = next(a for a in agents if a['id'] == 'scout')
+        self.assertNotIn('Offline fixtures (demo only)', scout['tools'])
 
 
 class BuilderAndLinkTests(CrewBase):
