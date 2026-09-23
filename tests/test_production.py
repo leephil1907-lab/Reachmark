@@ -178,6 +178,8 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
         for path in ('/showcase','/receptionist','/reviews','/about','/enquire','/signin','/signup'):
             self.assertIn(f'href="{path}"',home,path)
         self.assertNotIn('I hunt missing websites',home)
+        self.assertIn('Three steps. No maze.',home)
+        self.assertIn('© 2026 Reachmark',home)
         about=self.client.get('/about').get_data(as_text=True)
         self.assertLess(len(home),len(about)//2)
     def test_about_and_reviews_keep_the_full_page(self):
@@ -194,5 +196,21 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
             body=self.client.get(path).get_data(as_text=True)
             self.assertNotIn('Sign in to the workspace',body,path)
             self.assertNotIn('Studio owner?',body,path)
+
+    def test_header_nav_stays_slim(self):
+        home=self.client.get('/').get_data(as_text=True)
+        nav=home.split('<nav class="main"')[1].split('</nav>')[0]
+        for label in ('Reviews','About','Enquire'):
+            self.assertIn(label,nav)
+        for label in ('Samples','Receptionist'):
+            self.assertNotIn(label,nav)
+    def test_public_pages_show_exactly_one_support_bubble(self):
+        for path in ('/','/showcase','/enquire'):
+            body=self.client.get(path).get_data(as_text=True)
+            self.assertIn('embed.tawk.to',body,path)
+            self.assertNotIn('rm-receptionist-launch',body,path)
+        body=self.client.get('/receptionist').get_data(as_text=True)
+        self.assertIn('rm-receptionist-launch',body)
+        self.assertNotIn('embed.tawk.to',body)
 
 if __name__=='__main__':unittest.main()

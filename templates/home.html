@@ -40,17 +40,28 @@ nav.main a:hover{background:#e8ebdb}
 .band h2{font:700 28px 'Manrope',sans-serif;letter-spacing:-1px;margin:0 0 10px}
 .band h2 span{color:#d5f268}
 .band p{font:400 13px/1.7 'Manrope',sans-serif;color:#9db48f;max-width:520px;margin:0 auto 22px}
-footer.site{border-top:1px solid #e2e7d6;padding:30px 0 40px;margin-top:10px}
-.foot{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-.foot img{height:26px}
-.foot nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
-.foot nav a{font:700 12px 'Manrope',sans-serif;color:#4c5a41;text-decoration:none;padding:8px 10px}
-.foot small{display:block;width:100%;font:500 11px 'Manrope',sans-serif;color:#8a9976;margin-top:10px}
-@media(max-width:900px){.hero{padding:44px 0 28px}.hero h1{font-size:32px}.grid3,.shots{grid-template-columns:1fr}.shots img{height:210px}nav.main{margin-left:0}.head-cta{margin-left:auto}}
+.steps{margin:10px 0 6px;text-align:center}
+.steps h2{font:700 22px 'Manrope',sans-serif;letter-spacing:-.8px;margin:0 0 16px}
+.steps ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:left}
+.steps li{background:#fff;border:1px solid #e2e7d6;border-radius:16px;padding:22px}
+.steps li b{display:block;font:700 11px 'Manrope',sans-serif;letter-spacing:1.6px;color:#5c7a2e;margin-bottom:8px}
+.steps li strong{display:block;font:700 16px 'Manrope',sans-serif;margin-bottom:6px}
+.steps li p{font:400 13px/1.65 'Manrope',sans-serif;color:#4c5a41;margin:0 0 10px}
+.steps li a{font:700 13px 'Manrope',sans-serif;color:#0f1a0a}
+footer.site{background:#0f1a0a;color:#eaf3de;margin-top:36px}
+.fgrid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:28px;padding:44px 0 26px}
+.fbrand img{height:28px}
+.fbrand p{font:400 12.5px/1.7 'Manrope',sans-serif;color:#9db48f;max-width:320px;margin:12px 0 0}
+.fcol b{display:block;font:700 10px 'Manrope',sans-serif;letter-spacing:1.6px;color:#d5f268;margin-bottom:12px}
+.fcol a{display:block;font:600 13px 'Manrope',sans-serif;color:#cde0bc;text-decoration:none;padding:5px 0}
+.fcol a:hover{color:#fff}
+.fbase{border-top:1px solid rgba(255,255,255,.1);padding:18px 0 22px}
+.fbase small{font:500 11px 'Manrope',sans-serif;color:#8aa07a}
+@media(max-width:900px){.hero{padding:44px 0 28px}.hero h1{font-size:32px}.grid3,.shots,.steps ol{grid-template-columns:1fr}.shots img{height:210px}nav.main{margin-left:0}.head-cta{margin-left:auto}.fgrid{grid-template-columns:1fr;gap:22px}}
 </style></head><body>
 <header class="site-head"><div class="wrap head-in">
   <a href="/" class="logo" aria-label="Reachmark home"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
-  <nav class="main" aria-label="Primary"><a href="/showcase">Samples</a><a href="/receptionist">Receptionist</a><a href="/reviews">Reviews</a><a href="/about">About</a><a href="/enquire">Enquire</a></nav>
+  <nav class="main" aria-label="Primary"><a href="/reviews">Reviews</a><a href="/about">About</a><a href="/enquire">Enquire</a></nav>
   <div class="head-cta"><a class="btn ghost" href="/signin">Sign in</a><a class="btn primary" href="/signup">Create account</a></div>
 </div></header>
 <main class="wrap">
@@ -74,15 +85,27 @@ footer.site{border-top:1px solid #e2e7d6;padding:30px 0 40px;margin-top:10px}
       <a href="/showcase"><img src="/static/samples/stillwell-studio-preview.jpg" alt="Stillwell studio sample preview" loading="lazy"><span>Stillwell · Wellness</span></a>
     </div>
   </section>
+  <section class="steps" aria-label="How it works">
+    <h2>Three steps. No maze.</h2>
+    <ol>
+      <li><b>STEP 01</b><strong>Look around freely</strong><p>Browse eight fictional sample sites with live previews. No account, no sales call.</p><a href="/showcase">See the samples →</a></li>
+      <li><b>STEP 02</b><strong>Say hello in a minute</strong><p>One short form: what you need, your budget range, your timeline.</p><a href="/enquire">Open the form →</a></li>
+      <li><b>STEP 03</b><strong>Get a human reply</strong><p>A considered answer about scope, timeline and fit — never an invented quote.</p><a href="/about">How we work →</a></li>
+    </ol>
+  </section>
   <section class="band">
     <h2>Have a project in mind? <span>Let’s talk.</span></h2>
     <p>Send one enquiry and get a considered, human reply about scope, timeline and fit.</p>
     <a class="btn primary" href="/enquire">Tell us about it →</a>
   </section>
 </main>
-<footer class="site"><div class="wrap foot">
-  <a href="/" aria-label="Reachmark home"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
-  <nav aria-label="Footer"><a href="/showcase">Samples</a><a href="/receptionist">Receptionist</a><a href="/reviews">Reviews</a><a href="/about">About</a><a href="/enquire">Enquire</a><a href="/signin">Sign in</a></nav>
-  <small>Reachmark — Find Potential. Make Your Mark. Sample sites are fictional concepts, never real clients.</small>
+<footer class="site"><div class="wrap">
+  <div class="fgrid">
+    <div class="fbrand"><a href="/" aria-label="Reachmark home"><img src="/static/logo-inverse.svg" alt="Reachmark"></a><p>Reachmark — Find Potential. Make Your Mark. A website designer for businesses that want to be found and chosen.</p></div>
+    <nav class="fcol" aria-label="Explore"><b>EXPLORE</b><a href="/showcase">Website samples</a><a href="/receptionist">AI receptionist</a><a href="/reviews">Client reviews</a><a href="/about">About Reachmark</a><a href="/enquire">Enquire</a></nav>
+    <nav class="fcol" aria-label="Account"><b>CLIENTS</b><a href="/signin">Sign in</a><a href="/signup">Create account</a></nav>
+  </div>
+  <div class="fbase"><small>© 2026 Reachmark · Sample sites are fictional concepts, never real clients.</small></div>
 </div></footer>
+{% include 'tawkto.html' %}
 </body></html>
