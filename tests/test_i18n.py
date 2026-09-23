@@ -104,7 +104,9 @@ class TemplateRenderTests(unittest.TestCase):
                                        studio='Reachmark', reply_email='', base='', responses={})
                 self.assertIn(f'<html lang="{loc}"', html)
                 self.assertIn('id="locale-select"', html)
-                html = render_template('preview.html', lead=dict(lead), studio='Reachmark')
+                from web.concept import concept_copy, detect_archetype
+                html = render_template('preview.html', lead=dict(lead), studio='Reachmark',
+                                       copy=concept_copy(detect_archetype(lead['category']), loc), wa='')
                 self.assertIn(f'<html lang="{loc}"', html)
                 script = build_script(lead, {}, {'token': 't'}, {'agency': 'Reachmark'},
                                       seconds=18, locale=loc)
