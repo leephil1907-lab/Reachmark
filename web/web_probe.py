@@ -125,6 +125,11 @@ def observe(url, max_bytes=65536, timeout=12, respect_robots=True, verify_links=
     result['signals'] = signals
     result['link_check'] = (check_links(html, result['final_url']) if verify_links
                             else {'checked': 0, 'broken': [], 'skipped': 0})
+    try:
+        from web.brand import extract_brand
+        result['brand'] = extract_brand(html, result['final_url'])
+    except Exception:
+        result['brand'] = {}
     result['ok'] = True
     return result
 

@@ -46,3 +46,96 @@ def concept_copy(archetype, locale='en'):
         offers.append({'t': title.strip(), 'd': desc.strip()})
     return {'tag': strings['tag'], 'about': strings['about'], 'offers': offers,
             'archetype': archetype}
+
+
+# Trade palettes: when the business has no readable page, the preview still
+# dresses in the craft's own colours — never the studio's house style.
+ARCH_THEMES = {
+    'food': {'bg': '#170f0a', 'surface': '#201410', 'card': '#251812',
+             'ink': '#f7ede2', 'muted': '#c8ae9c', 'faint': '#87705f',
+             'accent': '#f2a45c', 'vibe': 'serif',
+             'tools': ['WhatsApp', 'Instagram', 'Google Maps']},
+    'beauty': {'bg': '#1d1118', 'surface': '#291623', 'card': '#2e1a29',
+               'ink': '#faeef4', 'muted': '#d3b3c4', 'faint': '#8f7386',
+               'accent': '#f0a3c4', 'vibe': 'serif',
+               'tools': ['WhatsApp', 'Instagram', 'Calendly']},
+    'health': {'bg': '#0a1a1c', 'surface': '#0f2427', 'card': '#122b2e',
+               'ink': '#eaf7f5', 'muted': '#a9ccc8', 'faint': '#6d8f8c',
+               'accent': '#63d6c3', 'vibe': 'sans',
+               'tools': ['WhatsApp', 'Google Calendar', 'Google Maps']},
+    'home': {'bg': '#181310', 'surface': '#231b15', 'card': '#292017',
+             'ink': '#f6efe3', 'muted': '#cbb894', 'faint': '#8a7a5c',
+             'accent': '#e8b04b', 'vibe': 'sans',
+             'tools': ['WhatsApp', 'Google Maps', 'Stripe']},
+    'stay': {'bg': '#140e20', 'surface': '#1d142e', 'card': '#241a36',
+             'ink': '#f1eafb', 'muted': '#c2b1dd', 'faint': '#84779f',
+             'accent': '#c6a1f2', 'vibe': 'serif',
+             'tools': ['WhatsApp', 'Google Maps', 'Instagram']},
+    'pro': {'bg': '#0c1425', 'surface': '#111b31', 'card': '#152239',
+            'ink': '#eaf1fb', 'muted': '#a9bcd4', 'faint': '#6e8199',
+            'accent': '#82b4f7', 'vibe': 'sans',
+            'tools': ['WhatsApp', 'Calendly', 'Stripe']},
+}
+SERIF_HINTS = ('serif', 'georgia', 'times', 'garamond', 'playfair', 'merriweather',
+               'lora', 'cormorant', 'bodoni', 'didot', 'fraunces', 'dm serif')
+ROUND_HINTS = ('round', 'quicksand', 'nunito', 'comfortaa', 'baloo', 'fredoka',
+               'poppins', 'dm sans', 'manrope')
+
+
+def _luminance(hexcode):
+    """Relative luminance 0..1 for a #rrggbb string (0 on garbage)."""
+    try:
+        rgb = [int(hexcode[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+    except (ValueError, TypeError, IndexError):
+        return 0
+    conv = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in rgb]
+    return 0.2126 * conv[0] + 0.7152 * conv[1] + 0.0722 * conv[2]
+
+
+def build_theme(archetype, brand=None):
+    """Compose the preview theme: observed brand first, trade palette behind.
+
+    Returns {'colors': {...tokens incl. accent/accent_ink/line...},
+    'logo', 'logo_source', 'images': [{'url','alt'}], 'fonts': [...],
+    'has_brand': bool, 'archetype': str, 'widget_key': 'pc.w_<arch>_t'}.
+    Only strict #rrggbb colours and http(s)/data URLs pass through.
+    """
+    from .brand import _is_usable_colour as _usable
+    arch = archetype if archetype in ARCH_THEMES else 'pro'
+    base = dict(ARCH_THEMES[arch])
+    brand = brand or {}
+    accent, accent_source = base['accent'], 'trade palette'
+    candidates = []
+    if brand.get('theme_color'):
+        candidates.append(brand['theme_color'])
+    candidates.extend(brand.get('colors') or [])
+    for cand in candidates:
+        code = (cand or '').strip().lower()
+        if re.fullmatch(r'#[0-9a-f]{6}', code) and _usable(code):
+            accent, accent_source = code, 'observed on page'
+            break
+    base['accent'] = accent
+    base['accent_ink'] = '#201405' if _luminance(accent) > 0.45 else '#fff8ef'
+    r, g, b = int(accent[1:3], 16), int(accent[3:5], 16), int(accent[5:7], 16)
+    base['line'] = f'rgba({r},{g},{b},.22)'
+    base['accent_source'] = accent_source
+    fonts = [str(f)[:60] for f in (brand.get('fonts') or []) if str(f).strip()][:3]
+    joined = ' '.join(fonts).lower()
+    if any(h in joined for h in SERIF_HINTS):
+        base['vibe'] = 'serif'
+    elif any(h in joined for h in ROUND_HINTS):
+        base['vibe'] = 'round'
+    logo = str(brand.get('logo') or '')
+    if not logo.lower().startswith(('https://', 'http://', 'data:image/')):
+        logo = ''
+    images = []
+    for img in (brand.get('images') or [])[:6]:
+        url = str((img or {}).get('url') or '')
+        if url.lower().startswith(('https://', 'http://', 'data:image/')):
+            images.append({'url': url[:800], 'alt': str(img.get('alt') or '')[:120]})
+    return {'colors': base, 'logo': logo[:800],
+            'logo_source': str(brand.get('logo_source') or '')[:60],
+            'images': images, 'fonts': fonts,
+            'has_brand': bool(logo or images or accent_source == 'observed on page'
+                              or fonts),
+            'archetype': arch, 'widget_key': f'pc.w_{arch}_t'}

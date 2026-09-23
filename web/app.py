@@ -551,11 +551,20 @@ def draft(lid):
 def preview(token):
     with db() as c: r=c.execute('SELECT * FROM leads WHERE token=?',(token,)).fetchone()
     if not r: abort(404)
-    from web.concept import detect_archetype, concept_copy
+    from web.concept import detect_archetype, concept_copy, build_theme
     lead=dict(r); loc=getattr(g,'locale','en')
     digits=re.sub(r'\D','',lead.get('phone') or '')
     wa=digits if len(digits)>=7 else ''
-    return render_template('preview.html',lead=lead,studio=settings()['agency'] or 'Reachmark Studio',copy=concept_copy(detect_archetype(lead.get('category')),loc),wa=wa)
+    arch=detect_archetype(lead.get('category'))
+    brand={}
+    try:
+        from agents.agent_auditor import latest_audit, ensure_tables as ensure_audit_tables
+        ensure_audit_tables(db)
+        _audit=latest_audit(db,lead['id'])
+        if _audit: brand=(_audit.get('observations') or {}).get('brand') or {}
+    except Exception:
+        brand={}
+    return render_template('preview.html',lead=lead,studio=settings()['agency'] or 'Reachmark Studio',copy=concept_copy(arch,loc),wa=wa,theme=build_theme(arch,brand))
 @app.route('/unsubscribe/<token>',methods=['GET','POST'])
 def unsubscribe(token):
     with db() as c:

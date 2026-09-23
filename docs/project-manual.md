@@ -129,7 +129,7 @@ CSV: UTF-8, max 3 MB / 5,000 rows. Required: `name`. Optional: `category,city,ad
 
 Three editable, deterministic tones: Professional, Warm, Concise. Uses the lead’s saved name/location and your sender profile. No language-model service or invented research claims. It asks for requirements/budget and offers a **tailored quote**, with no invented prices or unsubstantiated “cheaper than your current provider” claims.
 
-Each business has a responsive, independent concept page. It uses a shared design template and the actual saved business information, clearly labeled as a proposal, not the official business site. No fictional reviews, invented hours, fake booking tools, or claimed business photos. Decorative SVG artwork is labeled as concept art. Contact links use the saved phone/email. A fully bespoke client website is a separate build after agreement.
+Each business has a responsive, independent concept page. It wears that business's own observed brand — the Scout harvests colours, logo, imagery and fonts from the listed page (`web/brand.py`), the audit stores the brand pack, and the Builder themes the one-pager from it (`build_theme`); businesses with no readable page fall back to their trade archetype palette, never the studio house style. The page is clearly labeled as a proposal, not the official business site. No fictional reviews, invented hours, fake booking tools, or claimed business photos. Decorative SVG artwork is labeled as concept art. Contact links use the saved phone/email. A fully bespoke client website is a separate build after agreement.
 
 Preview emails use a link to the publicly deployed concept. No screenshot attachment or automatic full-site generator. Set your real public URL in Settings before emailing links.
 

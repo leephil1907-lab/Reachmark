@@ -4,7 +4,7 @@ import os
 
 import web.app as module
 from tests.test_crew import CrewBase
-from web.concept import ARCHETYPES, FIELDS, concept_copy, detect_archetype
+from web.concept import ARCHETYPES, FIELDS, concept_copy, detect_archetype, build_theme
 
 LOCALES = ('en', 'es', 'fr', 'de', 'pt', 'zh')
 
@@ -89,3 +89,83 @@ class PreviewPageTests(CrewBase):
 
     def test_unknown_token_404s(self):
         self.assertEqual(self.client.get('/preview/does-not-exist').status_code, 404)
+
+
+class ThemeTests(CrewBase):
+    def test_food_trade_palette_is_not_studio_lime(self):
+        theme = build_theme('food', {})
+        self.assertEqual(theme['colors']['accent'], '#f2a45c')
+        self.assertNotIn('#d5f268', ' '.join(v for v in theme['colors'].values()
+                                             if isinstance(v, str)))
+        self.assertEqual(theme['archetype'], 'food')
+        self.assertEqual(theme['widget_key'], 'pc.w_food_t')
+
+    def test_observed_brand_colour_overrides_trade_palette(self):
+        theme = build_theme('food', {'theme_color': '#7a2f1b', 'colors': ['#7a2f1b']})
+        self.assertEqual(theme['colors']['accent'], '#7a2f1b')
+        self.assertEqual(theme['colors']['accent_source'], 'observed on page')
+        self.assertTrue(theme['has_brand'])
+
+    def test_white_theme_color_falls_back_to_trade(self):
+        theme = build_theme('health', {'theme_color': '#ffffff'})
+        self.assertEqual(theme['colors']['accent'], '#63d6c3')
+
+    def test_accent_ink_stays_readable(self):
+        light = build_theme('pro', {'colors': ['#f5e9c8']})['colors']['accent_ink']
+        dark = build_theme('pro', {'colors': ['#123a5e']})['colors']['accent_ink']
+        self.assertEqual(light, '#201405')
+        self.assertEqual(dark, '#fff8ef')
+
+    def test_serif_fonts_flip_display_vibe(self):
+        theme = build_theme('home', {'fonts': ['Fraunces']})
+        self.assertEqual(theme['colors']['vibe'], 'serif')
+
+    def test_unknown_archetype_and_junk_urls_are_safe(self):
+        theme = build_theme('nope', {'logo': 'javascript:alert(1)',
+                                     'images': [{'url': 'ftp://x/y.png', 'alt': ''}]})
+        self.assertEqual(theme['archetype'], 'pro')
+        self.assertEqual(theme['logo'], '')
+        self.assertEqual(theme['images'], [])
+
+
+class PreviewBrandTests(CrewBase):
+    def _mklead(self, **kw):
+        row = {'id': 'pvb1', 'source_key': 'pvb1', 'name': 'Sunrise Bakery',
+               'category': 'Bakery', 'city': 'Austin', 'phone': '+1 512 555 0100',
+               'email': 'hello@sunrise.test', 'address': '1 Main St',
+               'stage': 'New', 'token': 'pvtoken1', 'created': module.now(),
+               'updated': module.now()}
+        row.update(kw)
+        with module.db() as c:
+            c.execute('INSERT OR REPLACE INTO leads(id,source_key,name,category,city,phone,email,address,stage,token,created,updated) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
+                      tuple(row[k] for k in ('id', 'source_key', 'name', 'category', 'city', 'phone', 'email', 'address', 'stage', 'token', 'created', 'updated')))
+        return row
+
+    def _audit_with_brand(self, lead_id, brand):
+        from agents.agent_auditor import ensure_tables
+        ensure_tables(module.db)
+        with module.db() as c:
+            c.execute('INSERT INTO site_audits(id,lead_id,url,status,observations,created) VALUES(?,?,?,?,?,?)',
+                      ('a1', lead_id, 'https://x.test/', 'HAS_WEBSITE',
+                       json.dumps({'ok': True, 'brand': brand}), module.now()))
+
+    def test_preview_wears_observed_brand(self):
+        lead = self._mklead()
+        self._audit_with_brand(lead['id'], {
+            'theme_color': '#7a2f1b', 'colors': ['#7a2f1b'],
+            'logo': 'https://cdn.test/logo.png', 'logo_source': 'og:logo',
+            'images': [{'url': 'https://cdn.test/hero.jpg', 'alt': 'Fresh loaves'}],
+            'fonts': []})
+        body = self.client.get('/preview/pvtoken1').data.decode()
+        for needle in ('--accent:#7a2f1b', 'https://cdn.test/logo.png',
+                       'https://cdn.test/hero.jpg', 'id="gallery"', 'Order ahead',
+                       'Plays well with', 'WhatsApp', 'Live demo', 'Get directions',
+                       'id="lightbox"', 'id="w-form"', 'vibe-serif'):
+            self.assertIn(needle, body)
+
+    def test_preview_without_brand_uses_trade_palette(self):
+        self._mklead()
+        body = self.client.get('/preview/pvtoken1').data.decode()
+        self.assertIn('--accent:#f2a45c', body)
+        self.assertNotIn('id="gallery"', body)
+        self.assertIn('Order ahead', body)

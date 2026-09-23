@@ -104,10 +104,13 @@ class TemplateRenderTests(unittest.TestCase):
                                        studio='Reachmark', reply_email='', base='', responses={})
                 self.assertIn(f'<html lang="{loc}"', html)
                 self.assertIn('id="locale-select"', html)
-                from web.concept import concept_copy, detect_archetype
+                from web.concept import build_theme, concept_copy, detect_archetype
+                arch = detect_archetype(lead['category'])
                 html = render_template('preview.html', lead=dict(lead), studio='Reachmark',
-                                       copy=concept_copy(detect_archetype(lead['category']), loc), wa='')
+                                       copy=concept_copy(arch, loc), wa='',
+                                       theme=build_theme(arch, {}))
                 self.assertIn(f'<html lang="{loc}"', html)
+                self.assertNotIn('pc.w_food_t', html)
                 script = build_script(lead, {}, {'token': 't'}, {'agency': 'Reachmark'},
                                       seconds=18, locale=loc)
                 html = render_template(
