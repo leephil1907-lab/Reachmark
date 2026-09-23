@@ -80,7 +80,7 @@ def ensure_billing(db):
     with db() as c:
         cols = {r[1] for r in c.execute('PRAGMA table_info(users)')}
         for col, typ in [('tier', "TEXT DEFAULT 'free'"), ('tier_expires', 'TEXT'),
-                         ('paystack_customer', 'TEXT')]:
+                         ('paystack_customer', 'TEXT'), ('expiry_warned', 'TEXT')]:
             if col not in cols:
                 c.execute(f'ALTER TABLE users ADD COLUMN {col} {typ}')
         c.execute("UPDATE users SET tier='free' WHERE tier IS NULL OR tier=''")
@@ -212,6 +212,17 @@ def register_billing(app, db, now, log):
             if (verify_data or {}).get('status') != 'success':
                 c.execute('UPDATE payments SET status=?,raw=? WHERE reference=?',
                           ('failed', json.dumps(verify_data or {})[:4000], reference))
+                try:
+                    from web.accounts import get_base_url, send_branded
+                    _fbase = get_base_url()
+                    _floc = locale_now()
+                    _ftier = localized_tiers(_floc).get(p['tier'], {}).get('name', p['tier'])
+                    send_branded(p['email'], _t('au.m_f_sub', _floc),
+                                 _t('au.m_f_body', _floc, tier=_ftier, ref=reference),
+                                 html_title=_t('au.m_f_title', _floc), cta_url=f'{_fbase}/pricing',
+                                 cta_label=_t('au.m_f_cta', _floc), db=db)
+                except Exception:
+                    pass
                 return None
             try:
                 paid_amount = int((verify_data or {}).get('amount') or 0)
@@ -328,6 +339,44 @@ def register_billing(app, db, now, log):
             if data.get('reference'):
                 activate(data['reference'], data)
         return jsonify(ok=True)
+
+    @app.post('/api/cron/expiry-warnings')
+    def cron_expiry_warnings():
+        """Daily cron (Railway Cron Job): warn paid users expiring within 72h. Once per expiry."""
+        secret = os.getenv('CRON_SECRET', '')
+        supplied = request.headers.get('X-Cron-Secret', '') or (request.get_json(silent=True) or {}).get('secret', '')
+        if not secret or not hmac.compare_digest(str(supplied), secret):
+            return jsonify(error=_t('pay.e_sig', locale_now())), 401
+        horizon = (datetime.now(timezone.utc) + timedelta(hours=72)).isoformat()
+        with db() as c:
+            rows = [dict(r) for r in c.execute(
+                "SELECT * FROM users WHERE tier IN ('starter','pro') AND tier_expires>? AND tier_expires<=? "
+                'AND (expiry_warned IS NULL OR expiry_warned!=tier_expires)', (now(), horizon))]
+        warned = 0
+        try:
+            from web.accounts import get_base_url, send_branded
+            base = get_base_url()
+            _cl = locale_now()
+            for u in rows:
+                try:
+                    exp = datetime.fromisoformat(u['tier_expires'])
+                    if exp.tzinfo is None:
+                        exp = exp.replace(tzinfo=timezone.utc)
+                    days = max(0, (exp - datetime.now(timezone.utc)).days)
+                except Exception:
+                    days = 0
+                _tname = localized_tiers(_cl).get(u['tier'], {}).get('name', u['tier'])
+                send_branded(u['email'], _t('au.m_x_sub', _cl, days=days, tier=_tname),
+                             _t('au.m_x_body', _cl, days=days, tier=_tname),
+                             html_title=_t('au.m_x_title', _cl), cta_url=f'{base}/pricing',
+                             cta_label=_t('au.m_x_cta', _cl), db=db)
+                with db() as c:
+                    c.execute('UPDATE users SET expiry_warned=tier_expires WHERE id=?', (u['id'],))
+                warned += 1
+        except Exception:
+            pass
+        log('billing', f'Expiry warnings sent: {warned}')
+        return jsonify(ok=True, warned=warned)
 
     @app.get('/api/billing/receipt/<reference>.pdf')
     def billing_receipt(reference):

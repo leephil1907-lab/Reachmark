@@ -460,6 +460,15 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
             # Invalidate other sessions? Clear login attempts
             c.execute('DELETE FROM login_attempts WHERE client=?', (hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest(),))
         log('account', f'Password reset completed: {row["email"]}')
+        try:
+            base = get_base_url()
+            _pl = locale_now()
+            send_branded(row['email'], _t('au.m_p_sub', _pl),
+                         _t('au.m_p_body', _pl),
+                         html_title=_t('au.m_p_title', _pl), cta_url=f'{base}/signin',
+                         cta_label=_t('au.m_p_cta', _pl), db=db)
+        except Exception:
+            pass
         return jsonify(ok=True)
 
     @app.get('/api/auth/export')

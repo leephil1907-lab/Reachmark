@@ -133,3 +133,21 @@ Postgres driver in the codebase, so pointing it at Neon **will not work right no
 
 Do **not** set any `DATABASE_URL` today: nothing reads it, and the app would
 silently keep using the SQLite file.
+
+---
+
+## 4. Subscription expiry reminders (cron)
+
+Plans are one-off 30-day charges (no auto-renew), so the app warns paid users by
+e-mail 72 hours before expiry — but something has to trigger it daily:
+
+1. Generate a secret: `openssl rand -hex 24` (any long random string works).
+2. Railway Variables → add `CRON_SECRET=<that secret>`.
+3. Railway → **New → Cron Job** → schedule `0 9 * * *` (daily 09:00 UTC) →
+   command:
+   ```
+   curl -s -X POST https://YOUR-DOMAIN/api/cron/expiry-warnings -H "X-Cron-Secret: <that secret>"
+   ```
+4. The endpoint replies `{"ok": true, "warned": N}`. Each user is warned **once
+   per expiry** (tracked in the database), so re-runs and overlaps are harmless.
+   Test it any time by running the same curl command yourself.

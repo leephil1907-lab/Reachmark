@@ -839,6 +839,31 @@ def register_network(app, db, now, log, settings):
                 return jsonify(error=_t('nw.e_slot', locale_now())), 409
             booking = dict(c.execute('SELECT * FROM bookings WHERE id=?', (bid,)).fetchone())
         try:
+            from web.accounts import get_base_url, send_branded
+            _base = get_base_url()
+            _bloc = locale_now()
+            _studio = (settings().get('agency') or 'Reachmark').strip()
+            _slot = f"{match['start'].replace('T', ' ')} – {match['end'].replace('T', ' ')}"
+            _ics = f"{_base}/api/bookings/{booking['token']}.ics"
+            send_branded(email, _t('nw.m_bk_sub', _bloc, studio=_studio),
+                         _t('nw.m_bk_body', _bloc, slot=_slot, studio=_studio),
+                         html_title=_t('nw.m_bk_title', _bloc), cta_url=_ics,
+                         cta_label=_t('nw.m_bk_cta', _bloc), db=db)
+            _owner_email = ''
+            if owner_uid == 'owner':
+                _owner_email = (settings().get('reply_email') or '').strip()
+            else:
+                with db() as c:
+                    _r = c.execute('SELECT email FROM users WHERE id=?', (owner_uid,)).fetchone()
+                    _owner_email = (_r['email'] if _r else '') or ''
+            if _owner_email and '@' in _owner_email:
+                send_branded(_owner_email, _t('nw.m_bko_sub', _bloc, name=name, slot=_slot),
+                             _t('nw.m_bko_body', _bloc, name=name, email=email, slot=_slot),
+                             html_title=_t('nw.m_bko_title', _bloc), cta_url=f'{_base}/workspace',
+                             cta_label=_t('nw.m_bko_cta', _bloc), db=db)
+        except Exception:
+            pass
+        try:
             dispatch(db, now, log, owner_uid, 'booking.created',
                      {'booking_id': bid, 'slot_start': match['start'], 'name': name, 'email': email})
         except Exception:
