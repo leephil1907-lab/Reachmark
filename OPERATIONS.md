@@ -15,9 +15,9 @@ chat, source or the browser (MCP connectors store only a *variable name* like
 |---|---|
 | `SMTP_HOST/PORT/SECURITY/USER/PASSWORD/FROM` | Your mail provider (TLS only: 587+starttls or 465+ssl). Until set, approved mail queues in the outbox — never *sent*. |
 | `DASHBOARD_PASSWORD` | Dev/compat gate for the dashboard. Production uses the owner login below. |
-| `DATABASE_PATH` | Absolute SQLite path (default: project dir; Docker: `/data/sitegap.sqlite3`). |
+| `DATABASE_PATH` | Absolute SQLite path (default: project dir; Docker: `/data/sitegap.sqlite3`; Railway: `/data/prospect.sqlite3` on an attached volume — without a volume, redeploys wipe the database). |
 | `PORT` | Default `8000`. |
-| `OVERPASS_URLS` | Optional contracted/self-hosted map endpoints (≤2, comma-separated). |
+| `OVERPASS_URLS` | Map endpoints, ≤2 comma-separated. Default: two shared public mirrors. Dedicated capacity (required before sustained commercial volume): self-host Overpass (`docker run -p 8080:80 --ulimit nofile=65536:65536 wiktorn/overpass-api`) or a contracted endpoint, then set `OVERPASS_URLS=https://your-overpass/api/interpreter`. The app load-sheds across the list in order. |
 | `CREW_LLM_PROVIDER/MODEL/API_KEY/BASE_URL/TIMEOUT/BUDGET/SEND_CONTACTS` | Optional model for phrasing only (`auto\|ollama\|openai\|anthropic\|none`). Contacts are masked by default. |
 | `OLLAMA_HOST` | Local models, no key: `ollama serve && ollama pull llama3.1`. |
 | `CREW_VIDEO_RENDER` | `1` lets Brag render ad cuts when Playwright+ffmpeg exist; `0` writes the brief only. |
@@ -91,6 +91,14 @@ docker compose up -d
 
 Never restore over a live writer. After restoring: restart, sign in, compare counts, open a
 real record, download a PDF. Drill a full offsite restore on a separate host monthly.
+
+Railway (current host): add a **volume mounted at `/data`**, set
+`DATABASE_PATH=/data/prospect.sqlite3`, and redeploy — the app refuses to start with a
+clear error if `/data` is missing, so a forgotten volume is loud, not silent. Run
+backups as a second Railway cron service on the same image + volume:
+`python scripts/backup.py backup` with `BACKUP_DIR=/data/backups`
+(`--directory` overrides), plus `RESTIC_REPOSITORY/PASSWORD` and
+`BACKUP_HEALTHCHECK_URL` for the encrypted offsite copy and failure alerts.
 
 ## 6. Monitoring
 

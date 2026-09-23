@@ -18,6 +18,10 @@ def now(): return datetime.now(timezone.utc).isoformat()
 from contextlib import contextmanager
 @contextmanager
 def db():
+    parent = os.path.dirname(os.path.abspath(DB))
+    if not os.path.isdir(parent):
+        raise RuntimeError('Database directory does not exist: %s. Create it or fix DATABASE_PATH '
+                           '(on Railway: attach a volume mounted at /data).' % parent)
     c = sqlite3.connect(DB, timeout=20); c.row_factory=sqlite3.Row
     c.execute('PRAGMA busy_timeout=20000')
     try:

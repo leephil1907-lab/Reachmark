@@ -27,6 +27,14 @@ class ProspectTests(unittest.TestCase):
     def ready(self,l):
         self.client.post('/api/settings',json={'sender_name':'Alex','agency':'Test Studio','reply_email':'alex@example.test','postal_address':'Test address','public_base_url':'https://example.test','offer':'clear, mobile-friendly websites'})
         return self.client.post('/api/leads/'+l['id']+'/compose',json={'preview':True}).json
+    def test_missing_database_directory_fails_with_a_clear_message(self):
+        module.DB = os.path.join(self.tmp.name, 'no-such-dir', 'x.sqlite3')
+        with self.assertRaises(RuntimeError) as ctx:
+            with module.db():
+                pass
+        self.assertIn('DATABASE_PATH', str(ctx.exception))
+        module.DB = os.path.join(self.tmp.name, 'test.sqlite3')
+
     def test_classification(self):
         self.assertEqual(module.classify(''),'NOT_LISTED')
         self.assertEqual(module.classify('https://www.facebook.com/example'),'SOCIAL_ONLY')
