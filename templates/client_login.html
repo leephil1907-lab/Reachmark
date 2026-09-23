@@ -4,7 +4,7 @@
 .brand{position:relative;background:#0f1a0a;color:#eaf3de;padding:44px 40px;display:flex;flex-direction:column;overflow:hidden}
 .brand::before{content:'';position:absolute;inset:-40px;background:radial-gradient(ellipse at 32% 18%, #d5f268 0%, transparent 55%),radial-gradient(ellipse at 88% 84%, #1e3a0a 0%, transparent 50%);opacity:.32;pointer-events:none}
 .brand .logo{position:relative}
-.brand .logo img{height:34px;filter:brightness(0) invert(1)}
+.brand .logo img{height:34px}
 .eyebrow{position:relative;font:600 9px 'Manrope',sans-serif;letter-spacing:1.6px;color:#d5f268;display:flex;align-items:center;gap:8px;margin-top:34px}
 .eyebrow::before{content:'';width:18px;height:1px;background:#d5f268;opacity:.7}
 .brand h1{position:relative;font:700 32px/1.05 'Manrope',sans-serif;letter-spacing:-1.2px;margin:14px 0 12px}
@@ -42,7 +42,7 @@ button[type=submit]:hover{background:#1a2a12;transform:translateY(-1px)}
 </head><body>
 <div class="auth-shell">
   <div class="brand">
-    <a href="/" class="logo" aria-label="Reachmark home"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
+    <a href="/" class="logo" aria-label="Reachmark home"><img src="/static/logo-inverse.svg" alt="Reachmark"></a>
     <div class="eyebrow">CLIENT PORTAL · VERIFIED PREVIEWS</div>
     <h1>Welcome back.<br><span>We saved your spot.</span></h1>
     <p>Open your proposals, track invoices and approve previews — all tied to your email, private by design.</p>
@@ -67,7 +67,6 @@ button[type=submit]:hover{background:#1a2a12;transform:translateY(-1px)}
     <p class="auth-note" style="margin-top:0">No account? <a href="/signup">Create one</a> · <a href="#" onclick="requestVerify(event)">Resend verification</a></p>
     <p id="verify-note" class="auth-note" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:10px;border-radius:10px;color:#2d4a0a">Didn’t get verification email? <a href="#" onclick="requestVerify(event)">Resend verification</a></p>
     <p class="social">Private to your projects & invoices · No global discovery access</p>
-<p class="social">Studio owner? <a href="/login">Sign in to the workspace</a>.</p>
     <div class="meta"><span>◎ Global</span><span>⌁ Health</span><span>↗ Previews</span></div>
   </div>
 </div>

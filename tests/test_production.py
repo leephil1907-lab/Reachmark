@@ -169,4 +169,30 @@ class ProductionTests(unittest.TestCase):
         d=self.client.get('/api/operations/readiness').json
         self.assertIn('NOT CONFIGURED',d['Owner authentication']);self.assertIn('Not connected',d['Error monitoring'])
 
+class HomepageAndAuthBrandTests(unittest.TestCase):
+    setUp=test_app.ProspectTests.setUp
+    tearDown=test_app.ProspectTests.tearDown
+    def test_home_is_a_slim_multipage_hub(self):
+        home=self.client.get('/').get_data(as_text=True)
+        self.assertIn('Reachmark \u2014 Find Potential. Make Your Mark.',home)
+        for path in ('/showcase','/receptionist','/reviews','/about','/enquire','/signin','/signup'):
+            self.assertIn(f'href="{path}"',home,path)
+        self.assertNotIn('I hunt missing websites',home)
+        about=self.client.get('/about').get_data(as_text=True)
+        self.assertLess(len(home),len(about)//2)
+    def test_about_and_reviews_keep_the_full_page(self):
+        for path in ('/about','/reviews'):
+            body=self.client.get(path).get_data(as_text=True)
+            self.assertIn('I hunt missing websites',body,path)
+    def test_auth_pages_use_the_visible_inverse_logo(self):
+        for path in ('/signup','/signin','/login'):
+            body=self.client.get(path).get_data(as_text=True)
+            self.assertIn('logo-inverse.svg',body,path)
+            self.assertNotIn('brightness(0) invert(1)',body,path)
+    def test_client_pages_never_link_the_owner_workspace(self):
+        for path in ('/signup','/signin'):
+            body=self.client.get(path).get_data(as_text=True)
+            self.assertNotIn('Sign in to the workspace',body,path)
+            self.assertNotIn('Studio owner?',body,path)
+
 if __name__=='__main__':unittest.main()

@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="en"><head>
+{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ gtm_id }}');</script><!-- End Google Tag Manager -->{% endif %}
+{% if ga_id is defined and ga_id %}<!-- Global site tag (gtag.js) - Google Analytics --><script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}</title><meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.' }}">{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">{% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}<meta name="theme-color" content="#20251f"><meta name="application-name" content="Reachmark"><meta property="og:type" content="website"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.' }}"><meta property="og:site_name" content="Reachmark">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}">{% endif %}<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.' }}"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="stylesheet" href="/static/fonts.css">{% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}<style>
+*{box-sizing:border-box}body{margin:0;font-family:'Manrope',Arial,sans-serif;background:#f5f5ef;color:#20251f;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+.site-head{position:sticky;top:0;z-index:5;background:rgba(245,245,239,.94);backdrop-filter:blur(8px);border-bottom:1px solid #e2e7d6}
+.head-in{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:14px 0}
+.logo img{height:30px;display:block}
+nav.main{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+nav.main a{font:700 12px 'Manrope',sans-serif;color:#20251f;text-decoration:none;padding:9px 12px;border-radius:10px}
+nav.main a:hover{background:#e8ebdb}
+.head-cta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-block;font:700 13px 'Manrope',sans-serif;text-decoration:none;padding:12px 20px;border-radius:12px;border:1px solid transparent}
+.btn.primary{background:#d5f268;border-color:#cbe85b;color:#0f1a0a}
+.btn.dark{background:#0f1a0a;color:#eaf3de}
+.btn.ghost{border-color:#cfd8bd;color:#0f1a0a;background:#fff}
+.hero{padding:64px 0 40px;text-align:center}
+.eyebrow{font:700 10px 'Manrope',sans-serif;letter-spacing:2px;color:#5c7a2e}
+.hero h1{font:700 44px/1.05 'Manrope',sans-serif;letter-spacing:-1.6px;margin:14px auto 12px;max-width:640px}
+.hero h1 span{color:#5c7a2e}
+.hero p{font:400 15px/1.7 'Manrope',sans-serif;color:#4c5a41;max-width:600px;margin:0 auto}
+.hero .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.hero .note{font:600 11px 'Manrope',sans-serif;color:#8a9976;margin-top:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px 0 8px}
+.card{background:#fff;border:1px solid #e2e7d6;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:10px}
+.card .k{font:700 10px 'Manrope',sans-serif;letter-spacing:1.6px;color:#5c7a2e}
+.card h2{font:700 19px 'Manrope',sans-serif;letter-spacing:-.5px;margin:0}
+.card p{font:400 13px/1.65 'Manrope',sans-serif;color:#4c5a41;margin:0;flex:1}
+.card a.more{font:700 13px 'Manrope',sans-serif;color:#0f1a0a}
+.strip{margin:34px 0 8px}
+.strip-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.strip-head h2{font:700 22px 'Manrope',sans-serif;letter-spacing:-.8px;margin:0}
+.strip-head a{font:700 13px 'Manrope',sans-serif;color:#0f1a0a}
+.shots{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.shots a{display:block;border-radius:16px;overflow:hidden;border:1px solid #e2e7d6;background:#fff;text-decoration:none}
+.shots img{width:100%;height:190px;object-fit:cover;object-position:top;display:block}
+.shots span{display:block;font:700 12px 'Manrope',sans-serif;color:#0f1a0a;padding:12px 14px}
+.band{background:#0f1a0a;color:#eaf3de;border-radius:20px;padding:44px 32px;text-align:center;margin:36px 0}
+.band h2{font:700 28px 'Manrope',sans-serif;letter-spacing:-1px;margin:0 0 10px}
+.band h2 span{color:#d5f268}
+.band p{font:400 13px/1.7 'Manrope',sans-serif;color:#9db48f;max-width:520px;margin:0 auto 22px}
+footer.site{border-top:1px solid #e2e7d6;padding:30px 0 40px;margin-top:10px}
+.foot{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.foot img{height:26px}
+.foot nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.foot nav a{font:700 12px 'Manrope',sans-serif;color:#4c5a41;text-decoration:none;padding:8px 10px}
+.foot small{display:block;width:100%;font:500 11px 'Manrope',sans-serif;color:#8a9976;margin-top:10px}
+@media(max-width:900px){.hero{padding:44px 0 28px}.hero h1{font-size:32px}.grid3,.shots{grid-template-columns:1fr}.shots img{height:210px}nav.main{margin-left:0}.head-cta{margin-left:auto}}
+</style></head><body>
+<header class="site-head"><div class="wrap head-in">
+  <a href="/" class="logo" aria-label="Reachmark home"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
+  <nav class="main" aria-label="Primary"><a href="/showcase">Samples</a><a href="/receptionist">Receptionist</a><a href="/reviews">Reviews</a><a href="/about">About</a><a href="/enquire">Enquire</a></nav>
+  <div class="head-cta"><a class="btn ghost" href="/signin">Sign in</a><a class="btn primary" href="/signup">Create account</a></div>
+</div></header>
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow">REACHMARK · WEBSITE DESIGNER</div>
+    <h1>Find potential. <span>Make your mark.</span></h1>
+    <p>Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.</p>
+    <div class="cta"><a class="btn dark" href="/showcase">See website samples</a><a class="btn primary" href="/enquire">Start a project</a></div>
+    <div class="note">8 fictional sample designs · Live previews · No account needed to look around</div>
+  </section>
+  <section class="grid3" aria-label="Start here">
+    <div class="card"><div class="k">01 · SAMPLES</div><h2>Website directions, previewed live</h2><p>Eight fictional sample sites across cafés, clinics, law, retail and more — each one explorable before you enquire.</p><a class="more" href="/showcase">Browse the gallery →</a></div>
+    <div class="card"><div class="k">02 · RECEPTIONIST</div><h2>Questions? Ask the front desk</h2><p>Our AI receptionist answers from published facts only — services, process, timelines — and hands you to a human when unsure.</p><a class="more" href="/receptionist">Chat with us →</a></div>
+    <div class="card"><div class="k">03 · PROJECT</div><h2>Tell us about your project</h2><p>One short form: what you need, your budget range, your timeline. A real reply — never an invented quote.</p><a class="more" href="/enquire">Enquire now →</a></div>
+  </section>
+  <section class="strip" aria-label="Sample previews">
+    <div class="strip-head"><h2>Fresh from the gallery</h2><a href="/showcase">See all eight →</a></div>
+    <div class="shots">
+      <a href="/showcase"><img src="/static/samples/ember-coffee-preview.jpg" alt="Ember and Oak café sample preview" loading="lazy"><span>Ember &amp; Oak · Café</span></a>
+      <a href="/showcase"><img src="/static/samples/fintech-pulse-preview.jpg" alt="Fintech Pulse sample preview" loading="lazy"><span>Fintech Pulse · Finance</span></a>
+      <a href="/showcase"><img src="/static/samples/stillwell-studio-preview.jpg" alt="Stillwell studio sample preview" loading="lazy"><span>Stillwell · Wellness</span></a>
+    </div>
+  </section>
+  <section class="band">
+    <h2>Have a project in mind? <span>Let’s talk.</span></h2>
+    <p>Send one enquiry and get a considered, human reply about scope, timeline and fit.</p>
+    <a class="btn primary" href="/enquire">Tell us about it →</a>
+  </section>
+</main>
+<footer class="site"><div class="wrap foot">
+  <a href="/" aria-label="Reachmark home"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
+  <nav aria-label="Footer"><a href="/showcase">Samples</a><a href="/receptionist">Receptionist</a><a href="/reviews">Reviews</a><a href="/about">About</a><a href="/enquire">Enquire</a><a href="/signin">Sign in</a></nav>
+  <small>Reachmark — Find Potential. Make Your Mark. Sample sites are fictional concepts, never real clients.</small>
+</div></footer>
+</body></html>
