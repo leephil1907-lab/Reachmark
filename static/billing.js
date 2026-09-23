@@ -3,7 +3,7 @@
   var NEED = {overview: 'free', portfolio: 'free', invoices: 'free', projects: 'free',
     leads: 'starter', health: 'starter', global: 'starter',
     outreach: 'pro', crew: 'pro',
-    enquiries: 'owner', contracts: 'owner', settings: 'owner'};
+    enquiries: 'owner', contracts: 'owner', settings: 'owner', clients: 'owner'};
   var RANK = {free: 0, starter: 1, pro: 2, owner: 9};
   function ready(fn) {
     if (document.readyState !== 'loading') fn();

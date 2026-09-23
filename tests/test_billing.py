@@ -113,13 +113,17 @@ class TierGatingTests(BillingBase):
         r = self.client.get('/api/crew')
         self.assertEqual(r.status_code, 200)
 
-    def test_paid_client_sees_directory_in_state(self):
+    def test_paid_client_sees_only_own_workspace_in_state(self):
         with module.db() as c:
-            c.execute("INSERT OR REPLACE INTO leads(id,source_key,name,stage,token,created,updated) VALUES('st1','stk1','State Bakery','New','stt1',?,?)",
+            c.execute("INSERT OR REPLACE INTO leads(id,source_key,name,stage,token,created,updated,owner_user_id) VALUES('st1','stk1','State Bakery','New','stt1',?,?,'bill-client')",
+                      (module.now(), module.now()))
+            c.execute("INSERT OR REPLACE INTO leads(id,source_key,name,stage,token,created,updated) VALUES('st2','stk2','Studio Secret','New','stt2',?,?)",
                       (module.now(), module.now()))
         self.make_client('starter', future())
         leads = self.client.get('/api/state').get_json()['leads']
-        self.assertTrue(any(l['name'] == 'State Bakery' for l in leads))
+        names = [l['name'] for l in leads]
+        self.assertIn('State Bakery', names)
+        self.assertNotIn('Studio Secret', names)
 
     def test_free_client_sees_no_directory(self):
         self.make_client()
@@ -162,7 +166,7 @@ class CheckoutTests(BillingBase):
         self.assertEqual(r.get_json()['authorization_url'], 'https://pay.test/abc')
         args = m.call_args[0]
         self.assertEqual(args[1], '/transaction/initialize')
-        self.assertEqual(args[2]['amount'], 1200000)
+        self.assertEqual(args[2]['amount'], 3500000)
         self.assertEqual(args[2]['currency'], 'NGN')
         with module.db() as c:
             row = c.execute('SELECT * FROM payments WHERE reference=?', ('rm-testref1',)).fetchone()
@@ -172,7 +176,7 @@ class CheckoutTests(BillingBase):
     def test_callback_activates_plan(self):
         self.make_client()
         init = {'authorization_url': 'https://pay.test/abc', 'reference': 'rm-testref2'}
-        verify = {'status': 'success', 'amount': 900, 'currency': 'USD', 'reference': 'rm-testref2'}
+        verify = {'status': 'success', 'amount': 2500, 'currency': 'USD', 'reference': 'rm-testref2'}
 
         def fake(method, path, payload=None):
             return init if path == '/transaction/initialize' else verify
@@ -191,7 +195,7 @@ class CheckoutTests(BillingBase):
     def test_callback_rejects_failed_payment(self):
         self.make_client()
         init = {'authorization_url': 'https://pay.test/abc', 'reference': 'rm-testref3'}
-        verify = {'status': 'failed', 'amount': 900, 'currency': 'USD', 'reference': 'rm-testref3'}
+        verify = {'status': 'failed', 'amount': 2500, 'currency': 'USD', 'reference': 'rm-testref3'}
 
         def fake(method, path, payload=None):
             return init if path == '/transaction/initialize' else verify
@@ -209,10 +213,10 @@ class CheckoutTests(BillingBase):
     def test_webhook_activates_with_valid_signature(self):
         self.make_client()
         with module.db() as c:
-            c.execute("INSERT INTO payments VALUES('p1','bill-client','bill@example.test','pro','USD',2900,'rm-hook1','pending','',?,?)",
+            c.execute("INSERT INTO payments(id,user_id,email,tier,currency,amount_minor,reference,status,paid_at,created,raw) VALUES('p1','bill-client','bill@example.test','pro','USD',3500,'rm-hook1','pending','',?,?)",
                       (module.now(), '{}'))
         event = {'event': 'charge.success',
-                 'data': {'status': 'success', 'amount': 2900, 'currency': 'USD', 'reference': 'rm-hook1'}}
+                 'data': {'status': 'success', 'amount': 3500, 'currency': 'USD', 'reference': 'rm-hook1'}}
         raw = json.dumps(event)
         sig = hmac.new(b'whsec-test', raw.encode(), hashlib.sha512).hexdigest()
         with patch.dict('os.environ', {'PAYSTACK_SECRET_KEY': 'whsec-test'}):

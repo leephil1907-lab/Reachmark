@@ -16,7 +16,7 @@ import urllib.request
 import uuid
 from datetime import datetime, timedelta, timezone
 
-from flask import redirect, render_template, request, jsonify, session
+from flask import Response, redirect, render_template, request, jsonify, session
 
 TIERS = {
     'free': {
@@ -28,15 +28,15 @@ TIERS = {
                      'Workspace overview stats'],
     },
     'starter': {
-        'name': 'Starter', 'rank': 1, 'usd_minor': 900, 'ngn_minor': 1200000,
-        'usd': '$9', 'ngn': '₦12,000', 'per': '30 days',
+        'name': 'Starter', 'rank': 1, 'usd_minor': 2500, 'ngn_minor': 3500000,
+        'usd': '$25', 'ngn': '₦35,000', 'per': '30 days',
         'tag': 'Find businesses that need websites.',
         'features': ['Everything in Free', 'Lead directory: add, import & manage',
                      'Website health audits', 'Business discovery & map search', 'CSV exports'],
     },
     'pro': {
-        'name': 'Pro', 'rank': 2, 'usd_minor': 2900, 'ngn_minor': 4000000,
-        'usd': '$29', 'ngn': '₦40,000', 'per': '30 days',
+        'name': 'Pro', 'rank': 2, 'usd_minor': 3500, 'ngn_minor': 5000000,
+        'usd': '$35', 'ngn': '₦50,000', 'per': '30 days',
         'tag': 'Outreach and automation, unlocked.',
         'features': ['Everything in Starter', 'Outreach composer & sending', 'AI crew campaigns',
                      'Review-link creation', 'Mail templates & outbox'],
@@ -48,6 +48,8 @@ PERIOD_DAYS = 30
 # listed here stays owner-only (the guard answers 403 as before).
 RULES = [
     (r'^/api/billing/checkout$', 'free'),
+    (r'^/api/billing/crypto', 'free'),
+    (r'^/api/billing/receipt', 'free'),
     (r'^/api/leads/[^/]+/(send|compose|suppress)$', 'pro'),
     (r'^/api/leads(/|$)', 'starter'),
     (r'^/api/(import|export|discover|jobs|map)(/|$)', 'starter'),
@@ -58,6 +60,7 @@ RULES = [
     (r'^/api/auth/(me|logout|export|close|request-verification)', 'free'),
     (r'^/api/(invoices|projects)(/|$)', 'free'),
     (r'^/api/documents/(invoice|brief|proposal)(/|$)', 'free'),
+    (r'^/api/documents/audit', 'starter'),
     (r'^/api/state$', 'free'),
 ]
 
@@ -73,7 +76,7 @@ def ensure_billing(db):
         c.execute('''CREATE TABLE IF NOT EXISTS payments(
             id TEXT PRIMARY KEY, user_id TEXT, email TEXT, tier TEXT, currency TEXT,
             amount_minor INTEGER, reference TEXT UNIQUE, status TEXT, paid_at TEXT,
-            created TEXT, raw TEXT)''')
+            created TEXT, raw TEXT, tx_hash TEXT, coin_amount TEXT, coin_address TEXT)''')
 
 
 def tier_status(user):
@@ -136,6 +139,25 @@ def public_prices():
             for k, v in TIERS.items()}
 
 
+def grant_tier(db, now, log, user_id, tier, days=PERIOD_DAYS):
+    """Extend a user's plan by `days` from the later of now / current expiry."""
+    with db() as c:
+        row = c.execute('SELECT tier_expires FROM users WHERE id=?', (user_id,)).fetchone()
+        current = (row['tier_expires'] or '') if row else ''
+    stamp = now()
+    base = current if current and current > stamp else stamp
+    try:
+        base_dt = datetime.fromisoformat(base)
+    except ValueError:
+        base_dt = datetime.now(timezone.utc)
+    if base_dt.tzinfo is None:
+        base_dt = base_dt.replace(tzinfo=timezone.utc)
+    new_exp = (base_dt + timedelta(days=days)).isoformat()
+    with db() as c:
+        c.execute('UPDATE users SET tier=?,tier_expires=? WHERE id=?', (tier, new_exp, user_id))
+    return new_exp
+
+
 def register_billing(app, db, now, log):
     ensure_billing(db)
 
@@ -160,24 +182,21 @@ def register_billing(app, db, now, log):
                 c.execute('UPDATE payments SET status=?,raw=? WHERE reference=?',
                           ('mismatch', json.dumps(verify_data or {})[:4000], reference))
                 return None
-            current = ''
-            user = c.execute('SELECT tier_expires FROM users WHERE id=?', (p['user_id'],)).fetchone()
-            if user:
-                current = user['tier_expires'] or ''
             stamp = now()
-            base = current if current and current > stamp else stamp
-            try:
-                base_dt = datetime.fromisoformat(base)
-            except ValueError:
-                base_dt = datetime.now(timezone.utc)
-            if base_dt.tzinfo is None:
-                base_dt = base_dt.replace(tzinfo=timezone.utc)
-            new_exp = (base_dt + timedelta(days=PERIOD_DAYS)).isoformat()
             c.execute('UPDATE payments SET status=?,paid_at=?,raw=? WHERE reference=?',
                       ('paid', stamp, json.dumps(verify_data or {})[:4000], reference))
-            c.execute('UPDATE users SET tier=?,tier_expires=? WHERE id=?',
-                      (p['tier'], new_exp, p['user_id']))
+        grant_tier(db, now, log, p['user_id'], p['tier'], PERIOD_DAYS)
         log('billing', f"{p['email']} upgraded to {p['tier']} ({p['currency']}).")
+        try:
+            from web.accounts import get_base_url, send_branded
+            base = get_base_url()
+            send_branded(p['email'], f"Receipt — {TIERS[p['tier']]['name']} plan",
+                         f"Hi {p['email']},\n\nPayment received — your {TIERS[p['tier']]['name']} plan is active for {PERIOD_DAYS} days.\nReference: {reference}\n\nYour receipt (PDF):\n{base}/api/billing/receipt/{reference}.pdf\n\n— Reachmark · Global",
+                         html_title='Payment received',
+                         cta_url=f"{base}/api/billing/receipt/{reference}.pdf",
+                         cta_label='Download receipt (PDF)', db=db)
+        except Exception:
+            pass
         p.update(status='paid', paid_at=stamp)
         return p
 
@@ -232,10 +251,12 @@ def register_billing(app, db, now, log):
         except BillingError as e:
             return jsonify(error=str(e)), 503
         with db() as c:
-            c.execute('INSERT INTO payments VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+            c.execute('INSERT INTO payments(id,user_id,email,tier,currency,amount_minor,reference,'
+                      'status,paid_at,created,raw) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
                       (uuid.uuid4().hex, cid, user['email'], tier, currency, amount,
                        data['reference'], 'pending', '', now(),
-                       json.dumps({'authorization_url': data.get('authorization_url')})))
+                       json.dumps({'method': 'paystack',
+                                   'authorization_url': data.get('authorization_url')})))
         return jsonify(authorization_url=data['authorization_url'], reference=data['reference'])
 
     @app.get('/billing/callback')
@@ -265,3 +286,37 @@ def register_billing(app, db, now, log):
             if data.get('reference'):
                 activate(data['reference'], data)
         return jsonify(ok=True)
+
+    @app.get('/api/billing/receipt/<reference>.pdf')
+    def billing_receipt(reference):
+        with db() as c:
+            row = c.execute('SELECT * FROM payments WHERE reference=?', (reference[:64],)).fetchone()
+        if not row:
+            return jsonify(error='Receipt not found.'), 404
+        p = dict(row)
+        if not session.get('owner') and session.get('client_id') != p['user_id']:
+            return jsonify(error='Owner login required.'), 403
+        if p['status'] != 'paid':
+            return jsonify(error='This payment has no receipt yet.'), 400
+        from web.documents import pdf
+        try:
+            meta = json.loads(p['raw'] or '{}')
+        except Exception:
+            meta = {}
+        method = meta.get('method') or p['currency']
+        if method == 'paystack':
+            method = 'Card / bank via Paystack'
+        elif method == 'manual':
+            method = 'Manual studio approval'
+        elif method == 'crypto':
+            method = 'Crypto (' + str(meta.get('coin', '')).replace('_', ' ') + ')'
+        amount = ('Recorded by studio' if p['currency'] == 'MANUAL'
+                  else f"{p['currency']} {(p['amount_minor'] or 0) / 100:,.2f}")
+        blob = pdf('Payment receipt',
+                   f"{TIERS.get(p['tier'], {}).get('name', p['tier'])} plan",
+                   [('Plan', f"{TIERS.get(p['tier'], {}).get('name', p['tier'])} — {PERIOD_DAYS} days"),
+                    ('Amount', amount), ('Reference', p['reference']),
+                    ('Paid at', p['paid_at'] or ''), ('Method', method),
+                    ('Billed to', p['email'])], now(), 'Reachmark')
+        return Response(blob, mimetype='application/pdf', headers={
+            'Content-Disposition': f"attachment; filename=reachmark-receipt-{p['reference'][:12]}.pdf"})

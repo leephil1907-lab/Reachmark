@@ -42,7 +42,7 @@ def pdf(title,subtitle,sections,stamp,studio):
     for heading,value in sections:story.extend([Paragraph(text(heading),styles['RMHeading']),Paragraph(text(value),styles['RMBody'])])
     def page(canvas,doc):
         # Footer rule and branding
-        canvas.setStrokeColor(colors.HexColor('#cce57b'));canvas.setLineWidth(3);canvas.line(42,43,553,43);canvas.setFont('Reachmark',8);canvas.setFillColor(colors.HexColor('#56644a'));canvas.drawString(42,28,'REACHMARK · Saved-record export');canvas.drawRightString(553,28,f'Page {doc.page}')
+        canvas.setStrokeColor(colors.HexColor('#cce57b'));canvas.setLineWidth(3);canvas.line(42,43,553,43);canvas.setFont('Reachmark',8);canvas.setFillColor(colors.HexColor('#56644a'));canvas.drawString(42,28,'REACHMARK · Saved-record export · '+os.getenv('SUPPORT_EMAIL','reachmarkofficial@gmail.com'));canvas.drawRightString(553,28,f'Page {doc.page}')
         # Small header logo on each page
         try:
             canvas.drawImage(LOGOPATH, 42, 800, width=120, height=28, preserveAspectRatio=True, mask='auto')
@@ -82,6 +82,10 @@ def register_documents(app,db,now,settings):
                         lead=c.execute('SELECT email FROM leads WHERE id=?',(r.get('lead_id'),)).fetchone()
                         if lead and lead['email'] and lead['email'].strip().lower()==user_email:
                             allowed=True
+                elif kind=='audit':
+                    own=c.execute('SELECT owner_user_id FROM leads WHERE id=?',(record_id,)).fetchone()
+                    if own and own['owner_user_id']==cid:
+                        allowed=True
                 if not allowed:
                     abort(404)
             client=c.execute('SELECT name,city,address,email FROM leads WHERE id=?',(r.get('lead_id',''),)).fetchone() if kind in ('proposal','brief') and r.get('lead_id') else None

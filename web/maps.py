@@ -40,13 +40,22 @@ def rows_from_payload(payload, category, label):
             source='OpenStreetMap',source_url=f"https://www.openstreetmap.org/{item['type']}/{item['id']}",latitude=point.get('lat'),longitude=point.get('lon'),opening_hours=tags.get('opening_hours',''),social_url=tags.get('contact:facebook') or tags.get('contact:instagram',''),source_tags=tags))
     return rows
 
+def _cid():
+    from flask import session
+    if session.get('client_id') and session.get('role') == 'client' and not session.get('owner'):
+        return session.get('client_id')
+    return None
+
+
 def register_maps(app, db, now, add_lead, categories):
     with db() as c:
-        c.executescript('''CREATE TABLE IF NOT EXISTS map_scans(id TEXT PRIMARY KEY,label TEXT,category TEXT,bounds TEXT,state TEXT,created TEXT,updated TEXT);
+        c.executescript('''CREATE TABLE IF NOT EXISTS map_scans(id TEXT PRIMARY KEY,label TEXT,category TEXT,bounds TEXT,state TEXT,created TEXT,updated TEXT,owner_user_id TEXT);
         CREATE TABLE IF NOT EXISTS map_cells(id TEXT PRIMARY KEY,scan_id TEXT,bounds TEXT,state TEXT,found INTEGER DEFAULT 0,message TEXT DEFAULT '',updated TEXT);
         CREATE INDEX IF NOT EXISTS map_cells_scan ON map_cells(scan_id);
         CREATE TABLE IF NOT EXISTS map_geocache(query TEXT PRIMARY KEY,data TEXT,created TEXT);
         ''')
+        if 'owner_user_id' not in {r[1] for r in c.execute('PRAGMA table_info(map_scans)')}:
+            c.execute('ALTER TABLE map_scans ADD COLUMN owner_user_id TEXT')
         c.execute("UPDATE map_scans SET state='interrupted' WHERE state IN ('queued','running')")
         c.execute("UPDATE map_cells SET state='pending',message='Interrupted; resume to retry this cell.' WHERE state='running'")
     worker_lock=threading.Lock()
@@ -68,7 +77,9 @@ def register_maps(app, db, now, add_lead, categories):
                         query=f'[out:json][timeout:35];nwr({box})["{key}"="{value}"]["name"];out center tags {LIMIT+1};'
                         data=query_overpass(query,HEADERS)
                         rows=rows_from_payload(data,scan['category'],scan['label'])
-                        for row in rows: add_lead(row)
+                        for row in rows:
+                            if scan.get('owner_user_id'): row['owner_user_id'] = scan['owner_user_id']
+                            add_lead(row)
                         partial=bool(data.get('remark')) or len(data['elements'])>LIMIT
                         status='partial' if partial else 'checked'
                         message=('Source incomplete or listing cap reached. Zoom into this cell and scan smaller areas.' if partial else 'Selected category queried; not proof of exhaustive business coverage.')
@@ -91,8 +102,10 @@ def register_maps(app, db, now, add_lead, categories):
 
     @app.get('/api/map/state')
     def map_state():
+        cid = _cid()
         with db() as c:
-            scans=[dict(r) for r in c.execute('SELECT * FROM map_scans ORDER BY created DESC LIMIT 50')]
+            if cid: scans=[dict(r) for r in c.execute('SELECT * FROM map_scans WHERE owner_user_id=? ORDER BY created DESC LIMIT 50',(cid,))]
+            else: scans=[dict(r) for r in c.execute('SELECT * FROM map_scans ORDER BY created DESC LIMIT 50')]
             for scan in scans:
                 scan['bounds']=json.loads(scan['bounds'])
                 scan['cells']=[{**dict(r),'bounds':json.loads(r['bounds'])} for r in c.execute('SELECT * FROM map_cells WHERE scan_id=? ORDER BY rowid',(scan['id'],))]
@@ -120,10 +133,12 @@ def register_maps(app, db, now, add_lead, categories):
         try: cells=grid(value.get('bounds'))
         except ValueError as e: return jsonify(error=str(e)),400
         sid=uuid.uuid4().hex
+        cid=_cid()
         with db() as c:
             c.execute('BEGIN IMMEDIATE')
-            if c.execute("SELECT 1 FROM map_scans WHERE state IN ('queued','running')").fetchone(): return jsonify(error='Pause the active map scan before starting another.'),409
-            c.execute('INSERT INTO map_scans VALUES(?,?,?,?,?,?,?)',(sid,label.strip(),category,json.dumps(value['bounds']),'queued',now(),now()))
+            busy=(c.execute("SELECT 1 FROM map_scans WHERE state IN ('queued','running') AND owner_user_id=?",(cid,)).fetchone() if cid else c.execute("SELECT 1 FROM map_scans WHERE state IN ('queued','running')").fetchone())
+            if busy: return jsonify(error='Pause the active map scan before starting another.'),409
+            c.execute('INSERT INTO map_scans(id,label,category,bounds,state,created,updated,owner_user_id) VALUES(?,?,?,?,?,?,?,?)',(sid,label.strip(),category,json.dumps(value['bounds']),'queued',now(),now(),cid))
             for cell in cells: c.execute('INSERT INTO map_cells(id,scan_id,bounds,state,updated) VALUES(?,?,?,?,?)',(uuid.uuid4().hex,sid,json.dumps(cell),'pending',now()))
         threading.Thread(target=run,args=(sid,),daemon=True).start()
         return jsonify(id=sid),202
@@ -135,10 +150,13 @@ def register_maps(app, db, now, add_lead, categories):
             c.execute('BEGIN IMMEDIATE')
             scan=c.execute('SELECT * FROM map_scans WHERE id=?',(sid,)).fetchone()
             if not scan: return jsonify(error='Scan not found.'),404
+            cid=_cid()
+            if cid and dict(scan).get('owner_user_id') != cid: return jsonify(error='Scan not found.'),404
             if action=='cancel':
                 c.execute("UPDATE map_scans SET state='cancelled',updated=? WHERE id=? AND state IN ('queued','running')",(now(),sid))
                 return jsonify(ok=True)
-            if worker_lock.locked() or c.execute("SELECT 1 FROM map_scans WHERE state IN ('queued','running')").fetchone(): return jsonify(error='Wait for the in-flight scan to stop.'),409
+            busy=(c.execute("SELECT 1 FROM map_scans WHERE state IN ('queued','running') AND owner_user_id=?",(cid,)).fetchone() if cid else c.execute("SELECT 1 FROM map_scans WHERE state IN ('queued','running')").fetchone())
+            if worker_lock.locked() or busy: return jsonify(error='Wait for the in-flight scan to stop.'),409
             todo=c.execute("SELECT 1 FROM map_cells WHERE scan_id=? AND state IN ('pending','failed','running')",(sid,)).fetchone()
             if not todo: return jsonify(error='No retryable cells. For partial/dense cells, zoom in and start a smaller scan.'),400
             c.execute("UPDATE map_cells SET state='pending' WHERE scan_id=? AND state IN ('failed','running')",(sid,))

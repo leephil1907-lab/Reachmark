@@ -62,7 +62,7 @@ footer.site{background:#0f1a0a;color:#eaf3de;margin-top:36px}
 <header class="site-head"><div class="wrap head-in">
   <a href="/" class="logo" aria-label="Reachmark home"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
   <nav class="main" aria-label="Primary"><a href="/reviews">Reviews</a><a href="/about">About</a><a href="/enquire">Enquire</a><a href="/pricing">Plans</a></nav>
-  <div class="head-cta"><a class="btn ghost" href="/signin">Sign in</a><a class="btn primary" href="/signup">Create account</a></div>
+  <div class="head-cta">{% if client_logged_in %}<a class="btn primary" href="/dashboard">Dashboard</a>{% elif owner_logged_in %}<a class="btn primary" href="/workspace">Workspace</a>{% else %}<a class="btn ghost" href="/signin">Sign in</a><a class="btn primary" href="/signup">Create account</a>{% endif %}</div>
 </div></header>
 <main class="wrap">
   <section class="hero">
@@ -73,12 +73,12 @@ footer.site{background:#0f1a0a;color:#eaf3de;margin-top:36px}
     <div class="note">8 fictional sample designs · Live previews · No account needed to look around</div>
   </section>
   <section class="grid3" aria-label="Start here">
-    <div class="card"><div class="k">01 · SAMPLES</div><h2>Website directions, previewed live</h2><p>Eight fictional sample sites across cafés, clinics, law, retail and more — each one explorable before you enquire.</p><a class="more" href="/showcase">Browse the gallery →</a></div>
+    <div class="card"><div class="k">01 · SAMPLES</div><h2>Website directions, previewed live</h2><p>Ten fictional sample sites across cafés, clinics, law, retail, crypto and more — each one explorable before you enquire.</p><a class="more" href="/showcase">Browse the gallery →</a></div>
     <div class="card"><div class="k">02 · REVIEWS</div><h2>Clients, in their own words</h2><p>Approved reviews from real Reachmark projects — shown as written, nothing drafted by us.</p><a class="more" href="/reviews">Read reviews →</a></div>
     <div class="card"><div class="k">03 · PROJECT</div><h2>Tell us about your project</h2><p>One short form: what you need, your budget range, your timeline. A real reply — never an invented quote.</p><a class="more" href="/enquire">Enquire now →</a></div>
   </section>
   <section class="strip" aria-label="Sample previews">
-    <div class="strip-head"><h2>Fresh from the gallery</h2><a href="/showcase">See all eight →</a></div>
+    <div class="strip-head"><h2>Fresh from the gallery</h2><a href="/showcase">See all ten →</a></div>
     <div class="shots">
       <a href="/showcase"><img src="/static/samples/ember-coffee-preview.jpg" alt="Ember and Oak café sample preview" loading="lazy"><span>Ember &amp; Oak · Café</span></a>
       <a href="/showcase"><img src="/static/samples/fintech-pulse-preview.jpg" alt="Fintech Pulse sample preview" loading="lazy"><span>Fintech Pulse · Finance</span></a>
@@ -102,11 +102,11 @@ footer.site{background:#0f1a0a;color:#eaf3de;margin-top:36px}
 </main>
 <footer class="site"><div class="wrap">
   <div class="fgrid">
-    <div class="fbrand"><a href="/" aria-label="Reachmark home"><img src="/static/logo-inverse.svg" alt="Reachmark"></a><p>Reachmark — Find Potential. Make Your Mark. A website designer for businesses that want to be found and chosen.</p></div>
+    <div class="fbrand"><a href="/" aria-label="Reachmark home"><img src="/static/logo-inverse.svg" alt="Reachmark"></a><p>Reachmark — Find Potential. Make Your Mark. A website designer for businesses that want to be found and chosen.</p>{% include 'newsletter-form.html' %}</div>
     <nav class="fcol" aria-label="Explore"><b>EXPLORE</b><a href="/showcase">Website samples</a><a href="/receptionist">AI receptionist</a><a href="/reviews">Client reviews</a><a href="/about">About Reachmark</a><a href="/enquire">Enquire</a><a href="/pricing">Workspace plans</a></nav>
     <nav class="fcol" aria-label="Account"><b>CLIENTS</b><a href="/signin">Sign in</a><a href="/signup">Create account</a></nav>
   </div>
-  <div class="fbase"><small>© 2026 Reachmark · Sample sites are fictional concepts, never real clients.</small></div>
+  <div class="fbase"><small>© 2026 Reachmark · Sample sites are fictional concepts, never real clients. · Support: <a href="mailto:{{ support_email }}" style="color:#d5f268;">{{ support_email }}</a></small></div>
 </div></footer>
 {% include 'tawkto.html' %}
 <script src="/static/pwa.js" defer></script>

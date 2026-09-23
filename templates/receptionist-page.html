@@ -11,7 +11,7 @@
 </head><body class="rx-page">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}
 <nav class="rx-nav" aria-label="Public pages"><a href="/" class="rx-brand"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
-<div class="rx-links"><a href="/">About</a><a href="/showcase">Samples</a><a href="/receptionist" aria-current="page">AI Receptionist</a><a href="/about#pricing">Pricing</a><a href="/pricing">Plans</a><a data-magnet class="rx-btn small" href="/enquire">Enquire ↗</a></div></nav>
+<div class="rx-links"><a href="/">About</a><a href="/showcase">Samples</a><a href="/receptionist" aria-current="page">AI Receptionist</a><a href="/about#pricing">Pricing</a><a href="/pricing">Plans</a>{% if client_logged_in %}<a href="/dashboard">Dashboard</a>{% elif owner_logged_in %}<a href="/workspace">Workspace</a>{% endif %}<a data-magnet class="rx-btn small" href="/enquire">Enquire ↗</a></div></nav>
 <main>
 <header class="rx-hero rx-aurora"><div class="rx-hero-copy">
 <p class="rx-eyebrow">Reachmark AI Receptionist</p>
@@ -125,7 +125,8 @@
 <p>Try the chat on this page right now — or send an enquiry and the studio replies with a tailored estimate.</p>
 <p class="rx-cta-row"><button type="button" data-magnet class="rx-btn" data-open-widget>Try it live</button><a data-magnet class="rx-btn ghost" href="/enquire">Send an enquiry</a></p></section>
 
-<footer class="rx-footer"><p>© <span data-year>2026</span> Reachmark · <a href="/">About</a> · <a href="/showcase">Samples</a> · <a href="/about#pricing">Pricing</a> · <a href="/pricing">Plans</a> · <a href="/enquire">Enquire</a></p></footer>
+{% include 'adsense-unit.html' %}
+<footer class="rx-footer"><p>© <span data-year>2026</span> Reachmark · <a href="/">About</a> · <a href="/showcase">Samples</a> · <a href="/about#pricing">Pricing</a> · <a href="/pricing">Plans</a> · <a href="/enquire">Enquire</a> · <a href="mailto:{{ support_email }}">Support</a></p></footer>
 </main>
 {% include 'receptionist.html' %}
 

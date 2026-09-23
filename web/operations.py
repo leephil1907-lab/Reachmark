@@ -162,8 +162,16 @@ def register_operations(app,db,now,log):
         log('mcp_run',f'MCP tool {tool_name}: {status}')
         return jsonify(id=rid,status=status,error=error),200
 
+    def _client_blocked():
+        from flask import session
+        if session.get('client_id') and session.get('role')=='client' and not session.get('owner'):
+            return jsonify(error='Owner login required.'),403
+        return None
+
     @app.route('/api/contracts',methods=['GET','POST'])
     def contracts():
+        blocked=_client_blocked()
+        if blocked: return blocked
         if request.method=='GET':
             with db() as c: rows=[dict(r) for r in c.execute('SELECT * FROM contracts ORDER BY created DESC')]
             return jsonify(contracts=rows,currencies=CURRENCIES,stages=STAGES)
@@ -191,6 +199,8 @@ def register_operations(app,db,now,log):
 
     @app.route('/api/contracts/<cid>',methods=['PATCH','DELETE'])
     def contract_detail(cid):
+        blocked=_client_blocked()
+        if blocked: return blocked
         if request.method=='PATCH': return write_contract(cid)
         with db() as c: c.execute('DELETE FROM contracts WHERE id=?',(cid,))
         log('contract','A contract record was deleted');return jsonify(ok=True)
@@ -209,21 +219,32 @@ def register_operations(app,db,now,log):
         days=request.args.get('days','30')
         if days not in ('7','30','90'): return jsonify(error='Choose 7, 30 or 90 days.'),400
         days=int(days);end=datetime.now(timezone.utc).date();start=end-timedelta(days=days-1);cutoff=start.isoformat()
+        from flask import session
+        cid=session.get('client_id') if (session.get('client_id') and session.get('role')=='client' and not session.get('owner')) else None
         with db() as c:
-            leads=[dict(r) for r in c.execute('SELECT city,status,audit_status,email,phone,stage,created,checked_at FROM leads')]
-            sends=[dict(r) for r in c.execute('SELECT state,created FROM sends')]
+            if cid:
+                leads=[dict(r) for r in c.execute('SELECT city,status,audit_status,email,phone,stage,created,checked_at FROM leads WHERE owner_user_id=?',(cid,))]
+                sends=[dict(r) for r in c.execute('SELECT s.state,s.created FROM sends s JOIN leads l ON l.id=s.lead_id WHERE l.owner_user_id=?',(cid,))]
+                jobs=[dict(r) for r in c.execute('SELECT id,category,state,added,checked,progress,total,message,created,updated FROM jobs WHERE owner_user_id=?',(cid,))]
+                map_scans=[dict(r) for r in c.execute("SELECT s.*,count(c.id) total,sum(CASE WHEN c.state='checked' THEN 1 ELSE 0 END) checked FROM map_scans s LEFT JOIN map_cells c ON c.scan_id=s.id WHERE s.owner_user_id=? GROUP BY s.id",(cid,))]
+                map_cells=[dict(r) for r in c.execute('SELECT c.state,count(*) count FROM map_cells c JOIN map_scans s ON s.id=c.scan_id WHERE s.owner_user_id=? GROUP BY c.state',(cid,))]
+                drafts=c.execute("SELECT count(*) FROM leads WHERE trim(body)!='' AND owner_user_id=?",(cid,)).fetchone()[0]
+                activity=[]
+            else:
+                leads=[dict(r) for r in c.execute('SELECT city,status,audit_status,email,phone,stage,created,checked_at FROM leads')]
+                sends=[dict(r) for r in c.execute('SELECT state,created FROM sends')]
+                jobs=[dict(r) for r in c.execute('SELECT id,category,state,added,checked,progress,total,message,created,updated FROM jobs')]
+                map_scans=[dict(r) for r in c.execute("SELECT s.*,count(c.id) total,sum(CASE WHEN c.state='checked' THEN 1 ELSE 0 END) checked FROM map_scans s LEFT JOIN map_cells c ON c.scan_id=s.id GROUP BY s.id")]
+                map_cells=[dict(r) for r in c.execute('SELECT state,count(*) count FROM map_cells GROUP BY state')]
+                drafts=c.execute("SELECT count(*) FROM leads WHERE trim(body)!=''").fetchone()[0]
+                activity=[dict(r) for r in c.execute('SELECT kind,message,created FROM activity ORDER BY id DESC LIMIT 30')]
             enquiries=[dict(r) for r in c.execute('SELECT status,created FROM enquiries')]
             contracts=[dict(r) for r in c.execute('SELECT status,currency,amount_minor,paid_minor,created,signed_recorded_at FROM contracts')]
             runs=[dict(r) for r in c.execute('SELECT status,duration_ms,created FROM mcp_runs')]
-            jobs=[dict(r) for r in c.execute('SELECT id,category,state,added,checked,progress,total,message,created,updated FROM jobs')]
-            map_scans=[dict(r) for r in c.execute("SELECT s.*,count(c.id) total,sum(CASE WHEN c.state='checked' THEN 1 ELSE 0 END) checked FROM map_scans s LEFT JOIN map_cells c ON c.scan_id=s.id GROUP BY s.id")]
-            map_cells=[dict(r) for r in c.execute('SELECT state,count(*) count FROM map_cells GROUP BY state')]
             recent_runs=[dict(r) for r in c.execute('SELECT id,connector_name,tool_name,status,created,finished FROM mcp_runs ORDER BY created DESC LIMIT 20')]
             pages=[dict(r) for r in c.execute("SELECT page,created FROM usage_events WHERE event='page_request' AND created>=?",(cutoff,))]
             started=c.execute("SELECT MIN(created) FROM usage_events WHERE event='measurement_started'").fetchone()[0]
-            drafts=c.execute("SELECT count(*) FROM leads WHERE trim(body)!=''").fetchone()[0]
             connectors=c.execute('SELECT count(*) FROM mcp_connectors').fetchone()[0];skills=c.execute('SELECT count(*) FROM mcp_skills').fetchone()[0]
-            activity=[dict(r) for r in c.execute('SELECT kind,message,created FROM activity ORDER BY id DESC LIMIT 30')]
         def counts(rows,key):return dict(Counter(r[key] or 'Not checked' for r in rows))
         timeline=[]
         for i in range(days):

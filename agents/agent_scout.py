@@ -337,6 +337,9 @@ def run(ctx):
         row.update({k: v for k, v in fields.items() if not (row.get(k) or '').strip()})
         if not ctx.add_lead:
             continue
+        owner = ctx.params.get('owner_user_id') if isinstance(ctx.params, dict) else None
+        if owner:
+            row['owner_user_id'] = owner
         try:
             added = ctx.add_lead(row)
         except Exception as exc:

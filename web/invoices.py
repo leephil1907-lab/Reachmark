@@ -30,6 +30,13 @@ def format_amount(minor, currency):
         return f"{currency} {minor:,}"
     return f"{currency} {Decimal(minor) / (10 ** decimals):,.{decimals}f}"
 
+def _session_cid():
+    from flask import session
+    if session.get('client_id') and session.get('role') == 'client' and not session.get('owner'):
+        return session.get('client_id')
+    return None
+
+
 def register_invoices(app, db, now, log):
     with db() as c:
         c.executescript('''CREATE TABLE IF NOT EXISTS invoices(
@@ -247,10 +254,15 @@ def register_invoices(app, db, now, log):
         if len(notes) > 5000 or len(terms) > 5000:
             return jsonify(error='Notes and terms must be 5000 characters or less.'),400
         with db() as c:
-            if project_id and not c.execute('SELECT 1 FROM projects WHERE id=?', (project_id,)).fetchone():
-                return jsonify(error='Linked project not found.'),400
-            if lead_id and not c.execute('SELECT 1 FROM leads WHERE id=?', (lead_id,)).fetchone():
-                return jsonify(error='Linked business not found.'),400
+            _cid = _session_cid()
+            if project_id:
+                _p = c.execute('SELECT client_user_id FROM projects WHERE id=?', (project_id,)).fetchone()
+                if not _p or (_cid and _p['client_user_id'] != _cid):
+                    return jsonify(error='Linked project not found.'),400
+            if lead_id:
+                _l = c.execute('SELECT owner_user_id FROM leads WHERE id=?', (lead_id,)).fetchone()
+                if not _l or (_cid and _l['owner_user_id'] != _cid):
+                    return jsonify(error='Linked business not found.'),400
         try:
             computed_items, subtotal, discount_minor, tax_minor, total, tax_rate, discount_type, discount_value = validate_and_compute(data, currency)
         except ValueError as e:
@@ -315,10 +327,15 @@ def register_invoices(app, db, now, log):
         if len(notes) > 5000 or len(terms) > 5000:
             return jsonify(error='Notes/terms too long.'),400
         with db() as c:
-            if project_id and not c.execute('SELECT 1 FROM projects WHERE id=?', (project_id,)).fetchone():
-                return jsonify(error='Linked project not found.'),400
-            if lead_id and not c.execute('SELECT 1 FROM leads WHERE id=?', (lead_id,)).fetchone():
-                return jsonify(error='Linked business not found.'),400
+            _cid = _session_cid()
+            if project_id:
+                _p = c.execute('SELECT client_user_id FROM projects WHERE id=?', (project_id,)).fetchone()
+                if not _p or (_cid and _p['client_user_id'] != _cid):
+                    return jsonify(error='Linked project not found.'),400
+            if lead_id:
+                _l = c.execute('SELECT owner_user_id FROM leads WHERE id=?', (lead_id,)).fetchone()
+                if not _l or (_cid and _l['owner_user_id'] != _cid):
+                    return jsonify(error='Linked business not found.'),400
         # Items: if not provided, keep old items; if provided, replace
         if 'items' in data:
             try:

@@ -142,20 +142,42 @@ def record_response(db, now, token, payload, fingerprint=''):
     return {'id': response_id, 'choice': choice, 'label': RESPONSES[choice], 'note': note, 'created': stamp}, link
 
 
-def responses_for(db, link_id=None, limit=50):
+def _session_owner():
+    try:
+        from flask import session
+        if session.get('client_id') and session.get('role') == 'client' and not session.get('owner'):
+            return session.get('client_id')
+    except Exception:
+        return None
+    return None
+
+
+def responses_for(db, link_id=None, limit=50, owner=None):
+    if owner is None:
+        owner = _session_owner()
     query = 'SELECT r.*, l.name AS lead_name, l.city AS lead_city FROM review_responses r ' \
             'LEFT JOIN leads l ON l.id=r.lead_id'
     args = ()
+    conds = []
     if link_id:
-        query += ' WHERE r.link_id=?'
-        args = (link_id,)
+        conds.append('r.link_id=?')
+        args += (link_id,)
+    if owner:
+        conds.append('l.owner_user_id=?')
+        args += (owner,)
+    if conds:
+        query += ' WHERE ' + ' AND '.join(conds)
     with db() as c:
         return [dict(row) for row in c.execute(query + ' ORDER BY r.created DESC LIMIT ?', args + (limit,))]
 
 
-def link_overview(db, limit=40):
+def link_overview(db, limit=40, owner=None):
     """Console view: every review link, its views and its answer."""
+    if owner is None:
+        owner = _session_owner()
     ensure_tables(db)
+    where = 'WHERE b.owner_user_id=? ' if owner else ''
+    args = (owner, limit) if owner else (limit,)
     with db() as c:
         rows = [dict(r) for r in c.execute(
             'SELECT l.id,l.token,l.lead_id,l.status,l.views,l.first_view,l.last_view,l.created,l.headline,'
@@ -163,7 +185,7 @@ def link_overview(db, limit=40):
             '(SELECT choice FROM review_responses r WHERE r.link_id=l.id ORDER BY r.created DESC LIMIT 1) AS last_choice,'
             '(SELECT rating FROM review_responses r WHERE r.link_id=l.id ORDER BY r.created DESC LIMIT 1) AS last_rating,'
             '(SELECT count(*) FROM review_responses r WHERE r.link_id=l.id) AS response_count '
-            'FROM review_links l LEFT JOIN leads b ON b.id=l.lead_id ORDER BY l.created DESC LIMIT ?', (limit,))]
+            'FROM review_links l LEFT JOIN leads b ON b.id=l.lead_id ' + where + 'ORDER BY l.created DESC LIMIT ?', args)]
     answered = sum(1 for row in rows if row['last_choice'])
     opened = sum(1 for row in rows if (row['views'] or 0) > 0)
     return {'links': rows, 'total': len(rows), 'opened': opened, 'answered': answered}
@@ -245,7 +267,7 @@ def register_review_links(app, db, now, log, settings):
             tier, active, _ = tier_status(dict(row) if row else None)
             if tier != 'pro' or not active:
                 return jsonify(error='The Pro plan manages review links.', upgrade='/pricing', required='pro'), 402
-        return jsonify(link_overview(db), responses=responses_for(db))
+        return jsonify(links=link_overview(db), responses=responses_for(db))
 
     @app.post('/api/review-links/<link_id>/handled')
     def review_mark_handled(link_id):

@@ -22,7 +22,7 @@ def install_security(app, db):
     with db() as c:c.execute('CREATE TABLE IF NOT EXISTS login_attempts(client TEXT PRIMARY KEY,failures INTEGER,blocked_until REAL)')
     def public():
         p=request.path
-        if p in ('/','/login','/healthz','/about','/offline','/robots.txt','/sitemap.xml','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/signup','/signin','/client-login','/forgot','/reset','/verify','/pricing','/billing/callback','/api/billing/status','/api/billing/webhook'): return True
+        if p in ('/','/login','/healthz','/about','/offline','/robots.txt','/sitemap.xml','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/signup','/signin','/client-login','/forgot','/reset','/verify','/pricing','/billing/callback','/api/billing/status','/api/billing/webhook','/api/newsletter'): return True
         if p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/','/verify/','/reset/','/forgot')): return True
         # Quick review links a business is invited to answer, and the public AI receptionist.
         if p.startswith(('/r/','/api/r/')): return True
@@ -38,7 +38,7 @@ def install_security(app, db):
         if session.get('client_id') and session.get('role')=='client':
             return 'client'
         return 'none'
-    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),client_logged_in=bool(session.get('client_id')),current_role=current_role(),production_mode=production))
+    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),client_logged_in=bool(session.get('client_id')),current_role=current_role(),production_mode=production,support_email=os.getenv('SUPPORT_EMAIL','reachmarkofficial@gmail.com').strip() or 'reachmarkofficial@gmail.com'))
     @app.before_request
     def owner_guard():
         if public():return
@@ -86,6 +86,8 @@ def install_security(app, db):
             return redirect('/signin')
         # CSRF for owner writes
         check_csrf = authenticated or (session.get('client_id') and session.get('role')=='client')
+        if request.path == '/api/newsletter':
+            check_csrf = False  # footer form works for visitors and clients alike
         if check_csrf and request.method in ('POST','PATCH','DELETE','PUT'):
             supplied=request.headers.get('X-CSRF-Token') or request.form.get('csrf_token','')
             if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error='Session verification failed. Reload the page and try again.'),403

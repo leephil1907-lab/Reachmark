@@ -237,6 +237,9 @@ class Ctx:
         placeholders = ','.join('?' for _ in ids)
         with self.db() as c:
             rows = [dict(r) for r in c.execute(f'SELECT * FROM leads WHERE id IN ({placeholders})', tuple(ids))]
+        owner = self.params.get('owner_user_id') if isinstance(self.params, dict) else None
+        if owner:
+            rows = [r for r in rows if r.get('owner_user_id') == owner]
         order = {lid: i for i, lid in enumerate(ids)}
         rows.sort(key=lambda r: order.get(r['id'], 999))
         return rows[:LIMITS['max_leads']]
@@ -286,14 +289,22 @@ class Crew:
             step['data'] = json.loads(step['data'] or '{}')
         return run
 
-    def stats(self):
+    def stats(self, started_by=None):
         with self.db() as c:
-            runs = c.execute('SELECT count(*) FROM crew_runs').fetchone()[0]
-            done = c.execute("SELECT count(*) FROM crew_runs WHERE status='completed'").fetchone()[0]
-            artifacts = c.execute('SELECT count(*) FROM crew_artifacts').fetchone()[0]
-            pending = c.execute("SELECT count(*) FROM crew_approvals WHERE state='pending'").fetchone()[0]
-            events = c.execute('SELECT count(*) FROM crew_events').fetchone()[0]
-            steps = c.execute("SELECT count(*) FROM crew_steps WHERE status='ok'").fetchone()[0]
+            if started_by:
+                runs = c.execute('SELECT count(*) FROM crew_runs WHERE started_by=?', (started_by,)).fetchone()[0]
+                done = c.execute("SELECT count(*) FROM crew_runs WHERE status='completed' AND started_by=?", (started_by,)).fetchone()[0]
+                artifacts = c.execute('SELECT count(*) FROM crew_artifacts a JOIN crew_runs r ON r.id=a.run_id WHERE r.started_by=?', (started_by,)).fetchone()[0]
+                pending = c.execute("SELECT count(*) FROM crew_approvals a JOIN crew_runs r ON r.id=a.run_id WHERE a.state='pending' AND r.started_by=?", (started_by,)).fetchone()[0]
+                events = c.execute('SELECT count(*) FROM crew_events e JOIN crew_runs r ON r.id=e.run_id WHERE r.started_by=?', (started_by,)).fetchone()[0]
+                steps = c.execute("SELECT count(*) FROM crew_steps s JOIN crew_runs r ON r.id=s.run_id WHERE s.status='ok' AND r.started_by=?", (started_by,)).fetchone()[0]
+            else:
+                runs = c.execute('SELECT count(*) FROM crew_runs').fetchone()[0]
+                done = c.execute("SELECT count(*) FROM crew_runs WHERE status='completed'").fetchone()[0]
+                artifacts = c.execute('SELECT count(*) FROM crew_artifacts').fetchone()[0]
+                pending = c.execute("SELECT count(*) FROM crew_approvals WHERE state='pending'").fetchone()[0]
+                events = c.execute('SELECT count(*) FROM crew_events').fetchone()[0]
+                steps = c.execute("SELECT count(*) FROM crew_steps WHERE status='ok'").fetchone()[0]
         return {'runs': runs, 'completed': done, 'artifacts': artifacts, 'pending_approvals': pending,
                 'events': events, 'steps_ok': steps, 'active': self.active_run}
 
@@ -556,6 +567,11 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
     from web.ai_provider import provider_status, health as llm_health
     from crew.skills_loader import playbook_index
 
+    def run_owner():
+        if session.get('client_id') and session.get('role') == 'client' and not session.get('owner'):
+            return 'client:' + session.get('client_id')
+        return None
+
     def owner_only():
         if session.get('owner'):
             return None
@@ -574,13 +590,26 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
         guard = owner_only()
         if guard:
             return guard
+        mine = run_owner()
         with db() as c:
-            runs = [dict(r) for r in c.execute('SELECT * FROM crew_runs ORDER BY created DESC LIMIT 12')]
-            approvals = [dict(r) for r in c.execute("SELECT * FROM crew_approvals WHERE state='pending' ORDER BY created DESC LIMIT 50")]
-            artifacts = [dict(r) for r in c.execute('SELECT id,run_id,agent,lead_id,kind,title,created FROM crew_artifacts ORDER BY created DESC LIMIT 40')]
-            events = [dict(r) for r in c.execute('SELECT * FROM crew_events ORDER BY rowid DESC LIMIT 60')]
-            followups = [dict(r) for r in c.execute("SELECT * FROM followups WHERE state='planned' ORDER BY due LIMIT 25")]
-            dispatch = [dict(r) for r in c.execute('SELECT * FROM crew_dispatch ORDER BY created DESC LIMIT 25')]
+            if mine:
+                runs = [dict(r) for r in c.execute('SELECT * FROM crew_runs WHERE started_by=? ORDER BY created DESC LIMIT 12', (mine,))]
+                ids = [r['id'] for r in runs]
+                approvals, artifacts, events, followups, dispatch = [], [], [], [], []
+                if ids:
+                    ph = ','.join('?' for _ in ids)
+                    approvals = [dict(r) for r in c.execute(f"SELECT * FROM crew_approvals WHERE state='pending' AND run_id IN ({ph}) ORDER BY created DESC LIMIT 50", tuple(ids))]
+                    artifacts = [dict(r) for r in c.execute(f'SELECT id,run_id,agent,lead_id,kind,title,created FROM crew_artifacts WHERE run_id IN ({ph}) ORDER BY created DESC LIMIT 40', tuple(ids))]
+                    events = [dict(r) for r in c.execute(f'SELECT * FROM crew_events WHERE run_id IN ({ph}) ORDER BY rowid DESC LIMIT 60', tuple(ids))]
+                    followups = [dict(r) for r in c.execute(f"SELECT * FROM followups WHERE state='planned' AND run_id IN ({ph}) ORDER BY due LIMIT 25", tuple(ids))]
+                    dispatch = [dict(r) for r in c.execute(f'SELECT * FROM crew_dispatch WHERE run_id IN ({ph}) ORDER BY created DESC LIMIT 25', tuple(ids))]
+            else:
+                runs = [dict(r) for r in c.execute('SELECT * FROM crew_runs ORDER BY created DESC LIMIT 12')]
+                approvals = [dict(r) for r in c.execute("SELECT * FROM crew_approvals WHERE state='pending' ORDER BY created DESC LIMIT 50")]
+                artifacts = [dict(r) for r in c.execute('SELECT id,run_id,agent,lead_id,kind,title,created FROM crew_artifacts ORDER BY created DESC LIMIT 40')]
+                events = [dict(r) for r in c.execute('SELECT * FROM crew_events ORDER BY rowid DESC LIMIT 60')]
+                followups = [dict(r) for r in c.execute("SELECT * FROM followups WHERE state='planned' ORDER BY due LIMIT 25")]
+                dispatch = [dict(r) for r in c.execute('SELECT * FROM crew_dispatch ORDER BY created DESC LIMIT 25')]
         from web.review_links import link_overview
         from web.receptionist import threads as receptionist_threads
         for run in runs:
@@ -597,9 +626,9 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
             playbook_version=_playbook_version(),
             runs=runs, approvals=approvals, artifacts=artifacts, events=list(reversed(events)),
             followups=followups, dispatch=dispatch,
-            stats=crew.stats(), provider=llm_health(), playbook=playbook_index(),
+            stats=crew.stats(mine), provider=llm_health(), playbook=playbook_index(),
             review_links=link_overview(db),
-            threads=receptionist_threads(db, limit=20),
+            threads=([] if mine else receptionist_threads(db, limit=20)),
             guardrails={
                 'autopilot_scope': 'internal steps only — drafting, research, concept pages',
                 'outbound_rule': 'Every e-mail, review-link share or SMS text needs a separate owner approval.',
@@ -633,8 +662,18 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
             return jsonify(error='Unknown crew pipeline.'), 400
         if mode in ('campaign', 'research') and not params['fixtures'] and not params['location'] and not params['lead_ids'] and not params['lead_id']:
             return jsonify(error='Give the crew a location ("City, Country"), a saved lead, or switch on the offline demo.'), 400
+        mine = run_owner()
+        if mine:
+            want = ([params['lead_id']] if params['lead_id'] else []) + params['lead_ids']
+            if want:
+                with db() as c:
+                    for lid in set(want):
+                        if not c.execute('SELECT id FROM leads WHERE id=? AND owner_user_id=?',
+                                         (lid, session.get('client_id'))).fetchone():
+                            return jsonify(error='That lead is not in your workspace.'), 403
+            params['owner_user_id'] = session.get('client_id')
         try:
-            run_id = crew.start(mode, params, agent_id, 'owner')
+            run_id = crew.start(mode, params, agent_id, mine or 'owner')
         except CrewError as exc:
             return jsonify(error=str(exc)), 409
         return jsonify(ok=True, run_id=run_id)
@@ -646,6 +685,9 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
             return guard
         run = crew.get_run(run_id)
         if not run:
+            return jsonify(error='Run not found.'), 404
+        mine = run_owner()
+        if mine and run.get('started_by') != mine:
             return jsonify(error='Run not found.'), 404
         run['pipeline'] = json.loads(run['pipeline'] or '[]') if isinstance(run['pipeline'], str) else run['pipeline']
         with db() as c:
@@ -661,6 +703,11 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
         guard = owner_only()
         if guard:
             return guard
+        mine = run_owner()
+        if mine:
+            run = crew.get_run(run_id)
+            if not run or run.get('started_by') != mine:
+                return jsonify(error='Run not found.'), 404
         crew.cancel(run_id)
         return jsonify(ok=True)
 
@@ -671,8 +718,15 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
             return guard
         body = request.get_json(silent=True) or {}
         decision = 'approve' if str(body.get('decision')) == 'approve' else 'reject'
+        mine = run_owner()
+        if mine:
+            with db() as c:
+                ok = c.execute('SELECT 1 FROM crew_approvals a JOIN crew_runs r ON r.id=a.run_id '
+                               'WHERE a.id=? AND r.started_by=?', (approval_id, mine)).fetchone()
+            if not ok:
+                return jsonify(error='Approval not found.'), 404
         try:
-            approval = crew.decide(approval_id, decision, str(body.get('note', '')), 'owner')
+            approval = crew.decide(approval_id, decision, str(body.get('note', '')), mine or 'owner')
         except CrewError as exc:
             return jsonify(error=str(exc)), 409
         resumed = crew.maybe_resume(approval['run_id'])
@@ -688,6 +742,13 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
             row = c.execute('SELECT * FROM crew_approvals WHERE id=?', (approval_id,)).fetchone()
         if not row:
             return jsonify(error='Approval not found.'), 404
+        mine = run_owner()
+        if mine:
+            with db() as c:
+                ok = c.execute('SELECT 1 FROM crew_runs WHERE id=? AND started_by=?',
+                               (dict(row)['run_id'], mine)).fetchone()
+            if not ok:
+                return jsonify(error='Approval not found.'), 404
         if row['state'] != 'approved':
             return jsonify(error='Approve the item first — nothing is sent without your decision.'), 409
         from agents.agent_closer import dispatch_item
@@ -699,6 +760,8 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
         guard = owner_only()
         if guard:
             return guard
+        if session.get('client_id') and not session.get('owner'):
+            return jsonify(error='Owner login required.'), 403
         with db() as c:
             ids = [r[0] for r in c.execute("SELECT id FROM leads WHERE source='Fixture (offline demo)'")]
             for lid in ids:

@@ -7,6 +7,9 @@ from email.message import EmailMessage
 
 EMAIL_RE = re.compile(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+')
 
+def support_email():
+    return os.getenv('SUPPORT_EMAIL', 'reachmarkofficial@gmail.com').strip() or 'reachmarkofficial@gmail.com'
+
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
@@ -27,20 +30,22 @@ def get_base_url():
     except Exception:
         return 'http://localhost:8000'
 
-def branded_html(title, text_body, cta_url=None, cta_label=None):
-    # Simple branded HTML, no external assets, uses inline styles
-    safe = text_body.replace('\n','<br>')
+def branded_html(title, text_body, cta_url=None, cta_label=None, base_url=None):
+    # Branded HTML mail matching the site: cream canvas, white card, lime CTA.
+    base = (base_url or 'https://reachmark.co').rstrip('/')
+    host = base.replace('https://', '').replace('http://', '')
+    safe = text_body.replace('\n', '<br>')
     cta = f'<p style="margin:22px 0"><a href="{cta_url}" style="display:inline-block;background:#0f1a0a;color:#d5f268;padding:13px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-family:Manrope,Arial,sans-serif">{cta_label}</a></p>' if cta_url else ''
     html = f"""<!doctype html><html><body style="margin:0;background:#eef6d1;font-family:Manrope,Arial,sans-serif;color:#1a2315">
 <div style="max-width:560px;margin:0 auto;padding:28px">
 <div style="background:#ffffff;border:1px solid #e2e7d6;border-radius:16px;padding:28px">
-<div style="margin-bottom:18px"><img src="https://reachmark.co/static/logo-primary.svg" alt="Reachmark" style="height:32px" onerror="this.style.display='none'"><div style="font-weight:800;letter-spacing:-0.5px;font-size:18px;color:#0f1a0a">Reachmark</div><div style="font-size:11px;letter-spacing:1.2px;color:#8c9c77">FIND POTENTIAL · MAKE YOUR MARK</div></div>
+<div style="margin-bottom:18px"><img src="{base}/static/logo-primary.png" alt="Reachmark" style="height:34px" onerror="this.style.display='none'"><div style="font-weight:800;letter-spacing:-0.5px;font-size:18px;color:#0f1a0a">Reachmark</div><div style="font-size:11px;letter-spacing:1.2px;color:#8c9c77">FIND POTENTIAL · MAKE YOUR MARK</div></div>
 <h1 style="margin:8px 0 10px;font-size:20px;letter-spacing:-0.5px;color:#0f1a0a">{title}</h1>
-<div style="line-height:1.7;color:#2d4a0a;font-size:14px">{safe}</div>
+<div style="line-height:1.7;color:#33402a;font-size:14px">{safe}</div>
 {cta}
-<div style="margin-top:22px;padding-top:16px;border-top:1px solid #eef1e4;font-size:12px;color:#8a9976">If you didn't ask for this, you can ignore this email. Reply to hello@reachmark.co for help.</div>
+<div style="margin-top:22px;padding-top:16px;border-top:1px solid #eef1e4;font-size:12px;color:#8a9976">If you didn't ask for this, you can ignore this email. Reply to {support_email()} for help.</div>
 </div>
-<div style="text-align:center;margin-top:14px;font-size:11px;color:#8a9976">Reachmark · Global · reachmark.co</div>
+<div style="text-align:center;margin-top:14px;font-size:11px;color:#8a9976">Reachmark · Global · {host}</div>
 </div></body></html>"""
     return html
 
@@ -49,7 +54,7 @@ def send_branded(to_email, subject, text_body, html_title=None, cta_url=None, ct
     to_email = to_email.strip().lower()
     base = get_base_url() if 'request' in globals() else 'https://reachmark.co'
     # Build HTML if title given
-    html_body = branded_html(html_title or subject, text_body, cta_url, cta_label) if html_title or cta_url else None
+    html_body = branded_html(html_title or subject, text_body, cta_url, cta_label, base_url=base) if html_title or cta_url else None
     outbox_id = uuid.uuid4().hex
     created = now_iso()
     # Try SMTP if configured
@@ -235,7 +240,19 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
             log('account', f'Email verified: {row["email"]}')
         except Exception:
             pass
-        return Response("""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Email verified · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"></head><body style="margin:0;background:#e9edde;display:grid;place-items:center;min-height:100vh;font-family:Manrope,Arial,sans-serif"><div style="background:#fff;border:1px solid #d2d8c7;border-radius:22px;padding:40px;max-width:480px;text-align:center"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:38px"><h1 style="font-size:26px;letter-spacing:-0.8px">Email verified ✓</h1><p style="color:#535f4c;line-height:1.6">Your Reachmark account is now verified. You can close this tab and continue to your dashboard.</p><a href="/signin" style="display:inline-block;margin-top:12px;background:#0f1a0a;color:#d5f268;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">Continue to sign in →</a></div></body></html>""", mimetype='text/html')
+        try:
+            base = get_base_url()
+            send_branded(row['email'], 'Welcome to Reachmark — email verified',
+                         f"Hi {row['email']},\n\nYour email is verified and your Reachmark account is ready.\n\nFree plan: samples, enquiries and your own invoices and projects.\n\nNeed the working tools? See workspace plans:\n{base}/pricing\n\n— Reachmark · Global",
+                         html_title='Welcome to Reachmark', cta_url=f'{base}/dashboard',
+                         cta_label='Open your dashboard →', db=db)
+        except Exception:
+            pass
+        if session.get('client_id'):
+            next_btn = '<a href="/dashboard" style="display:inline-block;margin-top:12px;background:#0f1a0a;color:#d5f268;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">Continue to your dashboard →</a>'
+        else:
+            next_btn = '<a href="/signin" style="display:inline-block;margin-top:12px;background:#0f1a0a;color:#d5f268;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">Continue to sign in →</a>'
+        return Response(f"""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Email verified · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"></head><body style="margin:0;background:#e9edde;display:grid;place-items:center;min-height:100vh;font-family:Manrope,Arial,sans-serif"><div style="background:#fff;border:1px solid #d2d8c7;border-radius:22px;padding:40px;max-width:480px;text-align:center"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:38px"><h1 style="font-size:26px;letter-spacing:-0.8px">Email verified ✓</h1><p style="color:#535f4c;line-height:1.6">Your Reachmark account is now verified. You can close this tab and continue to your dashboard.</p>{next_btn}</div></body></html>""", mimetype='text/html')
 
     # --- Auth APIs ---
     def _create_verification(user_id, email):
@@ -244,8 +261,9 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
         with db() as c:
             c.execute('UPDATE users SET verification_token=?, verification_expires=?, updated=? WHERE id=?', (token, expires, now_iso(), user_id))
         base = get_base_url()
+        host = base.replace("https://", "").replace("http://", "")
         link = f"{base}/verify/{token}"
-        text = f"Hi {email},\n\nConfirm your Reachmark account by opening this link (valid 24 hours):\n{link}\n\nIf you didn't create an account, you can ignore this email.\n\n— Reachmark · Global\nreachmark.co"
+        text = f"Hi {email},\n\nConfirm your Reachmark account by opening this link (valid 24 hours):\n{link}\n\nIf you didn't create an account, you can ignore this email.\n\n— Reachmark · Global\n{host}"
         send_branded(email, "Confirm your Reachmark account", text, html_title="Confirm your email", cta_url=link, cta_label="Verify email →", db=db)
         return token
 

@@ -35,6 +35,13 @@ def register_standard(app, db, log, settings_fn=None):
     def is_owner():
         return bool(session.get('owner'))
 
+    def client_outbox_email():
+        if session.get('client_id') and session.get('role') == 'client' and not session.get('owner'):
+            with db() as c:
+                u = c.execute('SELECT email FROM users WHERE id=?', (session.get('client_id'),)).fetchone()
+            return (u['email'] if u else '').strip().lower()
+        return None
+
     def pro_or_owner():
         if is_owner():
             return True
@@ -116,8 +123,12 @@ def register_standard(app, db, log, settings_fn=None):
             if session.get('client_id'):
                 return jsonify(error='The Pro plan opens the outbox.', upgrade='/pricing', required='pro'), 402
             return jsonify(error='Owner login required.'),401
+        email = client_outbox_email()
         with db() as c:
-            rows = [dict(r) for r in c.execute('SELECT id, to_email, subject, created, state FROM mail_outbox ORDER BY created DESC LIMIT 100')]
+            if email:
+                rows = [dict(r) for r in c.execute('SELECT id, to_email, subject, created, state FROM mail_outbox WHERE lower(to_email)=? ORDER BY created DESC LIMIT 100', (email,))]
+            else:
+                rows = [dict(r) for r in c.execute('SELECT id, to_email, subject, created, state FROM mail_outbox ORDER BY created DESC LIMIT 100')]
         return jsonify(outbox=rows)
 
     @app.get('/api/outbox/<oid>')
@@ -130,6 +141,9 @@ def register_standard(app, db, log, settings_fn=None):
             r = c.execute('SELECT * FROM mail_outbox WHERE id=?', (oid,)).fetchone()
             if not r:
                 return jsonify(error='Not found.'),404
+            email = client_outbox_email()
+            if email and str(dict(r).get('to_email', '')).strip().lower() != email:
+                return jsonify(error='Not found.'),404
             return jsonify(dict(r))
 
     @app.post('/api/outbox/<oid>/resend')
@@ -141,6 +155,9 @@ def register_standard(app, db, log, settings_fn=None):
         with db() as c:
             r = c.execute('SELECT * FROM mail_outbox WHERE id=?', (oid,)).fetchone()
             if not r:
+                return jsonify(error='Not found.'),404
+            email = client_outbox_email()
+            if email and str(dict(r).get('to_email', '')).strip().lower() != email:
                 return jsonify(error='Not found.'),404
             # Attempt resend via SMTP if configured
             import ssl, smtplib
@@ -284,10 +301,10 @@ def register_standard(app, db, log, settings_fn=None):
                 # No check for fabricated metrics: ensure no lead has invented figures
                 # This is a soft check — just report
                 pass
-            # Check premium samples still 8
+            # Check premium samples still 10
             from web.portfolio import SAMPLES
-            if len(SAMPLES) != 8:
-                errors.append(f'SAMPLES count is {len(SAMPLES)}, expected 8')
+            if len(SAMPLES) != 10:
+                errors.append(f'SAMPLES count is {len(SAMPLES)}, expected 10')
         except Exception as e:
             errors.append('verifier error: '+type(e).__name__)
         return jsonify(ok=len(errors)==0, errors=errors)

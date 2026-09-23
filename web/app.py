@@ -27,19 +27,21 @@ def db():
         c.close()
 with db() as c:
     c.execute('PRAGMA journal_mode=WAL')
-    c.executescript('''CREATE TABLE IF NOT EXISTS leads (id TEXT PRIMARY KEY, source_key TEXT UNIQUE, name TEXT NOT NULL, category TEXT, city TEXT, address TEXT, phone TEXT, email TEXT, website TEXT, status TEXT, stage TEXT DEFAULT 'New', source TEXT, source_url TEXT, note TEXT DEFAULT '', subject TEXT DEFAULT '', body TEXT DEFAULT '', token TEXT UNIQUE, created TEXT, updated TEXT);
+    c.executescript('''CREATE TABLE IF NOT EXISTS leads (id TEXT PRIMARY KEY, source_key TEXT UNIQUE, name TEXT NOT NULL, category TEXT, city TEXT, address TEXT, phone TEXT, email TEXT, website TEXT, status TEXT, stage TEXT DEFAULT 'New', source TEXT, source_url TEXT, note TEXT DEFAULT '', subject TEXT DEFAULT '', body TEXT DEFAULT '', token TEXT UNIQUE, created TEXT, updated TEXT, owner_user_id TEXT);
     CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, data TEXT);
     CREATE TABLE IF NOT EXISTS activity (id INTEGER PRIMARY KEY, kind TEXT, message TEXT, created TEXT);
     CREATE TABLE IF NOT EXISTS sends (id TEXT PRIMARY KEY, lead_id TEXT, recipient TEXT, state TEXT, error TEXT, created TEXT);
     CREATE TABLE IF NOT EXISTS suppression (email TEXT PRIMARY KEY, created TEXT);
-    CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY,state TEXT,locations TEXT,category TEXT,progress INTEGER,total INTEGER,added INTEGER,checked INTEGER,message TEXT,created TEXT,updated TEXT);
+    CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY,state TEXT,locations TEXT,category TEXT,progress INTEGER,total INTEGER,added INTEGER,checked INTEGER,message TEXT,created TEXT,updated TEXT,owner_user_id TEXT);
     CREATE TABLE IF NOT EXISTS optout_links (token TEXT PRIMARY KEY, email TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS client_reviews (id TEXT PRIMARY KEY, name TEXT NOT NULL, business TEXT, rating INTEGER NOT NULL, text TEXT NOT NULL, created TEXT NOT NULL, approved INTEGER DEFAULT 1);''')
 # Non-destructive migrations for earlier workspaces.
 with db() as c:
     columns={r[1] for r in c.execute('PRAGMA table_info(leads)')}
-    for name,kind in [('audit_status','TEXT'),('audit_reason','TEXT'),('checked_at','TEXT'),('http_code','INTEGER'),('latitude','REAL'),('longitude','REAL'),('opening_hours','TEXT'),('social_url','TEXT'),('source_tags','TEXT')]:
+    for name,kind in [('audit_status','TEXT'),('audit_reason','TEXT'),('checked_at','TEXT'),('http_code','INTEGER'),('latitude','REAL'),('longitude','REAL'),('opening_hours','TEXT'),('social_url','TEXT'),('source_tags','TEXT'),('owner_user_id','TEXT')]:
         if name not in columns: c.execute(f'ALTER TABLE leads ADD COLUMN {name} {kind}')
+    if 'owner_user_id' not in {r[1] for r in c.execute('PRAGMA table_info(jobs)')}:
+        c.execute('ALTER TABLE jobs ADD COLUMN owner_user_id TEXT')
     c.execute("UPDATE jobs SET state='interrupted',message='Server restarted; start a new search to continue.' WHERE state IN ('queued','running')")
 from web.services import discover_location, audit_website
 from web.portfolio import SAMPLES
@@ -52,10 +54,18 @@ def settings():
     return base
 def log(kind, message):
     with db() as c: c.execute('INSERT INTO activity(kind,message,created) VALUES(?,?,?)',(kind,message,now()))
+def client_owner():
+    from flask import session
+    if session.get('client_id') and session.get('role') == 'client' and not session.get('owner'):
+        return session.get('client_id')
+    return None
 def lead(lid):
     with db() as c: r=c.execute('SELECT * FROM leads WHERE id=?',(lid,)).fetchone()
     if not r: abort(404)
-    return dict(r)
+    d = dict(r)
+    cid = client_owner()
+    if cid and d.get('owner_user_id') != cid: abort(404)
+    return d
 def classify(url):
     if not url.strip(): return 'NOT_LISTED'
     try: host=(urlparse(url if '://' in url else 'https://'+url).hostname or '').lower()
@@ -66,7 +76,7 @@ def add_lead(v):
     website=v.get('website','').strip()
     key=v.get('source_key') or '|'.join(v.get(k,'').strip().lower() for k in ('name','city','phone'))
     with db() as c:
-        cur=c.execute('INSERT OR IGNORE INTO leads(id,source_key,name,category,city,address,phone,email,website,status,source,source_url,token,created,updated) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',(lid,key,v['name'][:200],v.get('category','')[:100],v.get('city','')[:200],v.get('address','')[:500],v.get('phone','')[:100],v.get('email','')[:250],website[:1000],classify(website),v.get('source','CSV'),v.get('source_url',''),uuid.uuid4().hex,stamp,stamp))
+        cur=c.execute('INSERT OR IGNORE INTO leads(id,source_key,name,category,city,address,phone,email,website,status,source,source_url,token,created,updated,owner_user_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',(lid,key,v['name'][:200],v.get('category','')[:100],v.get('city','')[:200],v.get('address','')[:500],v.get('phone','')[:100],v.get('email','')[:250],website[:1000],classify(website),v.get('source','CSV'),v.get('source_url',''),uuid.uuid4().hex,stamp,stamp,v.get('owner_user_id')))
         count=cur.rowcount
         if count:
             c.execute('UPDATE leads SET latitude=?,longitude=?,opening_hours=?,social_url=?,source_tags=? WHERE id=?',(v.get('latitude'),v.get('longitude'),v.get('opening_hours',''),v.get('social_url',''),json.dumps(v.get('source_tags',{})),lid))
@@ -299,15 +309,24 @@ def state():
         with db() as c:
             urow = c.execute('SELECT * FROM users WHERE id=?', (session.get('client_id'),)).fetchone()
         paid_tools = tier_status(dict(urow) if urow else None)[0] in ('starter', 'pro')
+    cid = client_owner() if is_client else None
     with db() as c:
         if is_client and not paid_tools:
-            # Free clients see no leads/jobs; paid plans unlock the shared workspace tools
+            # Free clients keep global aggregates; record detail stays empty.
             leads=[]
             activity=[]
-            sent=0
             suppressed=[]
-            enquiry_count=0
             jobs=[]
+            sent=c.execute("SELECT count(*) FROM sends WHERE state='sent'").fetchone()[0]
+            enquiry_count=c.execute("SELECT count(*) FROM enquiries WHERE status='New'").fetchone()[0]
+        elif cid:
+            # Paid clients work in a private workspace: only their own records.
+            leads=[dict(r) for r in c.execute("SELECT l.*,r.verification,r.reviewed_at FROM leads l LEFT JOIN lead_reviews r ON r.lead_id=l.id WHERE l.owner_user_id=? ORDER BY l.created DESC",(cid,))]
+            activity=[]
+            sent=c.execute("SELECT count(*) FROM sends s JOIN leads l ON l.id=s.lead_id WHERE s.state='sent' AND l.owner_user_id=?",(cid,)).fetchone()[0]
+            suppressed=[]
+            enquiry_count=c.execute("SELECT count(*) FROM enquiries WHERE status='New'").fetchone()[0]
+            jobs=[dict(r) for r in c.execute('SELECT * FROM jobs WHERE owner_user_id=? ORDER BY created DESC LIMIT 15',(cid,))]
         else:
             leads=[dict(r) for r in c.execute("SELECT l.*,r.verification,r.reviewed_at FROM leads l LEFT JOIN lead_reviews r ON r.lead_id=l.id ORDER BY l.created DESC")]
             activity=([] if is_client else [dict(r) for r in c.execute('SELECT * FROM activity ORDER BY id DESC LIMIT 12')])
@@ -329,7 +348,7 @@ def save_settings():
 def create_lead():
     v=request.get_json() or {}
     if not str(v.get('name','')).strip(): return jsonify(error='Business name is required.'),400
-    v={k:str(val).strip() for k,val in v.items()}; v['source']='Manual'
+    v={k:str(val).strip() for k,val in v.items()}; v['source']='Manual'; v['owner_user_id']=client_owner()
     count=add_lead(v); log('import',f'{count} business added manually'); return jsonify(added=count)
 @app.route('/api/leads/<lid>',methods=['PATCH','DELETE'])
 def update_lead(lid):
@@ -361,23 +380,27 @@ def import_csv():
         count=0
         for r in rows:
             v={k:(val or '').strip() for k,val in r.items() if isinstance(val,(str,type(None))) and k}
-            v['website']=v.get('website') or v.get('listed_website',''); v['city']=v.get('city') or v.get('city_searched',''); v['source']='CSV'
+            v['website']=v.get('website') or v.get('listed_website',''); v['city']=v.get('city') or v.get('city_searched',''); v['source']='CSV'; v['owner_user_id']=client_owner()
             if v.get('name'): count+=add_lead(v)
         log('import',f'Imported {count} businesses from CSV'); return jsonify(added=count,skipped=len(rows)-count)
     except (UnicodeError,csv.Error,TypeError): return jsonify(error='Could not read this file. Upload a UTF-8 CSV.'),400
 @app.route('/api/export')
 def export():
-    with db() as c: rows=[dict(r) for r in c.execute('SELECT * FROM leads ORDER BY created DESC')]
+    cid = client_owner()
+    with db() as c:
+        if cid: rows=[dict(r) for r in c.execute('SELECT * FROM leads WHERE owner_user_id=? ORDER BY created DESC',(cid,))]
+        else: rows=[dict(r) for r in c.execute('SELECT * FROM leads ORDER BY created DESC')]
     fields=['name','category','city','address','phone','email','website','status','stage','source','source_url','note','audit_status','audit_reason','checked_at','http_code','latitude','longitude','opening_hours','social_url']
     f=io.StringIO(); w=csv.DictWriter(f,fieldnames=fields,extrasaction='ignore'); w.writeheader()
     for row in rows:
         w.writerow({k: ("'"+str(v) if str(v).startswith(('=','+','-','@','\t','\r')) else v) for k,v in row.items()})
     return Response(f.getvalue(),mimetype='text/csv',headers={'Content-Disposition':'attachment; filename=reachmark-leads.csv'})
-def search_save(location, category, include_websites=False):
+def search_save(location, category, include_websites=False, owner=None):
     rows, resolved=discover_location(location,CATEGORIES[category])
     added=0; candidates=0
     for row in rows:
         row['category']=category
+        if owner: row['owner_user_id']=owner
         if not include_websites and classify(row['website'])=='HAS_WEBSITE': continue
         candidates+=1; added+=add_lead(row)
     return {'added':added,'scanned':len(rows),'candidates':candidates,'resolved':resolved},rows
@@ -391,26 +414,29 @@ def discover():
         if time.monotonic()-last_discovery<10: return jsonify(error='Wait 10 seconds between searches.'),429
         last_discovery=time.monotonic()
     try:
-        result,_=search_save(city,category)
+        result,_=search_save(city,category,owner=client_owner())
         log('discovery',f"{city} · {category}: {result['added']} new candidates from {result['scanned']} listings")
         return jsonify(result)
     except (requests.RequestException,ValueError,KeyError): return jsonify(error='Public map service unavailable or location not found. Retry later or import CSV.'),502
 
 def run_job(jid,locations,category,check):
     added=checked=failures=0
+    with db() as c:
+        jrow=c.execute('SELECT owner_user_id FROM jobs WHERE id=?',(jid,)).fetchone()
+    owner=jrow['owner_user_id'] if jrow else None
     try:
         for i,location in enumerate(locations):
             with db() as c:
                 if c.execute('SELECT state FROM jobs WHERE id=?',(jid,)).fetchone()[0]=='cancelled': return
                 c.execute("UPDATE jobs SET state='running',message=?,updated=? WHERE id=?",('Searching '+location,now(),jid))
             try:
-                result,rows=search_save(location,category,include_websites=check);added+=result['added']
+                result,rows=search_save(location,category,include_websites=check,owner=owner);added+=result['added']
                 # Bound website audits per location; remaining saved URLs can be checked manually.
                 if check:
                     for row in [r for r in rows if r.get('website')][:12]:
                         with db() as c:
                             if c.execute('SELECT state FROM jobs WHERE id=?',(jid,)).fetchone()[0]=='cancelled': return
-                            l=c.execute('SELECT id FROM leads WHERE source_key=?',(row['source_key'],)).fetchone()
+                            l=(c.execute('SELECT id FROM leads WHERE source_key=? AND owner_user_id=?',(row['source_key'],owner)).fetchone() if owner else c.execute('SELECT id FROM leads WHERE source_key=?',(row['source_key'],)).fetchone())
                         if l:
                             save_audit(l['id']);checked+=1
                             with db() as c: c.execute('UPDATE jobs SET added=?,checked=?,message=?,updated=? WHERE id=?',(added,checked,'Checking websites in '+location,now(),jid))
@@ -430,16 +456,21 @@ def start_job():
     v=request.get_json() or {}; locations=v.get('locations',[]); category=v.get('category')
     if not isinstance(locations,list) or not 1<=len(locations)<=8 or any(not isinstance(x,str) or not x.strip() or len(x)>150 for x in locations) or not isinstance(category,str) or category not in CATEGORIES: return jsonify(error='Enter 1–8 city/country locations and a supported category.'),400
     locations=list(dict.fromkeys(x.strip() for x in locations));jid=uuid.uuid4().hex
+    cid=client_owner()
     with db() as c:
         c.execute('BEGIN IMMEDIATE')
-        if c.execute("SELECT 1 FROM jobs WHERE state IN ('queued','running')").fetchone(): return jsonify(error='A discovery job is already running. Wait or cancel it first.'),409
-        c.execute('INSERT INTO jobs VALUES(?,?,?,?,?,?,?,?,?,?,?)',(jid,'queued',json.dumps(locations),category,0,len(locations),0,0,'Waiting for public map services',now(),now()))
+        busy=(c.execute("SELECT 1 FROM jobs WHERE state IN ('queued','running') AND owner_user_id=?",(cid,)).fetchone() if cid else c.execute("SELECT 1 FROM jobs WHERE state IN ('queued','running')").fetchone())
+        if busy: return jsonify(error='A discovery job is already running. Wait or cancel it first.'),409
+        c.execute('INSERT INTO jobs(id,state,locations,category,progress,total,added,checked,message,created,updated,owner_user_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',(jid,'queued',json.dumps(locations),category,0,len(locations),0,0,'Waiting for public map services',now(),now(),cid))
     threading.Thread(target=run_job,args=(jid,locations,category,bool(v.get('check_websites'))),daemon=True).start()
     return jsonify(id=jid),202
 
 @app.route('/api/jobs/<jid>/cancel',methods=['POST'])
 def cancel_job(jid):
-    with db() as c: c.execute("UPDATE jobs SET state='cancelled',message='Cancelled. An in-flight source request may finish saving results.',updated=? WHERE id=? AND state IN ('queued','running')",(now(),jid))
+    cid=client_owner()
+    with db() as c:
+        if cid: c.execute("UPDATE jobs SET state='cancelled',message='Cancelled. An in-flight source request may finish saving results.',updated=? WHERE id=? AND state IN ('queued','running') AND owner_user_id=?",(now(),jid,cid))
+        else: c.execute("UPDATE jobs SET state='cancelled',message='Cancelled. An in-flight source request may finish saving results.',updated=? WHERE id=? AND state IN ('queued','running')",(now(),jid))
     return jsonify(ok=True)
 
 def save_audit(lid):
@@ -564,6 +595,10 @@ from web.receptionist import register_receptionist
 register_receptionist(app, db, now, log, settings)
 from web.billing import register_billing
 register_billing(app, db, now, log)
+from web.console import register_console
+register_console(app, db, now, log)
+from web.crypto import register_crypto
+register_crypto(app, db, now, log)
 
 
 # Client reviews — leave a review for good job done

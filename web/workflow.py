@@ -40,9 +40,15 @@ def register_workflow(app,db,now,log):
                 pass
     @app.get('/api/quality')
     def quality():
+        from flask import session
+        cid=session.get('client_id') if (session.get('client_id') and session.get('role')=='client' and not session.get('owner')) else None
         with db() as c:
-            leads=[dict(r) for r in c.execute('SELECT id,name,city,address,phone,email FROM leads')]
-            reviews=[dict(r) for r in c.execute('SELECT * FROM lead_reviews WHERE lead_id IN (SELECT id FROM leads)')]
+            if cid:
+                leads=[dict(r) for r in c.execute('SELECT id,name,city,address,phone,email FROM leads WHERE owner_user_id=?',(cid,))]
+                reviews=[dict(r) for r in c.execute('SELECT * FROM lead_reviews WHERE lead_id IN (SELECT id FROM leads WHERE owner_user_id=?)',(cid,))]
+            else:
+                leads=[dict(r) for r in c.execute('SELECT id,name,city,address,phone,email FROM leads')]
+                reviews=[dict(r) for r in c.execute('SELECT * FROM lead_reviews WHERE lead_id IN (SELECT id FROM leads)')]
         pairs,truncated=duplicates(leads)
         return jsonify(duplicates=pairs,truncated=truncated,reviews=reviews)
     @app.post('/api/leads/<lid>/review')
@@ -56,7 +62,10 @@ def register_workflow(app,db,now,log):
         if not validurl:return jsonify(error='Evidence must be a valid HTTP(S) URL.'),400
         if status not in ('UNREVIEWED','INCONCLUSIVE') and (len(note.strip())<20 or not url):return jsonify(error='Add an evidence URL and at least 20 characters describing your manual research. Automated failures are not confirmation.'),400
         with db() as c:
-            if not c.execute('SELECT id FROM leads WHERE id=?',(lid,)).fetchone():abort(404)
+            from flask import session as _sess
+            _cid=_sess.get('client_id') if (_sess.get('client_id') and _sess.get('role')=='client' and not _sess.get('owner')) else None
+            _chk=(c.execute('SELECT id FROM leads WHERE id=? AND owner_user_id=?',(lid,_cid)).fetchone() if _cid else c.execute('SELECT id FROM leads WHERE id=?',(lid,)).fetchone())
+            if not _chk:abort(404)
             c.execute('INSERT OR REPLACE INTO lead_reviews VALUES(?,?,?,?,?)',(lid,status,note.strip(),url.strip(),now()))
         log('review','Manual business verification recorded');return jsonify(ok=True)
     @app.get('/api/projects')
@@ -122,7 +131,11 @@ def register_workflow(app,db,now,log):
         with db() as c:
             old=c.execute('SELECT * FROM projects WHERE id=?',(pid,)).fetchone() if pid else None
             if pid and not old:abort(404)
-            if lead and not c.execute('SELECT 1 FROM leads WHERE id=?',(lead,)).fetchone():return jsonify(error='Linked business not found.'),400
+            from flask import session as _sess
+            _cid=_sess.get('client_id') if (_sess.get('client_id') and _sess.get('role')=='client' and not _sess.get('owner')) else None
+            _l=c.execute('SELECT owner_user_id FROM leads WHERE id=?',(lead,)).fetchone() if lead else None
+            if lead and (not _l or (_cid and _l['owner_user_id'] != _cid)):return jsonify(error='Linked business not found.'),400
+            if _cid and contract:return jsonify(error='Linked contract not found.'),400
             if contract and not c.execute('SELECT 1 FROM contracts WHERE id=?',(contract,)).fetchone():return jsonify(error='Linked contract not found.'),400
             pid=pid or uuid.uuid4().hex;stamp=now()
             # Explicit column list avoids ordering issues after migration
