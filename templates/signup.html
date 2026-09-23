@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create client account · Reachmark</title><meta name="csrf-token" content="{{ csrf_token() }}"><link rel="stylesheet" href="/static/fonts.css"><style>
+<!doctype html><html lang="{{ locale }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create client account · Reachmark</title><meta name="csrf-token" content="{{ csrf_token() }}"><link rel="stylesheet" href="/static/fonts.css"><style>
 *{box-sizing:border-box}body{margin:0;font-family:'Manrope',Arial,sans-serif;background:#eef6d1;color:#1a2315;min-height:100vh;display:grid;place-items:center;padding:24px}
 .auth-shell{width:min(1060px,100%);display:grid;grid-template-columns:.95fr 1.05fr;background:#fff;border:1px solid #e2e7d6;border-radius:24px;overflow:hidden;box-shadow:0 24px 64px rgba(16,24,12,.12);min-height:620px}
 .brand{position:relative;background:#0f1a0a;color:#eaf3de;padding:44px 40px;display:flex;flex-direction:column;overflow:hidden}
@@ -36,6 +36,7 @@ button[type=submit]:disabled{opacity:.6;cursor:not-allowed;transform:none}
 .auth-error{background:#f9e7e1;border:1px solid #e9c9bf;color:#8b3524;padding:12px;border-radius:10px;font:600 12px 'Manrope',sans-serif;display:none;margin-top:14px}
 .auth-ok{background:#eef6d1;border:1px solid #d8e9b8;color:#2d4a0a;padding:12px;border-radius:10px;font:600 12px 'Manrope',sans-serif;display:none;margin-top:14px}
 .auth-note{font:500 11px 'Manrope',sans-serif;color:#8a9976;margin-top:14px;text-align:center;line-height:1.6}
+.locale-select{font:700 12px Manrope,Arial,sans-serif;padding:8px 10px;border-radius:10px;border:1px solid #dfe8cc;background:#fff;color:#0f1a0a;cursor:pointer;margin-top:14px}
 .auth-note a{color:#1a3310;font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .meta{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .meta span{font:600 9px 'Manrope',sans-serif;color:#6b7a5a;background:#f7f9f0;border:1px solid #eef1e4;padding:6px 8px;border-radius:20px}
@@ -45,40 +46,42 @@ button[type=submit]:disabled{opacity:.6;cursor:not-allowed;transform:none}
 <div class="auth-shell">
   <div class="brand">
     <a href="/" class="logo" aria-label="Reachmark home"><img src="/static/logo-inverse.svg" alt="Reachmark"></a>
-    <div class="eyebrow">CLIENT PORTAL · PRIVATE BY EMAIL</div>
-    <h1>Your project,<br><span>all in one place.</span></h1>
-    <p>Proposals, invoices and previews assigned to your email — nothing else. No lead finder, no global tools.</p>
+    <div class="eyebrow">{{ t('au.s_eyebrow') }}</div>
+    <h1>{{ t('au.s_h1a') }}<br><span>{{ t('au.s_h1b') }}</span></h1>
+    <p>{{ t('au.s_p') }}</p>
     <div class="points">
-      <div class="point"><span>✓</span> Proposals & 3D previews linked to you</div>
-      <div class="point"><span>◎</span> Invoices & payment status, instantly</div>
-      <div class="point"><span>↗</span> Private — only your studio can assign</div>
+      <div class="point"><span>✓</span> {{ t('au.s_pt1') }}</div>
+      <div class="point"><span>◎</span> {{ t('au.s_pt2') }}</div>
+      <div class="point"><span>↗</span> {{ t('au.s_pt3') }}</div>
     </div>
-    <div class="preview"><img src="/static/samples/fintech-pulse-preview.jpg" alt=""><div><strong>Fintech Pulse · Live preview</strong><br><small>Figma → live in 7 days · Global delivery</small></div><span style="margin-left:auto;background:#0f1a0a;color:#d5f268;font:700 9px 'Manrope',sans-serif;padding:6px 8px;border-radius:20px">PREVIEW</span></div>
-    <div class="trust"><span class="stars">★★★★★</span><div><strong>4.8/5 · Client trusted</strong><br><small>Verified previews · 127 reviews</small></div><span style="margin-left:auto;background:#d5f268;color:#0f1a0a;font:700 9px 'Manrope',sans-serif;padding:6px 8px;border-radius:20px">SECURE</span></div>
+    <div class="preview"><img src="/static/samples/fintech-pulse-preview.jpg" alt=""><div><strong>Fintech Pulse · {{ t('au.s_live') }}</strong><br><small>{{ t('au.s_pv_s') }}</small></div><span style="margin-left:auto;background:#0f1a0a;color:#d5f268;font:700 9px 'Manrope',sans-serif;padding:6px 8px;border-radius:20px">{{ t('au.s_pv_tag') }}</span></div>
+    <div class="trust"><span class="stars">★★★★★</span><div><strong>{{ t('au.s_tr') }}</strong><br><small>{{ t('au.s_tr_s') }}</small></div><span style="margin-left:auto;background:#d5f268;color:#0f1a0a;font:700 9px 'Manrope',sans-serif;padding:6px 8px;border-radius:20px">{{ t('au.s_sec') }}</span></div>
   </div>
   <div class="form">
-    <div class="top"><div class="eyebrow">CREATE YOUR ACCOUNT</div><h2>Let’s get you set up.</h2><p class="lead">Your studio will assign work to this email. Takes 20 seconds.</p></div>
+    <div class="top"><div class="eyebrow">{{ t('au.s_f_eyebrow') }}</div><h2>{{ t('au.s_f_h') }}</h2><p class="lead">{{ t('au.s_lead') }}</p></div>{% include 'locale-switcher.html' %}
     <div id="msg" role="alert" class="auth-error"></div>
-    <div id="verify-hint" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:12px;border-radius:10px;color:#2d4a0a;font:600 12px 'Manrope',sans-serif;margin-top:14px">✓ Account created — verification email sent. Check inbox (and spam) for 24h link. <a href="#" onclick="requestVerify(event)" style="color:#1a3310">Resend</a></div>
+    <div id="verify-hint" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:12px;border-radius:10px;color:#2d4a0a;font:600 12px 'Manrope',sans-serif;margin-top:14px">{{ t('au.s_v1') }} <a href="#" onclick="requestVerify(event)" style="color:#1a3310">{{ t('au.s_resend') }}</a></div>
     <form id="signup-form" novalidate>
-      <label for="name">Your name</label>
+      <label for="name">{{ t('au.s_name') }}</label>
       <input id="name" name="name" maxlength="120" placeholder="Ada Lovelace" autocomplete="name">
-      <label for="email">Work email</label>
+      <label for="email">{{ t('au.s_email') }}</label>
       <input id="email" name="email" type="email" required maxlength="250" placeholder="you@company.com" autocomplete="email">
       <div class="field-row">
-        <div><label for="password">Password — 8+ characters</label><input id="password" name="password" type="password" required minlength="8" maxlength="1024" autocomplete="new-password" placeholder="••••••••"></div>
-        <div><label for="confirm">Confirm password</label><input id="confirm" type="password" required maxlength="1024" autocomplete="new-password" placeholder="••••••••"></div>
+        <div><label for="password">{{ t('au.s_pw8') }}</label><input id="password" name="password" type="password" required minlength="8" maxlength="1024" autocomplete="new-password" placeholder="••••••••"></div>
+        <div><label for="confirm">{{ t('au.s_conf') }}</label><input id="confirm" type="password" required maxlength="1024" autocomplete="new-password" placeholder="••••••••"></div>
       </div>
-      <button type="submit">Create account →</button>
+      <button type="submit">{{ t('au.s_create') }}</button>
     </form>
-    <p class="auth-note">Already have an account? <a href="/signin">Sign in</a> · <a href="/pricing">Workspace plans</a> · <a href="/">About Reachmark</a></p>
-    <p class="auth-note" style="font-size:10px">Your data is kept private to your assigned projects and invoices.</p>
-    <div class="meta"><span>◎ Global</span><span>⌁ Health checks</span><span>↗ Previews</span><span>✓ No spam</span></div>
+    <p class="auth-note">{{ t('au.s_note1') }} <a href="/signin">{{ t('au.s_signin') }}</a> · <a href="/pricing">{{ t('au.s_plans') }}</a> · <a href="/">{{ t('foot.about') }}</a></p>
+    <p class="auth-note" style="font-size:10px">{{ t('au.s_priv') }}</p>
+    <div class="meta"><span>◎ {{ t('au.s_meta1') }}</span><span>⌁ {{ t('au.s_meta2') }}</span><span>↗ {{ t('au.s_meta3') }}</span><span>✓ {{ t('au.s_meta4') }}</span></div>
   </div>
 </div>
+<script src="/static/i18n.js"></script>
 <script>
+var T_=window.T||function(k,f){return f;};
 const form=document.getElementById('signup-form'),msg=document.getElementById('msg');
-async function requestVerify(e){e.preventDefault();const email=document.getElementById('email').value.trim();try{let r=await fetch('/api/auth/request-verification',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});let j=await r.json();alert(j.already_verified?'Already verified.':'Verification email sent.');}catch(err){alert('Could not resend.')}}
+async function requestVerify(e){e.preventDefault();const email=document.getElementById('email').value.trim();try{let r=await fetch('/api/auth/request-verification',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});let j=await r.json();alert(j.already_verified?T_('au.js_verified','verified'):T_('au.js_vsent','vsent'));}catch(err){alert(T_('au.js_noresend','noresend'))}}
 // Token comes from this page's own meta tag — never scrape another page,
 // whose Set-Cookie could race and overwrite the fresh client session (auto-logout bug).
 let csrfToken=document.querySelector('meta[name="csrf-token"]')?.content||'';
@@ -88,17 +91,17 @@ form.onsubmit=async e=>{
   const email=document.getElementById('email').value.trim();
   const pw=document.getElementById('password').value;
   const confirm=document.getElementById('confirm').value;
-  if(pw!==confirm){msg.textContent='Passwords do not match.';msg.style.display='block';return}
-  if(pw.length<8){msg.textContent='Password must be at least 8 characters.';msg.style.display='block';return}
+  if(pw!==confirm){msg.textContent=T_('au.js_nomatch','nomatch');msg.style.display='block';return}
+  if(pw.length<8){msg.textContent=T_('au.e_pw8','pw8');msg.style.display='block';return}
   msg.style.display='none';
-  const btn=form.querySelector('button');btn.disabled=true;btn.textContent='Creating…';
+  const btn=form.querySelector('button');btn.disabled=true;btn.textContent=T_('au.js_creating','creating');
   try{
         let r=await fetch('/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({name,email,password:pw})});
     let j=await r.json();
-    if(!r.ok) throw new Error(j.error||'Could not create account.');
-    if(j.needs_verification){document.getElementById('verify-hint').style.display='block'; msg.textContent='Verification email sent — you can continue to dashboard or verify first.'; msg.style.display='block'; msg.style.background='#eef6d1'; msg.style.color='#2d4a0a'; msg.style.border='1px solid #d8e9b8'; setTimeout(()=>location.href='/dashboard',1400); return}
+    if(!r.ok) throw new Error(j.error||T_('au.js_nocreate','nocreate'));
+    if(j.needs_verification){document.getElementById('verify-hint').style.display='block'; msg.textContent=T_('au.js_vfirst','vfirst'); msg.style.display='block'; msg.style.background='#eef6d1'; msg.style.color='#2d4a0a'; msg.style.border='1px solid #d8e9b8'; setTimeout(()=>location.href='/dashboard',1400); return}
     location.href='/dashboard';
-  }catch(err){msg.textContent=err.message;msg.style.display='block';btn.disabled=false;btn.textContent='Create account →';}
+  }catch(err){msg.textContent=err.message;msg.style.display='block';btn.disabled=false;btn.textContent=T_('au.s_create','create');}
 };
 </script>
 </body></html>

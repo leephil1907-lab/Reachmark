@@ -1,0 +1,1 @@
+<select id="locale-select" class="locale-select" aria-label="{{ t('common.language') }}" onchange="setLocale(this.value)">{% for code in locales %}<option value="{{ code }}"{% if code == locale %} selected{% endif %}>{{ locale_names[code] }}</option>{% endfor %}</select>

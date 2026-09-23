@@ -1,5 +1,6 @@
 // Premium Framer-like carousels — banner ads + 3D templates + reveals — every click has a purpose
 document.addEventListener('DOMContentLoaded', () => {
+  const T_ = window.T || ((k, f) => f);
   function initCarousel(rootSelector, trackSelector, slideSelector, dotsSelector, prevSelector, nextSelector, viewportSelector, intervalMs) {
     const root = document.querySelector(rootSelector);
     if (!root) return;
@@ -112,17 +113,17 @@ document.addEventListener('DOMContentLoaded', () => {
         text: (fd.get('text') || '').toString().trim()
       };
       if (!payload.name || !payload.text || !(payload.rating >= 1 && payload.rating <= 5)) {
-        if (toast) { toast.textContent = 'Please fill name, rating (1-5) and review (≥12 chars).'; toast.className = 'review-toast err'; toast.style.display = 'block'; }
+        if (toast) { toast.textContent = T_('show.js_fill','Please fill name, rating (1-5) and review (≥12 chars).'); toast.className = 'review-toast err'; toast.style.display = 'block'; }
         return;
       }
       const btn = form.querySelector('.submit');
       const prevText = btn ? btn.textContent : '';
-      if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+      if (btn) { btn.disabled = true; btn.textContent = T_('show.js_sending','Sending…'); }
       try {
         const res = await fetch('/api/client-reviews', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         const j = await res.json();
-        if (!res.ok) throw new Error(j.error || 'Failed');
-        if (toast) { toast.textContent = 'Thank you — your review is live! Refresh to see it alongside Trustpilot.'; toast.className = 'review-toast ok'; toast.style.display = 'block'; }
+        if (!res.ok) throw new Error(j.error || T_('show.js_failed','Failed'));
+        if (toast) { toast.textContent = T_('show.js_thanks','Thank you — your review is live! Refresh to see it alongside Trustpilot.'); toast.className = 'review-toast ok'; toast.style.display = 'block'; }
         form.reset(); rating = 0; stars.forEach(s => s.classList.remove('active'));
         // append to list instantly (no wait)
         const list = document.getElementById('client-review-list');
@@ -133,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
           list.prepend(card);
         }
       } catch (err) {
-        if (toast) { toast.textContent = err.message || 'Could not submit review. Try again.'; toast.className = 'review-toast err'; toast.style.display = 'block'; }
+        if (toast) { toast.textContent = err.message || T_('show.js_err','Could not submit review. Try again.'); toast.className = 'review-toast err'; toast.style.display = 'block'; }
       } finally {
         if (btn) { btn.disabled = false; btn.textContent = prevText; }
       }

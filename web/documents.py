@@ -11,6 +11,7 @@ from reportlab.lib.enums import TA_LEFT
 from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,KeepTogether,Image
 from reportlab.lib.units import mm
 from web.operations import CURRENCIES
+from web.i18n import t as _t, locale_now
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONTDIR=os.path.join(ROOT,'static','pdf-fonts')
 pdfmetrics.registerFont(TTFont('Reachmark',os.path.join(FONTDIR,'DejaVuSans.ttf')))
@@ -20,14 +21,14 @@ pdfmetrics.registerFontFamily('Reachmark',normal='Reachmark',bold='ReachmarkBold
 LOGOPATH_PRIMARY=os.path.join(ROOT,'static','reachmark-logo.png')
 LOGOPATH_FALLBACK=os.path.join(ROOT,'static','icon-512.png')
 LOGOPATH=LOGOPATH_PRIMARY if os.path.exists(LOGOPATH_PRIMARY) else LOGOPATH_FALLBACK
-def amount(value,currency):return 'Tailored quote — amount not set' if value is None else f'{currency} {Decimal(value)/(10**CURRENCIES[currency]):,.{CURRENCIES[currency]}f}'
-def pdf(title,subtitle,sections,stamp,studio):
+def amount(value,currency,loc='en'):return _t('pdf.tailored',loc) if value is None else f'{currency} {Decimal(value)/(10**CURRENCIES[currency]):,.{CURRENCIES[currency]}f}'
+def pdf(title,subtitle,sections,stamp,studio,loc='en'):
     buf=io.BytesIO();styles=getSampleStyleSheet()
     styles.add(ParagraphStyle(name='RMBody',fontName='Reachmark',fontSize=9.5,leading=15,spaceAfter=9,textColor=colors.HexColor('#30382c'),wordWrap='CJK'))
     styles.add(ParagraphStyle(name='RMTitle',fontName='ReachmarkBold',fontSize=26,leading=32,spaceAfter=14,textColor=colors.HexColor('#26351e')))
     styles.add(ParagraphStyle(name='RMHeading',fontName='ReachmarkBold',fontSize=12,leading=17,spaceBefore=14,spaceAfter=7))
     styles.add(ParagraphStyle(name='RMStudio',fontName='ReachmarkBold',fontSize=10,leading=13,textColor=colors.HexColor('#26351e'),spaceAfter=2))
-    def text(value):return escape(str(value or 'Not recorded')).replace('\n','<br/>')
+    def text(value):return escape(str(value or _t('pdf.notrec',loc))).replace('\n','<br/>')
     story=[]
     # Branded header: logo + studio name
     try:
@@ -38,11 +39,11 @@ def pdf(title,subtitle,sections,stamp,studio):
         story.append(Spacer(1,4))
     except Exception:
         pass
-    story.extend([Paragraph(text(studio),styles['RMStudio']), Paragraph(text(title),styles['RMTitle']),Paragraph(text(subtitle),styles['RMBody']),Paragraph('Generated '+text(stamp),styles['RMBody'])])
+    story.extend([Paragraph(text(studio),styles['RMStudio']), Paragraph(text(title),styles['RMTitle']),Paragraph(text(subtitle),styles['RMBody']),Paragraph(_t('pdf.gen',loc,s=text(stamp)),styles['RMBody'])])
     for heading,value in sections:story.extend([Paragraph(text(heading),styles['RMHeading']),Paragraph(text(value),styles['RMBody'])])
     def page(canvas,doc):
         # Footer rule and branding
-        canvas.setStrokeColor(colors.HexColor('#cce57b'));canvas.setLineWidth(3);canvas.line(42,43,553,43);canvas.setFont('Reachmark',8);canvas.setFillColor(colors.HexColor('#56644a'));canvas.drawString(42,28,'REACHMARK · Saved-record export · '+os.getenv('SUPPORT_EMAIL','reachmarkofficial@gmail.com'));canvas.drawRightString(553,28,f'Page {doc.page}')
+        canvas.setStrokeColor(colors.HexColor('#cce57b'));canvas.setLineWidth(3);canvas.line(42,43,553,43);canvas.setFont('Reachmark',8);canvas.setFillColor(colors.HexColor('#56644a'));canvas.drawString(42,28,'REACHMARK · '+_t('pdf.foot',loc)+' · '+os.getenv('SUPPORT_EMAIL','reachmarkofficial@gmail.com'));canvas.drawRightString(553,28,_t('pdf.page',loc,n=doc.page))
         # Small header logo on each page
         try:
             canvas.drawImage(LOGOPATH, 42, 800, width=120, height=28, preserveAspectRatio=True, mask='auto')
@@ -53,6 +54,7 @@ def pdf(title,subtitle,sections,stamp,studio):
 def register_documents(app,db,now,settings):
     @app.get('/api/documents/<kind>/<record_id>.pdf')
     def export_pdf(kind,record_id):
+        loc=locale_now()
         if kind not in ('audit','proposal','contract','brief','invoice'):abort(404)
         if kind=='audit':
             table='leads'
@@ -99,13 +101,13 @@ def register_documents(app,db,now,settings):
             if kind=='invoice':
                 invoice_items=[dict(x) for x in c.execute('SELECT * FROM invoice_items WHERE invoice_id=? ORDER BY created',(record_id,))]
         if kind=='audit':
-            title='Business audit report';subtitle=r['name']+' · Evidence summary, not a guarantee'
-            sections=[('Business and source',f"{r['name']}\n{r['city']}\n{r['address']}\nSource: {r['source']}\n{r['source_url']}\nLast imported / seen: {r['source_seen_at']}"),('Website evidence',f"Listed URL: {r['website'] or 'No website listed in source'}\nSource status: {r['status']}\nAutomated observation: {r['audit_status'] or 'Not checked'}\nChecked: {r['checked_at'] or 'Not checked'}\n{r['audit_reason'] or 'No URL check recorded.'}"),('Manual verification',f"{review['verification']}\n{review['note']}\n{review['evidence_url']}\nReviewed: {review['reviewed_at']}" if review else 'No manual verification recorded.'),('Limitations','A missing source URL is not proof of no website. Connection errors do not establish closure or permanent unavailability. Contact fields and ownership must be independently verified.')]
+            title=_t('pdf.a_title',loc);subtitle=_t('pdf.a_sub',loc,n=r['name'])
+            sections=[(_t('pdf.a_s1',loc),f"{r['name']}\n{r['city']}\n{r['address']}\n{_t('pdf.a_src',loc,s=r['source'])}\n{r['source_url']}\n{_t('pdf.a_seen',loc,d=r['source_seen_at'])}"),(_t('pdf.a_s2',loc),f"{_t('pdf.a_url',loc,u=r['website'] or _t('pdf.a_nourl',loc))}\n{_t('pdf.a_status',loc,s=r['status'])}\n{_t('pdf.a_obs',loc,o=r['audit_status'] or _t('wsj.ap_a0',loc))}\n{_t('pdf.a_checked',loc,c=r['checked_at'] or _t('wsj.ap_a0',loc))}\n{r['audit_reason'] or _t('pdf.a_nocheck',loc)}"),(_t('pdf.a_s3',loc),f"{review['verification']}\n{review['note']}\n{review['evidence_url']}\n{_t('pdf.a_rev',loc,d=review['reviewed_at'])}" if review else _t('wsj.pd_norev',loc)),(_t('pdf.a_s4',loc),_t('pdf.a_lim',loc))]
         elif kind=='contract':
-            title='Contract record';subtitle=r['title']+' · '+('DRAFT / NOT AGREED' if r['status'] in ('Draft','Sent') else 'MANUALLY RECORDED STATUS: '+r['status'])
-            sections=[('Client',r['client']+'\n'+r['email']),('Recorded agreement',f"Status: {r['status']}\nValue: {amount(r['amount_minor'],r['currency'])}\nPayments recorded: {amount(r['paid_minor'],r['currency'])}"),('Recorded scope and notes',r['notes']),('Important distinction','This PDF is an export of your tracker, not an electronically signed agreement, invoice, payment receipt or independently verified contract. No additional terms are implied.')]
+            title=_t('pdf.c_title',loc);subtitle=r['title']+' · '+(_t('pdf.c_draft',loc) if r['status'] in ('Draft','Sent') else _t('pdf.c_man',loc,s=r['status']))
+            sections=[(_t('pdf.c_s1',loc),r['client']+'\n'+r['email']),(_t('pdf.c_s2',loc),f"{_t('pdf.c_status',loc,s=r['status'])}\n{_t('pdf.c_value',loc,v=amount(r['amount_minor'],r['currency'],loc))}\n{_t('pdf.c_paid',loc,p=amount(r['paid_minor'],r['currency'],loc))}"),(_t('pdf.c_s3',loc),r['notes']),(_t('pdf.c_s4',loc),_t('pdf.c_imp',loc))]
         elif kind=='invoice':
-            title='Invoice';subtitle=r['number']+' · '+r['status'] + (' · DRAFT' if r['status']=='Draft' else '')
+            title=_t('pdf.i_title',loc);subtitle=r['number']+' · '+r['status'] + (_t('pdf.i_draft',loc) if r['status']=='Draft' else '')
             lines=[]
             for idx,it in enumerate(invoice_items,1):
                 decimals=CURRENCIES[r['currency']]
@@ -114,15 +116,15 @@ def register_documents(app,db,now,settings):
                 unit_str = f"{r['currency']} {unit:,.{decimals}f}" if decimals else f"{r['currency']} {unit:,}"
                 amt_str = f"{r['currency']} {amt:,.{decimals}f}" if decimals else f"{r['currency']} {amt:,}"
                 lines.append(f"{idx}. {it['description']}  —  {it['quantity']} × {unit_str} = {amt_str}")
-            items_text='\n'.join(lines) if lines else 'No items'
-            sub = amount(r['subtotal_minor'], r['currency'])
-            disc = amount(r['discount_minor'], r['currency'])
-            tax = amount(r['tax_minor'], r['currency'])
-            total = amount(r['total_minor'], r['currency'])
-            sections=[('Bill to',f"{r['client_name']}\n{r['client_email']}\n{r['client_address']}"),('Invoice details',f"Number: {r['number']}\nStatus: {r['status']}\nCurrency: {r['currency']}\nIssue date: {r['issue_date'] or 'Not set'}\nDue date: {r['due_date'] or 'Not set'}\nProject: {r['project_id'] or 'Not linked'}\nBusiness: {r['lead_id'] or 'Not linked'}"),('Items',items_text),('Totals',f"Subtotal: {sub}\nDiscount ({r['discount_type']} {r['discount_value']}): -{disc}\nTax ({r['tax_rate']}%): {tax}\nTotal: {total}"),('Notes',r['notes'] or '—'),('Terms',r['terms'] or 'Payment due as specified. This is a record; verify acceptance and bank receipt separately. Additional terms must be agreed explicitly.')]
+            items_text='\n'.join(lines) if lines else _t('pdf.i_noitems',loc)
+            sub = amount(r['subtotal_minor'], r['currency'], loc)
+            disc = amount(r['discount_minor'], r['currency'], loc)
+            tax = amount(r['tax_minor'], r['currency'], loc)
+            total = amount(r['total_minor'], r['currency'], loc)
+            sections=[(_t('pdf.i_s1',loc),f"{r['client_name']}\n{r['client_email']}\n{r['client_address']}"),(_t('pdf.i_s2',loc),f"{_t('pdf.i_num',loc,n=r['number'])}\n{_t('pdf.i_status',loc,s=r['status'])}\n{_t('pdf.i_cur',loc,c=r['currency'])}\n{_t('pdf.i_issue',loc,d=r['issue_date'] or _t('wsj.iv_notset',loc))}\n{_t('pdf.i_due',loc,d=r['due_date'] or _t('wsj.iv_notset',loc))}\n{_t('pdf.i_proj',loc,p=r['project_id'] or _t('ws.iv_nolink',loc))}\n{_t('pdf.i_biz',loc,b=r['lead_id'] or _t('ws.iv_nolink',loc))}"),(_t('pdf.i_s3',loc),items_text),(_t('pdf.i_s4',loc),f"{_t('pdf.i_sub',loc,s=sub)}\n{_t('pdf.i_disc',loc,t=r['discount_type'],v=r['discount_value'],d=disc)}\n{_t('pdf.i_tax',loc,r=r['tax_rate'],t=tax)}\n{_t('pdf.i_total',loc,t=total)}"),(_t('pdf.i_s5',loc),r['notes'] or '—'),(_t('pdf.i_s6',loc),r['terms'] or _t('pdf.i_terms',loc))]
         else:
-            title='Website proposal & quote' if kind=='proposal' else 'Project brief';subtitle=r['title']+' · DRAFT FOR REVIEW'
-            client_text=f"{client['name']}\n{client['city']}\n{client['address']}\n{client['email']}" if client else 'No business linked'
-            sections=[('Client',client_text),('Project',f"Stage: {r['stage']}\nLead reference: {r['lead_id'] or 'Not linked'}\nContract reference: {r['contract_id'] or 'Not linked'}\nAssigned client: {r.get('client_user_id') or 'Not assigned'}"),('Proposed scope',r['scope']),('Tailored quote',amount(r['quote_minor'],r['currency'])),('Next action',f"{r['next_action'] or 'Not set'}\nTarget date: {r['due_date'] or 'Not set'}"),('Approval and terms','Draft only. Pricing, scope, taxes, payment terms, schedule and acceptance must be expressly agreed with the client. Linked contract records remain separate. No automatic sending, signing or payment collection.')]
-        content=pdf(title,subtitle,sections,now(),settings()['agency'] or 'Reachmark Studio')
+            title=_t('pdf.p_title',loc) if kind=='proposal' else _t('pdf.p_brief',loc);subtitle=r['title']+' · '+_t('pdf.p_draft',loc)
+            client_text=f"{client['name']}\n{client['city']}\n{client['address']}\n{client['email']}" if client else _t('pdf.p_nobiz',loc)
+            sections=[(_t('pdf.p_s1',loc),client_text),(_t('pdf.p_s2',loc),f"{_t('pdf.p_stage',loc,s=r['stage'])}\n{_t('pdf.p_lead',loc,r=r['lead_id'] or _t('ws.iv_nolink',loc))}\n{_t('pdf.p_contract',loc,r=r['contract_id'] or _t('ws.iv_nolink',loc))}\n{_t('pdf.p_assigned',loc,c=r.get('client_user_id') or _t('pdf.p_noassign',loc))}"),(_t('pdf.p_s3',loc),r['scope']),(_t('pdf.p_s4',loc),amount(r['quote_minor'],r['currency'],loc)),(_t('pdf.p_s5',loc),f"{r['next_action'] or _t('wsj.iv_notset',loc)}\n{_t('pdf.p_due',loc,d=r['due_date'] or _t('wsj.iv_notset',loc))}"),(_t('pdf.p_s6',loc),_t('pdf.p_terms',loc))]
+        content=pdf(title,subtitle,sections,now(),settings()['agency'] or 'Reachmark Studio',loc=loc)
         return Response(content,mimetype='application/pdf',headers={'Content-Disposition':f'attachment; filename="reachmark-{kind}-{record_id[:12]}.pdf"','Cache-Control':'no-store'})

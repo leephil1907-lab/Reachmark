@@ -3,6 +3,7 @@
    so the demo can never drift from the printed words. */
 (function () {
   'use strict';
+  var T_=window.T||function(k,f){return f;};
 
   /* "Try it live" opens the real chat widget on this page. */
   document.querySelectorAll('[data-open-widget]').forEach(function (btn) {
@@ -93,10 +94,9 @@
     if (!pill || !('fetch' in window)) return;
     fetch('/api/frontdesk/status').then(function (r) { return r.json(); }).then(function (s) {
       if (!s || !s.ok) return;
-      pill.textContent = 'Front desk live — ' + s.topics + ' topics, ' + s.questions +
-        ' answers (brain ' + s.brain + ').';
+      pill.textContent = T_('rx.js_live','Front desk live — {t} topics, {q} answers (brain {b}).').replace('{t}',s.topics).replace('{q}',s.questions).replace('{b}',s.brain);
     }).catch(function () {
-      pill.textContent = 'Front desk status: unavailable right now.';
+      pill.textContent = T_('rx.js_unavail','Front desk status: unavailable right now.');
     });
   })();
 })();

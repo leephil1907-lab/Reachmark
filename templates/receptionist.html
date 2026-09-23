@@ -1,25 +1,25 @@
 {# AI receptionist widget — include on any public page with: {% include 'receptionist.html' %} #}
-<button id="rm-receptionist-launch" type="button" aria-label="Open the studio assistant" aria-expanded="false">
-  <span class="rm-dot"></span> Ask the studio
+<button id="rm-receptionist-launch" type="button" aria-label="{{ t('rx.w_open') }}" aria-expanded="false">
+  <span class="rm-dot"></span> {{ t('rx.w_ask') }}
 </button>
-<section id="rm-receptionist" class="rm-panel" hidden aria-label="Studio assistant">
+<section id="rm-receptionist" class="rm-panel" hidden aria-label="{{ t('rx.w_aria') }}">
   <header class="rm-head">
-    <div><b>Reachmark front desk</b><small>Answers from published facts only · hands over to a human on request</small></div>
-    <button type="button" id="rm-close" aria-label="Close assistant">×</button>
+    <div><b>{{ t('rx.w_title') }}</b><small>{{ t('rx.w_sub') }}</small></div>
+    <button type="button" id="rm-close" aria-label="{{ t('rx.w_close') }}">×</button>
   </header>
   <div class="rm-log" id="rm-log" role="log" aria-live="polite">
-    <div class="rm-msg assistant">Hello — I can explain what the studio does, what the published tiers cost, how long a build takes, or how to start. What would you like to know?</div>
+    <div class="rm-msg assistant">{{ t('rx.w_hello') }}</div>
   </div>
   <form class="rm-form" id="rm-form">
-    <label class="rm-sr" for="rm-input">Your message</label>
+    <label class="rm-sr" for="rm-input">{{ t('rx.w_msg') }}</label>
     <input id="rm-input" name="message" type="text" maxlength="600" autocomplete="off"
-           placeholder="Ask about pricing, timing, samples…"/>
-    <input id="rm-name" name="name" type="text" maxlength="120" autocomplete="name" placeholder="Your name (optional)" hidden/>
-    <input id="rm-email" name="email" type="email" maxlength="200" autocomplete="email" placeholder="E-mail (optional)" hidden/>
+           placeholder="{{ t('rx.w_ph') }}"/>
+    <input id="rm-name" name="name" type="text" maxlength="120" autocomplete="name" placeholder="{{ t('rx.w_name') }}" hidden/>
+    <input id="rm-email" name="email" type="email" maxlength="200" autocomplete="email" placeholder="{{ t('rx.w_email') }}" hidden/>
     <input id="rm-hp" name="company_url" type="text" class="rm-hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>
-    <button type="submit" id="rm-send">Send</button>
+    <button type="submit" id="rm-send">{{ t('rx.w_send') }}</button>
   </form>
-  <p class="rm-note">No invented answers: if it is not a verified fact, the owner is asked. <a href="/enquire">Full enquiry form ↗</a></p>
+  <p class="rm-note">{{ t('rx.w_note') }} <a href="/enquire">{{ t('rx.w_full') }}</a></p>
 </section>
 <link rel="stylesheet" href="/static/receptionist.css"/>
 <script src="/static/receptionist.js" defer></script>

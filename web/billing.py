@@ -17,6 +17,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from flask import Response, redirect, render_template, request, jsonify, session
+from web.i18n import t as _t, locale_now
 
 TIERS = {
     'free': {
@@ -108,7 +109,7 @@ def paystack_request(method, path, payload=None):
     """Call the Paystack API with the secret key. Separated for test stubbing."""
     secret = os.getenv('PAYSTACK_SECRET_KEY', '').strip()
     if not secret:
-        raise BillingError('Payments are not connected yet. The studio is finishing setup.')
+        raise BillingError(_t('pay.e_nopay', locale_now()))
     req = urllib.request.Request(
         'https://api.paystack.co' + path,
         data=json.dumps(payload).encode() if payload is not None else None,
@@ -119,14 +120,14 @@ def paystack_request(method, path, payload=None):
             out = json.load(r)
     except urllib.error.HTTPError as e:
         try:
-            msg = json.load(e).get('message', 'Payment provider error.')
+            msg = json.load(e).get('message', _t('pay.e_prov', locale_now()))
         except Exception:
-            msg = 'Payment provider error.'
+            msg = _t('pay.e_prov', locale_now())
         raise BillingError(msg)
     except Exception:
-        raise BillingError('Could not reach the payment provider. Try again.')
+        raise BillingError(_t('pay.e_reach', locale_now()))
     if not out.get('status'):
-        raise BillingError(out.get('message') or 'Payment provider error.')
+        raise BillingError(out.get('message') or _t('pay.e_prov', locale_now()))
     return out['data']
 
 
@@ -134,9 +135,37 @@ def payments_configured():
     return bool(os.getenv('PAYSTACK_SECRET_KEY', '').strip())
 
 
+_TIER_I18N = {
+    'free': ('pay.t_free', 'pay.t_free_tag', 'pay.t_free_per',
+             ['pay.t_free_f1', 'pay.t_free_f2', 'pay.t_free_f3', 'pay.t_free_f4', 'pay.t_free_f5']),
+    'starter': ('pay.t_st', 'pay.t_st_tag', 'pay.t_st_per',
+                ['pay.t_st_f1', 'pay.t_st_f2', 'pay.t_st_f3', 'pay.t_st_f4', 'pay.t_st_f5']),
+    'pro': ('pay.t_pro', 'pay.t_pro_tag', 'pay.t_st_per',
+            ['pay.t_pro_f1', 'pay.t_pro_f2', 'pay.t_pro_f3', 'pay.t_pro_f4', 'pay.t_pro_f5']),
+}
+
+
+def localized_tiers(locale=None):
+    loc = locale or locale_now()
+    out = {}
+    for tid, tier in TIERS.items():
+        nk, tk, pk, fks = _TIER_I18N[tid]
+        row = dict(tier)
+        row['name'] = _t(nk, loc)
+        row['tag'] = _t(tk, loc)
+        row['per'] = _t(pk, loc)
+        row['features'] = [_t(fk, loc) for fk in fks]
+        out[tid] = row
+    return out
+
+
 def public_prices():
-    return {k: {'usd': v['usd'], 'ngn': v['ngn'], 'per': v['per'], 'name': v['name']}
-            for k, v in TIERS.items()}
+    loc = locale_now()
+    out = {}
+    for k, v in TIERS.items():
+        nk, tk, pk, fks = _TIER_I18N[k]
+        out[k] = {'usd': v['usd'], 'ngn': v['ngn'], 'per': _t(pk, loc), 'name': _t(nk, loc)}
+    return out
 
 
 def grant_tier(db, now, log, user_id, tier, days=PERIOD_DAYS):
@@ -190,11 +219,14 @@ def register_billing(app, db, now, log):
         try:
             from web.accounts import get_base_url, send_branded
             base = get_base_url()
-            send_branded(p['email'], f"Receipt — {TIERS[p['tier']]['name']} plan",
-                         f"Hi {p['email']},\n\nPayment received — your {TIERS[p['tier']]['name']} plan is active for {PERIOD_DAYS} days.\nReference: {reference}\n\nYour receipt (PDF):\n{base}/api/billing/receipt/{reference}.pdf\n\n— Reachmark · Global",
-                         html_title='Payment received',
-                         cta_url=f"{base}/api/billing/receipt/{reference}.pdf",
-                         cta_label='Download receipt (PDF)', db=db)
+            _bloc = locale_now()
+            _tname = localized_tiers(_bloc)[p['tier']]['name']
+            _rurl = f"{base}/api/billing/receipt/{reference}.pdf"
+            send_branded(p['email'], _t('pay.mail_sub', _bloc, name=_tname),
+                         _t('pay.mail_body', _bloc, email=p['email'], name=_tname, days=PERIOD_DAYS,
+                            ref=reference, url=_rurl),
+                         html_title=_t('pay.mail_title', _bloc), cta_url=_rurl,
+                         cta_label=_t('pay.mail_cta', _bloc), db=db)
         except Exception:
             pass
         p.update(status='paid', paid_at=stamp)
@@ -202,7 +234,7 @@ def register_billing(app, db, now, log):
 
     @app.get('/pricing')
     def pricing_page():
-        return render_template('pricing.html', tiers=TIERS, configured=payments_configured())
+        return render_template('pricing.html', tiers=localized_tiers(), configured=payments_configured())
 
     @app.get('/api/billing/status')
     def billing_status():
@@ -224,22 +256,22 @@ def register_billing(app, db, now, log):
     @app.post('/api/billing/checkout')
     def billing_checkout():
         if session.get('owner'):
-            return jsonify(error='The owner account already has full access.'), 400
+            return jsonify(error=_t('pay.e_owner', locale_now())), 400
         cid = session.get('client_id')
         if not cid or session.get('role') != 'client':
-            return jsonify(error='Sign in to choose a plan.'), 401
+            return jsonify(error=_t('pay.e_signin', locale_now())), 401
         v = request.get_json() or {}
         tier = str(v.get('tier', '')).lower()
         currency = str(v.get('currency', '')).upper()
         if tier not in ('starter', 'pro'):
-            return jsonify(error='Choose the Starter or Pro plan.'), 400
+            return jsonify(error=_t('pay.e_tier', locale_now())), 400
         if currency not in ('USD', 'NGN'):
-            return jsonify(error='Choose USD or NGN.'), 400
+            return jsonify(error=_t('pay.e_cur', locale_now())), 400
         with db() as c:
             row = c.execute('SELECT * FROM users WHERE id=? AND is_active=1', (cid,)).fetchone()
         if not row:
             session.clear()
-            return jsonify(error='Account not found. Sign in again.'), 401
+            return jsonify(error=_t('pay.e_acct', locale_now())), 401
         user = dict(row)
         amount = TIERS[tier]['usd_minor' if currency == 'USD' else 'ngn_minor']
         try:
@@ -279,7 +311,7 @@ def register_billing(app, db, now, log):
         good = secret and sig and hmac.compare_digest(
             sig, hmac.new(secret.encode(), request.get_data(), hashlib.sha512).hexdigest())
         if not good:
-            return jsonify(error='Bad signature.'), 401
+            return jsonify(error=_t('pay.e_sig', locale_now())), 401
         event = request.get_json(silent=True) or {}
         if event.get('event') == 'charge.success':
             data = event.get('data') or {}
@@ -292,31 +324,33 @@ def register_billing(app, db, now, log):
         with db() as c:
             row = c.execute('SELECT * FROM payments WHERE reference=?', (reference[:64],)).fetchone()
         if not row:
-            return jsonify(error='Receipt not found.'), 404
+            return jsonify(error=_t('pay.e_norect', locale_now())), 404
         p = dict(row)
         if not session.get('owner') and session.get('client_id') != p['user_id']:
-            return jsonify(error='Owner login required.'), 403
+            return jsonify(error=_t('rx.e_owner', locale_now())), 403
         if p['status'] != 'paid':
-            return jsonify(error='This payment has no receipt yet.'), 400
+            return jsonify(error=_t('pay.e_nopdf', locale_now())), 400
         from web.documents import pdf
         try:
             meta = json.loads(p['raw'] or '{}')
         except Exception:
             meta = {}
         method = meta.get('method') or p['currency']
+        _ploc = locale_now()
         if method == 'paystack':
-            method = 'Card / bank via Paystack'
+            method = _t('pay.pdf_card', _ploc)
         elif method == 'manual':
-            method = 'Manual studio approval'
+            method = _t('pay.pdf_manual', _ploc)
         elif method == 'crypto':
-            method = 'Crypto (' + str(meta.get('coin', '')).replace('_', ' ') + ')'
-        amount = ('Recorded by studio' if p['currency'] == 'MANUAL'
+            method = _t('pay.pdf_crypto', _ploc) + ' (' + str(meta.get('coin', '')).replace('_', ' ') + ')'
+        amount = (_t('pay.pdf_recorded', _ploc) if p['currency'] == 'MANUAL'
                   else f"{p['currency']} {(p['amount_minor'] or 0) / 100:,.2f}")
-        blob = pdf('Payment receipt',
-                   f"{TIERS.get(p['tier'], {}).get('name', p['tier'])} plan",
-                   [('Plan', f"{TIERS.get(p['tier'], {}).get('name', p['tier'])} — {PERIOD_DAYS} days"),
-                    ('Amount', amount), ('Reference', p['reference']),
-                    ('Paid at', p['paid_at'] or ''), ('Method', method),
-                    ('Billed to', p['email'])], now(), 'Reachmark')
+        _pname = localized_tiers(_ploc).get(p['tier'], {}).get('name', p['tier'])
+        blob = pdf(_t('pay.pdf_title', _ploc),
+                   _t('pay.pdf_sub', _ploc, name=_pname),
+                   [(_t('pay.pdf_plan', _ploc), f"{_pname} — {_t('pay.pdf_days', _ploc, n=PERIOD_DAYS)}"),
+                    (_t('pay.pdf_amount', _ploc), amount), (_t('pay.pdf_ref', _ploc), p['reference']),
+                    (_t('pay.pdf_paid', _ploc), p['paid_at'] or ''), (_t('pay.pdf_method', _ploc), method),
+                    (_t('pay.pdf_bill', _ploc), p['email'])], now(), 'Reachmark', loc=_ploc)
         return Response(blob, mimetype='application/pdf', headers={
             'Content-Disposition': f"attachment; filename=reachmark-receipt-{p['reference'][:12]}.pdf"})

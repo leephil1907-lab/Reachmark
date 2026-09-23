@@ -29,4 +29,4 @@ body.public-page{ color:#0f1a0a; -webkit-font-smoothing:antialiased; text-render
 .sample-kicker, .public-eyebrow, .sample-card-actions{ color:#1a3310 !important; font-weight:600 !important; }
 .public-links, .public-footer, .public-footer p{ color:#1e2e15 !important; }
 .enquiry-form-shell label{ color:#0f1a0a !important; font-weight:600 !important; }
-
+.locale-select{font:700 12px Manrope,Arial,sans-serif;padding:8px 10px;border-radius:10px;border:1px solid #e2e7d6;background:#fff;color:#0f1a0a;cursor:pointer}

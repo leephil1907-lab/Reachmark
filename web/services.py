@@ -1,5 +1,6 @@
 """Live public-data discovery and bounded, SSRF-resistant website checks."""
 import ipaddress, socket, re, threading, time
+from web.i18n import t as _t, locale_now
 from functools import lru_cache
 from urllib.parse import urlparse, urljoin
 import requests, urllib3
@@ -23,7 +24,7 @@ def geocode(location):
         last_geo=time.monotonic()
         r=requests.get('https://nominatim.openstreetmap.org/search',params={'q':location,'format':'json','limit':1},headers=HEADERS,timeout=20)
         r.raise_for_status(); places=r.json()
-    if not places: raise ValueError('Location not found. Include city and country.')
+    if not places: raise ValueError(_t('er_067', locale_now()))
     return places[0]
 
 def discover_location(location, tag, limit=80):
@@ -32,7 +33,7 @@ def discover_location(location, tag, limit=80):
     q=f'[out:json][timeout:40];nwr(around:15000,{lat},{lon})["{key}"="{value}"]["name"];out center tags {int(limit)};'
     from web.map_provider import query_overpass
     payload=query_overpass(q,HEADERS)
-    if payload.get('remark'): raise ValueError('Source returned an incomplete result; retry a smaller map area.')
+    if payload.get('remark'): raise ValueError(_t('er_115', locale_now()))
     rows=[]
     for item in payload.get('elements',[]):
         t=item.get('tags',{}); center=item.get('center',item)

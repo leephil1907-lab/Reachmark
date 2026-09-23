@@ -1,5 +1,6 @@
 /* Workspace plan gating: hide tabs above the client's tier, offer an upgrade. */
 (function () {
+  var T_ = window.T || function (k, f) { return f; };
   var NEED = {overview: 'free', portfolio: 'free', invoices: 'free', projects: 'free',
     leads: 'starter', health: 'starter', global: 'starter',
     outreach: 'pro', crew: 'pro',
@@ -11,7 +12,7 @@
   }
   ready(function () {
     if (/[?&]upgraded=1/.test(location.search) && window.toast) {
-      try { toast('Your plan is active — the unlocked tabs are ready.'); } catch (e) {}
+      try { toast(T_('wsj.up_toast','Your plan is active — the unlocked tabs are ready.')); } catch (e) {}
     }
     fetch('/api/auth/me', {headers: {'Accept': 'application/json'}}).then(function (r) {
       return r.ok ? r.json() : null;
@@ -30,7 +31,7 @@
         a.href = '/pricing';
         a.setAttribute('data-upgrade-link', '1');
         a.className = 'nav upgrade-link';
-        a.innerHTML = '<span>&#9733;</span>' + (have > 0 ? 'Upgrade to Pro' : 'See plans &amp; upgrade');
+        a.innerHTML = '<span>&#9733;</span>' + (have > 0 ? T_('wsj.up_pro','Upgrade to Pro') : T_('wsj.up_see','See plans & upgrade'));
         nav.appendChild(a);
       }
     }).catch(function () {});

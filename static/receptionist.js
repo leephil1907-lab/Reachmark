@@ -2,6 +2,7 @@
    Talks to /api/receptionist/message. No external requests, no tracking, no storage
    beyond a per-visitor thread id in localStorage so a reload keeps the conversation. */
 (function () {
+  var T_=window.T||function(k,f){return f;};
   var launch = document.getElementById('rm-receptionist-launch');
   var panel = document.getElementById('rm-receptionist');
   if (!launch || !panel) return;
@@ -49,7 +50,7 @@
     input.value = '';
     send.disabled = true;
     send.textContent = '…';
-    var thinking = bubble('One moment — checking the published facts.', 'assistant');
+    var thinking = bubble(T_('rx.js_thinking','One moment — checking the published facts.'), 'assistant');
     thinking.classList.add('thinking');
 
     fetch('/api/receptionist/message', {
@@ -71,7 +72,7 @@
       thinking.remove();
       var data = result.data || {};
       if (!result.ok) {
-        bubble(data.error || 'Something went wrong on the way. Please use the enquiry form at /enquire.', 'assistant error');
+        bubble(data.error || T_('rx.js_fail','Something went wrong on the way. Please use the enquiry form at /enquire.'), 'assistant error');
         return;
       }
       if (data.thread) remember(data.thread);
@@ -80,19 +81,19 @@
         nameField.hidden = false;
         emailField.hidden = false;
         if (!emailField.dataset.asked) {
-          bubble('If you add a name and e-mail here, the studio owner replies to you personally.', 'assistant note');
+          bubble(T_('rx.js_ask_contact','If you add a name and e-mail here, the studio owner replies to you personally.'), 'assistant note');
           emailField.dataset.asked = '1';
         }
       }
       if ((data.actions || []).indexOf('offer_review_link') !== -1) {
-        bubble('Tip: say “preview my business” with the business name and the studio will prepare a private review link.', 'assistant note');
+        bubble(T_('rx.js_tip','Tip: say “preview my business” with the business name and the studio will prepare a private review link.'), 'assistant note');
       }
     }).catch(function () {
       thinking.remove();
-      bubble('The connection dropped. Please try again, or use /enquire.', 'assistant error');
+      bubble(T_('rx.js_drop','The connection dropped. Please try again, or use /enquire.'), 'assistant error');
     }).then(function () {
       send.disabled = false;
-      send.textContent = 'Send';
+      send.textContent = T_('rx.w_send','Send');
       input.focus();
     });
   });

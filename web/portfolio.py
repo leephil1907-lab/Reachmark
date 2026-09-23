@@ -14,3 +14,24 @@ SAMPLES = [
 
 def find_sample(slug):
     return next((s for s in SAMPLES if s['slug']==slug), None)
+
+
+def localize_sample(sample, locale=None):
+    """Translate the gallery layer (category/style/description) of one sample.
+
+    The sample's inner demo copy (eyebrow/headline/intro/services/cta) stays
+    English: it is the design artifact being previewed, like quoted speech.
+    """
+    from flask import g
+    from web.i18n import t
+    loc = locale or getattr(g, 'locale', 'en')
+    out = dict(sample)
+    slug = sample['slug']
+    out['category'] = t('sample.%s.cat' % slug, loc)
+    out['style'] = t('sample.%s.style' % slug, loc)
+    out['description'] = t('sample.%s.desc' % slug, loc)
+    return out
+
+
+def localized_samples(locale=None):
+    return [localize_sample(s, locale) for s in SAMPLES]

@@ -1,5 +1,6 @@
 """MCP connections, reviewed skills, manual contracts, and source-backed analytics."""
 import os, json, uuid, re, hashlib, time
+from web.i18n import t as _t, locale_now
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal, InvalidOperation
 from collections import Counter, defaultdict
@@ -14,18 +15,18 @@ def digest(tool): return hashlib.sha256(json.dumps(tool,sort_keys=True).encode()
 def safe_schema(schema):
     if isinstance(schema,dict):
         for key in ('$ref','$dynamicRef','$recursiveRef'):
-            if key in schema and not str(schema[key]).startswith('#'): raise ValueError('External schema references are not supported.')
+            if key in schema and not str(schema[key]).startswith('#'): raise ValueError(_t('er_050', locale_now()))
         for v in schema.values(): safe_schema(v)
     elif isinstance(schema,list):
         for v in schema: safe_schema(v)
 def validate_args(tool,args):
-    if not isinstance(args,dict): raise ValueError('Tool arguments must be a JSON object.')
+    if not isinstance(args,dict): raise ValueError(_t('er_144', locale_now()))
     schema=tool.get('inputSchema',{'type':'object'})
     safe_schema(schema)
     try:
         cls=validators.validator_for(schema);cls.check_schema(schema);cls(schema).validate(args)
-    except (ValidationError,SchemaError) as e: raise ValueError('Arguments do not match the tool schema: '+str(e.message)[:300])
-    except Exception: raise ValueError('The provider schema could not be resolved safely. Review it or use a different tool.')
+    except (ValidationError,SchemaError) as e: raise ValueError(_t('er_008', locale_now(), d=str(e.message)[:300]))
+    except Exception: raise ValueError(_t('er_129', locale_now()))
 
 def money(value,currency,optional=False):
     if optional and (value is None or str(value).strip()==''): return None
@@ -33,7 +34,7 @@ def money(value,currency,optional=False):
         n=Decimal(str(value or '0'));factor=10**CURRENCIES[currency]
         if not n.is_finite() or n<0 or n>Decimal('1000000000000') or n*factor!=(n*factor).to_integral_value(): raise ValueError()
         return int(n*factor)
-    except (InvalidOperation,ValueError): raise ValueError('Enter a non-negative amount with the correct decimal places for the currency.')
+    except (InvalidOperation,ValueError): raise ValueError(_t('er_043', locale_now()))
 
 def register_operations(app,db,now,log):
     with db() as c:
@@ -52,13 +53,13 @@ def register_operations(app,db,now,log):
         return dict(r)
     def client_for(conn):
         token=os.getenv(conn['token_env'],'') if conn['token_env'] else ''
-        if conn['token_env'] and not os.getenv('DASHBOARD_PASSWORD'): raise MCPError('Set DASHBOARD_PASSWORD before connecting an authenticated MCP service.')
-        if conn['token_env'] and not token: raise MCPError('The selected server-side token variable is not configured. Add it in the host environment and restart.')
+        if conn['token_env'] and not os.getenv('DASHBOARD_PASSWORD'): raise MCPError(_t('er_112', locale_now()))
+        if conn['token_env'] and not token: raise MCPError(_t('er_130', locale_now()))
         return MCPClient(conn['url'],token)
     def clean_tools(tools):
         result=[];names=set()
         for tool in tools:
-            if not isinstance(tool,dict) or not isinstance(tool.get('name'),str) or not tool['name'] or len(tool['name'])>256: raise MCPError('Server returned a malformed tool name.')
+            if not isinstance(tool,dict) or not isinstance(tool.get('name'),str) or not tool['name'] or len(tool['name'])>256: raise MCPError(_t('er_110', locale_now()))
             if tool['name'] in names: continue
             names.add(tool['name'])
             result.append({k:tool[k] for k in ('name','title','description','inputSchema','annotations') if k in tool})
@@ -81,7 +82,7 @@ def register_operations(app,db,now,log):
         v=request.get_json(silent=True) or {};name=str(v.get('name','')).strip();url=str(v.get('url','')).strip();env=str(v.get('token_env','')).strip()
         try: validate_endpoint(url)
         except MCPError as e:return jsonify(error=str(e)),400
-        if not name or len(name)>100 or len(url)>1500 or (env and not re.fullmatch(r'MCP_TOKEN_[A-Z0-9_]{1,80}',env)): return jsonify(error='Provide a name and, optionally, a dedicated environment variable such as MCP_TOKEN_DESIGN. Never enter a token itself.'),400
+        if not name or len(name)>100 or len(url)>1500 or (env and not re.fullmatch(r'MCP_TOKEN_[A-Z0-9_]{1,80}',env)): return jsonify(error=_t('er_092', locale_now())),400
         cid=uuid.uuid4().hex
         with db() as c: c.execute('INSERT INTO mcp_connectors(id,name,url,token_env,status,created,updated) VALUES(?,?,?,?,?,?,?)',(cid,name,url,env,'Not tested',now(),now()))
         log('connector','MCP connector added: '+name);return jsonify(id=cid),201
@@ -90,7 +91,7 @@ def register_operations(app,db,now,log):
     def remove_connector(cid):
         connector(cid)
         with db() as c:
-            if c.execute("SELECT 1 FROM mcp_runs WHERE connector_id=? AND status='running'",(cid,)).fetchone(): return jsonify(error='Wait for this connector’s active run to finish.'),409
+            if c.execute("SELECT 1 FROM mcp_runs WHERE connector_id=? AND status='running'",(cid,)).fetchone(): return jsonify(error=_t('er_156', locale_now())),409
             c.execute('DELETE FROM mcp_connectors WHERE id=?',(cid,));c.execute('DELETE FROM mcp_skills WHERE connector_id=?',(cid,))
         return jsonify(ok=True)
 
@@ -110,9 +111,9 @@ def register_operations(app,db,now,log):
     def save_skill():
         v=request.get_json(silent=True) or {};conn=connector(v.get('connector_id',''));name=str(v.get('name','')).strip();description=str(v.get('description','')).strip();tool_name=v.get('tool_name');args=v.get('arguments',{})
         tool=next((t for t in json.loads(conn['tools']) if t['name']==tool_name),None)
-        if not name or len(name)>100 or len(description)>1000 or not tool: return jsonify(error='Choose a discovered tool and give the skill a short name.'),400
+        if not name or len(name)>100 or len(description)>1000 or not tool: return jsonify(error=_t('er_016', locale_now())),400
         try:
-            if len(json.dumps(args))>30000: raise ValueError('Skill arguments exceed 30 KB.')
+            if len(json.dumps(args))>30000: raise ValueError(_t('er_113', locale_now()))
             validate_args(tool,args)
         except ValueError as e: return jsonify(error=str(e)),400
         sid=uuid.uuid4().hex
@@ -133,25 +134,25 @@ def register_operations(app,db,now,log):
     @app.route('/api/mcp/run',methods=['POST'])
     def run_tool():
         v=request.get_json(silent=True) or {};rid=v.get('request_id','');args=v.get('arguments');conn=connector(v.get('connector_id',''));tool_name=v.get('tool_name')
-        if not re.fullmatch(r'[a-f0-9]{32}',str(rid)) or v.get('approved') is not True: return jsonify(error='Review the destination, tool, and arguments, and explicitly approve this run.'),400
+        if not re.fullmatch(r'[a-f0-9]{32}',str(rid)) or v.get('approved') is not True: return jsonify(error=_t('er_102', locale_now())),400
         tool=next((t for t in json.loads(conn['tools']) if t['name']==tool_name),None)
-        if not tool or v.get('digest')!=digest(tool): return jsonify(error='The tool selection changed. Sync the connector and review the tool again.'),409
+        if not tool or v.get('digest')!=digest(tool): return jsonify(error=_t('er_135', locale_now())),409
         try:
-            if len(json.dumps(args))>30000: raise ValueError('Arguments exceed 30 KB.')
+            if len(json.dumps(args))>30000: raise ValueError(_t('er_009', locale_now()))
             validate_args(tool,args);client=client_for(conn)
         except (ValueError,MCPError) as e:return jsonify(error=str(e)),400
         with db() as c:
             c.execute('BEGIN IMMEDIATE')
             old=c.execute('SELECT * FROM mcp_runs WHERE id=?',(rid,)).fetchone()
             if old:return jsonify(id=rid,status=old['status'],duplicate=True),200
-            if c.execute("SELECT 1 FROM mcp_runs WHERE status='running'").fetchone(): return jsonify(error='A tool is already running. Wait before starting another.'),409
+            if c.execute("SELECT 1 FROM mcp_runs WHERE status='running'").fetchone(): return jsonify(error=_t('er_003', locale_now())),409
             c.execute('INSERT INTO mcp_runs VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',(rid,conn['id'],conn['name'],tool_name,v.get('skill_id',''),'running',client.redact(json.dumps(args)),'','',0,now(),None))
         started=time.monotonic();calling=False;status='failed';result_text='';error=''
         try:
             client.initialize();fresh=clean_tools(client.list_tools());current=next((t for t in fresh if t['name']==tool_name),None)
-            if not current or digest(current)!=digest(tool): raise MCPError('The provider changed this tool since your review. Sync and approve its new definition before running.')
+            if not current or digest(current)!=digest(tool): raise MCPError(_t('er_128', locale_now()))
             calling=True;result=client.call(tool_name,args)
-            if not isinstance(result,dict): raise MCPError('The tool returned an invalid result.')
+            if not isinstance(result,dict): raise MCPError(_t('er_134', locale_now()))
             status='tool_error' if result.get('isError') else 'succeeded'
             result_text=client.redact(json.dumps(result,ensure_ascii=False))
             if len(result_text)>100000: result_text=result_text[:100000]+'\n[Output truncated at 100,000 characters]'
@@ -165,7 +166,7 @@ def register_operations(app,db,now,log):
     def _client_blocked():
         from flask import session
         if session.get('client_id') and session.get('role')=='client' and not session.get('owner'):
-            return jsonify(error='Owner login required.'),403
+            return jsonify(error=_t('er_083', locale_now())),403
         return None
 
     @app.route('/api/contracts',methods=['GET','POST'])
@@ -179,15 +180,15 @@ def register_operations(app,db,now,log):
 
     def write_contract(cid):
         v=request.get_json(silent=True) or {};currency=v.get('currency','USD');status=v.get('status','Draft');title=str(v.get('title','')).strip();client=str(v.get('client','')).strip();email=str(v.get('email','')).strip();notes=str(v.get('notes','')).strip();lead_id=str(v.get('lead_id','')).strip()
-        if not isinstance(currency,str) or currency not in CURRENCIES or not isinstance(status,str) or status not in STAGES or not title or not client or len(title)>180 or len(client)>180 or len(notes)>5000: return jsonify(error='Provide a title, client, supported currency, and valid contract stage.'),400
-        if email and not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',email): return jsonify(error='Enter a valid client email.'),400
+        if not isinstance(currency,str) or currency not in CURRENCIES or not isinstance(status,str) or status not in STAGES or not title or not client or len(title)>180 or len(client)>180 or len(notes)>5000: return jsonify(error=_t('er_094', locale_now())),400
+        if email and not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',email): return jsonify(error=_t('er_045', locale_now())),400
         try:
             amount=money(v.get('amount'),currency,optional=True);paid=money(v.get('paid'),currency)
-            if paid and (amount is None or paid>amount): raise ValueError('Recorded payments cannot exceed the stated contract value. Set the contract value first.')
+            if paid and (amount is None or paid>amount): raise ValueError(_t('er_099', locale_now()))
         except ValueError as e: return jsonify(error=str(e)),400
         stamp=now()
         with db() as c:
-            if lead_id and not c.execute('SELECT 1 FROM leads WHERE id=?',(lead_id,)).fetchone(): return jsonify(error='The linked lead no longer exists.'),400
+            if lead_id and not c.execute('SELECT 1 FROM leads WHERE id=?',(lead_id,)).fetchone(): return jsonify(error=_t('er_127', locale_now())),400
             previous=c.execute('SELECT * FROM contracts WHERE id=?',(cid,)).fetchone() if cid else None
             if cid and not previous: abort(404)
             signed=previous['signed_recorded_at'] if previous else None
@@ -217,7 +218,7 @@ def register_operations(app,db,now,log):
     @app.route('/api/analytics')
     def analytics():
         days=request.args.get('days','30')
-        if days not in ('7','30','90'): return jsonify(error='Choose 7, 30 or 90 days.'),400
+        if days not in ('7','30','90'): return jsonify(error=_t('er_014', locale_now())),400
         days=int(days);end=datetime.now(timezone.utc).date();start=end-timedelta(days=days-1);cutoff=start.isoformat()
         from flask import session
         cid=session.get('client_id') if (session.get('client_id') and session.get('role')=='client' and not session.get('owner')) else None

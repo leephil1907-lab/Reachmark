@@ -1,10 +1,10 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html><html lang="{{ locale }}"><head>
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ gtm_id }}');</script><!-- End Google Tag Manager -->{% endif %}
 {% if ga_id is defined and ga_id %}<!-- Global site tag (gtag.js) - Google Analytics --><script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Project Enquiries & Website Estimates — Reachmark</title><meta name="description" content="Tell Reachmark about your website project, ask a question, or request a tailored estimate. Choose a sample design and share your requirements."><meta name="theme-color" content="#20251f"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="icon" href="/static/icon.svg"><style>.logo{width:200px !important}</style>
 <style>body{background:#eef6d1 !important; color:#0f1a0a} nav{background:#ffffff !important; border-color:#e2e7d6 !important; box-shadow:0 2px 12px rgba(32,45,22,.06) !important} .logo{width:200px !important}</style>
 <link rel="stylesheet" href="/static/public.css">
-<link rel="stylesheet" href="/static/premium.css">
+<link rel="stylesheet" href="/static/premium.css"><script src="/static/i18n.js"></script>
 <style>
 [data-theme="dark"]{color-scheme:dark}
 [data-theme="dark"] body{background:#1b2518;color:#e8f0d0}
@@ -27,15 +27,15 @@
 [data-theme="dark"] .public-main, [data-theme="dark"] main{background:transparent !important}
 </style>
 <title>{{ seo.title if seo is defined and seo.title else 'Enquire — Reachmark' }}</title><meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Tell Reachmark about your project.' }}">{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">{% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}<meta property="og:type" content="website"><meta property="og:title" content="{{ seo.title if seo is defined else 'Enquire — Reachmark' }}"><meta property="og:description" content="{{ seo.description if seo is defined else '' }}"><meta property="og:image" content="{{ seo.og_image if seo is defined else '/static/social-card.png' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}<meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script></head><body class="public-page">
-{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}<nav class="public-nav"><a href="/"><img class="public-logo" src="/static/logo-primary.svg" alt="Reachmark"></a><div class="public-links"><a href="/">About Reachmark</a><a href="/showcase">Website samples</a><a href="/pricing">Plans</a>{% if client_logged_in %}<a href="/dashboard">Dashboard</a>{% elif owner_logged_in %}<a href="/workspace">Workspace</a>{% endif %}<a class="public-btn outline" href="#enquiry">Project enquiry ↗</a><button id="theme-toggle-public" aria-label="Toggle theme" title="Toggle theme" style="background:transparent;border:1px solid #e2e7d6;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:16px">◐</button></div></nav><main class="public-main">{% include 'enquiry-form.html' %}{% include 'adsense-footer.html' %}</main>
+{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}<nav class="public-nav"><a href="/"><img class="public-logo" src="/static/logo-primary.svg" alt="Reachmark"></a><div class="public-links"><a href="/">{{ t('foot.about') }}</a><a href="/showcase">{{ t('foot.samples') }}</a><a href="/pricing">{{ t('nav.plans') }}</a>{% if client_logged_in %}<a href="/dashboard">{{ t('nav.dashboard') }}</a>{% elif owner_logged_in %}<a href="/workspace">{{ t('nav.workspace') }}</a>{% endif %}<a class="public-btn outline" href="#enquiry">{{ t('enq.nav_btn') }}</a>{% include 'locale-switcher.html' %}<button id="theme-toggle-public" aria-label="{{ t('common.theme') }}" title="{{ t('common.theme') }}" style="background:transparent;border:1px solid #e2e7d6;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:16px">◐</button></div></nav><main class="public-main">{% include 'enquiry-form.html' %}{% include 'adsense-footer.html' %}</main>
 <section class="trustpilot-section premium-reveal" style="padding:28px; margin:40px 0 20px;">
   <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:14px;">
       <span style="color:#00b67a; font-size:18px;">★★★★★</span>
-      <span style="font:600 13px 'Manrope',sans-serif; color:#1e2e15;">4.8/5 · Excellent on Trustpilot</span>
-      <span style="font-size:10px; color:#8a9976;">127 reviews · World-class websites, proven by clients</span>
+      <span style="font:600 13px 'Manrope',sans-serif; color:#1e2e15;">{{ t('enq.tp') }}</span>
+      <span style="font-size:10px; color:#8a9976;">{{ t('enq.tp_note') }}</span>
     </div>
-    <a href="/showcase" style="font-size:10px; color:#8ca650; text-decoration:underline;">See live previews →</a>
+    <a href="/showcase" style="font-size:10px; color:#8ca650; text-decoration:underline;">{{ t('enq.previews') }}</a>
   </div>
 </section>
 
@@ -43,61 +43,61 @@
   <div class="world-footer-inner">
     <div class="footer-top">
       <div class="footer-brand">
-        <a href="/"><img class="footer-logo" src="/static/logo-primary.svg" alt="Reachmark — World-class website designer"></a>
-        <p>World-class website design — Figma-inspired, Framer-smooth, and built to turn local discovery into real projects. Lead finder · 3D previews · thoughtful outreach. MAP data © OpenStreetMap.</p>
+        <a href="/"><img class="footer-logo" src="/static/logo-primary.svg" alt="{{ t('show.foot_alt') }}"></a>
+        <p>{{ t('show.foot_p') }}</p>
         <div style="display:flex; align-items:center; gap:10px; margin-top:18px; background:#1a2315; border:1px solid #2a3a22; padding:10px 14px; border-radius:10px;">
           <span style="color:#00b67a; font-size:13px; letter-spacing:2px;">★★★★★</span>
-          <span style="font:600 11px 'Manrope',sans-serif; color:#e6e9dd;">4.8/5 · Excellent</span>
-          <span style="font-size:9px; color:#9aa38e;">on Trustpilot · 127 reviews</span>
+          <span style="font:600 11px 'Manrope',sans-serif; color:#e6e9dd;">{{ t('tp.rating') }}</span>
+          <span style="font-size:9px; color:#9aa38e;">{{ t('tp.on_tp') }}</span>
         </div>
         <div style="margin-top:16px; display:flex; gap:10px;">
           <a href="https://instagram.com" aria-label="Instagram" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">◎</a>
           <a href="https://x.com" aria-label="X" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">𝕏</a>
-          <a href="mailto:{{ support_email }}" aria-label="Email" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">✉</a>
-          <span style="font-size:11px;color:#9aa38e;">Support: <a href="mailto:{{ support_email }}" style="color:#d5f268;">{{ support_email }}</a></span>
-          <a href="/enquire" aria-label="Contact" style="width:34px; height:34px; border-radius:8px; background:#d5f268; border:1px solid #cbe85b; display:grid; place-items:center; color:#0f1510; font-size:13px;">↗</a>
+          <a href="mailto:{{ support_email }}" aria-label="{{ t('soc.email') }}" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">✉</a>
+          <span style="font-size:11px;color:#9aa38e;">{{ t('foot.support') }} <a href="mailto:{{ support_email }}" style="color:#d5f268;">{{ support_email }}</a></span>
+          <a href="/enquire" aria-label="{{ t('soc.contact') }}" style="width:34px; height:34px; border-radius:8px; background:#d5f268; border:1px solid #cbe85b; display:grid; place-items:center; color:#0f1510; font-size:13px;">↗</a>
         </div>
       </div>
       <div class="footer-col">
-        <h4>Templates</h4>
-        <a href="/showcase/ember-coffee">Ember & Oak — Café</a>
-        <a href="/showcase/stillwell-studio">Stillwell — Wellness</a>
-        <a href="/showcase/forma-homes">Forma House — Renovation</a>
-        <a href="/showcase/astra-clinic">Astra Clinic — Healthcare</a>
-        <a href="/showcase/novera-law">Novera Law — Legal</a>
-        <a href="/showcase/bloom-market">Bloom Market — Boutique</a>
-        <a href="/showcase/fintech-pulse">Fintech Pulse — Finance <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">NEW · 4K</span></a>
-        <a href="/showcase/nova-exchange">Nova Exchange — Crypto <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">NEW</span></a>
-        <a href="/showcase/orbit-web3">Orbit Studio — Web3 <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">NEW</span></a>
-        <a href="/showcase/getpaid">Get Paid — SaaS <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">NEW · FROM UPLOAD</span></a>
+        <h4>{{ t('show.col_templates') }}</h4>
+        <a href="/showcase/ember-coffee">Ember & Oak — {{ t('show.tpl_cafe') }}</a>
+        <a href="/showcase/stillwell-studio">Stillwell — {{ t('show.tpl_wellness') }}</a>
+        <a href="/showcase/forma-homes">Forma House — {{ t('show.tpl_reno') }}</a>
+        <a href="/showcase/astra-clinic">Astra Clinic — {{ t('show.tpl_health') }}</a>
+        <a href="/showcase/novera-law">Novera Law — {{ t('show.tpl_legal') }}</a>
+        <a href="/showcase/bloom-market">Bloom Market — {{ t('show.tpl_boutique') }}</a>
+        <a href="/showcase/fintech-pulse">Fintech Pulse — {{ t('show.tpl_fin') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_4k') }}</span></a>
+        <a href="/showcase/nova-exchange">Nova Exchange — {{ t('show.tpl_crypto') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_new') }}</span></a>
+        <a href="/showcase/orbit-web3">Orbit Studio — {{ t('show.tpl_web3') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_new') }}</span></a>
+        <a href="/showcase/getpaid">Get Paid — {{ t('show.tpl_saas') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_upload') }}</span></a>
       </div>
       <div class="footer-col">
-        <h4>Discover</h4>
-        <a href="/#how-it-works">How it works</a>
-        <a href="/#website-samples">3D samples & Figma</a>
-        <a href="/showcase">All templates — Gallery</a>
-        <a href="/enquire">Get estimate</a>
-        <a href="/enquire">Contact studio</a>
-        <a href="/about">About Reachmark</a>
+        <h4>{{ t('show.col_discover') }}</h4>
+        <a href="/#how-it-works">{{ t('show.d1') }}</a>
+        <a href="/#website-samples">{{ t('show.d2') }}</a>
+        <a href="/showcase">{{ t('show.d3') }}</a>
+        <a href="/enquire">{{ t('show.d4') }}</a>
+        <a href="/enquire">{{ t('show.d5') }}</a>
+        <a href="/about">{{ t('foot.about') }}</a>
       </div>
       <div class="footer-col">
-        <h4>Stay in touch</h4>
-        <p style="font-size:10px; color:#9aa38e; line-height:1.7; margin:0 0 12px;">Get one premium tip each week — no spam, unsubscribe anytime.</p>
+        <h4>{{ t('show.col_touch') }}</h4>
+        <p style="font-size:10px; color:#9aa38e; line-height:1.7; margin:0 0 12px;">{{ t('show.touch_p') }}</p>
         {% include 'newsletter-form.html' %}
         <div style="font-size:10px; color:#9aa38e; line-height:1.8;">
           <div><span style="color:#d5f268;">✉</span> {{ support_email }}</div>
-          <div><span style="color:#d5f268;">◉</span> Remote studio · Global</div>
-          <div><span style="color:#d5f268;">↗</span> Lead finder · Preview · Outreach · Build</div>
+          <div><span style="color:#d5f268;">◉</span> {{ t('show.c_remote') }}</div>
+          <div><span style="color:#d5f268;">↗</span> {{ t('show.c_flow') }}</div>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Reachmark — World-class website designer. All rights reserved. Map data © <a href="https://www.openstreetmap.org/copyright" style="color:#8a9a7a;">OpenStreetMap</a> ODbL.</span>
+      <span>{{ t('show.copy1') }} <a href="https://www.openstreetmap.org/copyright" style="color:#8a9a7a;">OpenStreetMap</a> {{ t('show.copy2') }}</span>
       <div class="legal">
-        <a href="/about">Privacy</a>
-        <a href="/about">Terms</a>
-        <a href="/sitemap.xml">Sitemap</a>
-        <a href="/enquire">Support via live chat ↗</a>
+        <a href="/about">{{ t('show.privacy') }}</a>
+        <a href="/about">{{ t('show.terms') }}</a>
+        <a href="/sitemap.xml">{{ t('show.sitemap') }}</a>
+        <a href="/enquire">{{ t('show.chat') }}</a>
       </div>
     </div>
   </div>

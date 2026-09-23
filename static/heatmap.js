@@ -2,6 +2,7 @@
    same /api/analytics timeline the line chart uses. Empty days stay empty. */
 (function () {
   'use strict';
+var T_ = window.T || function (k, f) { return f; };
   function level(value, max) {
     if (!value || !max) return 0;
     var ratio = value / max;
@@ -22,7 +23,7 @@
     var label = seriesEl && seriesEl.selectedOptions ? seriesEl.selectedOptions[0].text : series;
     var rows = window.analyticsData.timeline || [];
     if (!rows.length) {
-      box.innerHTML = '<p class="small muted">No days recorded yet.</p>';
+      box.innerHTML = '<p class="small muted">' + T_('wsj.hm_none','No days recorded yet.') + '</p>';
       return;
     }
     var values = rows.map(function (row) { return row[series] || 0; });
@@ -31,12 +32,12 @@
       return '<span class="hm-cell hm-' + level(values[i], max) + '" title="' +
         esc(row.date) + ': ' + values[i] + '"></span>';
     }).join('');
-    box.innerHTML = '<div class="hm-grid" role="img" aria-label="' + esc(label) +
-      ' per day, last ' + rows.length + ' days">' + cells + '</div>' +
-      '<div class="hm-legend"><span>Less</span>' +
+    box.innerHTML = '<div class="hm-grid" role="img" aria-label="' + esc(T_('wsj.hm_label','{l} per day, last {n} days').replace('{l}', label).replace('{n}', rows.length)) +
+      '">' + cells + '</div>' +
+      '<div class="hm-legend"><span>' + T_('wsj.hm_less','Less') + '</span>' +
       '<span class="hm-cell hm-0"></span><span class="hm-cell hm-1"></span>' +
       '<span class="hm-cell hm-2"></span><span class="hm-cell hm-3"></span>' +
-      '<span class="hm-cell hm-4"></span><span>More</span></div>';
+      '<span class="hm-cell hm-4"></span><span>' + T_('wsj.hm_more','More') + '</span></div>';
   }
   window.renderHeatmap = renderHeatmap;
 })();

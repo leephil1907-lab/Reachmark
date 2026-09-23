@@ -1,5 +1,6 @@
 """Invoice creator: original Reachmark design inspired by AllScale workflow (not copied branding). Manual PDF and payment tracking only."""
 import re, uuid, json
+from web.i18n import t as _t, locale_now
 from datetime import datetime, timezone, date
 from decimal import Decimal, InvalidOperation
 from flask import request, jsonify, session, abort
@@ -20,7 +21,7 @@ def money_minor(value, currency):
             raise ValueError()
         return int(n * factor)
     except (InvalidOperation, ValueError):
-        raise ValueError('Enter a valid non-negative amount for ' + currency)
+        raise ValueError(_t('er_047', locale_now(), c=currency))
 
 def format_amount(minor, currency):
     if minor is None:
@@ -120,17 +121,17 @@ def register_invoices(app, db, now, log):
         # Items validation
         items = data.get('items')
         if not isinstance(items, list) or len(items) == 0 or len(items) > 25:
-            raise ValueError('Add 1 to 25 line items.')
+            raise ValueError(_t('er_004', locale_now()))
         computed_items = []
         subtotal = 0
         for it in items:
             if not isinstance(it, dict):
-                raise ValueError('Line items must be objects.')
+                raise ValueError(_t('er_062', locale_now()))
             desc = str(it.get('description','')).strip()
             qty_raw = it.get('quantity', 1)
             price_raw = it.get('unit_price')
             if not desc or len(desc) > 500:
-                raise ValueError('Each item needs a description (max 500 characters).')
+                raise ValueError(_t('er_037', locale_now()))
             try:
                 qty = Decimal(str(qty_raw).strip())
                 if not qty.is_finite() or qty <= 0 or qty > Decimal('1000000'):
@@ -139,10 +140,10 @@ def register_invoices(app, db, now, log):
                 if qty * 100 != (qty * 100).to_integral_value():
                     raise ValueError()
             except:
-                raise ValueError('Quantity must be a positive number (max 1,000,000, 2 decimals).')
+                raise ValueError(_t('er_098', locale_now()))
             unit_minor = money_minor(price_raw, currency)
             if unit_minor is None:
-                raise ValueError('Each item requires a unit price.')
+                raise ValueError(_t('er_038', locale_now()))
             amount_minor = int((Decimal(unit_minor) * qty).to_integral_value(rounding='ROUND_HALF_UP'))
             subtotal += amount_minor
             computed_items.append({'description': desc, 'quantity': float(qty), 'unit_minor': unit_minor, 'amount_minor': amount_minor, 'id': str(it.get('id') or uuid.uuid4().hex)[:32]})
@@ -153,7 +154,7 @@ def register_invoices(app, db, now, log):
             if tax_rate < 0 or tax_rate > 100:
                 raise ValueError()
         except:
-            raise ValueError('Tax rate must be 0 to 100.')
+            raise ValueError(_t('er_118', locale_now()))
         discount_type = str(data.get('discount_type','none')).strip()
         if discount_type not in DISCOUNT_TYPES:
             discount_type = 'none'
@@ -165,14 +166,14 @@ def register_invoices(app, db, now, log):
             if discount_type == 'percent' and discount_value > 100:
                 raise ValueError()
         except:
-            raise ValueError('Discount value is invalid.')
+            raise ValueError(_t('er_035', locale_now()))
         discount_minor = 0
         if discount_type == 'percent' and discount_value:
             discount_minor = int((Decimal(subtotal) * Decimal(str(discount_value)) / Decimal('100')).to_integral_value(rounding='ROUND_HALF_UP'))
         elif discount_type == 'fixed' and discount_value:
             fixed_minor = money_minor(str(discount_value), currency)
             if fixed_minor is None:
-                raise ValueError('Fixed discount requires a valid amount.')
+                raise ValueError(_t('er_052', locale_now()))
             discount_minor = min(fixed_minor, subtotal)
         taxable = subtotal - discount_minor
         tax_minor = int((Decimal(taxable) * Decimal(str(tax_rate)) / Decimal('100')).to_integral_value(rounding='ROUND_HALF_UP')) if tax_rate else 0
@@ -184,7 +185,7 @@ def register_invoices(app, db, now, log):
         cid = current_client_id()
         is_own = is_owner()
         if not is_own and not cid:
-            return jsonify(error='Authentication required.'),401
+            return jsonify(error=_t('er_010', locale_now())),401
         with db() as c:
             rows = [dict(r) for r in c.execute('SELECT * FROM invoices ORDER BY updated DESC')]
             # For clients, filter
@@ -211,7 +212,7 @@ def register_invoices(app, db, now, log):
             row = dict(r)
             user_email = client_email_for_id(cid) if cid else None
             if not can_access_invoice(row, cid, user_email):
-                return jsonify(error='Not found.'),404
+                return jsonify(error=_t('er_077', locale_now())),404
             items = [dict(it) for it in c.execute('SELECT * FROM invoice_items WHERE invoice_id=? ORDER BY created', (iid,))]
             row['items'] = items
         return jsonify(row)
@@ -219,11 +220,11 @@ def register_invoices(app, db, now, log):
     @app.post('/api/invoices')
     def create_invoice():
         if not is_owner():
-            return jsonify(error='Owner login required.'),401
+            return jsonify(error=_t('er_083', locale_now())),401
         data = request.get_json(silent=True) or {}
         currency = str(data.get('currency','USD')).strip()
         if currency not in CURRENCIES:
-            return jsonify(error='Choose a supported currency.'),400
+            return jsonify(error=_t('er_018', locale_now())),400
         client_name = str(data.get('client_name','')).strip()
         client_email = str(data.get('client_email','')).strip()
         client_address = str(data.get('client_address','')).strip()
@@ -235,34 +236,34 @@ def register_invoices(app, db, now, log):
         notes = str(data.get('notes','')).strip()
         terms = str(data.get('terms','')).strip()
         if not client_name or len(client_name) > 180:
-            return jsonify(error='Client name is required (max 180).'),400
+            return jsonify(error=_t('er_025', locale_now())),400
         if client_email and (not EMAIL_RE.fullmatch(client_email) or len(client_email) > 250):
-            return jsonify(error='Enter a valid client email.'),400
+            return jsonify(error=_t('er_045', locale_now())),400
         if len(client_address) > 500:
-            return jsonify(error='Client address is too long.'),400
+            return jsonify(error=_t('er_024', locale_now())),400
         if status not in STATUSES:
-            return jsonify(error='Choose a valid status.'),400
+            return jsonify(error=_t('er_020', locale_now())),400
         try:
             if issue_date:
                 date.fromisoformat(issue_date)
             if due_date:
                 date.fromisoformat(due_date)
             if issue_date and due_date and due_date < issue_date:
-                return jsonify(error='Due date cannot be before issue date.'),400
+                return jsonify(error=_t('er_036', locale_now())),400
         except ValueError:
-            return jsonify(error='Use YYYY-MM-DD dates.'),400
+            return jsonify(error=_t('er_149', locale_now())),400
         if len(notes) > 5000 or len(terms) > 5000:
-            return jsonify(error='Notes and terms must be 5000 characters or less.'),400
+            return jsonify(error=_t('er_078', locale_now())),400
         with db() as c:
             _cid = _session_cid()
             if project_id:
                 _p = c.execute('SELECT client_user_id FROM projects WHERE id=?', (project_id,)).fetchone()
                 if not _p or (_cid and _p['client_user_id'] != _cid):
-                    return jsonify(error='Linked project not found.'),400
+                    return jsonify(error=_t('er_065', locale_now())),400
             if lead_id:
                 _l = c.execute('SELECT owner_user_id FROM leads WHERE id=?', (lead_id,)).fetchone()
                 if not _l or (_cid and _l['owner_user_id'] != _cid):
-                    return jsonify(error='Linked business not found.'),400
+                    return jsonify(error=_t('er_063', locale_now())),400
         try:
             computed_items, subtotal, discount_minor, tax_minor, total, tax_rate, discount_type, discount_value = validate_and_compute(data, currency)
         except ValueError as e:
@@ -289,7 +290,7 @@ def register_invoices(app, db, now, log):
     @app.route('/api/invoices/<iid>', methods=['PATCH'])
     def update_invoice(iid):
         if not is_owner():
-            return jsonify(error='Owner login required.'),401
+            return jsonify(error=_t('er_083', locale_now())),401
         data = request.get_json(silent=True) or {}
         with db() as c:
             row = c.execute('SELECT * FROM invoices WHERE id=?', (iid,)).fetchone()
@@ -298,7 +299,7 @@ def register_invoices(app, db, now, log):
             old = dict(row)
         currency = str(data.get('currency', old['currency'])).strip()
         if currency not in CURRENCIES:
-            return jsonify(error='Currency not supported.'),400
+            return jsonify(error=_t('er_033', locale_now())),400
         client_name = str(data.get('client_name', old['client_name'])).strip()
         client_email = str(data.get('client_email', old['client_email'])).strip()
         client_address = str(data.get('client_address', old['client_address'])).strip()
@@ -310,32 +311,32 @@ def register_invoices(app, db, now, log):
         notes = str(data.get('notes', old['notes'] or '')).strip()
         terms = str(data.get('terms', old['terms'] or '')).strip()
         if not client_name or len(client_name) > 180:
-            return jsonify(error='Client name required.'),400
+            return jsonify(error=_t('er_026', locale_now())),400
         if client_email and (not EMAIL_RE.fullmatch(client_email) or len(client_email) > 250):
-            return jsonify(error='Valid client email required.'),400
+            return jsonify(error=_t('er_153', locale_now())),400
         if status not in STATUSES:
-            return jsonify(error='Status invalid.'),400
+            return jsonify(error=_t('er_116', locale_now())),400
         try:
             if issue_date:
                 date.fromisoformat(issue_date)
             if due_date:
                 date.fromisoformat(due_date)
             if issue_date and due_date and due_date < issue_date:
-                return jsonify(error='Due date cannot be before issue date.'),400
+                return jsonify(error=_t('er_036', locale_now())),400
         except:
-            return jsonify(error='Use YYYY-MM-DD.'),400
+            return jsonify(error=_t('er_150', locale_now())),400
         if len(notes) > 5000 or len(terms) > 5000:
-            return jsonify(error='Notes/terms too long.'),400
+            return jsonify(error=_t('er_079', locale_now())),400
         with db() as c:
             _cid = _session_cid()
             if project_id:
                 _p = c.execute('SELECT client_user_id FROM projects WHERE id=?', (project_id,)).fetchone()
                 if not _p or (_cid and _p['client_user_id'] != _cid):
-                    return jsonify(error='Linked project not found.'),400
+                    return jsonify(error=_t('er_065', locale_now())),400
             if lead_id:
                 _l = c.execute('SELECT owner_user_id FROM leads WHERE id=?', (lead_id,)).fetchone()
                 if not _l or (_cid and _l['owner_user_id'] != _cid):
-                    return jsonify(error='Linked business not found.'),400
+                    return jsonify(error=_t('er_063', locale_now())),400
         # Items: if not provided, keep old items; if provided, replace
         if 'items' in data:
             try:
@@ -387,7 +388,7 @@ def register_invoices(app, db, now, log):
     @app.delete('/api/invoices/<iid>')
     def delete_invoice(iid):
         if not is_owner():
-            return jsonify(error='Owner login required.'),401
+            return jsonify(error=_t('er_083', locale_now())),401
         with db() as c:
             c.execute('DELETE FROM invoice_items WHERE invoice_id=?', (iid,))
             c.execute('DELETE FROM invoices WHERE id=?', (iid,))

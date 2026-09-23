@@ -1,8 +1,9 @@
 """Public project requests and a private owner inbox; no simulated submissions."""
 import hashlib, os, re, uuid
+from web.i18n import t as _t, locale_now
 from datetime import datetime, timezone, timedelta
 from flask import request, jsonify, render_template, abort
-from web.portfolio import SAMPLES, find_sample
+from web.portfolio import SAMPLES, find_sample, localize_sample, localized_samples
 
 def register_enquiries(app, db, now, log):
     with db() as c:
@@ -21,8 +22,8 @@ def register_enquiries(app, db, now, log):
             base = settings()['public_base_url'].rstrip('/')
         except: base = request.url_root.rstrip('/')
         seo = {
-            'title': 'Website Samples — 8 Premium Figma-inspired designs | Reachmark',
-            'description': 'Explore 8 premium Figma-inspired fictional website concepts — café, wellness, homes, clinic, law, boutique, fintech, SaaS invoice — each with a live 3D preview. Find your direction and enquire.',
+            'title': 'Website Samples — 10 Premium Figma-inspired designs | Reachmark',
+            'description': 'Explore 10 premium Figma-inspired fictional website concepts — café, wellness, homes, clinic, law, boutique, fintech, crypto, Web3, SaaS invoice — each with a live 3D preview. Find your direction and enquire.',
             'keywords': 'website samples, Figma templates, Reachmark portfolio, 3D previews, clinic, law, boutique, fintech',
             'canonical': (base + '/showcase') if base else None,
             'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
@@ -33,7 +34,7 @@ def register_enquiries(app, db, now, log):
         gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'
         gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'
         structured=[{'@context':'https://schema.org','@type':'CollectionPage','name':'Website Samples — Reachmark','description': seo['description'], 'url': seo['canonical'] or request.url}]
-        return render_template('showcase.html',samples=SAMPLES,seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
+        return render_template('showcase.html',samples=localized_samples(),seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
 
     @app.route('/showcase/<slug>')
     def sample_site(slug):
@@ -57,7 +58,7 @@ def register_enquiries(app, db, now, log):
         gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'
         gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'
         structured=[{'@context':'https://schema.org','@type':'CreativeWork','name': sample['name'], 'description': seo['description'], 'url': seo['canonical'] or request.url, 'image': seo['og_image']}]
-        return render_template('sample-site.html',sample=sample,seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
+        return render_template('sample-site.html',sample=localize_sample(sample),seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
 
     @app.route('/enquire')
     def enquire():
@@ -80,13 +81,16 @@ def register_enquiries(app, db, now, log):
         gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'
         gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'
         structured=[{'@context':'https://schema.org','@type':'ContactPage','name':'Enquire — Reachmark','description': seo['description'], 'url': seo['canonical'] or request.url}]
-        return render_template('enquire.html',samples=SAMPLES,chosen_sample=slug if find_sample(slug) else '',seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
+        return render_template('enquire.html',samples=localized_samples(),chosen_sample=slug if find_sample(slug) else '',seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
 
     @app.route('/api/enquiries',methods=['POST'])
     def submit_enquiry():
+        from flask import g
+        from web.i18n import t as _t
+        loc = getattr(g,'locale','en')
         v=request.get_json(silent=True)
-        if not isinstance(v,dict): return jsonify(error='Please submit the enquiry form.'),400
-        if v.get('company_url'): return jsonify(error='Unable to accept this submission.'),400
+        if not isinstance(v,dict): return jsonify(error=_t('enq.err_form',loc)),400
+        if v.get('company_url'): return jsonify(error=_t('enq.err_trap',loc)),400
         limits={'name':120,'email':250,'business':200,'kind':80,'budget':150,'timeline':150,'message':5000,'sample':80,'request_id':40,'project_details':3000}
         data={k:str(v.get(k,'')).strip() for k in limits}
         # Merge free-form project details into the main message so the inbox shows everything
@@ -96,14 +100,14 @@ def register_enquiries(app, db, now, log):
                 data['message']=(data['message']+"\n\n— Project details (your own words):\n"+extra).strip()
             else:
                 data['message']=(data['message']+"\n\n— Project details:\n"+extra[:3000]).strip()[:5000]
-        if any(len(data[k])>limits[k] for k in limits if k!='project_details') or len(data['message'])>5000: return jsonify(error='One of the fields is too long. Keep your message under 5,000 characters.'),400
-        if len(data['name'])<2 or len(data['message'])<15: return jsonify(error='Please add your name and a message of at least 15 characters.'),400
-        if not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',data['email']): return jsonify(error='Please enter a valid email address.'),400
-        if data['kind'] not in ('Website estimate','Project question','Other enquiry'): return jsonify(error='Choose an enquiry type.'),400
-        if data['sample'] and not find_sample(data['sample']): return jsonify(error='Choose one of the listed samples, or no preference.'),400
-        if v.get('consent') is not True: return jsonify(error='Please confirm we may contact you about this request.'),400
+        if any(len(data[k])>limits[k] for k in limits if k!='project_details') or len(data['message'])>5000: return jsonify(error=_t('enq.err_long',loc)),400
+        if len(data['name'])<2 or len(data['message'])<15: return jsonify(error=_t('enq.err_short',loc)),400
+        if not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',data['email']): return jsonify(error=_t('enq.err_email',loc)),400
+        if data['kind'] not in ('Website estimate','Project question','Other enquiry'): return jsonify(error=_t('enq.err_kind',loc)),400
+        if data['sample'] and not find_sample(data['sample']): return jsonify(error=_t('enq.err_sample',loc)),400
+        if v.get('consent') is not True: return jsonify(error=_t('enq.err_consent',loc)),400
         rid=data['request_id']
-        if rid and not re.fullmatch(r'[a-f0-9]{32}',rid): return jsonify(error='Please refresh the form and try again.'),400
+        if rid and not re.fullmatch(r'[a-f0-9]{32}',rid): return jsonify(error=_t('enq.err_refresh',loc)),400
         rid=rid or uuid.uuid4().hex
         stamp=now();cutoff=(datetime.now(timezone.utc)-timedelta(hours=1)).isoformat()
         email=data['email'].lower();fingerprint=hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()
@@ -112,9 +116,9 @@ def register_enquiries(app, db, now, log):
             existing=c.execute('SELECT email FROM enquiries WHERE id=?',(rid,)).fetchone()
             if existing:
                 if existing['email']==email: return jsonify(ok=True,reference=rid[:8].upper()),200
-                return jsonify(error='Please refresh the form and try again.'),409
+                return jsonify(error=_t('enq.err_refresh',loc)),409
             if c.execute('SELECT count(*) FROM enquiries WHERE email=? AND created>?',(email,cutoff)).fetchone()[0]>=3 or c.execute('SELECT count(*) FROM enquiries WHERE fingerprint=? AND created>?',(fingerprint,cutoff)).fetchone()[0]>=30:
-                return jsonify(error='Too many recent requests. Please try again later.'),429
+                return jsonify(error=_t('er_143', locale_now())),429
             c.execute('INSERT INTO enquiries(id,name,email,business,kind,budget,timeline,message,sample,fingerprint,created,updated) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',(rid,data['name'],email,data['business'],data['kind'],data['budget'],data['timeline'],data['message'],data['sample'],fingerprint,stamp,stamp))
         log('enquiry','A new project enquiry was received')
         return jsonify(ok=True,reference=rid[:8].upper()),201
@@ -132,6 +136,6 @@ def register_enquiries(app, db, now, log):
                 c.execute('DELETE FROM enquiries WHERE id=?',(eid,));return jsonify(ok=True)
             v=request.get_json(silent=True) or {}
             status=v.get('status');notes=v.get('notes','')
-            if status not in ('New','In progress','Answered','Closed') or not isinstance(notes,str) or len(notes)>5000: return jsonify(error='Choose a valid status and keep notes under 5,000 characters.'),400
+            if status not in ('New','In progress','Answered','Closed') or not isinstance(notes,str) or len(notes)>5000: return jsonify(error=_t('er_019', locale_now())),400
             c.execute('UPDATE enquiries SET status=?,notes=?,updated=? WHERE id=?',(status,notes,now(),eid))
         return jsonify(ok=True)

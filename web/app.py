@@ -1,9 +1,10 @@
 import os, csv, io, json, sqlite3, uuid, re, ssl, smtplib, time, threading
+from web.i18n import t as _t, locale_now
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 from email.message import EmailMessage
 import requests
-from flask import Flask, request, jsonify, render_template, Response, abort, redirect
+from flask import Flask, g, request, jsonify, render_template, Response, abort, redirect
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['MAX_CONTENT_LENGTH'] = 3 * 1024 * 1024
@@ -95,6 +96,23 @@ def inject_branding():
     try: s=settings()
     except Exception: s={}
     return {'app_settings': s}
+@app.before_request
+def set_locale():
+    try:
+        from web.i18n import resolve_locale
+        g.locale = resolve_locale(request.cookies.get('rm_locale'), request.headers.get('Accept-Language', ''))
+    except Exception:
+        g.locale = 'en'
+
+@app.context_processor
+def inject_i18n():
+    from web.i18n import LOCALES, LOCALE_NAMES, t as translate
+    loc = getattr(g, 'locale', 'en')
+    if loc not in LOCALES:
+        loc = 'en'
+    return {'t': lambda key, **kw: translate(key, loc, **kw), 'locale': loc,
+            'locales': LOCALES, 'locale_names': LOCALE_NAMES}
+
 @app.context_processor
 def inject_adsense():
     return {'adsense_client': ADSENSE_CLIENT,
@@ -120,12 +138,14 @@ def custom_domain_redirect():
 
 @app.before_request
 def same_origin():
+    from web.i18n import t as _t
+    loc = getattr(g,'locale',None) or 'en'
     if request.is_json and request.method in ('POST','PATCH','PUT'):
         body=request.get_json(silent=True)
-        if not isinstance(body,dict): return jsonify(error='Send a JSON object.'),400
+        if not isinstance(body,dict): return jsonify(error=_t('enq.err_json',loc)),400
     if request.method in ('POST','PATCH','DELETE'):
         origin=request.headers.get('Origin')
-        if origin and urlparse(origin).netloc != request.host: return jsonify(error='Cross-origin request rejected.'),403
+        if origin and urlparse(origin).netloc != request.host: return jsonify(error=_t('api.csrf',loc)),403
 @app.after_request
 def headers(r):
     if request.path.startswith(('/api/','/preview/','/unsubscribe/','/workspace','/dashboard')): r.headers['X-Robots-Tag']='noindex, nofollow'; r.headers['Cache-Control']='no-store'
@@ -164,7 +184,7 @@ def adsense_tags(response):
         pass
     return response
 @app.errorhandler(413)
-def too_big(e): return jsonify(error='File too large. Limit: 3 MB.'),413
+def too_big(e): return jsonify(error=_t('er_051', locale_now())),413
 @app.route('/')
 def home():
     base=settings()['public_base_url'].rstrip('/')
@@ -344,14 +364,14 @@ def state():
 def save_settings():
     data=request.get_json() or {}; s={k:str(data.get(k,''))[:1500].strip() for k in DEFAULTS}
     u=s['public_base_url']
-    if s['reply_email'] and not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',s['reply_email']): return jsonify(error='Enter a valid reply-to email.'),400
-    if u and (urlparse(u).scheme!='https' or not urlparse(u).netloc): return jsonify(error='Public preview URL must start with https://.'),400
+    if s['reply_email'] and not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',s['reply_email']): return jsonify(error=_t('er_048', locale_now())),400
+    if u and (urlparse(u).scheme!='https' or not urlparse(u).netloc): return jsonify(error=_t('er_097', locale_now())),400
     with db() as c: c.execute('INSERT OR REPLACE INTO settings VALUES(1,?)',(json.dumps(s),))
     log('settings','Sender profile updated'); return jsonify(ok=True)
 @app.route('/api/leads',methods=['POST'])
 def create_lead():
     v=request.get_json() or {}
-    if not str(v.get('name','')).strip(): return jsonify(error='Business name is required.'),400
+    if not str(v.get('name','')).strip(): return jsonify(error=_t('er_012', locale_now())),400
     v={k:str(val).strip() for k,val in v.items()}; v['source']='Manual'; v['owner_user_id']=client_owner()
     count=add_lead(v); log('import',f'{count} business added manually'); return jsonify(added=count)
 @app.route('/api/leads/<lid>',methods=['PATCH','DELETE'])
@@ -362,8 +382,8 @@ def update_lead(lid):
         return jsonify(ok=True)
     data=request.get_json() or {}; allowed={'name','email','phone','website','note','stage','subject','body'}
     data={k:str(v)[:10000] for k,v in data.items() if k in allowed}
-    if 'name' in data and not data['name'].strip(): return jsonify(error='Business name is required.'),400
-    if 'stage' in data and data['stage'] not in ['New','Drafted','Contacted','Replied','Won','Not a fit']: return jsonify(error='Invalid stage.'),400
+    if 'name' in data and not data['name'].strip(): return jsonify(error=_t('er_012', locale_now())),400
+    if 'stage' in data and data['stage'] not in ['New','Drafted','Contacted','Replied','Won','Not a fit']: return jsonify(error=_t('er_057', locale_now())),400
     if 'website' in data:
         data['status']=classify(data['website'])
         if data['website']!=lead(lid)['website']:
@@ -375,19 +395,19 @@ def update_lead(lid):
 @app.route('/api/import',methods=['POST'])
 def import_csv():
     f=request.files.get('file')
-    if not f: return jsonify(error='Choose a CSV file.'),400
+    if not f: return jsonify(error=_t('er_015', locale_now())),400
     try:
         reader=csv.DictReader(io.StringIO(f.read().decode('utf-8-sig')))
-        if not reader.fieldnames or 'name' not in reader.fieldnames: return jsonify(error='CSV must have a name column. Optional: category, city, address, phone, email, website.'),400
+        if not reader.fieldnames or 'name' not in reader.fieldnames: return jsonify(error=_t('er_013', locale_now())),400
         rows=list(reader)
-        if len(rows)>5000: return jsonify(error='Import up to 5,000 rows per file.'),400
+        if len(rows)>5000: return jsonify(error=_t('er_053', locale_now())),400
         count=0
         for r in rows:
             v={k:(val or '').strip() for k,val in r.items() if isinstance(val,(str,type(None))) and k}
             v['website']=v.get('website') or v.get('listed_website',''); v['city']=v.get('city') or v.get('city_searched',''); v['source']='CSV'; v['owner_user_id']=client_owner()
             if v.get('name'): count+=add_lead(v)
         log('import',f'Imported {count} businesses from CSV'); return jsonify(added=count,skipped=len(rows)-count)
-    except (UnicodeError,csv.Error,TypeError): return jsonify(error='Could not read this file. Upload a UTF-8 CSV.'),400
+    except (UnicodeError,csv.Error,TypeError): return jsonify(error=_t('er_030', locale_now())),400
 @app.route('/api/export')
 def export():
     cid = client_owner()
@@ -413,15 +433,15 @@ def search_save(location, category, include_websites=False, owner=None):
 def discover():
     global last_discovery
     v=request.get_json() or {}; city=str(v.get('city','')).strip(); category=v.get('category')
-    if not city or len(city)>150 or not isinstance(category,str) or category not in CATEGORIES: return jsonify(error='Choose a location and category.'),400
+    if not city or len(city)>150 or not isinstance(category,str) or category not in CATEGORIES: return jsonify(error=_t('er_017', locale_now())),400
     with lock:
-        if time.monotonic()-last_discovery<10: return jsonify(error='Wait 10 seconds between searches.'),429
+        if time.monotonic()-last_discovery<10: return jsonify(error=_t('er_154', locale_now())),429
         last_discovery=time.monotonic()
     try:
         result,_=search_save(city,category,owner=client_owner())
         log('discovery',f"{city} · {category}: {result['added']} new candidates from {result['scanned']} listings")
         return jsonify(result)
-    except (requests.RequestException,ValueError,KeyError): return jsonify(error='Public map service unavailable or location not found. Retry later or import CSV.'),502
+    except (requests.RequestException,ValueError,KeyError): return jsonify(error=_t('er_096', locale_now())),502
 
 def run_job(jid,locations,category,check):
     added=checked=failures=0
@@ -458,13 +478,13 @@ def run_job(jid,locations,category,check):
 @app.route('/api/jobs',methods=['POST'])
 def start_job():
     v=request.get_json() or {}; locations=v.get('locations',[]); category=v.get('category')
-    if not isinstance(locations,list) or not 1<=len(locations)<=8 or any(not isinstance(x,str) or not x.strip() or len(x)>150 for x in locations) or not isinstance(category,str) or category not in CATEGORIES: return jsonify(error='Enter 1–8 city/country locations and a supported category.'),400
+    if not isinstance(locations,list) or not 1<=len(locations)<=8 or any(not isinstance(x,str) or not x.strip() or len(x)>150 for x in locations) or not isinstance(category,str) or category not in CATEGORIES: return jsonify(error=_t('er_041', locale_now())),400
     locations=list(dict.fromkeys(x.strip() for x in locations));jid=uuid.uuid4().hex
     cid=client_owner()
     with db() as c:
         c.execute('BEGIN IMMEDIATE')
         busy=(c.execute("SELECT 1 FROM jobs WHERE state IN ('queued','running') AND owner_user_id=?",(cid,)).fetchone() if cid else c.execute("SELECT 1 FROM jobs WHERE state IN ('queued','running')").fetchone())
-        if busy: return jsonify(error='A discovery job is already running. Wait or cancel it first.'),409
+        if busy: return jsonify(error=_t('er_001', locale_now())),409
         c.execute('INSERT INTO jobs(id,state,locations,category,progress,total,added,checked,message,created,updated,owner_user_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',(jid,'queued',json.dumps(locations),category,0,len(locations),0,0,'Waiting for public map services',now(),now(),cid))
     threading.Thread(target=run_job,args=(jid,locations,category,bool(v.get('check_websites'))),daemon=True).start()
     return jsonify(id=jid),202
@@ -487,23 +507,24 @@ def audit_lead(lid):
     result=save_audit(lid);log('audit',f"Website checked for {lead(lid)['name']}: {result['status']}");return jsonify(result)
 
 def compose(l, tone, include_preview):
-    s=settings(); who=s['sender_name'] or 'Your name'; agency=s['agency'] or 'Your studio'
-    subject=f"A website idea for {l['name']}"
-    intro=f"Hi {l['name']} team,"
-    context=f"I’m {who} from {agency}. I came across your business"+(f" in {l['city']}" if l['city'] else '')+" and wanted to introduce myself."
-    pitch=f"We build {s['offer'].rstrip('.')} .".replace(' .','.')
-    if tone=='Concise': pitch='We build straightforward, mobile-friendly websites with clear services and an easy way for customers to get in touch.'
-    if tone=='Warm': context+= ' I thought a simple website concept might be useful to your team.'
+    _cl=locale_now()
+    s=settings(); who=s['sender_name'] or _t('oc.who',_cl); agency=s['agency'] or _t('oc.ag',_cl)
+    subject=_t('oc.sub',_cl,n=l['name'])
+    intro=_t('oc.intro',_cl,n=l['name'])
+    context=_t('oc.ctx',_cl,w=who,a=agency,c=_t('oc.ctx_city',_cl,c=l['city']) if l['city'] else '')
+    pitch=_t('oc.pitch',_cl,o=s['offer'].rstrip('.'))
+    if tone=='Concise': pitch=_t('oc.pitch_c',_cl)
+    if tone=='Warm': context+=_t('oc.warm',_cl)
     preview=''
     if include_preview:
-        if s['public_base_url']: preview=f"I put together an initial concept for your business: {s['public_base_url'].rstrip('/')}/preview/{l['token']}\nIt’s an independent design proposal, not your official website. The content is a starting point for your review."
-        else: preview='I’ve put together an initial website concept for your business. If you’re interested, I can share a preview for your review.'
-    close='Would you be interested in taking a look? If it feels like a good fit, reply with what you need and your budget. We can provide a tailored quote before you commit to a build.'
-    footer=f"Best,\n{who}\n{agency}"
+        if s['public_base_url']: preview=_t('oc.prev',_cl,u=s['public_base_url'].rstrip('/')+'/preview/'+l['token'])+'\n'+_t('oc.prev_b',_cl)
+        else: preview=_t('oc.prev_nourl',_cl)
+    close=_t('oc.close',_cl)
+    footer=_t('oc.best',_cl)+f"\n{who}\n{agency}"
     if s['reply_email']: footer+='\n'+s['reply_email']
     if s['postal_address']: footer+='\n'+s['postal_address']
-    footer+='\n\nIf this isn’t relevant, reply “no thanks” and I won’t follow up.'
-    if s['public_base_url']: footer+=f"\nOr opt out here: {s['public_base_url'].rstrip('/')}/unsubscribe/{l['token']}"
+    footer+='\n\n'+_t('oc.optout',_cl)
+    if s['public_base_url']: footer+='\n'+_t('oc.opturl',_cl,u=s['public_base_url'].rstrip('/')+'/unsubscribe/'+l['token'])
     return subject,'\n\n'.join(x for x in [intro,context,pitch,preview,close,footer] if x)
 @app.route('/api/leads/<lid>/compose',methods=['POST'])
 def draft(lid):
@@ -529,22 +550,22 @@ def unsubscribe(token):
 @app.route('/api/leads/<lid>/suppress',methods=['POST'])
 def suppress(lid):
     l=lead(lid)
-    if not l['email']: return jsonify(error='Add an email address first.'),400
+    if not l['email']: return jsonify(error=_t('er_006', locale_now())),400
     with db() as c: c.execute('INSERT OR IGNORE INTO suppression VALUES(?,?)',(l['email'].lower().strip(),now()))
     log('suppression',f'Outreach blocked for {l["name"]}'); return jsonify(ok=True)
 @app.route('/api/leads/<lid>/send',methods=['POST'])
 def send(lid):
     l=lead(lid); v=request.get_json() or {}; s=settings(); recipient=l['email'].strip().lower()
-    if not v.get('approved') or not v.get('basis'): return jsonify(error='Confirm review and a lawful basis for contacting this recipient.'),400
-    if not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',recipient): return jsonify(error='Add a valid recipient email.'),400
-    if not l['subject'] or not l['body']: return jsonify(error='Save a subject and message first.'),400
-    if any(not s[k] for k in ['sender_name','agency','reply_email','postal_address']): return jsonify(error='Complete your sender profile, including postal address, in Settings.'),400
-    if '\n' in l['subject'] or '\r' in l['subject']: return jsonify(error='Invalid subject.'),400
-    if not os.getenv('SMTP_HOST') or not os.getenv('SMTP_FROM'): return jsonify(error='SMTP is not configured. See Settings and README.'),400
+    if not v.get('approved') or not v.get('basis'): return jsonify(error=_t('er_028', locale_now())),400
+    if not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+',recipient): return jsonify(error=_t('er_005', locale_now())),400
+    if not l['subject'] or not l['body']: return jsonify(error=_t('er_105', locale_now())),400
+    if any(not s[k] for k in ['sender_name','agency','reply_email','postal_address']): return jsonify(error=_t('er_027', locale_now())),400
+    if '\n' in l['subject'] or '\r' in l['subject']: return jsonify(error=_t('er_058', locale_now())),400
+    if not os.getenv('SMTP_HOST') or not os.getenv('SMTP_FROM'): return jsonify(error=_t('er_103', locale_now())),400
     with db() as c:
         c.execute('BEGIN IMMEDIATE')
-        if c.execute('SELECT 1 FROM suppression WHERE email=?',(recipient,)).fetchone(): return jsonify(error='This recipient has opted out. Sending is blocked.'),400
-        if c.execute("SELECT 1 FROM sends WHERE lead_id=? AND state IN ('sending','sent','unknown')",(lid,)).fetchone(): return jsonify(error='A message was already sent, is sending, or has an uncertain result. Check your mail provider before any follow-up.'),409
+        if c.execute('SELECT 1 FROM suppression WHERE email=?',(recipient,)).fetchone(): return jsonify(error=_t('er_139', locale_now())),400
+        if c.execute("SELECT 1 FROM sends WHERE lead_id=? AND state IN ('sending','sent','unknown')",(lid,)).fetchone(): return jsonify(error=_t('er_002', locale_now())),409
         sid=uuid.uuid4().hex
         c.execute('INSERT INTO sends VALUES(?,?,?,?,?,?)',(sid,lid,recipient,'sending','',now()))
         c.execute('INSERT OR IGNORE INTO optout_links VALUES(?,?)',(l['token'],recipient))
@@ -557,7 +578,7 @@ def send(lid):
         if s['public_base_url']: body+=f"\nOpt out: {s['public_base_url'].rstrip('/')}/unsubscribe/{l['token']}"
         msg.set_content(body)
         host=os.environ['SMTP_HOST']; port=int(os.getenv('SMTP_PORT','587')); mode=os.getenv('SMTP_SECURITY','starttls')
-        if mode not in ('ssl','starttls'): raise ValueError('TLS is required')
+        if mode not in ('ssl','starttls'): raise ValueError(_t('er_117', locale_now()))
         cls=smtplib.SMTP_SSL if mode=='ssl' else smtplib.SMTP
         with cls(host,port,timeout=25) as smtp:
             if mode=='starttls': smtp.starttls(context=ssl.create_default_context())
@@ -620,9 +641,9 @@ def create_client_review():
     rating = d.get('rating')
     text = str(d.get('text','')).strip()[:800]
     if not name or not text or not isinstance(rating, int) or rating not in (1,2,3,4,5):
-        return jsonify(error='Name, 1-5 rating and review text are required.'), 400
+        return jsonify(error=_t('er_074', locale_now())), 400
     if len(text) < 12:
-        return jsonify(error='Review text should be at least 12 characters.'), 400
+        return jsonify(error=_t('er_101', locale_now())), 400
     rid = __import__('uuid').uuid4().hex
     created = now()
     with db() as c:

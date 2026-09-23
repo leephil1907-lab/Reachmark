@@ -4,6 +4,7 @@
    pretends stale content is live: if the browser is offline, the page says so. */
 (function () {
   'use strict';
+  var T_ = window.T || function (k, f) { return f; };
   if (!('serviceWorker' in navigator)) return;
 
   var banner = null;
@@ -20,7 +21,7 @@
     banner.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;' +
       'background:#20251F;color:#F5F5EF;border-radius:12px;padding:12px 16px;font:600 13px/1.5 ' +
       'Manrope,system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);text-align:center';
-    banner.textContent = 'Offline — showing the last copy saved on this device. Nothing you see here is new data.';
+    banner.textContent = T_('wsj.off','Offline — showing the last copy saved on this device. Nothing you see here is new data.');
     document.body.appendChild(banner);
   }
 

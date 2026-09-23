@@ -83,7 +83,7 @@ def lead_for(db, link):
     return dict(row) if row else {}
 
 
-def build_script(lead, concept, link, settings=None, seconds=None):
+def build_script(lead, concept, link, settings=None, seconds=None, locale=None):
     """Return the caption beats and the spoken script for one concept.
 
     Facts come from the lead record and the measured audit only. If a value was never
@@ -94,19 +94,21 @@ def build_script(lead, concept, link, settings=None, seconds=None):
     the facts stay record-only either way.
     """
     settings = settings or {}
+    from web.i18n import t as _t, locale_now
+    loc = locale or locale_now()
     story = concept.get('story') or {}
     studio = _clean(settings.get('agency') or STUDIO['name'], 40)
-    name = _clean(lead.get('name') or 'this business', 60)
+    name = _clean(lead.get('name') or _t('ad_biz', loc), 60)
     place = _clean(lead.get('city') or '', 40)
     facts = [str(f) for f in (concept.get('gaps') or []) if f][:3]
     contact = concept.get('contact') or {}
 
     if contact.get('phone'):
-        find_line = 'Right now the first thing a customer finds is a phone number in a listing.'
+        find_line = _t('ad_find_phone', loc)
     elif contact.get('email'):
-        find_line = 'Right now the first thing a customer finds is an e-mail address in a listing.'
+        find_line = _t('ad_find_email', loc)
     else:
-        find_line = 'Right now there is nothing of their own for a customer to land on.'
+        find_line = _t('ad_find_none', loc)
 
     length = float(seconds or 18)
     close_at = max(6.0, length - 3.2)
@@ -116,42 +118,42 @@ def build_script(lead, concept, link, settings=None, seconds=None):
     marks.append(round(close_at, 1))
 
     beats = [
-        {'at': marks[0], 'until': marks[1], 'kicker': 'Act one · The problem',
-         'title': story.get('problem_title') or f'{name}: what a customer finds today',
+        {'at': marks[0], 'until': marks[1], 'kicker': _t('ad_k1', loc),
+         'title': story.get('problem_title') or f"{name}: {_t('ad_today', loc).lower() if loc == 'en' else _t('ad_today', loc)}",
          'body': story.get('problem_body') or find_line,
-         'facts': facts or ['No website listed in the public listing']},
-        {'at': marks[1], 'until': marks[2], 'kicker': 'Act two · The process',
-         'title': story.get('process_title') or 'Researched, drafted, sent with one question',
+         'facts': facts or [_t('ad_nosite', loc)]},
+        {'at': marks[1], 'until': marks[2], 'kicker': _t('ad_k2', loc),
+         'title': story.get('process_title') or _t('ad_p2t', loc),
          'body': story.get('process_body') or
-                 'We read the public listing, drafted a one-page concept from those details, and sent it to the business.',
+                 _t('ad_p2b', loc),
          'facts': [f for f in (place, concept.get('family_label') or '') if f]},
-        {'at': marks[2], 'until': marks[3], 'kicker': 'Act three · The solution',
-         'title': story.get('solution_title') or 'A website that fits',
+        {'at': marks[2], 'until': marks[3], 'kicker': _t('ad_k3', loc),
+         'title': story.get('solution_title') or _t('ad_p3t', loc),
          'body': story.get('solution_body') or
-                 'One page from their own public details — about a minute to read, ending in a single question.',
+                 _t('ad_p3b', loc),
          'facts': []},
-        {'at': marks[3], 'until': marks[4], 'kicker': 'The ask',
-         'title': 'Would you like this built?',
-         'body': 'Three answers: yes, not right now, or “we already have a website”. A no ends it.',
-         'facts': ['No charge', 'Nothing published under their name', 'Reply STOP ends contact']},
+        {'at': marks[3], 'until': marks[4], 'kicker': _t('ad_k4', loc),
+         'title': _t('ad_askt', loc),
+         'body': _t('ad_askb', loc),
+         'facts': [_t('ad_cf1', loc), _t('ad_cf2', loc), _t('ad_cf3', loc)]},
     ]
     views = int(link.get('views') or 0)
-    watched = (f"It has been opened {views} time{'s' if views != 1 else ''} so far. "
-               if views else 'It has just gone out to them. ')
+    watched = ((_t('ad_opened1', loc, v=views) if views == 1 else _t('ad_openedn', loc, v=views))
+               if views else _t('ad_opened0', loc))
     spoken = (
-        f'{name}. {find_line} We read the public listing and drafted a one-page concept '
-        f'from those details. {watched}{studio} answers either way: concept first, ask second.'
+        f'{name}. {find_line} {_t('ad_sp1', loc)}'
+        f'{watched}{_t('ad_sp2', loc, s=studio)}'
     )
     spoken_short = (
-        f'{name}. {find_line} We drafted a concept page from the details already public. '
-        f'One question at the end: would you like this built? {studio} — concept first, ask second.'
+        f'{name}. {find_line} {_t('ad_ss1', loc)}'
+        f'{_t('ad_ss2', loc)}{_t('ad_ss3', loc, s=studio)}'
     )
     return {
         'studio': studio, 'business': name, 'place': place,
         'beats': beats,
         'spoken': _clean(story.get('spoken') or spoken, 1200),
         'spoken_short': _clean(story.get('spoken_short') or spoken_short, 900),
-        'end_note': f'Prepared by {studio} as an independent concept. No reviews, prices, hours or photographs were invented.',
+        'end_note': _t('ad_end', loc, s=studio),
     }
 
 

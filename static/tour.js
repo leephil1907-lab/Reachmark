@@ -3,14 +3,15 @@
    window.startTour() or the "Take the tour" button. */
 (function () {
   'use strict';
+  var T_ = window.T || function (k, f) { return f; };
   var KEY = 'rm-tour-seen';
   var STEPS = [
-    { page: 'overview', sel: '#page-overview .analytics-heading', title: 'Your live overview', body: 'Every number here comes from saved records. Nothing is estimated.' },
-    { page: 'leads', sel: '#page-leads .directory', title: 'Lead directory', body: 'Search, filter and sort saved businesses. Click a row to open its workspace.' },
-    { page: 'global', sel: '#page-global .global-grid', title: 'Global finder', body: 'Discover real businesses from OpenStreetMap, one bounded job at a time.' },
-    { page: 'health', sel: '#page-health .card', title: 'Website health', body: 'Evidence-first URL checks. A failure is never called a dead site.' },
-    { page: 'crew', sel: '#page-crew', title: 'AI crew', body: 'Scout, verify, concept, outreach — seven agents, and you approve every send.' },
-    { page: 'settings', sel: '#page-settings .settings-grid', title: 'Sender profile', body: 'Put your name behind outreach before the crew talks to anyone.' }
+    { page: 'overview', sel: '#page-overview .analytics-heading', title: T_('wsj.t_t1','Your live overview'), body: T_('wsj.t_b1','Every number here comes from saved records. Nothing is estimated.') },
+    { page: 'leads', sel: '#page-leads .directory', title: T_('wsj.t_t2','Lead directory'), body: T_('wsj.t_b2','Search, filter and sort saved businesses. Click a row to open its workspace.') },
+    { page: 'global', sel: '#page-global .global-grid', title: T_('wsj.t_t3','Global finder'), body: T_('wsj.t_b3','Discover real businesses from OpenStreetMap, one bounded job at a time.') },
+    { page: 'health', sel: '#page-health .card', title: T_('wsj.t_t4','Website health'), body: T_('wsj.t_b4','Evidence-first URL checks. A failure is never called a dead site.') },
+    { page: 'crew', sel: '#page-crew', title: T_('wsj.t_t5','AI crew'), body: T_('wsj.t_b5','Scout, verify, concept, outreach — seven agents, and you approve every send.') },
+    { page: 'settings', sel: '#page-settings .settings-grid', title: T_('wsj.t_t6','Sender profile'), body: T_('wsj.t_b6','Put your name behind outreach before the crew talks to anyone.') }
   ];
   var index = 0;
   var overlay = null;
@@ -46,14 +47,14 @@
     var dots = STEPS.map(function (_, n) {
       return '<span class="' + (n === index ? 'on' : '') + '"></span>';
     }).join('');
-    card.innerHTML = '<p class="tour-step">Step ' + (index + 1) + ' of ' + STEPS.length + '</p>' +
+    card.innerHTML = '<p class="tour-step">' + T_('wsj.t_step','Step {n} of {m}').replace('{n}', index + 1).replace('{m}', STEPS.length) + '</p>' +
       '<h3>' + step.title + '</h3><p>' + step.body + '</p>' +
       '<div class="tour-dots">' + dots + '</div>' +
       '<div class="tour-btns"><button type="button" data-tour="back"' +
-      (index === 0 ? ' disabled' : '') + '>Back</button>' +
-      '<button type="button" data-tour="skip">Skip</button>' +
+      (index === 0 ? ' disabled' : '') + '>' + T_('wsj.t_back','Back') + '</button>' +
+      '<button type="button" data-tour="skip">' + T_('wsj.t_skip','Skip') + '</button>' +
       '<button type="button" data-tour="next" class="primary">' +
-      (index === STEPS.length - 1 ? 'Finish' : 'Next') + '</button></div>';
+      (index === STEPS.length - 1 ? T_('wsj.t_finish','Finish') : T_('wsj.t_next','Next')) + '</button></div>';
   }
   function start() {
     if (overlay) end();
@@ -62,7 +63,7 @@
     card = document.createElement('div');
     card.className = 'tour-card';
     card.setAttribute('role', 'dialog');
-    card.setAttribute('aria-label', 'Workspace tour');
+    card.setAttribute('aria-label', T_('wsj.t_aria','Workspace tour'));
     overlay.appendChild(card);
     document.body.appendChild(overlay);
     card.addEventListener('click', function (event) {

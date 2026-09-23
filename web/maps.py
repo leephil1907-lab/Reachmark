@@ -1,5 +1,6 @@
 """Bounded viewport discovery with durable per-cell progress; no world-wide scraping."""
 import json, math, threading, uuid
+from web.i18n import t as _t, locale_now
 from flask import request, jsonify
 from web.services import geocode, HEADERS
 from web.map_provider import query_overpass
@@ -8,16 +9,16 @@ LIMIT = 500
 
 def grid(bounds):
     if not isinstance(bounds,list) or len(bounds)!=4 or any(type(x) not in (int,float) or not math.isfinite(x) for x in bounds):
-        raise ValueError('Bounds must be four finite numbers: south, west, north, east.')
+        raise ValueError(_t('er_011', locale_now()))
     south,west,north,east = bounds
     if not (-90<=south<north<=90 and -180<=west<=180 and -180<=east<=180) or west==east:
-        raise ValueError('Invalid geographic bounds.')
+        raise ValueError(_t('er_055', locale_now()))
     span=(east-west)%360
     # Limit angular span as well as area, including at high latitudes.
     height=(north-south)*111.32
     width=span*111.32*max(.01,math.cos(math.radians((north+south)/2)))
     if height>25 or width>25 or span>2 or north-south>1:
-        raise ValueError('Zoom in: each scan must be at most 25 km wide and 25 km high (longitude span ≤2°).')
+        raise ValueError(_t('er_157', locale_now()))
     parts=[(west,east)] if west<east else [(west,180),(-180,east)]
     cells=[]
     for w,e in parts:
@@ -26,7 +27,7 @@ def grid(bounds):
         for y in range(ny):
             for x in range(nx):
                 cells.append([south+(north-south)*y/ny,w+(e-w)*x/nx,south+(north-south)*(y+1)/ny,w+(e-w)*(x+1)/nx])
-    if len(cells)>20: raise ValueError('Select a smaller area (maximum 20 cells).')
+    if len(cells)>20: raise ValueError(_t('er_107', locale_now()))
     return cells
 
 def rows_from_payload(payload, category, label):
@@ -114,7 +115,7 @@ def register_maps(app, db, now, add_lead, categories):
     @app.post('/api/map/search')
     def map_search():
         value=request.get_json().get('query')
-        if not isinstance(value,str) or not 2<=len(value.strip())<=150: return jsonify(error='Enter a city and country, or coordinates.'),400
+        if not isinstance(value,str) or not 2<=len(value.strip())<=150: return jsonify(error=_t('er_042', locale_now())),400
         value=value.strip(); cachekey=value.casefold()
         with db() as c: cached=c.execute('SELECT * FROM map_geocache WHERE query=?',(cachekey,)).fetchone()
         if cached: return jsonify(place=json.loads(cached['data']),cached=True,cached_at=cached['created'])
@@ -123,13 +124,13 @@ def register_maps(app, db, now, add_lead, categories):
             with db() as c: c.execute('INSERT OR REPLACE INTO map_geocache VALUES(?,?,?)',(cachekey,json.dumps(place),now()))
             return jsonify(place=place,cached=False)
         except Exception:
-            return jsonify(error='Place search unavailable or no match. Pan/zoom manually or enter latitude, longitude; saved records are unaffected.'),502
+            return jsonify(error=_t('er_087', locale_now())),502
 
     @app.post('/api/map/scans')
     def map_start():
         value=request.get_json(); category=value.get('category');label=value.get('label','Selected map area')
         if not isinstance(category,str) or category not in categories or not isinstance(label,str) or not 1<=len(label.strip())<=150:
-            return jsonify(error='Select a supported category and an area label (1–150 characters).'),400
+            return jsonify(error=_t('er_108', locale_now())),400
         try: cells=grid(value.get('bounds'))
         except ValueError as e: return jsonify(error=str(e)),400
         sid=uuid.uuid4().hex
@@ -137,7 +138,7 @@ def register_maps(app, db, now, add_lead, categories):
         with db() as c:
             c.execute('BEGIN IMMEDIATE')
             busy=(c.execute("SELECT 1 FROM map_scans WHERE state IN ('queued','running') AND owner_user_id=?",(cid,)).fetchone() if cid else c.execute("SELECT 1 FROM map_scans WHERE state IN ('queued','running')").fetchone())
-            if busy: return jsonify(error='Pause the active map scan before starting another.'),409
+            if busy: return jsonify(error=_t('er_085', locale_now())),409
             c.execute('INSERT INTO map_scans(id,label,category,bounds,state,created,updated,owner_user_id) VALUES(?,?,?,?,?,?,?,?)',(sid,label.strip(),category,json.dumps(value['bounds']),'queued',now(),now(),cid))
             for cell in cells: c.execute('INSERT INTO map_cells(id,scan_id,bounds,state,updated) VALUES(?,?,?,?,?)',(uuid.uuid4().hex,sid,json.dumps(cell),'pending',now()))
         threading.Thread(target=run,args=(sid,),daemon=True).start()
@@ -145,20 +146,20 @@ def register_maps(app, db, now, add_lead, categories):
 
     @app.post('/api/map/scans/<sid>/<action>')
     def map_action(sid,action):
-        if action not in ('resume','cancel'): return jsonify(error='Unknown action.'),404
+        if action not in ('resume','cancel'): return jsonify(error=_t('er_146', locale_now())),404
         with db() as c:
             c.execute('BEGIN IMMEDIATE')
             scan=c.execute('SELECT * FROM map_scans WHERE id=?',(sid,)).fetchone()
-            if not scan: return jsonify(error='Scan not found.'),404
+            if not scan: return jsonify(error=_t('er_106', locale_now())),404
             cid=_cid()
-            if cid and dict(scan).get('owner_user_id') != cid: return jsonify(error='Scan not found.'),404
+            if cid and dict(scan).get('owner_user_id') != cid: return jsonify(error=_t('er_106', locale_now())),404
             if action=='cancel':
                 c.execute("UPDATE map_scans SET state='cancelled',updated=? WHERE id=? AND state IN ('queued','running')",(now(),sid))
                 return jsonify(ok=True)
             busy=(c.execute("SELECT 1 FROM map_scans WHERE state IN ('queued','running') AND owner_user_id=?",(cid,)).fetchone() if cid else c.execute("SELECT 1 FROM map_scans WHERE state IN ('queued','running')").fetchone())
-            if worker_lock.locked() or busy: return jsonify(error='Wait for the in-flight scan to stop.'),409
+            if worker_lock.locked() or busy: return jsonify(error=_t('er_155', locale_now())),409
             todo=c.execute("SELECT 1 FROM map_cells WHERE scan_id=? AND state IN ('pending','failed','running')",(sid,)).fetchone()
-            if not todo: return jsonify(error='No retryable cells. For partial/dense cells, zoom in and start a smaller scan.'),400
+            if not todo: return jsonify(error=_t('er_076', locale_now())),400
             c.execute("UPDATE map_cells SET state='pending' WHERE scan_id=? AND state IN ('failed','running')",(sid,))
             c.execute("UPDATE map_scans SET state='queued',updated=? WHERE id=?",(now(),sid))
         threading.Thread(target=run,args=(sid,),daemon=True).start()

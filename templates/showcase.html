@@ -1,10 +1,10 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html><html lang="{{ locale }}"><head>
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ gtm_id }}');</script><!-- End Google Tag Manager -->{% endif %}
 {% if ga_id is defined and ga_id %}<!-- Global site tag (gtag.js) - Google Analytics --><script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ seo.title if seo is defined and seo.title else 'Website Design Samples — Reachmark' }}</title><meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Explore ten premium Figma-inspired fictional website concepts — café, wellness, homes, clinic, law, boutique, fintech, crypto and Web3 — each with a live 3D preview.' }}">{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">{% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}<meta name="theme-color" content="#20251f"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><meta property="og:type" content="website"><meta property="og:title" content="{{ seo.title if seo is defined else 'Reachmark' }}"><meta property="og:description" content="{{ seo.description if seo is defined else '' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}<meta property="og:image" content="{{ seo.og_image if seo is defined and seo.og_image else '/static/social-card.png' }}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined else '' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined else '' }}"><meta name="twitter:image" content="{{ seo.og_image if seo is defined else '/static/social-card.png' }}"><link rel="icon" href="/static/icon.svg"><style>.logo{width:200px !important}</style>
 <style>body{background:#eef6d1 !important; color:#0f1a0a} nav{background:#ffffff !important; border-color:#e2e7d6 !important; box-shadow:0 2px 12px rgba(32,45,22,.06) !important} .logo{width:200px !important}</style>
 <link rel="stylesheet" href="/static/public.css">
-<link rel="stylesheet" href="/static/premium.css">
+<link rel="stylesheet" href="/static/premium.css"><script src="/static/i18n.js"></script>
 <style>
 [data-theme="dark"]{color-scheme:dark}
 [data-theme="dark"] body{background:#1b2518;color:#e8f0d0}
@@ -27,42 +27,42 @@
 [data-theme="dark"] .public-main, [data-theme="dark"] main{background:transparent !important}
 </style>
 <script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script></head><body class="public-page">
-{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}<nav class="public-nav"><a href="/"><img class="public-logo" src="/static/logo-primary.svg" alt="Reachmark"></a><div class="public-links"><a href="/">About Reachmark</a><a href="/showcase" aria-current="page">Website samples</a><a href="/pricing">Plans</a>{% if client_logged_in %}<a href="/dashboard">Dashboard</a>{% elif owner_logged_in %}<a href="/workspace">Workspace</a>{% endif %}<a data-magnet class="public-btn" href="/enquire">Let’s talk ↗</a><button id="theme-toggle-public" aria-label="Toggle theme" title="Toggle theme" style="background:transparent;border:1px solid #e2e7d6;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:16px">◐</button></div></nav><main class="public-main"><header class="public-heading"><div class="public-eyebrow">FIGMA COMMUNITY · PREMIUM COLLECTION · 10 TEMPLATES</div><h1>Your business.<br>A different kind of first impression.</h1><p>Ten Figma-inspired directions — editorial, clinical, commerce, architectural, data and cosmic — each rendered as a premium 3D website mockup. Open a live preview, find what feels right, and tell us what you’d like to make your own.</p></header>
+{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}<nav class="public-nav"><a href="/"><img class="public-logo" src="/static/logo-primary.svg" alt="Reachmark"></a><div class="public-links"><a href="/">{{ t('foot.about') }}</a><a href="/showcase" aria-current="page">{{ t('foot.samples') }}</a><a href="/pricing">{{ t('nav.plans') }}</a>{% if client_logged_in %}<a href="/dashboard">{{ t('nav.dashboard') }}</a>{% elif owner_logged_in %}<a href="/workspace">{{ t('nav.workspace') }}</a>{% endif %}<a data-magnet class="public-btn" href="/enquire">{{ t('pubnav.talk') }}</a>{% include 'locale-switcher.html' %}<button id="theme-toggle-public" aria-label="{{ t('common.theme') }}" title="{{ t('common.theme') }}" style="background:transparent;border:1px solid #e2e7d6;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:16px">◐</button></div></nav><main class="public-main"><header class="public-heading"><div class="public-eyebrow">{{ t('show.eyebrow') }}</div><h1>{{ t('show.h1a') }}<br>{{ t('show.h1b') }}</h1><p>{{ t('show.sub') }}</p></header>
 <!-- Trustpilot strip — visible ASAP -->
 <div class="premium-reveal" style="max-width:1280px; margin:18px auto 0; padding:0 6%; display:flex; justify-content:center;">
   <div style="display:inline-flex; align-items:center; gap:12px; background:#fff; border:1px solid #e2e7d6; padding:10px 16px; border-radius:20px; box-shadow:0 4px 16px rgba(32,45,22,.06); flex-wrap:wrap; justify-content:center;">
     <span style="font:800 12px 'Manrope',sans-serif; color:#00b67a;">★ Trustpilot</span>
     <span style="font-size:10px; color:#00b67a; letter-spacing:1px;">★★★★★</span>
-    <span style="font:600 11px 'Manrope',sans-serif; color:#1e2e15;">4.8/5 · Excellent</span>
-    <span style="font-size:9px; color:#8a9976;">· 127 reviews · World-class websites, proven by clients</span>
+    <span style="font:600 11px 'Manrope',sans-serif; color:#1e2e15;">{{ t('tp.rating') }}</span>
+    <span style="font-size:9px; color:#8a9976;">{{ t('tp.strip_note') }}</span>
   </div>
 </div>
 
 <section class="carousel-3d-hero premium-reveal" style="margin:20px 0 30px;">
-  <img src="/static/samples/carousel-3d-hero.jpg" alt="Three premium 3D website mockups floating — clinic, law, boutique">
+  <img src="/static/samples/carousel-3d-hero.jpg" alt="{{ t('show.hero_alt') }}">
   <div class="hero-overlay">
     <div class="overlay-copy">
-      <div class="eyebrow" style="color:#8c9c77; margin-bottom:8px;">FRAMER-LIKE 3D CAROUSEL</div>
-      <h4 style="font:600 18px 'Manrope',sans-serif; margin:0 0 8px; color:#1e2e15;">Figma auto-layout → live 3D previews</h4>
-      <p style="font-size:11px; line-height:1.7; color:#6b7a5a; margin:0;">Every template is fully functional — click any card below to open the working preview in a new tab.</p>
+      <div class="eyebrow" style="color:#8c9c77; margin-bottom:8px;">{{ t('show.ov_k') }}</div>
+      <h4 style="font:600 18px 'Manrope',sans-serif; margin:0 0 8px; color:#1e2e15;">{{ t('show.ov_h') }}</h4>
+      <p style="font-size:11px; line-height:1.7; color:#6b7a5a; margin:0;">{{ t('show.ov_p') }}</p>
     </div>
   </div>
 </section>
 
-{% include 'sample-cards.html' %}<div class="sample-explainer premium-reveal"><strong>Premium Figma-inspired design — not claimed client work.</strong> Ten fictional sample brands with AI-generated concept imagery and Figma community auto-layout principles (editorial, health, commerce, grid). They demonstrate layout and styling — not real businesses, reviews or completed commissions. Fully functional as live previews, they do not appear in the lead database.</div>
+{% include 'sample-cards.html' %}<div class="sample-explainer premium-reveal">{{ t('show.explainer') }}</div>
 <!-- Trustpilot Reviews — world-class social proof -->
 <section id="trustpilot" class="trustpilot-section premium-reveal">
   <div class="trustpilot-head">
     <div>
-      <div class="eyebrow">TRUSTED BY GROWING BUSINESSES</div>
-      <h2 style="font:600 32px/1.15 'Manrope',sans-serif; letter-spacing:-1.2px; color:#1e2e15; margin:12px 0 8px;">World-class websites,<br>proven by clients.</h2>
-      <p style="font-size:11px; color:#8a9976; max-width:420px; margin:0;">Real businesses, real results — no fabricated claims. Every review reflects a live preview that turned interest into a project.</p>
+      <div class="eyebrow">{{ t('tp.eyebrow') }}</div>
+      <h2 style="font:600 32px/1.15 'Manrope',sans-serif; letter-spacing:-1.2px; color:#1e2e15; margin:12px 0 8px;">{{ t('tp.h1') }}<br>{{ t('tp.h2') }}</h2>
+      <p style="font-size:11px; color:#8a9976; max-width:420px; margin:0;">{{ t('tp.sub') }}</p>
     </div>
     <div class="trustpilot-badge">
       <div class="tp-logo">★ <span>Trustpilot</span></div>
       <div>
         <div class="tp-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
-        <div style="font-size:9px; color:#6b7a5a; margin-top:4px;"><strong style="color:#1e2e15; font-size:11px;">4.8/5 · Excellent</strong> · 127 reviews</div>
+        <div style="font-size:9px; color:#6b7a5a; margin-top:4px;"><strong style="color:#1e2e15; font-size:11px;">{{ t('tp.rating') }}</strong>{{ t('tp.count') }}</div>
       </div>
     </div>
   </div>
@@ -79,68 +79,68 @@
     </article>
 
   </div>
-  <div class="trustpilot-foot">Reviews reflect client experiences with Reachmark previews — verified style ratings, not invented Trustpilot verification. <a href="/showcase" style="color:#8ca650; text-decoration:underline;">See the 10 live templates →</a></div>
+  <div class="trustpilot-foot">{{ t('tp.foot') }} <a href="/showcase" style="color:#8ca650; text-decoration:underline;">{{ t('tp.foot_a') }}</a></div>
 </section>
 
-<section class="gallery-callout"><div><h2>See something that feels like you?</h2><p>Share the design you like, your requirements, or a question. The enquiry form saves your message for the studio to review—no commitment required.</p></div><a data-magnet class="public-btn" href="/enquire">Ask for an estimate ↗</a></section>{% include 'adsense-footer.html' %}</main><footer class="world-footer">
+<section class="gallery-callout"><div><h2>{{ t('show.call_h') }}</h2><p>{{ t('show.call_p') }}</p></div><a data-magnet class="public-btn" href="/enquire">{{ t('show.ask') }} ↗</a></section>{% include 'adsense-footer.html' %}</main><footer class="world-footer">
   <div class="world-footer-inner">
     <div class="footer-top">
       <div class="footer-brand">
-        <a href="/"><img class="footer-logo" src="/static/logo-primary.svg" alt="Reachmark — World-class website designer"></a>
-        <p>World-class website design — Figma-inspired, Framer-smooth, and built to turn local discovery into real projects. Lead finder · 3D previews · thoughtful outreach. MAP data © OpenStreetMap.</p>
+        <a href="/"><img class="footer-logo" src="/static/logo-primary.svg" alt="{{ t('show.foot_alt') }}"></a>
+        <p>{{ t('show.foot_p') }}</p>
         <div style="display:flex; align-items:center; gap:10px; margin-top:18px; background:#1a2315; border:1px solid #2a3a22; padding:10px 14px; border-radius:10px;">
           <span style="color:#00b67a; font-size:13px; letter-spacing:2px;">★★★★★</span>
-          <span style="font:600 11px 'Manrope',sans-serif; color:#e6e9dd;">4.8/5 · Excellent</span>
-          <span style="font-size:9px; color:#9aa38e;">on Trustpilot · 127 reviews</span>
+          <span style="font:600 11px 'Manrope',sans-serif; color:#e6e9dd;">{{ t('tp.rating') }}</span>
+          <span style="font-size:9px; color:#9aa38e;">{{ t('tp.on_tp') }}</span>
         </div>
         <div style="margin-top:16px; display:flex; gap:10px;">
           <a href="https://instagram.com" aria-label="Instagram" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">◎</a>
           <a href="https://x.com" aria-label="X" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">𝕏</a>
-          <a href="mailto:{{ support_email }}" aria-label="Email" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">✉</a>
-          <span style="font-size:11px;color:#9aa38e;">Support: <a href="mailto:{{ support_email }}" style="color:#d5f268;">{{ support_email }}</a></span>
-          <a href="/enquire" aria-label="Contact" style="width:34px; height:34px; border-radius:8px; background:#d5f268; border:1px solid #cbe85b; display:grid; place-items:center; color:#0f1510; font-size:13px;">↗</a>
+          <a href="mailto:{{ support_email }}" aria-label="{{ t('soc.email') }}" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">✉</a>
+          <span style="font-size:11px;color:#9aa38e;">{{ t('foot.support') }} <a href="mailto:{{ support_email }}" style="color:#d5f268;">{{ support_email }}</a></span>
+          <a href="/enquire" aria-label="{{ t('soc.contact') }}" style="width:34px; height:34px; border-radius:8px; background:#d5f268; border:1px solid #cbe85b; display:grid; place-items:center; color:#0f1510; font-size:13px;">↗</a>
         </div>
       </div>
       <div class="footer-col">
-        <h4>Templates</h4>
-        <a href="/showcase/ember-coffee">Ember & Oak — Café</a>
-        <a href="/showcase/stillwell-studio">Stillwell — Wellness</a>
-        <a href="/showcase/forma-homes">Forma House — Renovation</a>
-        <a href="/showcase/astra-clinic">Astra Clinic — Healthcare</a>
-        <a href="/showcase/novera-law">Novera Law — Legal</a>
-        <a href="/showcase/bloom-market">Bloom Market — Boutique</a>
-        <a href="/showcase/fintech-pulse">Fintech Pulse — Finance <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">NEW · 4K</span></a>
-        <a href="/showcase/nova-exchange">Nova Exchange — Crypto <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">NEW</span></a>
-        <a href="/showcase/orbit-web3">Orbit Studio — Web3 <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">NEW</span></a>
-        <a href="/showcase/getpaid">Get Paid — SaaS <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">NEW · FROM UPLOAD</span></a>
+        <h4>{{ t('show.col_templates') }}</h4>
+        <a href="/showcase/ember-coffee">Ember & Oak — {{ t('show.tpl_cafe') }}</a>
+        <a href="/showcase/stillwell-studio">Stillwell — {{ t('show.tpl_wellness') }}</a>
+        <a href="/showcase/forma-homes">Forma House — {{ t('show.tpl_reno') }}</a>
+        <a href="/showcase/astra-clinic">Astra Clinic — {{ t('show.tpl_health') }}</a>
+        <a href="/showcase/novera-law">Novera Law — {{ t('show.tpl_legal') }}</a>
+        <a href="/showcase/bloom-market">Bloom Market — {{ t('show.tpl_boutique') }}</a>
+        <a href="/showcase/fintech-pulse">Fintech Pulse — {{ t('show.tpl_fin') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_4k') }}</span></a>
+        <a href="/showcase/nova-exchange">Nova Exchange — {{ t('show.tpl_crypto') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_new') }}</span></a>
+        <a href="/showcase/orbit-web3">Orbit Studio — {{ t('show.tpl_web3') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_new') }}</span></a>
+        <a href="/showcase/getpaid">Get Paid — {{ t('show.tpl_saas') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_upload') }}</span></a>
       </div>
       <div class="footer-col">
-        <h4>Discover</h4>
-        <a href="/#how-it-works">How it works</a>
-        <a href="/#website-samples">3D samples & Figma</a>
-        <a href="/showcase">All templates — Gallery</a>
-        <a href="/enquire">Get estimate</a>
-        <a href="/enquire">Contact studio</a>
-        <a href="/about">About Reachmark</a>
+        <h4>{{ t('show.col_discover') }}</h4>
+        <a href="/#how-it-works">{{ t('show.d1') }}</a>
+        <a href="/#website-samples">{{ t('show.d2') }}</a>
+        <a href="/showcase">{{ t('show.d3') }}</a>
+        <a href="/enquire">{{ t('show.d4') }}</a>
+        <a href="/enquire">{{ t('show.d5') }}</a>
+        <a href="/about">{{ t('foot.about') }}</a>
       </div>
       <div class="footer-col">
-        <h4>Stay in touch</h4>
-        <p style="font-size:10px; color:#9aa38e; line-height:1.7; margin:0 0 12px;">Get one premium tip each week — no spam, unsubscribe anytime.</p>
+        <h4>{{ t('show.col_touch') }}</h4>
+        <p style="font-size:10px; color:#9aa38e; line-height:1.7; margin:0 0 12px;">{{ t('show.touch_p') }}</p>
         {% include 'newsletter-form.html' %}
         <div style="font-size:10px; color:#9aa38e; line-height:1.8;">
           <div><span style="color:#d5f268;">✉</span> {{ support_email }}</div>
-          <div><span style="color:#d5f268;">◉</span> Remote studio · Global</div>
-          <div><span style="color:#d5f268;">↗</span> Lead finder · Preview · Outreach · Build</div>
+          <div><span style="color:#d5f268;">◉</span> {{ t('show.c_remote') }}</div>
+          <div><span style="color:#d5f268;">↗</span> {{ t('show.c_flow') }}</div>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 Reachmark — World-class website designer. All rights reserved. Map data © <a href="https://www.openstreetmap.org/copyright" style="color:#8a9a7a;">OpenStreetMap</a> ODbL.</span>
+      <span>{{ t('show.copy1') }} <a href="https://www.openstreetmap.org/copyright" style="color:#8a9a7a;">OpenStreetMap</a> {{ t('show.copy2') }}</span>
       <div class="legal">
-        <a href="/about">Privacy</a>
-        <a href="/about">Terms</a>
-        <a href="/sitemap.xml">Sitemap</a>
-        <a href="/enquire">Support via live chat ↗</a>
+        <a href="/about">{{ t('show.privacy') }}</a>
+        <a href="/about">{{ t('show.terms') }}</a>
+        <a href="/sitemap.xml">{{ t('show.sitemap') }}</a>
+        <a href="/enquire">{{ t('show.chat') }}</a>
       </div>
     </div>
   </div>

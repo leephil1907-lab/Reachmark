@@ -2,6 +2,7 @@
 Keeps the premium site (about.html) untouched — only adds owner/client-standard APIs.
 """
 import os, uuid, json, time, sqlite3
+from web.i18n import t as _t, locale_now
 from datetime import datetime, timezone
 from flask import request, jsonify, session, Response
 from werkzeug.security import generate_password_hash
@@ -60,7 +61,7 @@ def register_standard(app, db, log, settings_fn=None):
     @app.get('/api/snapshots')
     def list_snapshots():
         if not is_owner():
-            return jsonify(error='Owner login required.'),401
+            return jsonify(error=_t('er_083', locale_now())),401
         with db() as c:
             rows = [dict(r) for r in c.execute('SELECT id, note, created, created_by FROM snapshots ORDER BY created DESC LIMIT 50')]
         return jsonify(snapshots=rows)
@@ -68,7 +69,7 @@ def register_standard(app, db, log, settings_fn=None):
     @app.post('/api/snapshots')
     def create_snapshot():
         if not is_owner():
-            return jsonify(error='Owner login required.'),401
+            return jsonify(error=_t('er_083', locale_now())),401
         data = request.get_json(silent=True) or {}
         note = str(data.get('note','')).strip()[:200] or 'Manual snapshot'
         # Capture current settings + key tables counts for audit
@@ -97,11 +98,11 @@ def register_standard(app, db, log, settings_fn=None):
     @app.post('/api/snapshots/<sid>/rollback')
     def rollback_snapshot(sid):
         if not is_owner():
-            return jsonify(error='Owner login required.'),401
+            return jsonify(error=_t('er_083', locale_now())),401
         with db() as c:
             row = c.execute('SELECT * FROM snapshots WHERE id=?', (sid,)).fetchone()
             if not row:
-                return jsonify(error='Snapshot not found.'),404
+                return jsonify(error=_t('er_114', locale_now())),404
             try:
                 payload = json.loads(row['data'])
                 settings_data = payload.get('settings')
@@ -112,7 +113,7 @@ def register_standard(app, db, log, settings_fn=None):
                 # Restore settings
                 c.execute('INSERT OR REPLACE INTO settings VALUES(1,?)', (settings_json,))
             except Exception as e:
-                return jsonify(error='Could not restore snapshot: '+type(e).__name__),500
+                return jsonify(error=_t('er_031', locale_now(), d=type(e).__name__)),500
         log('snapshot', f'Rollback to {sid[:6]} — {row["note"]}')
         return jsonify(ok=True)
 
@@ -121,8 +122,8 @@ def register_standard(app, db, log, settings_fn=None):
     def list_outbox():
         if not pro_or_owner():
             if session.get('client_id'):
-                return jsonify(error='The Pro plan opens the outbox.', upgrade='/pricing', required='pro'), 402
-            return jsonify(error='Owner login required.'),401
+                return jsonify(error=_t('er_126', locale_now()), upgrade='/pricing', required='pro'), 402
+            return jsonify(error=_t('er_083', locale_now())),401
         email = client_outbox_email()
         with db() as c:
             if email:
@@ -135,37 +136,37 @@ def register_standard(app, db, log, settings_fn=None):
     def get_outbox(oid):
         if not pro_or_owner():
             if session.get('client_id'):
-                return jsonify(error='The Pro plan opens the outbox.', upgrade='/pricing', required='pro'), 402
-            return jsonify(error='Owner login required.'),401
+                return jsonify(error=_t('er_126', locale_now()), upgrade='/pricing', required='pro'), 402
+            return jsonify(error=_t('er_083', locale_now())),401
         with db() as c:
             r = c.execute('SELECT * FROM mail_outbox WHERE id=?', (oid,)).fetchone()
             if not r:
-                return jsonify(error='Not found.'),404
+                return jsonify(error=_t('er_077', locale_now())),404
             email = client_outbox_email()
             if email and str(dict(r).get('to_email', '')).strip().lower() != email:
-                return jsonify(error='Not found.'),404
+                return jsonify(error=_t('er_077', locale_now())),404
             return jsonify(dict(r))
 
     @app.post('/api/outbox/<oid>/resend')
     def resend_outbox(oid):
         if not pro_or_owner():
             if session.get('client_id'):
-                return jsonify(error='The Pro plan opens the outbox.', upgrade='/pricing', required='pro'), 402
-            return jsonify(error='Owner login required.'),401
+                return jsonify(error=_t('er_126', locale_now()), upgrade='/pricing', required='pro'), 402
+            return jsonify(error=_t('er_083', locale_now())),401
         with db() as c:
             r = c.execute('SELECT * FROM mail_outbox WHERE id=?', (oid,)).fetchone()
             if not r:
-                return jsonify(error='Not found.'),404
+                return jsonify(error=_t('er_077', locale_now())),404
             email = client_outbox_email()
             if email and str(dict(r).get('to_email', '')).strip().lower() != email:
-                return jsonify(error='Not found.'),404
+                return jsonify(error=_t('er_077', locale_now())),404
             # Attempt resend via SMTP if configured
             import ssl, smtplib
             from email.message import EmailMessage
             host = os.getenv('SMTP_HOST','').strip()
             frm = os.getenv('SMTP_FROM','').strip()
             if not host or not frm:
-                return jsonify(error='SMTP not configured. Set SMTP_HOST and SMTP_FROM.'),400
+                return jsonify(error=_t('er_104', locale_now())),400
             try:
                 msg = EmailMessage()
                 msg['From'] = frm
@@ -189,7 +190,7 @@ def register_standard(app, db, log, settings_fn=None):
                 return jsonify(ok=True)
             except Exception as e:
                 c.execute("UPDATE mail_outbox SET state=? WHERE id=?", ('resend_failed:'+type(e).__name__, oid))
-                return jsonify(error='Resend failed: '+type(e).__name__),502
+                return jsonify(error=_t('er_100', locale_now(), d=type(e).__name__)),502
 
     # --- Deploy check: preflight for live deployment (Reachmark tools/deploy-check.mjs parity) ---
     @app.get('/api/deploy-check')
@@ -286,7 +287,7 @@ def register_standard(app, db, log, settings_fn=None):
     @app.get('/api/verify-config')
     def verify_config():
         if not is_owner():
-            return jsonify(error='Owner login required.'),401
+            return jsonify(error=_t('er_083', locale_now())),401
         errors = []
         try:
             cfg = settings_fn() if settings_fn else {}
@@ -314,19 +315,19 @@ def register_standard(app, db, log, settings_fn=None):
     def mail_templates():
         if not pro_or_owner():
             if session.get('client_id'):
-                return jsonify(error='The Pro plan opens mail templates.', upgrade='/pricing', required='pro'), 402
-            return jsonify(error='Owner login required.'),401
+                return jsonify(error=_t('er_125', locale_now()), upgrade='/pricing', required='pro'), 402
+            return jsonify(error=_t('er_083', locale_now())),401
         # 9 branded templates matching Reachmark count, adapted to Reachmark context
         templates = [
-            {'id':'welcome','subject':'Confirm your Reachmark account','desc':'Sent on signup — 24h link'},
-            {'id':'verify_success','subject':'Your email is verified','desc':'Confirmation after /verify'},
-            {'id':'reset_request','subject':'Reset your Reachmark password','desc':'60 min one-time link'},
-            {'id':'reset_done','subject':'Your password was updated','desc':'After successful reset'},
-            {'id':'enquiry_received','subject':'We received your enquiry','desc':'Public enquirer copy'},
-            {'id':'enquiry_owner','subject':'New enquiry — Reachmark','desc':'Owner notification'},
-            {'id':'preview_shared','subject':'A website idea for {{business}}','desc':'Outreach with /preview link'},
-            {'id':'invoice_sent','subject':'Invoice {{number}} from Reachmark','desc':'Client invoice notification'},
-            {'id':'project_update','subject':'Project update: {{title}}','desc':'Project status change'},
+            {'id':'welcome','subject':_t('au.m_c_sub', locale_now()),'desc':_t('ml.w_desc', locale_now())},
+            {'id':'verify_success','subject':_t('ml.v_sub', locale_now()),'desc':_t('ml.v_desc', locale_now())},
+            {'id':'reset_request','subject':_t('au.m_r_sub', locale_now()),'desc':_t('ml.r_desc', locale_now())},
+            {'id':'reset_done','subject':_t('ml.rd_sub', locale_now()),'desc':_t('ml.rd_desc', locale_now())},
+            {'id':'enquiry_received','subject':_t('ml.e_sub', locale_now()),'desc':_t('ml.e_desc', locale_now())},
+            {'id':'enquiry_owner','subject':_t('ml.o_sub', locale_now()),'desc':_t('ml.o_desc', locale_now())},
+            {'id':'preview_shared','subject':_t('ml.p_sub', locale_now()),'desc':_t('ml.p_desc', locale_now())},
+            {'id':'invoice_sent','subject':_t('ml.i_sub', locale_now()),'desc':_t('ml.i_desc', locale_now())},
+            {'id':'project_update','subject':_t('ml.u_sub', locale_now()),'desc':_t('ml.u_desc', locale_now())},
         ]
         return jsonify(templates=templates)
 

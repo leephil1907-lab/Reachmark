@@ -1,18 +1,18 @@
 <section class="page" id="page-crew">
   <div class="heading-row page-heading">
     <div>
-      <div class="eyebrow">YOUR AI CREW</div>
-      <h1>Seven teammates. One loop.</h1>
-      <p>Scout finds them, Auditor measures them, Builder makes the review link, Scribe writes, Receptionist answers, Closer waits for your yes, Brag celebrates the win.</p>
+      <div class="eyebrow">{{ t('ws.cr_k') }}</div>
+      <h1>{{ t('ws.cr_h') }}</h1>
+      <p>{{ t('ws.cr_p') }}</p>
     </div>
     <div class="button-group">
-      <button class="secondary" onclick="loadCrew(true)">↻ Refresh</button>
-      <button class="primary" onclick="document.getElementById('crew-run-form').scrollIntoView({behavior:'smooth'});document.getElementById('crew-location').focus()">Run the crew ↗</button>
+      <button class="secondary" onclick="loadCrew(true)">{{ t('ws.cr_ref') }}</button>
+      <button class="primary" onclick="document.getElementById('crew-run-form').scrollIntoView({behavior:'smooth'});document.getElementById('crew-location').focus()">{{ t('ws.cr_run') }}</button>
     </div>
   </div>
 
   <div class="crew-hero">
-    <div class="crew-orb" id="crew-orb" aria-label="Crew pipeline visual"></div>
+    <div class="crew-orb" id="crew-orb" aria-label="{{ t('ws.cr_orb_aria') }}"></div>
     <div class="crew-hero-side">
       <div class="crew-stat-grid" id="crew-stats"></div>
       <div class="crew-guardrails" id="crew-guardrails"></div>
@@ -21,94 +21,94 @@
 
   <div class="crew-grid">
     <form class="card crew-run" id="crew-run-form">
-      <div class="section-top"><h3>Start a run</h3><span class="badge" id="crew-provider-badge">checking…</span></div>
-      <label>What should the crew do?
+      <div class="section-top"><h3>{{ t('ws.cr_start') }}</h3><span class="badge" id="crew-provider-badge">{{ t('ws.cr_checking') }}</span></div>
+      <label>{{ t('ws.cr_what') }}
         <select id="crew-mode">
-          <option value="campaign" selected>Full campaign run — find, verify, build a concept + review link, draft, then wait for approval</option>
-          <option value="research">Research shortlist — gather and verify only</option>
-          <option value="prepare">Prepare proposals — new concepts and drafts for leads you already have</option>
-          <option value="review">Single-lead review — one business, stopping before anything outbound</option>
-          <option value="launch">Launch kit — for work that was won</option>
-          <option value="single">One crew member only…</option>
+          <option value="campaign" selected>{{ t('ws.cr_m1') }}</option>
+          <option value="research">{{ t('ws.cr_m2') }}</option>
+          <option value="prepare">{{ t('ws.cr_m3') }}</option>
+          <option value="review">{{ t('ws.cr_m4') }}</option>
+          <option value="launch">{{ t('ws.cr_m5') }}</option>
+          <option value="single">{{ t('ws.cr_m6') }}</option>
         </select>
       </label>
-      <label id="crew-agent-wrap" hidden>Which teammate?
+      <label id="crew-agent-wrap" hidden>{{ t('ws.cr_which') }}
         <select id="crew-agent"></select>
       </label>
       <div class="crew-two">
-        <label>Location (city, country)
-          <input id="crew-location" placeholder="Austin, United States" autocomplete="off"/>
+        <label>{{ t('ws.cr_loc') }}
+          <input id="crew-location" placeholder="{{ t('ws.cr_loc_ph') }}" autocomplete="off"/>
         </label>
-        <label>Category
+        <label>{{ t('ws.cr_cat') }}
           <select id="crew-category"></select>
         </label>
       </div>
       <div class="crew-two">
-        <label>How many businesses? <input id="crew-limit" type="number" min="1" max="25" value="6"/></label>
-        <label>Tone
+        <label>{{ t('ws.cr_howmany') }} <input id="crew-limit" type="number" min="1" max="25" value="6"/></label>
+        <label>{{ t('ws.cr_tone') }}
           <select id="crew-tone">
             <option>Professional</option><option>Warm</option><option>Concise</option>
           </select>
         </label>
       </div>
-      <label class="crew-check"><input type="checkbox" id="crew-link" checked/> Build a quick review link for each business</label>
-      <label class="crew-check"><input type="checkbox" id="crew-sms"/> Also prepare a short SMS / WhatsApp note</label>
-      <button class="primary" type="submit" id="crew-submit">Run the crew ↗</button>
-      <p class="small muted" id="crew-run-hint">Nothing is ever sent to a business from here. The run stops at an approval queue and every message needs your separate yes.</p>
+      <label class="crew-check"><input type="checkbox" id="crew-link" checked/> {{ t('ws.cr_link') }}</label>
+      <label class="crew-check"><input type="checkbox" id="crew-sms"/> {{ t('ws.cr_sms') }}</label>
+      <button class="primary" type="submit" id="crew-submit">{{ t('ws.cr_run') }}</button>
+      <p class="small muted" id="crew-run-hint">{{ t('ws.cr_hint') }}</p>
     </form>
 
     <div class="card crew-run-status">
-      <div class="section-top"><h3 id="crew-run-title">Latest run</h3><span class="badge" id="crew-run-state">idle</span></div>
+      <div class="section-top"><h3 id="crew-run-title">{{ t('ws.cr_latest') }}</h3><span class="badge" id="crew-run-state">{{ t('ws.cr_idle') }}</span></div>
       <div id="crew-run-body" class="crew-run-body"></div>
-      <button class="text-link" id="crew-cancel" hidden onclick="crewCancel()">Cancel this run</button>
-      <button class="text-link" id="crew-purge" onclick="crewPurgeDemo()">Remove demo records</button>
+      <button class="text-link" id="crew-cancel" hidden onclick="crewCancel()">{{ t('ws.cr_cancel') }}</button>
+      <button class="text-link" id="crew-purge" onclick="crewPurgeDemo()">{{ t('ws.cr_purge') }}</button>
     </div>
   </div>
 
   <div class="card crew-agents">
-    <div class="section-top"><h3>The team</h3><span class="badge" id="crew-agent-count"></span></div>
+    <div class="section-top"><h3>{{ t('ws.cr_team') }}</h3><span class="badge" id="crew-agent-count"></span></div>
     <div class="crew-agent-grid" id="crew-agent-grid"></div>
   </div>
 
   <div class="card crew-approvals">
-    <div class="section-top"><h3>Approval queue</h3><span class="badge amber" id="crew-approval-count">0 waiting</span></div>
-    <p class="small muted">Every outbound item lands here as a separate decision. Approving queues it for dispatch; rejecting closes it. Nothing is sent from the run itself.</p>
+    <div class="section-top"><h3>{{ t('ws.cr_queue') }}</h3><span class="badge amber" id="crew-approval-count">{{ t('ws.cr_waiting') }}</span></div>
+    <p class="small muted">{{ t('ws.cr_queue_p') }}</p>
     <div id="crew-approvals"></div>
   </div>
 
   <div class="crew-grid">
     <div class="card">
-      <div class="section-top"><h3>Quick review links</h3><span class="badge" id="crew-link-count">0</span></div>
-      <p class="small muted">Each link asks the business one question. Views, first/last open and the answer are recorded — no tracking pixels, no third parties.</p>
+      <div class="section-top"><h3>{{ t('ws.cr_links') }}</h3><span class="badge" id="crew-link-count">0</span></div>
+      <p class="small muted">{{ t('ws.cr_links_p') }}</p>
       <div id="crew-links"></div>
     </div>
     <div class="card">
-      <div class="section-top"><h3>Front desk conversations</h3><span class="badge" id="crew-thread-count">0</span></div>
-      <p class="small muted">Answers come from published facts only. Handoffs and captured enquiries land here.</p>
+      <div class="section-top"><h3>{{ t('ws.cr_conv') }}</h3><span class="badge" id="crew-thread-count">0</span></div>
+      <p class="small muted">{{ t('ws.cr_conv_p') }}</p>
       <div id="crew-threads"></div>
     </div>
   </div>
 
   <div class="crew-grid">
     <div class="card">
-      <div class="section-top"><h3>Follow-up schedule</h3><span class="badge" id="crew-followup-count">0</span></div>
+      <div class="section-top"><h3>{{ t('ws.cr_fu') }}</h3><span class="badge" id="crew-followup-count">0</span></div>
       <div id="crew-followups"></div>
     </div>
     <div class="card">
-      <div class="section-top"><h3>Dispatch log</h3><span class="badge" id="crew-dispatch-count">0</span></div>
-      <p class="small muted">Exactly what happened to every approved message, including the ones the outbox caught.</p>
+      <div class="section-top"><h3>{{ t('ws.cr_disp') }}</h3><span class="badge" id="crew-dispatch-count">0</span></div>
+      <p class="small muted">{{ t('ws.cr_disp_p') }}</p>
       <div id="crew-dispatch"></div>
     </div>
   </div>
 
   <div class="card crew-playbook">
-    <div class="section-top"><h3>Playbooks the crew reads</h3><span class="badge" id="crew-skill-count"></span></div>
+    <div class="section-top"><h3>{{ t('ws.cr_play') }}</h3><span class="badge" id="crew-skill-count"></span></div>
     <p class="small muted" id="crew-skill-note"></p>
     <div class="crew-skill-grid" id="crew-skills"></div>
   </div>
 
   <div class="card crew-events">
-    <div class="section-top"><h3>Audit trail</h3><span class="badge" id="crew-event-count"></span></div>
+    <div class="section-top"><h3>{{ t('ws.cr_audit') }}</h3><span class="badge" id="crew-event-count"></span></div>
     <div id="crew-events"></div>
   </div>
 </section>

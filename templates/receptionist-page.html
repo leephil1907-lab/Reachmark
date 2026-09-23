@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html><html lang="{{ locale }}"><head>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ gtm_id }}');</script><!-- End Google Tag Manager -->{% endif %}
 {% if ga_id is defined and ga_id %}<!-- Global site tag (gtag.js) - Google Analytics --><script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
@@ -7,131 +7,131 @@
 <meta name="theme-color" content="#20251f"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180">
 <link rel="stylesheet" href="/static/fonts.css">
 <link rel="stylesheet" href="/static/receptionist-page.css">
-<link rel="stylesheet" href="/static/reveal.css">
+<link rel="stylesheet" href="/static/reveal.css"><script src="/static/i18n.js"></script>
 </head><body class="rx-page">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}
-<nav class="rx-nav" aria-label="Public pages"><a href="/" class="rx-brand"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
-<div class="rx-links"><a href="/">About</a><a href="/showcase">Samples</a><a href="/receptionist" aria-current="page">AI Receptionist</a><a href="/about#pricing">Pricing</a><a href="/pricing">Plans</a>{% if client_logged_in %}<a href="/dashboard">Dashboard</a>{% elif owner_logged_in %}<a href="/workspace">Workspace</a>{% endif %}<a data-magnet class="rx-btn small" href="/enquire">Enquire ↗</a></div></nav>
+<nav class="rx-nav" aria-label="{{ t('rx.nav_aria') }}"><a href="/" class="rx-brand"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
+<div class="rx-links"><a href="/">{{ t('rx.nav_about') }}</a><a href="/showcase">{{ t('rx.nav_samples') }}</a><a href="/receptionist" aria-current="page">{{ t('rx.nav_rx') }}</a><a href="/about#pricing">{{ t('rx.nav_pricing') }}</a><a href="/pricing">{{ t('nav.plans') }}</a>{% if client_logged_in %}<a href="/dashboard">{{ t('nav.dashboard') }}</a>{% elif owner_logged_in %}<a href="/workspace">{{ t('nav.workspace') }}</a>{% endif %}<a data-magnet class="rx-btn small" href="/enquire">{{ t('rx.nav_enquire') }}</a>{% include 'locale-switcher.html' %}</div></nav>
 <main>
 <header class="rx-hero rx-aurora"><div class="rx-hero-copy">
-<p class="rx-eyebrow">Reachmark AI Receptionist</p>
-<h1>Every chat, enquiry and booking — handled.</h1>
-<p class="rx-sub">A front desk for your website that answers visitors from published facts, captures every enquiry as real work, and hands over to you with the context attached — day and night.</p>
+<p class="rx-eyebrow">{{ t('rx.eyebrow') }}</p>
+<h1>{{ t('rx.h1') }}</h1>
+<p class="rx-sub">{{ t('rx.sub') }}</p>
 <ul class="rx-checks">
-<li>Answers from your published facts only — never a guess</li>
-<li>Captures every enquiry into your inbox and lead list</li>
-<li>Hands over to you with a summary and a draft reply</li>
-<li>Lives on every page of your Reachmark website</li>
+<li>{{ t('rx.c1') }}</li>
+<li>{{ t('rx.c2') }}</li>
+<li>{{ t('rx.c3') }}</li>
+<li>{{ t('rx.c4') }}</li>
 </ul>
-<div class="rx-cta-row"><button type="button" data-magnet class="rx-btn" data-open-widget>Try it live</button><a data-magnet class="rx-btn ghost" href="/about#pricing">See pricing</a></div>
-<p class="rx-micro">The chat bubble on this page <em>is</em> the receptionist. Ask it anything.</p>
-<p class="rx-micro" data-frontdesk-status>Front desk status: checking…</p>
+<div class="rx-cta-row"><button type="button" data-magnet class="rx-btn" data-open-widget>{{ t('rx.try') }}</button><a data-magnet class="rx-btn ghost" href="/about#pricing">{{ t('rx.see_pricing') }}</a></div>
+<p class="rx-micro">{{ t('rx.micro_a') }} <em>{{ t('rx.micro_em') }}</em> {{ t('rx.micro_b') }}</p>
+<p class="rx-micro" data-frontdesk-status>{{ t('rx.checking') }}</p>
 </div>
-<div class="rx-hero-art" aria-label="Example of the owner's inbox view">
-<div class="rx-inbox"><p class="rx-demo-tag">Example view</p>
-<h2>Overnight, while you slept</h2>
+<div class="rx-hero-art" aria-label="{{ t('rx.ex_view') }}">
+<div class="rx-inbox"><p class="rx-demo-tag">{{ t('rx.ex_view') }}</p>
+<h2>{{ t('rx.overnight') }}</h2>
 <div class="rx-inbox-grid">
-<section><h3>Key updates</h3><ul><li><b>2</b> new enquiries captured</li><li><b>1</b> visitor asked for a human</li></ul></section>
-<section><h3>Action items</h3><ul><li>Reply drafted for the pricing question</li><li>Concept preview requested — 1 business</li></ul></section>
-<section><h3>Handoffs</h3><ul><li>“Can I talk to a person?” — with transcript</li></ul></section>
+<section><h3>{{ t('rx.k_updates') }}</h3><ul><li><b>2</b> {{ t('rx.u1') }}</li><li><b>1</b> {{ t('rx.u2') }}</li></ul></section>
+<section><h3>{{ t('rx.k_actions') }}</h3><ul><li>{{ t('rx.a1') }}</li><li>{{ t('rx.a2') }}</li></ul></section>
+<section><h3>{{ t('rx.k_handoffs') }}</h3><ul><li>{{ t('rx.hf1') }}</li></ul></section>
 </div>
-<p class="rx-inbox-foot">Nothing invented: every line traces back to a saved conversation.</p>
+<p class="rx-inbox-foot">{{ t('rx.inbox_foot') }}</p>
 </div></div></header>
 
-<section data-reveal class="rx-strip" aria-label="Trades this suits"><p>At home in any local business — for example:</p>
-<ul><li>Barbers &amp; salons</li><li>Bakeries &amp; cafés</li><li>Dental studios</li><li>Clinics &amp; physios</li><li>Law firms</li><li>Trades</li><li>Retail</li></ul></section>
+<section data-reveal class="rx-strip" aria-label="{{ t('rx.ind_h') }}"><p>{{ t('rx.strip_p') }}</p>
+<ul><li>{{ t('rx.s1') }}</li><li>{{ t('rx.s2') }}</li><li>{{ t('rx.s3') }}</li><li>{{ t('rx.s4') }}</li><li>{{ t('rx.s5') }}</li><li>{{ t('rx.s6') }}</li><li>{{ t('rx.s7') }}</li></ul></section>
 
-<section data-reveal class="rx-demo" id="demo" aria-label="Example conversation">
+<section data-reveal class="rx-demo" id="demo" aria-label="{{ t('rx.ex_conv') }}">
 <div class="rx-demo-copy">
-<p class="rx-eyebrow">How it works</p>
-<h2>Watch the front desk work an example conversation</h2>
-<p>A visitor lands at 11&nbsp;pm with a pricing question. This is what happens next — an illustrated example, using real answers from the knowledge base.</p>
-<ol class="rx-steps" role="tablist" aria-label="Conversation steps">
-<li><button type="button" role="tab" aria-selected="true" data-step="0"><span>01</span><span>Chat answered<small>From published facts</small></span></button></li>
-<li><button type="button" role="tab" aria-selected="false" data-step="1"><span>02</span><span>Enquiry captured<small>Inbox + lead record</small></span></button></li>
-<li><button type="button" role="tab" aria-selected="false" data-step="2"><span>03</span><span>Owner summary<small>Context attached</small></span></button></li>
-<li><button type="button" role="tab" aria-selected="false" data-step="3"><span>04</span><span>Follow-up sent<small>You reply personally</small></span></button></li>
+<p class="rx-eyebrow">{{ t('rx.demo_k') }}</p>
+<h2>{{ t('rx.demo_h') }}</h2>
+<p>{{ t('rx.demo_p') }}</p>
+<ol class="rx-steps" role="tablist" aria-label="{{ t('rx.steps_aria') }}">
+<li><button type="button" role="tab" aria-selected="true" data-step="0"><span>01</span><span>{{ t('rx.st1') }}<small>{{ t('rx.st1s') }}</small></span></button></li>
+<li><button type="button" role="tab" aria-selected="false" data-step="1"><span>02</span><span>{{ t('rx.st2') }}<small>{{ t('rx.st2s') }}</small></span></button></li>
+<li><button type="button" role="tab" aria-selected="false" data-step="2"><span>03</span><span>{{ t('rx.st3') }}<small>{{ t('rx.st3s') }}</small></span></button></li>
+<li><button type="button" role="tab" aria-selected="false" data-step="3"><span>04</span><span>{{ t('rx.st4') }}<small>{{ t('rx.st4s') }}</small></span></button></li>
 </ol></div>
 <div class="rx-phone" aria-live="polite">
-<p class="rx-demo-tag">Example conversation</p>
+<p class="rx-demo-tag">{{ t('rx.ex_conv') }}</p>
 <div class="rx-screen" data-screen="0">
-<div class="rx-chat"><p class="them">How much for a 5-page site with a blog?</p>
-<p class="us">{{ tiers.growth.name }} is {{ tiers.growth.price_label }} — up to 5 pages plus a blog, a CMS for your own updates, SEO plus analytics, {{ tiers.growth.revisions }} revisions and priority support.</p>
-<p class="them">That fits. I’m Maya — maya@example.test</p>
-<p class="us">Thanks Maya — I’ve passed your details to the studio owner, who replies personally.</p></div>
-<p class="rx-screen-cap">Answered in seconds, quoted from the published tiers — no guessing.</p></div>
+<div class="rx-chat"><p class="them">{{ t('rx.c0_q') }}</p>
+<p class="us">{{ t('rx.c0_a', name=tiers.growth.name, price=tiers.growth.price_label, revs=tiers.growth.revisions) }}</p>
+<p class="them">{{ t('rx.c0_m') }}</p>
+<p class="us">{{ t('rx.c0_r') }}</p></div>
+<p class="rx-screen-cap">{{ t('rx.cap0') }}</p></div>
 <div class="rx-screen" data-screen="1" hidden>
-<div class="rx-card"><h3>New enquiry · 11:04 pm</h3><dl><dt>From</dt><dd>Maya (maya@example.test)</dd><dt>Intent</dt><dd>Pricing — Growth tier</dd><dt>Saved to</dt><dd>Studio inbox ✓ · Lead list ✓ · Transcript ✓</dd></dl></div>
-<p class="rx-screen-cap">An address means real work: enquiry, lead record and full transcript.</p></div>
+<div class="rx-card"><h3>{{ t('rx.c1_h') }}</h3><dl><dt>{{ t('rx.c1_from') }}</dt><dd>Maya (maya@example.test)</dd><dt>{{ t('rx.c1_intent') }}</dt><dd>{{ t('rx.c1_dd2') }}</dd><dt>{{ t('rx.c1_saved') }}</dt><dd>{{ t('rx.c1_dd3') }}</dd></dl></div>
+<p class="rx-screen-cap">{{ t('rx.cap1') }}</p></div>
 <div class="rx-screen" data-screen="2" hidden>
-<div class="rx-card"><h3>Morning summary for the owner</h3><p>Maya asked about a 5-page site with a blog, heard the {{ tiers.growth.name }} tier ({{ tiers.growth.price_label }}), and left an email. Suggested reply drafted — edit and send.</p><p class="rx-draft">“Thanks Maya — Growth covers exactly that. If you tell me…”</p></div>
-<p class="rx-screen-cap">You wake up to context, not a cold “someone messaged”.</p></div>
+<div class="rx-card"><h3>{{ t('rx.c2_h') }}</h3><p>{{ t('rx.c2_p', name=tiers.growth.name, price=tiers.growth.price_label) }}</p><p class="rx-draft">{{ t('rx.c2_d') }}</p></div>
+<p class="rx-screen-cap">{{ t('rx.cap2') }}</p></div>
 <div class="rx-screen" data-screen="3" hidden>
-<div class="rx-chat"><p class="owner">Hi Maya — yes, Growth covers a 5-page site plus blog. I’ve attached a tailored estimate; nothing is charged until you approve scope.</p>
-<p class="owner">If it helps, I can prepare a one-page concept preview first — takes a minute to look at. ✓✓ Read 8:02 am</p></div>
-<p class="rx-screen-cap">The human closes it. The receptionist did the night shift.</p></div>
+<div class="rx-chat"><p class="owner">{{ t('rx.c3_a') }}</p>
+<p class="owner">{{ t('rx.c3_b') }}</p></div>
+<p class="rx-screen-cap">{{ t('rx.cap3') }}</p></div>
 </div></section>
 
-<section data-reveal class="rx-features" aria-label="What it does"><p class="rx-eyebrow">Why it works</p>
-<h2>A front desk that never guesses</h2>
+<section data-reveal class="rx-features" aria-label="{{ t('rx.feat_aria') }}"><p class="rx-eyebrow">{{ t('rx.feat_k') }}</p>
+<h2>{{ t('rx.feat_h') }}</h2>
 <div class="rx-cards">
-<article><h3>Answers from facts only</h3><p>Every answer is quoted from your published pages. Anything unverified becomes an honest “I don’t have that to hand” — plus a handoff to you.</p></article>
-<article><h3>Captures every lead</h3><p>The moment a visitor shares an email, it becomes an enquiry in your inbox and a record in your lead list. No chat ever ends in a dead end.</p></article>
-<article><h3>Hands over with context</h3><p>“I want a human” arrives with the transcript, the intent and a suggested reply already drafted. You edit, you send.</p></article>
-<article><h3>On duty on every page</h3><p>The same assistant sits on your home page, samples and enquiry form — after hours, weekends, holidays included.</p></article>
+<article><h3>{{ t('rx.f1h') }}</h3><p>{{ t('rx.f1p') }}</p></article>
+<article><h3>{{ t('rx.f2h') }}</h3><p>{{ t('rx.f2p') }}</p></article>
+<article><h3>{{ t('rx.f3h') }}</h3><p>{{ t('rx.f3p') }}</p></article>
+<article><h3>{{ t('rx.f4h') }}</h3><p>{{ t('rx.f4p') }}</p></article>
 </div></section>
 
-<section data-reveal class="rx-industries" aria-label="Industries"><p class="rx-eyebrow">Where it fits</p>
-<h2>Made for the way local businesses work</h2>
-<div class="rx-tabs" role="tablist" aria-label="Industry examples">
-<button type="button" role="tab" aria-selected="true" data-tab="0">Clinics &amp; health</button>
-<button type="button" role="tab" aria-selected="false" data-tab="1">Home services</button>
-<button type="button" role="tab" aria-selected="false" data-tab="2">Professional services</button>
-<button type="button" role="tab" aria-selected="false" data-tab="3">Cafés &amp; retail</button>
-<button type="button" role="tab" aria-selected="false" data-tab="4">Trades &amp; studios</button>
+<section data-reveal class="rx-industries" aria-label="{{ t('rx.ind_aria') }}"><p class="rx-eyebrow">{{ t('rx.ind_k') }}</p>
+<h2>{{ t('rx.ind_h') }}</h2>
+<div class="rx-tabs" role="tablist" aria-label="{{ t('rx.ind_aria') }}">
+<button type="button" role="tab" aria-selected="true" data-tab="0">{{ t('rx.t0') }}</button>
+<button type="button" role="tab" aria-selected="false" data-tab="1">{{ t('rx.t1') }}</button>
+<button type="button" role="tab" aria-selected="false" data-tab="2">{{ t('rx.t2') }}</button>
+<button type="button" role="tab" aria-selected="false" data-tab="3">{{ t('rx.t3') }}</button>
+<button type="button" role="tab" aria-selected="false" data-tab="4">{{ t('rx.t4') }}</button>
 </div>
 <div class="rx-tabpanels">
-<div role="tabpanel" data-panel="0"><h3>Clinics, dental studios, physios</h3><p>Takes the booking question at midnight and turns it into a morning appointment request.</p><ul><li>“Do you take bookings online?” → explains the route, captures the request</li><li>“What does the first visit cost?” → quotes only published prices</li><li>Anything clinical → straight to a human, with the transcript</li></ul></div>
-<div role="tabpanel" data-panel="1" hidden><h3>Plumbers, electricians, cleaners</h3><p>On a job with dirty hands is exactly when the phone rings. The chat takes it instead.</p><ul><li>“Can you come this week?” → captures area, job and callback details</li><li>“How much for…?” → published rates or an honest “the owner quotes that”</li><li>Emergencies → flags as urgent in the handoff</li></ul></div>
-<div role="tabpanel" data-panel="2" hidden><h3>Lawyers, accountants, consultants</h3><p>Screens the vague “quick question” and arrives with the facts sorted.</p><ul><li>“Do you handle…?” → answers from the services page only</li><li>“Can I book a consultation?” → captures details for a callback</li><li>Anything resembling advice → refused, handed to the professional</li></ul></div>
-<div role="tabpanel" data-panel="3" hidden><h3>Cafés, bakeries, shops</h3><p>Answers the regulars’ questions while the queue is out of the door.</p><ul><li>“Are you open Sunday?” → published hours, nothing assumed</li><li>“Do you do orders for events?” → captures date, size and contact</li><li>“Where are you?” → the published address, never a guess</li></ul></div>
-<div role="tabpanel" data-panel="4" hidden><h3>Barbers, salons, builders, studios</h3><p>Keeps the chair full and the diary honest.</p><ul><li>“How much for…?” → published price list or owner quote</li><li>“Can I move my appointment?” → captured with name and details</li><li>Portfolio questions → points at real samples, never mock clients</li></ul></div>
+<div role="tabpanel" data-panel="0"><h3>{{ t('rx.p0h') }}</h3><p>{{ t('rx.p0p') }}</p><ul><li>{{ t('rx.p0a') }}</li><li>{{ t('rx.p0b') }}</li><li>{{ t('rx.p0c') }}</li></ul></div>
+<div role="tabpanel" data-panel="1" hidden><h3>{{ t('rx.p1h') }}</h3><p>{{ t('rx.p1p') }}</p><ul><li>{{ t('rx.p1a') }}</li><li>{{ t('rx.p1b') }}</li><li>{{ t('rx.p1c') }}</li></ul></div>
+<div role="tabpanel" data-panel="2" hidden><h3>{{ t('rx.p2h') }}</h3><p>{{ t('rx.p2p') }}</p><ul><li>{{ t('rx.p2a') }}</li><li>{{ t('rx.p2b') }}</li><li>{{ t('rx.p2c') }}</li></ul></div>
+<div role="tabpanel" data-panel="3" hidden><h3>{{ t('rx.p3h') }}</h3><p>{{ t('rx.p3p') }}</p><ul><li>{{ t('rx.p3a') }}</li><li>{{ t('rx.p3b') }}</li><li>{{ t('rx.p3c') }}</li></ul></div>
+<div role="tabpanel" data-panel="4" hidden><h3>{{ t('rx.p4h') }}</h3><p>{{ t('rx.p4p') }}</p><ul><li>{{ t('rx.p4a') }}</li><li>{{ t('rx.p4b') }}</li><li>{{ t('rx.p4c') }}</li></ul></div>
 </div></section>
 
-<section data-reveal class="rx-tones" aria-label="Tones of voice"><p class="rx-eyebrow">Tone of voice</p>
-<h2>Pick the tone that fits the business</h2>
-<p class="rx-tones-sub">Same facts, different manner. Press play to hear each one — spoken live by your own browser, so what you hear is exactly what the words say.</p>
+<section data-reveal class="rx-tones" aria-label="{{ t('rx.tone_aria') }}"><p class="rx-eyebrow">{{ t('rx.tone_k') }}</p>
+<h2>{{ t('rx.tone_h') }}</h2>
+<p class="rx-tones-sub">{{ t('rx.tone_sub') }}</p>
 <div class="rx-cards three">
-<article data-tone="warm"><h3>Warm &amp; friendly</h3><p class="rx-tone-for">Cafés · salons · studios</p><blockquote>Hello and welcome — lovely to see you! Ask me anything about prices, timing or booking, and I’ll look it up for you.</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>Hear it</button></p></article>
-<article data-tone="brief"><h3>Brief &amp; professional</h3><p class="rx-tone-for">Clinics · firms · consultancies</p><blockquote>Good day. I can help with prices, timelines or arranging a callback. How may I help?</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>Hear it</button></p></article>
-<article data-tone="patient"><h3>Patient &amp; plain-spoken</h3><p class="rx-tone-for">Trades · services · everyone</p><blockquote>No rush at all — tell me what you need in your own words, and we’ll take it from there, one step at a time.</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>Hear it</button></p></article>
+<article data-tone="warm"><h3>{{ t('rx.tone1h') }}</h3><p class="rx-tone-for">{{ t('rx.tone1f') }}</p><blockquote>{{ t('rx.tone1q') }}</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>{{ t('rx.hear') }}</button></p></article>
+<article data-tone="brief"><h3>{{ t('rx.tone2h') }}</h3><p class="rx-tone-for">{{ t('rx.tone2f') }}</p><blockquote>{{ t('rx.tone2q') }}</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>{{ t('rx.hear') }}</button></p></article>
+<article data-tone="patient"><h3>{{ t('rx.tone3h') }}</h3><p class="rx-tone-for">{{ t('rx.tone3f') }}</p><blockquote>{{ t('rx.tone3q') }}</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>{{ t('rx.hear') }}</button></p></article>
 </div>
-<p class="rx-micro" data-tts-note hidden>Your browser has no speech available right now — the words above are the whole script.</p></section>
+<p class="rx-micro" data-tts-note hidden>{{ t('rx.tts_note') }}</p></section>
 
-<section data-reveal class="rx-pricing" aria-label="Pricing"><p class="rx-eyebrow">Pricing</p>
-<h2>Included with every Reachmark build</h2>
-<p>The receptionist is part of the website, not an add-on. Same published tiers as everything else:</p>
+<section data-reveal class="rx-pricing" aria-label="{{ t('rx.pr_aria') }}"><p class="rx-eyebrow">{{ t('rx.pr_k') }}</p>
+<h2>{{ t('rx.pr_h') }}</h2>
+<p>{{ t('rx.pr_p') }}</p>
 <ul class="rx-tiers">{% for t in brand.tiers %}<li><b>{{ t.line }}</b><span>{{ tier_notes[t.id] }}</span></li>{% endfor %}</ul>
-<p><a data-magnet class="rx-btn" href="/about#pricing">Full pricing on the about page</a></p></section>
+<p><a data-magnet class="rx-btn" href="/about#pricing">{{ t('rx.pr_a') }}</a></p></section>
 
-<section data-reveal class="rx-faq" aria-label="Frequently asked questions"><p class="rx-eyebrow">Straight answers</p>
-<h2>Asked all the time — answered from published facts</h2>
-<p class="rx-faq-sub">These are the same answers the chat gives. Same file, same words, no exceptions.</p>
+<section data-reveal class="rx-faq" aria-label="{{ t('rx.faq_aria') }}"><p class="rx-eyebrow">{{ t('rx.faq_k') }}</p>
+<h2>{{ t('rx.faq_h') }}</h2>
+<p class="rx-faq-sub">{{ t('rx.faq_sub') }}</p>
 <div class="rx-faq-list">
 {% for item in faqs %}<details><summary>{{ item.q[0]|upper }}{{ item.q[1:] }}?</summary><p>{{ item.a }}</p></details>
 {% endfor %}</div></section>
 
-<section data-reveal class="rx-final"><h2>Let AI run your front desk.</h2>
-<p>Try the chat on this page right now — or send an enquiry and the studio replies with a tailored estimate.</p>
-<p class="rx-cta-row"><button type="button" data-magnet class="rx-btn" data-open-widget>Try it live</button><a data-magnet class="rx-btn ghost" href="/enquire">Send an enquiry</a></p></section>
+<section data-reveal class="rx-final"><h2>{{ t('rx.fin_h') }}</h2>
+<p>{{ t('rx.fin_p') }}</p>
+<p class="rx-cta-row"><button type="button" data-magnet class="rx-btn" data-open-widget>{{ t('rx.try') }}</button><a data-magnet class="rx-btn ghost" href="/enquire">{{ t('rx.send_enq') }}</a></p></section>
 
 {% include 'adsense-footer.html' %}
-<footer class="rx-footer"><p>© <span data-year>2026</span> Reachmark · <a href="/">About</a> · <a href="/showcase">Samples</a> · <a href="/about#pricing">Pricing</a> · <a href="/pricing">Plans</a> · <a href="/enquire">Enquire</a> · <a href="mailto:{{ support_email }}">Support</a></p></footer>
+<footer class="rx-footer"><p>© <span data-year>2026</span> Reachmark · <a href="/">{{ t('rx.nav_about') }}</a> · <a href="/showcase">{{ t('rx.nav_samples') }}</a> · <a href="/about#pricing">{{ t('rx.nav_pricing') }}</a> · <a href="/pricing">{{ t('nav.plans') }}</a> · <a href="/enquire">{{ t('rx.send_enq') }}</a> · <a href="mailto:{{ support_email }}">{{ t('rx.foot_support') }}</a></p></footer>
 </main>
 {% include 'receptionist.html' %}
 
 {% if owner_logged_in %}
-<section class="rx-agent" aria-label="Owner agent console">
+<section class="rx-agent" aria-label="{{ t('rx.ag_aria') }}">
 <style>
 .rx-agent{max-width:920px;margin:34px auto;padding:30px;background:#14210f;color:#e9f2da;border-radius:18px;border:1px solid #2c3d22}
 .rx-agent h2{margin:0 0 4px;font-size:22px}.rx-agent>p{margin:0 0 18px;color:#a9bc93;font-size:13.5px}
@@ -147,50 +147,51 @@
 #rx-agent-out{margin:16px 0 0;background:#0d160a;border:1px solid #33482a;border-radius:10px;padding:14px;font:12px/1.65 ui-monospace,Consolas,monospace;color:#cfe39f;white-space:pre-wrap;max-height:320px;overflow:auto;min-height:60px}
 @media(max-width:700px){.rx-agent-grid{grid-template-columns:1fr}}
 </style>
-<h2>Owner agent console</h2>
-<p>Signed in as the studio owner — the front desk works for you here. Reads are instant; sends need a lawful basis and a ticked approval. Every run is logged.</p>
+<h2>{{ t('rx.ag_h') }}</h2>
+<p>{{ t('rx.ag_p') }}</p>
 <div class="rx-agent-grid">
-<div class="rx-agent-card"><h3>STATUS</h3><div class="rx-agent-row">
-<button type="button" data-act="stats">Workspace stats</button>
-<button type="button" class="ghost" data-act="enquiry_list" data-params='{"status":"New"}'>New enquiries</button>
-<button type="button" class="ghost" data-act="invoice_list">Invoices</button>
-<button type="button" class="ghost" data-act="project_list">Projects</button>
+<div class="rx-agent-card"><h3>{{ t('rx.ag_status') }}</h3><div class="rx-agent-row">
+<button type="button" data-act="stats">{{ t('rx.ag_stats') }}</button>
+<button type="button" class="ghost" data-act="enquiry_list" data-params='{"status":"New"}'>{{ t('rx.ag_new') }}</button>
+<button type="button" class="ghost" data-act="invoice_list">{{ t('rx.ag_inv') }}</button>
+<button type="button" class="ghost" data-act="project_list">{{ t('rx.ag_proj') }}</button>
 </div></div>
-<div class="rx-agent-card"><h3>FIND LEADS</h3>
-<input id="ag-q" placeholder="Name, email or city" maxlength="120">
-<div class="rx-agent-row"><button type="button" id="ag-find">Search</button></div></div>
-<div class="rx-agent-card"><h3>ADD LEAD</h3>
-<input id="ag-name" placeholder="Business name *" maxlength="200">
-<input id="ag-email" placeholder="Email" maxlength="250">
-<input id="ag-city" placeholder="City" maxlength="200">
-<input id="ag-web" placeholder="Website" maxlength="1000">
-<div class="rx-agent-row"><button type="button" id="ag-add">Add lead</button></div></div>
-<div class="rx-agent-card"><h3>LEAD DETAIL</h3>
-<input id="ag-id" placeholder="Lead id">
-<select id="ag-stage"><option value="">— stage —</option><option>New</option><option>Drafted</option><option>Contacted</option><option>Replied</option><option>Won</option><option>Not a fit</option></select>
-<textarea id="ag-note" placeholder="Note" maxlength="2000"></textarea>
-<div class="rx-agent-row"><button type="button" id="ag-get">Open</button><button type="button" id="ag-save">Save</button><button type="button" class="ghost" id="ag-audit">Run audit</button><button type="button" class="danger" id="ag-del">Delete</button></div></div>
-<div class="rx-agent-card"><h3>SEND OUTREACH</h3>
-<input id="ag-send-id" placeholder="Lead id">
-<input id="ag-basis" placeholder="Lawful basis (10+ characters)" maxlength="300">
-<label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:8px"><input type="checkbox" id="ag-ok" style="width:auto;margin:0"> I reviewed the message and basis</label>
-<div class="rx-agent-row"><button type="button" id="ag-send">Send now</button></div></div>
-<div class="rx-agent-card"><h3>DISCOVER &amp; FOLLOW-UPS</h3>
-<input id="ag-disc-city" placeholder="City, Country" maxlength="150">
-<input id="ag-disc-cat" placeholder="Category (e.g. Bakery)" maxlength="60">
-<div class="rx-agent-row"><button type="button" id="ag-disc">Run discovery</button></div>
-<input id="ag-eq-id" placeholder="Enquiry id" style="margin-top:10px">
+<div class="rx-agent-card"><h3>{{ t('rx.ag_find') }}</h3>
+<input id="ag-q" placeholder="{{ t('rx.ag_q_ph') }}" maxlength="120">
+<div class="rx-agent-row"><button type="button" id="ag-find">{{ t('rx.ag_search') }}</button></div></div>
+<div class="rx-agent-card"><h3>{{ t('rx.ag_add') }}</h3>
+<input id="ag-name" placeholder="{{ t('rx.ag_name_ph') }}" maxlength="200">
+<input id="ag-email" placeholder="{{ t('rx.ag_email_ph') }}" maxlength="250">
+<input id="ag-city" placeholder="{{ t('rx.ag_city_ph') }}" maxlength="200">
+<input id="ag-web" placeholder="{{ t('rx.ag_web_ph') }}" maxlength="1000">
+<div class="rx-agent-row"><button type="button" id="ag-add">{{ t('rx.ag_add_b') }}</button></div></div>
+<div class="rx-agent-card"><h3>{{ t('rx.ag_det') }}</h3>
+<input id="ag-id" placeholder="{{ t('rx.ag_id_ph') }}">
+<select id="ag-stage"><option value="">{{ t('rx.ag_stage') }}</option><option>New</option><option>Drafted</option><option>Contacted</option><option>Replied</option><option>Won</option><option>Not a fit</option></select>
+<textarea id="ag-note" placeholder="{{ t('rx.ag_note_ph') }}" maxlength="2000"></textarea>
+<div class="rx-agent-row"><button type="button" id="ag-get">{{ t('rx.ag_open') }}</button><button type="button" id="ag-save">{{ t('rx.ag_save') }}</button><button type="button" class="ghost" id="ag-audit">{{ t('rx.ag_audit') }}</button><button type="button" class="danger" id="ag-del">{{ t('rx.ag_del') }}</button></div></div>
+<div class="rx-agent-card"><h3>{{ t('rx.ag_send_h') }}</h3>
+<input id="ag-send-id" placeholder="{{ t('rx.ag_id_ph') }}">
+<input id="ag-basis" placeholder="{{ t('rx.ag_basis_ph') }}" maxlength="300">
+<label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:8px"><input type="checkbox" id="ag-ok" style="width:auto;margin:0"> {{ t('rx.ag_ok') }}</label>
+<div class="rx-agent-row"><button type="button" id="ag-send">{{ t('rx.ag_send_b') }}</button></div></div>
+<div class="rx-agent-card"><h3>{{ t('rx.ag_disc_h') }}</h3>
+<input id="ag-disc-city" placeholder="{{ t('rx.ag_dcity_ph') }}" maxlength="150">
+<input id="ag-disc-cat" placeholder="{{ t('rx.ag_dcat_ph') }}" maxlength="60">
+<div class="rx-agent-row"><button type="button" id="ag-disc">{{ t('rx.ag_disc_b') }}</button></div>
+<input id="ag-eq-id" placeholder="{{ t('rx.ag_eq_ph') }}" style="margin-top:10px">
 <select id="ag-eq-status"><option>New</option><option>In progress</option><option>Answered</option><option>Closed</option></select>
-<div class="rx-agent-row"><button type="button" id="ag-eq">Save enquiry</button></div></div>
+<div class="rx-agent-row"><button type="button" id="ag-eq">{{ t('rx.ag_eq_b') }}</button></div></div>
 </div>
-<pre id="rx-agent-out">Results appear here.</pre>
+<pre id="rx-agent-out">{{ t('rx.ag_out') }}</pre>
 <script>
 (function(){
   var out=document.getElementById('rx-agent-out');
   var csrf=(document.querySelector('meta[name=csrf-token]')||{}).content||'';
   function show(x){out.textContent=typeof x==='string'?x:JSON.stringify(x,null,2);}
-  function act(tool,params){show('Running '+tool+' …');
-    return fetch('/api/receptionist/act',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tool:tool,params:params||{}})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(o){show(o.j);return o;}).catch(function(e){show('Error: '+e.message);});}
+  var T_=window.T||function(k,f){return f;};
+  function act(tool,params){show(T_('rx.js_running','Running')+' '+tool+' …');
+    return fetch('/api/receptionist/act',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tool:tool,params:params||{}})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(o){show(o.j);return o;}).catch(function(e){show(T_('rx.js_error','Error')+': '+e.message);});}
   function v(id){return (document.getElementById(id).value||'').trim();}
   document.querySelectorAll('[data-act]').forEach(function(b){b.onclick=function(){var p={};try{p=JSON.parse(b.dataset.params||'{}');}catch(e){}act(b.dataset.act,p);};});
   document.getElementById('ag-find').onclick=function(){act('lead_list',{q:v('ag-q'),limit:10});};
@@ -198,8 +199,8 @@
   document.getElementById('ag-get').onclick=function(){act('lead_get',{id:v('ag-id')});};
   document.getElementById('ag-save').onclick=function(){var p={id:v('ag-id')};if(v('ag-stage'))p.stage=v('ag-stage');if(v('ag-note'))p.note=v('ag-note');act('lead_update',p);};
   document.getElementById('ag-audit').onclick=function(){act('lead_audit',{id:v('ag-id')});};
-  document.getElementById('ag-del').onclick=function(){if(confirm('Delete this lead?'))act('lead_delete',{id:v('ag-id')});};
-  document.getElementById('ag-send').onclick=function(){if(!document.getElementById('ag-ok').checked){show('Tick the approval box first.');return;}if(!confirm('Send this outreach email now?'))return;act('lead_send',{id:v('ag-send-id'),basis:v('ag-basis')});};
+  document.getElementById('ag-del').onclick=function(){if(confirm(T_('rx.js_del_lead','Delete this lead?')))act('lead_delete',{id:v('ag-id')});};
+  document.getElementById('ag-send').onclick=function(){if(!document.getElementById('ag-ok').checked){show(T_('rx.js_tick','Tick the approval box first.'));return;}if(!confirm(T_('rx.js_send_c','Send this outreach email now?')))return;act('lead_send',{id:v('ag-send-id'),basis:v('ag-basis')});};
   document.getElementById('ag-disc').onclick=function(){act('discover_run',{city:v('ag-disc-city'),category:v('ag-disc-cat')});};
   document.getElementById('ag-eq').onclick=function(){act('enquiry_update',{id:v('ag-eq-id'),status:v('ag-eq-status'),notes:''});};
 })();

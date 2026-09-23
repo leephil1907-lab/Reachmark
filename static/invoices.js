@@ -1,4 +1,5 @@
 // Invoices — Reachmark original billing UI (no AllScale branding copied)
+var T_=window.T||function(k,f){return f;};
 let invoiceData = {invoices:[], currencies:{}, statuses:[]};
 
 function moneyFmt(minor, currency){
@@ -60,10 +61,10 @@ async function checkAuth(){
     });
     // Hide owner-only sections in overview if needed
     const emptyNote = document.getElementById('invoice-notice');
-    if(emptyNote) emptyNote.textContent='Only invoices assigned to your email are shown here. Download PDFs anytime.';
+    if(emptyNote) emptyNote.textContent=T_('wsj.iv_notice','Only invoices assigned to your email are shown here. Download PDFs anytime.');
     // Show client-specific banner in projects
     const projHead = document.querySelector('#page-projects .page-heading p');
-    if(projHead) projHead.textContent='Projects your studio shared with you.';
+    if(projHead) projHead.textContent=T_('wsj.iv_proj','Projects your studio shared with you.');
 
   } else {
     document.querySelectorAll('.nav').forEach(el=>el.style.display='');
@@ -73,7 +74,7 @@ async function checkAuth(){
   if(profile){
     if(sessionRole==='client'){
       fetch('/api/auth/me').then(r=>r.json()).then(j=>{
-        if(j.email) profile.innerHTML=esc(j.name||j.email.split('@')[0])+'<small>Client portal · '+esc(j.email)+'</small>';
+        if(j.email) profile.innerHTML=esc(j.name||j.email.split('@')[0])+'<small>'+T_('wsj.iv_portal','Client portal · {e}').replace('{e}',esc(j.email))+'</small>';
       }).catch(()=>{});
     } else if(sessionRole==='owner'){
       // keep existing owner text from state.settings
@@ -86,7 +87,7 @@ async function checkAuth(){
       if(sessionRole==='client'){
         const r=await fetch('/api/auth/logout',{method:'POST',headers:{'X-CSRF-Token':document.querySelector('meta[name="csrf-token"]')?.content||''}});
         if(r.ok) location.href='/signin';
-        else toast('Unable to sign out.',true);
+        else toast(T_('wsj.iv_signout','Unable to sign out.'),true);
       } else if(origLogout) origLogout();
       else { const r=await fetch('/logout',{method:'POST',headers:{'X-CSRF-Token':document.querySelector('meta[name="csrf-token"]')?.content||''}}); if(r.ok) location.href='/login'; }
     }catch(e){toast(e.message,true)}
@@ -106,26 +107,26 @@ function renderInvoices(){
   });
   if(empty) empty.style.display = rows.length ? 'none' : 'block';
   if(!rows.length){
-    list.innerHTML = invoiceData.invoices.length ? '<p class="small muted">No invoices match your search.</p>' : '';
+    list.innerHTML = invoiceData.invoices.length ? '<p class="small muted">'+T_('wsj.iv_nomatch','No invoices match your search.')+'</p>' : '';
     return;
   }
   list.innerHTML = rows.map(r=>{
-    const due = r.due_date ? `Due ${esc(r.due_date)}` : 'No due date';
+    const due = r.due_date ? T_('wsj.iv_due','Due {d}').replace('{d}',esc(r.due_date)) : T_('wsj.iv_nodue','No due date');
     const total = moneyFmt(r.total_minor, r.currency);
     const statusCls = r.status==='Paid' ? 'green' : r.status==='Overdue' ? 'amber' : r.status==='Draft' ? '' : '';
     return `<article class="invoice-card" style="border:1px solid #dce2d0;border-radius:10px;padding:16px;margin-bottom:12px;background:#fff;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap">
       <div style="min-width:220px">
         <strong>${esc(r.number)}</strong> <span class="badge ${statusCls}">${esc(r.status)}</span>
         <div style="margin:6px 0;font-weight:600">${esc(r.client_name)}</div>
-        <div class="small muted">${esc(r.client_email||'No email')} · ${due}</div>
-        <div class="small muted">${esc(r.currency)} · ${r.items?.length||0} items</div>
+        <div class="small muted">${esc(r.client_email||T_('wsj.iv_noemail','No email'))} · ${due}</div>
+        <div class="small muted">${esc(r.currency)} · ${T_('wsj.iv_items','{n} items').replace('{n}',r.items?.length||0)}</div>
       </div>
       <div style="text-align:right;min-width:140px">
         <div style="font:600 18px Manrope,sans-serif">${esc(total)}</div>
-        <div class="small muted">Issue ${esc(r.issue_date||'—')}</div>
+        <div class="small muted">${T_('wsj.iv_issue','Issue {d}').replace('{d}',esc(r.issue_date||'—'))}</div>
         <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
-          <button class="secondary" style="padding:7px 10px;font-size:12px" onclick="editInvoice('${r.id}')">Edit${sessionRole==='client'?' / view':''} ↗</button>
-          <a class="secondary" style="padding:7px 10px;font-size:12px;text-decoration:none" href="/api/documents/invoice/${r.id}.pdf" target="_blank">PDF ↓</a>
+          <button class="secondary" style="padding:7px 10px;font-size:12px" onclick="editInvoice('${r.id}')">${T_('wsj.iv_edit','Edit')}${sessionRole==='client'?T_('wsj.iv_view',' / view'):''} ↗</button>
+          <a class="secondary" style="padding:7px 10px;font-size:12px;text-decoration:none" href="/api/documents/invoice/${r.id}.pdf" target="_blank">${T_('wsj.op_pdf','PDF ↓')}</a>
         </div>
       </div>
     </article>`;
@@ -138,9 +139,9 @@ function addInvoiceRow(data={}){
   row.className='invoice-row';
   row.style.cssText='display:grid;grid-template-columns:1fr 90px 120px 40px;gap:8px;margin-bottom:8px;align-items:end';
   row.innerHTML=`
-    <label>Description<input name="item_desc" maxlength="500" required placeholder="Website design — homepage" value="${esc(data.description||'')}"></label>
-    <label>Qty<input name="item_qty" inputmode="decimal" required value="${esc(data.quantity||1)}"></label>
-    <label>Unit price<input name="item_price" inputmode="decimal" required placeholder="500.00" value="${esc(data.unit_price||'')}"></label>
+    <label>${T_('wsj.iv_desc','Description')}<input name="item_desc" maxlength="500" required placeholder="${T_('wsj.iv_desc_ph','Website design — homepage')}" value="${esc(data.description||'')}"></label>
+    <label>${T_('wsj.iv_qty','Qty')}<input name="item_qty" inputmode="decimal" required value="${esc(data.quantity||1)}"></label>
+    <label>${T_('wsj.iv_unit','Unit price')}<input name="item_price" inputmode="decimal" required placeholder="500.00" value="${esc(data.unit_price||'')}"></label>
     <button type="button" class="secondary" style="padding:8px" onclick="this.closest('.invoice-row').remove();updateInvoiceTotals()">×</button>
   `;
   list.appendChild(row);
@@ -171,12 +172,12 @@ function updateInvoiceTotals(){
   const total=taxable+tax;
   const fmt = (m)=> decimals===0 ? `${currency} ${m.toLocaleString()}` : `${currency} ${(m/factor).toLocaleString(undefined,{minimumFractionDigits:decimals,maximumFractionDigits:decimals})}`;
   const el=document.getElementById('invoice-totals');
-  if(el) el.innerHTML=`<div>Subtotal: <b>${fmt(subtotal)}</b></div><div>Discount: <b>-${fmt(discount)}</b> ${discType!=='none'?'('+esc(discType)+' '+discVal+')':''}</div><div>Tax (${taxRate}%): <b>${fmt(tax)}</b></div><div style="font-weight:700;font-size:15px;margin-top:6px;border-top:1px solid #dce2d0;padding-top:6px">Total: ${fmt(total)}</div>`;
+  if(el) el.innerHTML=`<div>${T_('wsj.iv_sub','Subtotal:')} <b>${fmt(subtotal)}</b></div><div>${T_('wsj.iv_disc','Discount:')} <b>-${fmt(discount)}</b> ${discType!=='none'?'('+esc(discType)+' '+discVal+')':''}</div><div>${T_('wsj.iv_tax','Tax ({r}%):').replace('{r}',taxRate)} <b>${fmt(tax)}</b></div><div style="font-weight:700;font-size:15px;margin-top:6px;border-top:1px solid #dce2d0;padding-top:6px">${T_('wsj.iv_total','Total:')} ${fmt(total)}</div>`;
 }
 
 async function editInvoice(id=null){
   if(sessionRole==='client' && !id){
-    toast('Only your studio can create invoices.', true);
+    toast(T_('wsj.iv_only','Only your studio can create invoices.'), true);
     return;
   }
   await loadInvoices();
@@ -190,12 +191,12 @@ async function editInvoice(id=null){
   try{
     const stateResp = await api('/api/state');
     const projResp = await api('/api/projects');
-    form.elements.project_id.innerHTML='<option value="">Not linked</option>'+ (projResp.projects||[]).map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('');
-    form.elements.lead_id.innerHTML='<option value="">Not linked</option>'+ (stateResp.leads||[]).slice(0,120).map(l=>`<option value="${l.id}">${esc(l.name)} · ${esc(l.city||'')}</option>`).join('');
+    form.elements.project_id.innerHTML='<option value="">'+T_('ws.iv_nolink','Not linked')+'</option>'+ (projResp.projects||[]).map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('');
+    form.elements.lead_id.innerHTML='<option value="">'+T_('ws.iv_nolink','Not linked')+'</option>'+ (stateResp.leads||[]).slice(0,120).map(l=>`<option value="${l.id}">${esc(l.name)} · ${esc(l.city||'')}</option>`).join('');
   }catch(e){ /* client may not have state leads */ 
     try{
       const projResp = await api('/api/projects');
-      form.elements.project_id.innerHTML='<option value="">Not linked</option>'+ (projResp.projects||[]).map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('');
+      form.elements.project_id.innerHTML='<option value="">'+T_('ws.iv_nolink','Not linked')+'</option>'+ (projResp.projects||[]).map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('');
     }catch(_){}
   }
   const data = invoiceData.invoices.find(x=>x.id===id);
@@ -231,18 +232,18 @@ async function editInvoice(id=null){
     } else {
       form.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=false);
     }
-    document.getElementById('invoice-documents').innerHTML=`<a href="/api/documents/invoice/${data.id}.pdf" target="_blank">↓ Invoice PDF</a>${!sessionRole||sessionRole==='owner'?`<button type="button" class="danger-link" onclick="deleteInvoice('${data.id}')">Delete invoice</button>`:''}`;
-    document.getElementById('invoice-modal-title').textContent= sessionRole==='client' ? 'Invoice — view only' : 'Edit invoice';
+    document.getElementById('invoice-documents').innerHTML=`<a href="/api/documents/invoice/${data.id}.pdf" target="_blank">${T_('wsj.iv_pdf2','↓ Invoice PDF')}</a>${!sessionRole||sessionRole==='owner'?`<button type="button" class="danger-link" onclick="deleteInvoice('${data.id}')">${T_('wsj.iv_del','Delete invoice')}</button>`:''}`;
+    document.getElementById('invoice-modal-title').textContent= sessionRole==='client' ? T_('wsj.iv_viewonly','Invoice — view only') : T_('wsj.iv_edit_t','Edit invoice');
   } else {
     form.elements.id.value='';
     form.elements.currency.value='USD';
     form.elements.status.value='Draft';
     form.elements.discount_type.value='none';
     document.getElementById('invoice-items-list').innerHTML='';
-    addInvoiceRow({description:'Website design and build', quantity:1, unit_price:'1200.00'});
-    addInvoiceRow({description:'Content and launch', quantity:1, unit_price:'300.00'});
-    document.getElementById('invoice-documents').innerHTML='<p class="small muted">Save to enable PDF download. Totals below are live.</p>';
-    document.getElementById('invoice-modal-title').textContent='New invoice';
+    addInvoiceRow({description:T_('wsj.iv_d1','Website design and build'), quantity:1, unit_price:'1200.00'});
+    addInvoiceRow({description:T_('wsj.iv_d2','Content and launch'), quantity:1, unit_price:'300.00'});
+    document.getElementById('invoice-documents').innerHTML='<p class="small muted">'+T_('wsj.iv_savefirst','Save to enable PDF download. Totals below are live.')+'</p>';
+    document.getElementById('invoice-modal-title').textContent=T_('wsj.iv_new','New invoice');
     form.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=false);
   }
   // Attach listeners
@@ -255,7 +256,7 @@ async function editInvoice(id=null){
 document.getElementById('invoice-form')?.addEventListener('submit', async e=>{
   e.preventDefault();
   const form=e.target;
-  if(sessionRole==='client'){ toast('Clients cannot edit invoices.', true); return; }
+  if(sessionRole==='client'){ toast(T_('wsj.iv_noedit','Clients cannot edit invoices.'), true); return; }
   const btn=form.querySelector('button[type="submit"]'); btn.disabled=true;
   const data=Object.fromEntries(new FormData(form));
   // Collect items
@@ -277,10 +278,10 @@ document.getElementById('invoice-form')?.addEventListener('submit', async e=>{
     if(!data.lead_id) delete data.lead_id;
     if(id){
       await api('/api/invoices/'+id,'PATCH', data);
-      toast('Invoice updated.');
+      toast(T_('wsj.iv_updated','Invoice updated.'));
     } else {
       const r=await api('/api/invoices','POST', data);
-      toast('Invoice created: '+r.number);
+      toast(T_('wsj.iv_created','Invoice created: {n}').replace('{n}',r.number));
     }
     closeModal('invoice-modal');
     await loadInvoices();
@@ -289,8 +290,8 @@ document.getElementById('invoice-form')?.addEventListener('submit', async e=>{
 });
 
 async function deleteInvoice(id){
-  if(!confirm('Delete this invoice? This cannot be undone.')) return;
-  try{await api('/api/invoices/'+id,'DELETE'); closeModal('invoice-modal'); await loadInvoices(); toast('Invoice deleted.')}catch(e){toast(e.message,true)}
+  if(!confirm(T_('wsj.iv_delq','Delete this invoice? This cannot be undone.'))) return;
+  try{await api('/api/invoices/'+id,'DELETE'); closeModal('invoice-modal'); await loadInvoices(); toast(T_('wsj.iv_deleted','Invoice deleted.'))}catch(e){toast(e.message,true)}
 }
 
 // Extend navigate to handle invoices

@@ -1,5 +1,6 @@
 """Serialized, bounded read-only Overpass access. Never retry writes or claim completeness."""
 import os, threading, time
+from web.i18n import t as _t, locale_now
 import requests
 
 # Commercial/high-volume deployments should configure a contracted or self-hosted instance.
@@ -13,7 +14,7 @@ def query_overpass(query, headers):
     global _last, _rate_until
     with _lock:
         if _rate_until > time.monotonic():
-            raise ValueError('Map provider rate limit. Wait before resuming; no fallback is used to bypass it.')
+            raise ValueError(_t('er_072', locale_now()))
         error = 'Map data providers are temporarily unavailable. Saved progress is retained; retry later.'
         for endpoint in ENDPOINTS:
             if _cooldown.get(endpoint, 0) > time.monotonic():
@@ -29,17 +30,17 @@ def query_overpass(query, headers):
                         _cooldown[endpoint] = time.monotonic() + delay
                         _rate_until = _cooldown[endpoint]
                         # Do not route around an explicit rate limit.
-                        raise ValueError('Map provider rate limit. Wait at least one minute before resuming.')
+                        raise ValueError(_t('er_071', locale_now()))
                     r.raise_for_status()
                     data = bytearray()
                     for chunk in r.iter_content(65536):
                         data.extend(chunk)
                         if len(data) > 8 * 1024 * 1024:
-                            raise ValueError('Map response too large. Zoom in and scan a smaller area.')
+                            raise ValueError(_t('er_073', locale_now()))
                     import json
                     payload = json.loads(data)
                     if not isinstance(payload, dict) or not isinstance(payload.get('elements'), list):
-                        raise ValueError('Invalid map response; area remains unconfirmed.')
+                        raise ValueError(_t('er_056', locale_now()))
                     return payload
             except requests.RequestException:
                 _cooldown[endpoint] = time.monotonic() + 60

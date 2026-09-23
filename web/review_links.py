@@ -12,6 +12,7 @@ independent concept prepared by the studio, and it is ``noindex`` and un-linked.
 """
 import hashlib, json, re, secrets, uuid
 from datetime import datetime, timezone, timedelta
+from web.i18n import t, locale_now
 
 RESPONSES = {'want': 'Yes — build my website', 'later': 'Not right now', 'have': 'I already have a website'}
 EMAIL_RE = re.compile(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+')
@@ -94,15 +95,16 @@ def record_response(db, now, token, payload, fingerprint=''):
     ensure_tables(db)
     link = get_link(db, token=token)
     if not link:
-        raise ValueError('This review link is not valid.')
+        raise ValueError(t('er_140', locale_now()))
     choice = str(payload.get('choice', '')).strip()
     if choice not in RESPONSES:
-        raise ValueError('Choose one of the three answers so the studio knows where to start.')
+        raise ValueError(t('er_021', locale_now()))
+    label = t('rv.' + choice, locale_now())
     note = str(payload.get('note', ''))[:1200].strip()
     name = str(payload.get('name', ''))[:120].strip()
     email = str(payload.get('email', '')).strip().lower()
     if email and not EMAIL_RE.fullmatch(email):
-        raise ValueError('That e-mail address does not look right — correct it or leave it empty.')
+        raise ValueError(t('er_120', locale_now()))
     try:
         rating = int(payload.get('rating') or 0)
     except (TypeError, ValueError):
@@ -115,7 +117,7 @@ def record_response(db, now, token, payload, fingerprint=''):
         recent = c.execute('SELECT count(*) FROM review_responses WHERE fingerprint=? AND created>?',
                            (fingerprint, cutoff)).fetchone()[0]
         if recent >= 5:
-            raise ValueError('Too many answers from this connection in the last hour. Please try again later.')
+            raise ValueError(t('er_142', locale_now()))
         response_id = uuid.uuid4().hex
         c.execute('INSERT INTO review_responses(id,link_id,lead_id,choice,note,name,email,fingerprint,rating,created) '
                   'VALUES(?,?,?,?,?,?,?,?,?,?)',
@@ -124,14 +126,14 @@ def record_response(db, now, token, payload, fingerprint=''):
         lead = c.execute('SELECT * FROM leads WHERE id=?', (link['lead_id'],)).fetchone()
         if lead:
             stage = 'Won' if choice == 'want' else ('Contacted' if choice == 'later' else 'Not a fit')
-            summary = RESPONSES[choice] + (f' — “{note}”' if note else '')
+            summary = label + (f' — “{note}”' if note else '')
             c.execute('UPDATE leads SET stage=?,note=TRIM(COALESCE(note,"")||?),updated=? WHERE id=?',
                       (stage, f'\n[Review link] {summary[:400]}', stamp, lead['id']))
         if email:
             # A real, addressable reply belongs in the normal enquiry inbox as well.
             enquiry_id = uuid.uuid4().hex
             message = (f'Replied through the review link for {lead["name"] if lead else "a business"}.\n\n'
-                       f'Answer: {RESPONSES[choice]}\n'
+                       f'Answer: {label}\n'
                        f'Message: {note or "—"}\n'
                        f'Link: /r/{link["token"]}')
             c.execute('INSERT INTO enquiries(id,name,email,business,kind,budget,timeline,message,sample,fingerprint,status,notes,created,updated) '
@@ -139,7 +141,7 @@ def record_response(db, now, token, payload, fingerprint=''):
                       (enquiry_id, name or (lead['name'] if lead else 'Review link visitor'), email,
                        (lead['name'] if lead else ''),
                        'Review link reply', '', '', message[:5000], '', fingerprint, 'New', '', stamp, stamp))
-    return {'id': response_id, 'choice': choice, 'label': RESPONSES[choice], 'note': note, 'created': stamp}, link
+    return {'id': response_id, 'choice': choice, 'label': label, 'note': note, 'created': stamp}, link
 
 
 def _session_owner():
@@ -204,7 +206,7 @@ def register_review_links(app, db, now, log, settings):
         """
         link = get_link(db, token=token)
         if not link:
-            return jsonify(error='That concept link does not exist.'), 404
+            return jsonify(error=t('er_119', locale_now())), 404
         concept = link.get('concept') or {}
         from agents.agent_video import build_script, lead_for, DEFAULT_SECONDS
         lead = lead_for(db, link) or {'name': 'this business'}
@@ -213,7 +215,7 @@ def register_review_links(app, db, now, log, settings):
         script = build_script(lead, concept, link, settings(), seconds=seconds)
         response = make_response(render_template('ad-stage.html', token=token, fmt=fmt,
                                                 business=script['business'], studio=script['studio'],
-                                                category=lead.get('category') or 'local business',
+                                                category=lead.get('category') or t('ad_cat', locale_now()),
                                                 place=script['place'],
                                                 problem_facts=[str(f) for f in script['beats'][0]['facts']][:4],
                                                 closing_facts=script['beats'][-1]['facts'],
@@ -243,7 +245,7 @@ def register_review_links(app, db, now, log, settings):
     def review_respond(token):
         payload = request.get_json(silent=True)
         if not isinstance(payload, dict):
-            return jsonify(error='Send your answer as a JSON object.'), 400
+            return jsonify(error=t('er_109', locale_now())), 400
         fingerprint = hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()[:32]
         try:
             response, link = record_response(db, now, token, payload, fingerprint)
@@ -266,7 +268,7 @@ def register_review_links(app, db, now, log, settings):
                 row = c.execute('SELECT * FROM users WHERE id=?', (session.get('client_id'),)).fetchone()
             tier, active, _ = tier_status(dict(row) if row else None)
             if tier != 'pro' or not active:
-                return jsonify(error='The Pro plan manages review links.', upgrade='/pricing', required='pro'), 402
+                return jsonify(error=t('er_124', locale_now()), upgrade='/pricing', required='pro'), 402
         return jsonify(links=link_overview(db), responses=responses_for(db))
 
     @app.post('/api/review-links/<link_id>/handled')

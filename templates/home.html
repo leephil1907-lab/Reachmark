@@ -1,7 +1,7 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html><html lang="{{ locale }}"><head>
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ gtm_id }}');</script><!-- End Google Tag Manager -->{% endif %}
 {% if ga_id is defined and ga_id %}<!-- Global site tag (gtag.js) - Google Analytics --><script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}</title><meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.' }}">{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">{% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}<meta name="theme-color" content="#20251f"><meta name="application-name" content="Reachmark"><meta property="og:type" content="website"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.' }}"><meta property="og:site_name" content="Reachmark">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}">{% endif %}<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.' }}"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="stylesheet" href="/static/fonts.css">{% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}<style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}</title><meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.' }}">{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">{% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}<meta name="theme-color" content="#20251f"><meta name="application-name" content="Reachmark"><meta property="og:type" content="website"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.' }}"><meta property="og:site_name" content="Reachmark">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}">{% endif %}<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.' }}"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="stylesheet" href="/static/fonts.css"><script src="/static/i18n.js"></script>{% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}<style>
 *{box-sizing:border-box}body{margin:0;font-family:'Manrope',Arial,sans-serif;background:#f5f5ef;color:#20251f;-webkit-font-smoothing:antialiased}
 .wrap{max-width:1120px;margin:0 auto;padding:0 22px}
 .site-head{position:sticky;top:0;z-index:5;background:rgba(245,245,239,.94);backdrop-filter:blur(8px);border-bottom:1px solid #e2e7d6}
@@ -11,6 +11,7 @@ nav.main{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
 nav.main a{font:700 12px 'Manrope',sans-serif;color:#20251f;text-decoration:none;padding:9px 12px;border-radius:10px}
 nav.main a:hover{background:#e8ebdb}
 .head-cta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.locale-select{font:700 12px 'Manrope',sans-serif;padding:9px 10px;border-radius:10px;border:1px solid #cfd8bd;background:#fff;color:#0f1a0a}
 .btn{display:inline-block;font:700 13px 'Manrope',sans-serif;text-decoration:none;padding:12px 20px;border-radius:12px;border:1px solid transparent}
 .btn.primary{background:#d5f268;border-color:#cbe85b;color:#0f1a0a}
 .btn.dark{background:#0f1a0a;color:#eaf3de}
@@ -60,54 +61,54 @@ footer.site{background:#0f1a0a;color:#eaf3de;margin-top:36px}
 @media(max-width:900px){.hero{padding:44px 0 28px}.hero h1{font-size:32px}.grid3,.shots,.steps ol{grid-template-columns:1fr}.shots img{height:210px}nav.main{margin-left:0}.head-cta{margin-left:auto}.fgrid{grid-template-columns:1fr;gap:22px}}
 </style></head><body>
 <header class="site-head"><div class="wrap head-in">
-  <a href="/" class="logo" aria-label="Reachmark home"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
-  <nav class="main" aria-label="Primary"><a href="/reviews">Reviews</a><a href="/about">About</a><a href="/enquire">Enquire</a><a href="/pricing">Plans</a></nav>
-  <div class="head-cta">{% if client_logged_in %}<a class="btn primary" href="/dashboard">Dashboard</a>{% elif owner_logged_in %}<a class="btn primary" href="/workspace">Workspace</a>{% else %}<a class="btn ghost" href="/signin">Sign in</a><a class="btn primary" href="/signup">Create account</a>{% endif %}</div>
+  <a href="/" class="logo" aria-label="{{ t('common.home_aria') }}"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
+  <nav class="main" aria-label="{{ t('common.nav_primary') }}"><a href="/reviews">{{ t('nav.reviews') }}</a><a href="/about">{{ t('nav.about') }}</a><a href="/enquire">{{ t('nav.enquire') }}</a><a href="/pricing">{{ t('nav.plans') }}</a></nav>
+  <div class="head-cta">{% include 'locale-switcher.html' %}{% if client_logged_in %}<a class="btn primary" href="/dashboard">{{ t('nav.dashboard') }}</a>{% elif owner_logged_in %}<a class="btn primary" href="/workspace">{{ t('nav.workspace') }}</a>{% else %}<a class="btn ghost" href="/signin">{{ t('nav.signin') }}</a><a class="btn primary" href="/signup">{{ t('nav.signup') }}</a>{% endif %}</div>
 </div></header>
 <main class="wrap">
   <section class="hero">
-    <div class="eyebrow">REACHMARK · WEBSITE DESIGNER</div>
-    <h1>Find potential. <span>Make your mark.</span></h1>
-    <p>Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.</p>
-    <div class="cta"><a class="btn dark" href="/showcase">See website samples</a><a class="btn primary" href="/enquire">Start a project</a></div>
-    <div class="note">10 fictional sample designs · Live previews · No account needed to look around</div>
+    <div class="eyebrow">REACHMARK · {{ t('home.eyebrow') }}</div>
+    <h1>{{ t('home.h1a') }} <span>{{ t('home.h1b') }}</span></h1>
+    <p>{{ t('home.sub') }}</p>
+    <div class="cta"><a class="btn dark" href="/showcase">{{ t('home.cta_samples') }}</a><a class="btn primary" href="/enquire">{{ t('home.cta_project') }}</a></div>
+    <div class="note">{{ t('home.note') }}</div>
   </section>
   {% include 'adsense-banner.html' %}
-  <section class="grid3" aria-label="Start here">
-    <div class="card"><div class="k">01 · SAMPLES</div><h2>Website directions, previewed live</h2><p>Ten fictional sample sites across cafés, clinics, law, retail, crypto and more — each one explorable before you enquire.</p><a class="more" href="/showcase">Browse the gallery →</a></div>
-    <div class="card"><div class="k">02 · REVIEWS</div><h2>Clients, in their own words</h2><p>Approved reviews from real Reachmark projects — shown as written, nothing drafted by us.</p><a class="more" href="/reviews">Read reviews →</a></div>
-    <div class="card"><div class="k">03 · PROJECT</div><h2>Tell us about your project</h2><p>One short form: what you need, your budget range, your timeline. A real reply — never an invented quote.</p><a class="more" href="/enquire">Enquire now →</a></div>
+  <section class="grid3" aria-label="{{ t('home.grid_aria') }}">
+    <div class="card"><div class="k">{{ t('home.card1k') }}</div><h2>{{ t('home.card1h') }}</h2><p>{{ t('home.card1p') }}</p><a class="more" href="/showcase">{{ t('home.card1a') }}</a></div>
+    <div class="card"><div class="k">{{ t('home.card2k') }}</div><h2>{{ t('home.card2h') }}</h2><p>{{ t('home.card2p') }}</p><a class="more" href="/reviews">{{ t('home.card2a') }}</a></div>
+    <div class="card"><div class="k">{{ t('home.card3k') }}</div><h2>{{ t('home.card3h') }}</h2><p>{{ t('home.card3p') }}</p><a class="more" href="/enquire">{{ t('home.card3a') }}</a></div>
   </section>
-  <section class="strip" aria-label="Sample previews">
-    <div class="strip-head"><h2>Fresh from the gallery</h2><a href="/showcase">See all ten →</a></div>
+  <section class="strip" aria-label="{{ t('home.strip_aria') }}">
+    <div class="strip-head"><h2>{{ t('home.strip_h') }}</h2><a href="/showcase">{{ t('home.strip_a') }}</a></div>
     <div class="shots">
-      <a href="/showcase"><img src="/static/samples/ember-coffee-preview.jpg" alt="Ember and Oak café sample preview" loading="lazy"><span>Ember &amp; Oak · Café</span></a>
-      <a href="/showcase"><img src="/static/samples/fintech-pulse-preview.jpg" alt="Fintech Pulse sample preview" loading="lazy"><span>Fintech Pulse · Finance</span></a>
-      <a href="/showcase"><img src="/static/samples/stillwell-studio-preview.jpg" alt="Stillwell studio sample preview" loading="lazy"><span>Stillwell · Wellness</span></a>
+      <a href="/showcase"><img src="/static/samples/ember-coffee-preview.jpg" alt="{{ t('home.alt1') }}" loading="lazy"><span>{{ t('home.shot1') }}</span></a>
+      <a href="/showcase"><img src="/static/samples/fintech-pulse-preview.jpg" alt="{{ t('home.alt2') }}" loading="lazy"><span>{{ t('home.shot2') }}</span></a>
+      <a href="/showcase"><img src="/static/samples/stillwell-studio-preview.jpg" alt="{{ t('home.alt3') }}" loading="lazy"><span>{{ t('home.shot3') }}</span></a>
     </div>
   </section>
-  <section class="steps" aria-label="How it works">
-    <h2>Three steps. No maze.</h2>
+  <section class="steps" aria-label="{{ t('home.steps_aria') }}">
+    <h2>{{ t('home.steps_h') }}</h2>
     <ol>
-      <li><b>STEP 01</b><strong>Look around freely</strong><p>Browse ten fictional sample sites with live previews. No account, no sales call.</p><a href="/showcase">See the samples →</a></li>
-      <li><b>STEP 02</b><strong>Say hello in a minute</strong><p>One short form: what you need, your budget range, your timeline.</p><a href="/enquire">Open the form →</a></li>
-      <li><b>STEP 03</b><strong>Get a human reply</strong><p>A considered answer about scope, timeline and fit — never an invented quote.</p><a href="/about">How we work →</a></li>
+      <li><b>{{ t('home.s1b') }}</b><strong>{{ t('home.s1h') }}</strong><p>{{ t('home.s1p') }}</p><a href="/showcase">{{ t('home.s1a') }}</a></li>
+      <li><b>{{ t('home.s2b') }}</b><strong>{{ t('home.s2h') }}</strong><p>{{ t('home.s2p') }}</p><a href="/enquire">{{ t('home.s2a') }}</a></li>
+      <li><b>{{ t('home.s3b') }}</b><strong>{{ t('home.s3h') }}</strong><p>{{ t('home.s3p') }}</p><a href="/about">{{ t('home.s3a') }}</a></li>
     </ol>
   </section>
   <section class="band">
-    <h2>Have a project in mind? <span>Let’s talk.</span></h2>
-    <p>Send one enquiry and get a considered, human reply about scope, timeline and fit.</p>
-    <a class="btn primary" href="/enquire">Tell us about it →</a>
+    <h2>{{ t('home.band_h1') }} <span>{{ t('home.band_h2') }}</span></h2>
+    <p>{{ t('home.band_p') }}</p>
+    <a class="btn primary" href="/enquire">{{ t('home.band_a') }}</a>
   </section>
 </main>
 {% include 'adsense-footer.html' %}
 <footer class="site"><div class="wrap">
   <div class="fgrid">
-    <div class="fbrand"><a href="/" aria-label="Reachmark home"><img src="/static/logo-inverse.svg" alt="Reachmark"></a><p>Reachmark — Find Potential. Make Your Mark. A website designer for businesses that want to be found and chosen.</p>{% include 'newsletter-form.html' %}</div>
-    <nav class="fcol" aria-label="Explore"><b>EXPLORE</b><a href="/showcase">Website samples</a><a href="/receptionist">AI receptionist</a><a href="/reviews">Client reviews</a><a href="/about">About Reachmark</a><a href="/enquire">Enquire</a><a href="/pricing">Workspace plans</a></nav>
-    <nav class="fcol" aria-label="Account"><b>CLIENTS</b><a href="/signin">Sign in</a><a href="/signup">Create account</a></nav>
+    <div class="fbrand"><a href="/" aria-label="{{ t('common.home_aria') }}"><img src="/static/logo-inverse.svg" alt="Reachmark"></a><p>{{ t('foot.brand') }} {{ t('foot.tag') }}</p>{% include 'newsletter-form.html' %}</div>
+    <nav class="fcol" aria-label="{{ t('foot.explore') }}"><b>{{ t('foot.explore') }}</b><a href="/showcase">{{ t('foot.samples') }}</a><a href="/receptionist">{{ t('foot.receptionist') }}</a><a href="/reviews">{{ t('foot.reviews') }}</a><a href="/about">{{ t('foot.about') }}</a><a href="/enquire">{{ t('foot.enquire') }}</a><a href="/pricing">{{ t('foot.plans') }}</a></nav>
+    <nav class="fcol" aria-label="{{ t('foot.clients') }}"><b>{{ t('foot.clients') }}</b><a href="/signin">{{ t('nav.signin') }}</a><a href="/signup">{{ t('nav.signup') }}</a></nav>
   </div>
-  <div class="fbase"><small>© 2026 Reachmark · Sample sites are fictional concepts, never real clients. · Support: <a href="mailto:{{ support_email }}" style="color:#d5f268;">{{ support_email }}</a></small></div>
+  <div class="fbase"><small>{{ t('foot.base1') }} · {{ t('foot.support') }} <a href="mailto:{{ support_email }}" style="color:#d5f268;">{{ support_email }}</a></small></div>
 </div></footer>
 {% include 'tawkto.html' %}
 <script src="/static/pwa.js" defer></script>

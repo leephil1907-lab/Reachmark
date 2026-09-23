@@ -1,7 +1,7 @@
 {# Newsletter subscribe — include in any footer with: {% include 'newsletter-form.html' %} #}
-<form data-newsletter style="display:flex;gap:8px;margin-top:12px;max-width:340px" aria-label="Subscribe to studio notes">
-<input type="email" name="email" required maxlength="200" placeholder="Email for studio notes" aria-label="Email for studio notes" style="flex:1;min-width:0;padding:10px 12px;border-radius:9px;border:1px solid #2a3a22;background:#1a2315;color:#e6e9dd;font-size:13px">
-<button type="submit" style="padding:10px 16px;border-radius:9px;border:0;background:#d5f268;color:#0f1510;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">Subscribe</button>
+<form data-newsletter style="display:flex;gap:8px;margin-top:12px;max-width:340px" aria-label="{{ t('news.aria') }}">
+<input type="email" name="email" required maxlength="200" placeholder="{{ t('news.ph') }}" aria-label="{{ t('news.ph') }}" style="flex:1;min-width:0;padding:10px 12px;border-radius:9px;border:1px solid #2a3a22;background:#1a2315;color:#e6e9dd;font-size:13px">
+<button type="submit" style="padding:10px 16px;border-radius:9px;border:0;background:#d5f268;color:#0f1510;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">{{ t('news.btn') }}</button>
 </form>
 <p data-newsletter-note style="font-size:11px;margin:6px 0 0;min-height:16px"></p>
 <script>
@@ -11,11 +11,11 @@
   var note=document.querySelector('[data-newsletter-note]');
   form.onsubmit=function(e){e.preventDefault();
     var email=form.email.value.trim();
-    note.style.color='';note.textContent='Subscribing…';
+    note.style.color='';note.textContent=T('news.sending','Subscribing…');
     fetch('/api/newsletter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:location.pathname})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(o){
-      note.textContent=o.j.message||o.j.error||'Done.';
+      note.textContent=o.j.message||o.j.error||T('news.done','Done.');
       if(o.ok){note.style.color='#d5f268';form.email.value='';}else{note.style.color='#f0a58a';}
-    }).catch(function(){note.style.color='#f0a58a';note.textContent='Could not subscribe. Try again.';});
+    }).catch(function(){note.style.color='#f0a58a';note.textContent=T('news.fail','Could not subscribe. Try again.');});
   };
 })();
 </script>

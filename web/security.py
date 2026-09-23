@@ -3,6 +3,7 @@ import os, secrets, time, hmac, hashlib
 from datetime import timedelta
 from flask import request, session, jsonify, redirect, render_template, url_for
 from werkzeug.security import check_password_hash
+from web.i18n import t as _t, locale_now
 from web.billing import check_client_path, tier_status
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -59,14 +60,14 @@ def install_security(app, db):
                                 # For /api/state, clients get filtered view elsewhere; allow but check CSRF for writes
                                 if request.method in ('POST','PATCH','DELETE','PUT'):
                                     supplied=request.headers.get('X-CSRF-Token') or request.form.get('csrf_token','')
-                                    if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error='Session verification failed. Reload the page and try again.'),403
+                                    if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error=_t('au.sec_csrf', locale_now())),403
                                 return
-                            if verdict=='upgrade':return jsonify(error='This needs the '+need.title()+' plan.',upgrade='/pricing',required=need,tier=tier),402
-                            return jsonify(error='Client access is limited to assigned projects and invoices.'),403
+                            if verdict=='upgrade':return jsonify(error=_t('er_138', locale_now(), p=need.title()),upgrade='/pricing',required=need,tier=tier),402
+                            return jsonify(error=_t('er_022', locale_now())),403
                         # Non-API page like '/' — allow client to view portal
                         if request.method in ('POST','PATCH','DELETE','PUT'):
                             supplied=request.headers.get('X-CSRF-Token') or request.form.get('csrf_token','')
-                            if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error='Session verification failed. Reload the page and try again.'),403
+                            if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error=_t('au.sec_csrf', locale_now())),403
                         return
             except Exception:
                 pass
@@ -81,7 +82,7 @@ def install_security(app, db):
             # Backward-compatible Basic auth for local development/tests only.
             auth=request.authorization; legacy=os.getenv('DASHBOARD_PASSWORD')
             if not production and legacy and auth and auth.username=='admin' and hmac.compare_digest(auth.password or '',legacy):return
-            if request.path.startswith('/api/'):return jsonify(error='Owner login required.'),401
+            if request.path.startswith('/api/'):return jsonify(error=_t('er_083', locale_now())),401
             # Clients (or expired sessions) belong on the client sign-in, not the hidden owner login.
             return redirect('/signin')
         # CSRF for owner writes
@@ -90,18 +91,18 @@ def install_security(app, db):
             check_csrf = False  # footer form works for visitors and clients alike
         if check_csrf and request.method in ('POST','PATCH','DELETE','PUT'):
             supplied=request.headers.get('X-CSRF-Token') or request.form.get('csrf_token','')
-            if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error='Session verification failed. Reload the page and try again.'),403
+            if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error=_t('au.sec_csrf', locale_now())),403
     @app.route('/login',methods=['GET','POST'])
     def owner_login():
         message=''
         if request.method=='POST':
-            if not hmac.compare_digest(request.form.get('csrf_token',''),session.get('csrf','')) or not session.get('csrf'):return 'Reload the login form and try again.',403
+            if not hmac.compare_digest(request.form.get('csrf_token',''),session.get('csrf','')) or not session.get('csrf'):return _t('au.sec_reload', locale_now()),403
             client=hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()
             with db() as c:
                 c.execute('BEGIN IMMEDIATE')
                 c.execute('DELETE FROM login_attempts WHERE blocked_until < ?',(time.time()-3600,))
                 row=c.execute('SELECT * FROM login_attempts WHERE client=?',(client,)).fetchone()
-                if row and row['failures']>=5 and row['blocked_until']>time.time():return render_template('login.html',message='Too many attempts. Wait 15 minutes before trying again.'),429
+                if row and row['failures']>=5 and row['blocked_until']>time.time():return render_template('login.html',message=_t('au.e_lock', locale_now())),429
                 failures=(row['failures'] if row and row['blocked_until']>time.time() else 0)+1
                 c.execute('INSERT OR REPLACE INTO login_attempts VALUES(?,?,?)',(client,failures,time.time()+900))
             value=request.form.get('password','')[:1024]; hashed=os.getenv('OWNER_PASSWORD_HASH'); legacy=os.getenv('DASHBOARD_PASSWORD','')
@@ -110,7 +111,7 @@ def install_security(app, db):
                 with db() as c:c.execute('DELETE FROM login_attempts WHERE client=?',(client,))
                 session.clear();session.permanent=True;session['owner']=True;session['revision']=hashlib.sha256((hashed or legacy).encode()).hexdigest();csrf()
                 return redirect('/workspace')
-            message='Unable to sign in. Check your owner password.'
+            message=_t('au.sec_badpw', locale_now())
         return render_template('login.html',message=message)
     @app.post('/logout')
     def owner_logout():session.clear();return redirect('/login')
@@ -132,5 +133,5 @@ def install_security(app, db):
     @app.errorhandler(500)
     def server_error(error):
         reference=secrets.token_hex(6);app.logger.error('Request failed; reference=%s',reference)
-        if request.path.startswith('/api/'):return jsonify(error='A server error occurred. Saved data is retained. Reference: '+reference),500
+        if request.path.startswith('/api/'):return jsonify(error=_t('au.sec_srv', locale_now(), ref=reference)),500
         return render_template('error.html',reference=reference),500

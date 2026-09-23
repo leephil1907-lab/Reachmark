@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ locale }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -113,19 +113,19 @@ body.tall #case{top:30px}
 <body class="{{ fmt }}">
 <div id="stage">
   <div class="top">
-    <span class="chip"><b>◨</b> Independent concept · prepared by {{ studio }}</span>
-    <span class="disclaimer">Not the official website of {{ business }}.<br>Nothing is published under their name unless they say yes.</span>
+    <span class="chip"><b>◨</b> {{ t('ad_chip', s=studio) }}</span>
+    <span class="disclaimer">{{ t('ad_dis', b=business) }}</span>
   </div>
 
   <div id="window">
-    <div id="chrome"><i></i><i></i><i></i><span class="url">{{ business }} — concept page · {{ studio }}</span></div>
-    <div id="mask"><iframe id="frame" title="Concept page" scrolling="no" src="/r/{{ token }}"></iframe></div>
+    <div id="chrome"><i></i><i></i><i></i><span class="url">{{ t('ad_url', b=business, s=studio) }}</span></div>
+    <div id="mask"><iframe id="frame" title="{{ t('ad_frame') }}" scrolling="no" src="/r/{{ token }}"></iframe></div>
     <div id="case"><div class="case-card">
       <div class="case-kicker">{{ category }} · {{ place }}</div>
       <h1>{{ business }}</h1>
-      <p class="case-sub">What a customer finds today</p>
+      <p class="case-sub">{{ t('ad_today') }}</p>
       <ul>{% for f in problem_facts %}<li>{{ f }}</li>{% endfor %}</ul>
-      <div class="case-stamp">Needs a website</div>
+      <div class="case-stamp">{{ t('ad_stamp') }}</div>
     </div></div>
   </div>
 
@@ -144,13 +144,13 @@ body.tall #case{top:30px}
 </div>
 
 <div id="end"><div class="inner">
-  <span class="tag">One question, one tap</span>
-  <h1>{{ business }} — <i>would you like this built?</i></h1>
+  <span class="tag">{{ t('ad_tag') }}</span>
+  <h1>{{ business }} — <i>{{ t('ad_q') }}</i></h1>
   <p>{{ end_note }}</p>
   <img class="logo" src="/static/logo-inverse.svg" alt="{{ studio }} logo">
   <div class="brand">{{ studio }}</div>
   <div class="chips">{% for f in closing_facts %}<span>{{ f }}</span>{% endfor %}</div>
-  <div class="small">Concept first. Ask second. Build when they say yes.</div>
+  <div class="small">{{ t('ad_small') }}</div>
 </div></div>
 
 <script>

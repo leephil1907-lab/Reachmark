@@ -1,8 +1,8 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html><html lang="{{ locale }}"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Workspace plans · Reachmark</title>
 <meta name="description" content="Reachmark workspace plans: Free, Starter and Pro. Pay in USD or NGN with Paystack. One payment unlocks 30 days.">
-<meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="csrf-token" content="{{ csrf_token() }}"><script src="/static/i18n.js"></script>
 <link rel="stylesheet" href="/static/fonts.css">
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:'Manrope',Arial,sans-serif;background:#f2f5e8;color:#1a2315}
@@ -52,113 +52,115 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
 .btn-dark{background:#1a2315;color:#fff;border:0;padding:12px 22px;border-radius:10px;font:700 14px 'Manrope',sans-serif;cursor:pointer}
 .btn-lime{background:#d5f268;color:#1a2315;border:0;padding:12px 22px;border-radius:10px;font:700 14px 'Manrope',sans-serif;cursor:pointer;margin-top:10px}
 .btn-dark:disabled{opacity:.5}
+.locale-select{font:700 12px Manrope,Arial,sans-serif;padding:8px 10px;border-radius:10px;border:1px solid #e2e7d6;background:#fff;color:#0f1a0a;cursor:pointer}
 </style></head><body>
 <nav class="public-nav"><a href="/"><img class="public-logo" src="/static/logo-primary.svg" alt="Reachmark"></a>
-<div class="public-links"><a href="/">About Reachmark</a><a href="/showcase">Website samples</a><a href="/pricing" aria-current="page">Plans</a>{% if client_logged_in %}<a class="public-btn" href="/dashboard">Dashboard</a>{% elif owner_logged_in %}<a class="public-btn" href="/workspace">Workspace</a>{% else %}<a href="/signin">Sign in</a><a class="public-btn" href="/signup">Create account</a>{% endif %}</div></nav>
+<div class="public-links"><a href="/">{{ t('foot.about') }}</a><a href="/showcase">{{ t('foot.samples') }}</a><a href="/pricing" aria-current="page">{{ t('nav.plans') }}</a>{% if client_logged_in %}<a class="public-btn" href="/dashboard">{{ t('nav.dashboard') }}</a>{% elif owner_logged_in %}<a class="public-btn" href="/workspace">{{ t('nav.workspace') }}</a>{% else %}<a href="/signin">{{ t('pay.signin') }}</a><a class="public-btn" href="/signup">{{ t('pay.create') }}</a>{% endif %}{% include 'locale-switcher.html' %}</div></nav>
 <main class="wrap">
-<p class="eyebrow">WORKSPACE PLANS</p>
-<h1>Pay for power. Keep the basics free.</h1>
-<p class="sub">A free account covers samples, enquiries and your own invoices and projects. Paid plans unlock the working tools — leads, audits, outreach and the AI crew. One payment, 30 days, pay in dollars or naira.</p>
+<p class="eyebrow">{{ t('pay.eyebrow') }}</p>
+<h1>{{ t('pay.h1') }}</h1>
+<p class="sub">{{ t('pay.sub') }}</p>
 {% include 'adsense-footer.html' %}
-<div class="cur-toggle" role="group" aria-label="Currency"><button type="button" id="cur-usd" class="on">USD $</button><button type="button" id="cur-ngn">NGN ₦</button></div>
+<div class="cur-toggle" role="group" aria-label="{{ t('pay.cur_aria') }}"><button type="button" id="cur-usd" class="on">USD $</button><button type="button" id="cur-ngn">NGN ₦</button></div>
 <div id="plan-note" role="status"></div>
 <div class="cards">
-{% for id, t in tiers.items() %}
-<article class="card{% if id == 'pro' %} pop{% endif %}">
-{% if id == 'pro' %}<span class="pop-tag">MOST POPULAR</span>{% endif %}
-<h2>{{ t.name }}</h2><p class="tagline">{{ t.tag }}</p>
-<p class="price"><span class="amt" data-usd="{{ t.usd }}" data-ngn="{{ t.ngn }}">{{ t.usd }}</span> <small>/ {{ t.per }}</small></p>
-<ul>{% for f in t.features %}<li>{{ f }}</li>{% endfor %}</ul>
-{% if id == 'free' %}<a class="btn btn-ghost" href="/signup">Create free account</a>
-{% elif id == 'starter' %}<button type="button" class="btn-dark" data-tier="starter">Choose Starter</button>
-{% else %}<button type="button" class="btn-lime" data-tier="pro">Choose Pro</button>{% endif %}
+{% for tier_id, tier in tiers.items() %}
+<article class="card{% if tier_id == 'pro' %} pop{% endif %}">
+{% if tier_id == 'pro' %}<span class="pop-tag">{{ t('pay.pop') }}</span>{% endif %}
+<h2>{{ tier.name }}</h2><p class="tagline">{{ tier.tag }}</p>
+<p class="price"><span class="amt" data-usd="{{ tier.usd }}" data-ngn="{{ tier.ngn }}">{{ tier.usd }}</span> <small>/ {{ tier.per }}</small></p>
+<ul>{% for f in tier.features %}<li>{{ f }}</li>{% endfor %}</ul>
+{% if tier_id == 'free' %}<a class="btn btn-ghost" href="/signup">{{ t('pay.free_btn') }}</a>
+{% elif tier_id == 'starter' %}<button type="button" class="btn-dark" data-tier="starter">{{ t('pay.starter_btn') }}</button>
+{% else %}<button type="button" class="btn-lime" data-tier="pro">{{ t('pay.pro_btn') }}</button>{% endif %}
 </article>
 {% endfor %}
 </div>
-<section class="crypto" id="crypto"><h2>Prefer to pay with crypto?</h2>
-<p class="muted">Five coins, confirmed by hand. Pick a plan and a coin, send the exact amount from your own wallet, then paste the transaction hash — the studio confirms and your 30 days start, usually within a day.</p>
+<section class="crypto" id="crypto"><h2>{{ t('pay.c_h') }}</h2>
+<p class="muted">{{ t('pay.c_p') }}</p>
 <div class="crypto-grid"><div>
-<label>Plan<select id="crypto-tier"><option value="starter">Starter — $25</option><option value="pro">Pro — $35</option></select></label>
-<label>Coin<select id="crypto-coin"></select></label>
-<button type="button" class="btn-dark" id="crypto-start">Show wallet address</button>
+<label>{{ t('pay.c_plan') }}<select id="crypto-tier"><option value="starter">{{ t('pay.c_os') }}</option><option value="pro">{{ t('pay.c_op') }}</option></select></label>
+<label>{{ t('pay.c_coin') }}<select id="crypto-coin"></select></label>
+<button type="button" class="btn-dark" id="crypto-start">{{ t('pay.c_show') }}</button>
 </div><div id="crypto-pay" hidden>
 <p><b id="crypto-amount"></b></p>
-<img id="crypto-qr" alt="Wallet address QR code">
-<p class="addr"><code id="crypto-addr"></code><button type="button" id="crypto-copy">Copy</button></p>
+<img id="crypto-qr" alt="{{ t('pay.c_qr_alt') }}">
+<p class="addr"><code id="crypto-addr"></code><button type="button" id="crypto-copy">{{ t('pay.c_copy') }}</button></p>
 <p class="muted" id="crypto-note"></p>
-<label>Transaction hash<input id="crypto-tx" placeholder="Paste the hash from your wallet" autocomplete="off"></label>
-<button type="button" class="btn-lime" id="crypto-submit">I have sent the payment</button>
+<label>{{ t('pay.c_tx') }}<input id="crypto-tx" placeholder="{{ t('pay.c_tx_ph') }}" autocomplete="off"></label>
+<button type="button" class="btn-lime" id="crypto-submit">{{ t('pay.c_sent') }}</button>
 </div></div>
 <p id="crypto-msg" role="status"></p></section>
-<section class="how"><h2>How payment works</h2>
+<section class="how"><h2>{{ t('pay.how_h') }}</h2>
 <div class="steps">
-<div><b>1 · Choose plan &amp; currency</b><p>Starter or Pro, in USD or NGN. You will sign in (or create a free account) first.</p></div>
-<div><b>2 · Pay securely with Paystack</b><p>Cards and bank channels on Paystack's checkout. Reachmark never sees your card.</p></div>
-<div><b>3 · 30 days, unlocked</b><p>Your plan activates instantly. No auto-renewal — pay again only when you want more time.</p></div>
+<div><b>{{ t('pay.s1h') }}</b><p>{{ t('pay.s1p') }}</p></div>
+<div><b>{{ t('pay.s2h') }}</b><p>{{ t('pay.s2p') }}</p></div>
+<div><b>{{ t('pay.s3h') }}</b><p>{{ t('pay.s3p') }}</p></div>
 </div></section>
 <section class="faq">
-<details><summary>Can I switch currency or plan later?</summary><p>Yes. Every payment is a fresh 30 days on whichever plan and currency you pick at checkout. A new payment extends your time from your current expiry date.</p></details>
-<details><summary>What if payment succeeds but my plan does not activate?</summary><p>Paystack always confirms in the background too, so activation catches up within a minute. If not, send an enquiry with your payment reference and the studio will fix it by hand.</p></details>
-<details><summary>Can I pay with crypto?</summary><p>Yes — Bitcoin, Ethereum, Solana, USDT on ERC20 and USDT on TRC20. Crypto payments are confirmed by hand: send the amount, paste the transaction hash, and the studio activates your plan, usually within a day.</p></details>
-<details><summary>Is this the same as website pricing?</summary><p>No. These plans unlock workspace tools. Done-for-you website builds are quoted separately — see <a href="/about#pricing">website pricing</a> or send an enquiry.</p></details>
+<details><summary>{{ t('pay.f1q') }}</summary><p>{{ t('pay.f1p') }}</p></details>
+<details><summary>{{ t('pay.f2q') }}</summary><p>{{ t('pay.f2p') }}</p></details>
+<details><summary>{{ t('pay.f3q') }}</summary><p>{{ t('pay.f3p') }}</p></details>
+<details><summary>{{ t('pay.f4q') }}</summary><p>{{ t('pay.f4a1') }} <a href="/about#pricing">{{ t('pay.f4a2') }}</a> {{ t('pay.f4a3') }}</p></details>
 </section>
 </main>
-<footer class="site"><a href="/">About</a><a href="/showcase">Samples</a><a href="/pricing">Plans</a><a href="/enquire">Enquire</a><a href="/signin">Sign in</a>{% include 'newsletter-form.html' %}<br><small style="color:#7a8a5f">Support: <a href="mailto:{{ support_email }}">{{ support_email }}</a></small></footer>
+<footer class="site"><a href="/">{{ t('rx.nav_about') }}</a><a href="/showcase">{{ t('rx.nav_samples') }}</a><a href="/pricing">{{ t('nav.plans') }}</a><a href="/enquire">{{ t('pay.enquire') }}</a><a href="/signin">{{ t('pay.signin') }}</a>{% include 'newsletter-form.html' %}<br><small style="color:#7a8a5f">{{ t('foot.support') }} <a href="mailto:{{ support_email }}">{{ support_email }}</a></small></footer>
 {% include 'tawkto.html' %}
 <script>
 (function(){
+  var T_=window.T||function(k,f){return f;};
   var cur='USD', note=document.getElementById('plan-note');
   function say(msg,err){note.textContent=msg;note.className='show'+(err?' err':'');}
   var q=new URLSearchParams(location.search).get('error');
-  if(q==='verify')say('We could not confirm that payment with Paystack. If you were charged, your plan activates automatically within a minute.',true);
-  else if(q==='payment')say('That payment did not complete. No plan was activated and you can try again.',true);
-  else if(q==='missing')say('The payment reference was missing. Please start checkout again from this page.',true);
+  if(q==='verify')say(T_('pay.js_verify','verify'),true);
+  else if(q==='payment')say(T_('pay.js_nopay','nopay'),true);
+  else if(q==='missing')say(T_('pay.js_missing','missing'),true);
   function setCur(c){cur=c;document.getElementById('cur-usd').classList.toggle('on',c==='USD');document.getElementById('cur-ngn').classList.toggle('on',c==='NGN');document.querySelectorAll('.amt').forEach(function(el){el.textContent=c==='USD'?el.dataset.usd:el.dataset.ngn;});}
   document.getElementById('cur-usd').onclick=function(){setCur('USD');};
   document.getElementById('cur-ngn').onclick=function(){setCur('NGN');};
   var csrf=(document.querySelector('meta[name=csrf-token]')||{}).content||'';
   fetch('/api/billing/status').then(function(r){return r.json();}).then(function(s){
-    if(!s.configured)say('Online payment is being connected. You can create a free account now and upgrade here once checkout opens.');
-    else if(s.authenticated&&s.role==='client'&&s.tier!=='free'&&s.tier_active)say('You are on '+s.tier.charAt(0).toUpperCase()+s.tier.slice(1)+' until '+new Date(s.tier_expires).toLocaleDateString()+'. A new payment extends it.');
-    else if(s.authenticated&&s.role==='owner')say('Signed in as the studio owner — every tool is already unlocked, no payment needed.');
+    if(!s.configured)say(T_('pay.js_connecting','connecting'));
+    else if(s.authenticated&&s.role==='client'&&s.tier!=='free'&&s.tier_active)say(T_('pay.js_until','until').replace('{t}',s.tier.charAt(0).toUpperCase()+s.tier.slice(1)).replace('{d}',new Date(s.tier_expires).toLocaleDateString()));
+    else if(s.authenticated&&s.role==='owner')say(T_('pay.js_owner','owner'));
   }).catch(function(){});
   var ctier=document.getElementById('crypto-tier'),ccoin=document.getElementById('crypto-coin'),cpay=document.getElementById('crypto-pay'),cmsg=document.getElementById('crypto-msg'),copts=[];
   function csay(m,err){cmsg.textContent=m;cmsg.className='show'+(err?' err':'');}
   function renderCoin(){
     var o=copts[ccoin.selectedIndex]||copts[0];if(!o)return;
-    document.getElementById('crypto-amount').textContent=o.coin_amount?('Send exactly '+o.coin_amount+' '+o.coin.replace('_',' ')+' (≈ $'+o.usd+')'):('Send exactly $'+o.usd+' worth of '+o.label);
+    document.getElementById('crypto-amount').textContent=o.coin_amount?(T_('pay.js_exact','exact').replace('{a}',o.coin_amount).replace('{c}',o.coin.replace('_',' ')).replace('{u}',o.usd)):(T_('pay.js_worth','worth').replace('{u}',o.usd).replace('{l}',o.label));
     document.getElementById('crypto-addr').textContent=o.address;
     document.getElementById('crypto-note').textContent=o.note;
     var qr=document.getElementById('crypto-qr');if(o.qr){qr.src=o.qr;qr.style.display='';}else{qr.style.display='none';}
   }
   ccoin.onchange=renderCoin;
-  document.getElementById('crypto-copy').onclick=function(){var t=document.getElementById('crypto-addr').textContent;if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){csay('Address copied.');});};
+  document.getElementById('crypto-copy').onclick=function(){var t=document.getElementById('crypto-addr').textContent;if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){csay(T_('pay.js_copied','copied'));});};
   document.getElementById('crypto-start').onclick=function(){
     csay('');cpay.hidden=true;copts=[];
     fetch('/api/billing/status').then(function(r){return r.json();}).then(function(s){
       if(!s.authenticated){location.href='/signup';return;}
-      if(s.role==='owner'){csay('The owner account already has full access.');return;}
+      if(s.role==='owner'){csay(T_('pay.js_owner2','owner2'));return;}
       fetch('/api/billing/crypto?tier='+ctier.value).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(out){
-        if(!out.ok||!out.j.coins||!out.j.coins.length){csay((out.j&&out.j.error)||'Crypto payments are not enabled yet. Please use card checkout above or check back soon.',true);return;}
+        if(!out.ok||!out.j.coins||!out.j.coins.length){csay((out.j&&out.j.error)||T_('pay.js_coff','coff'),true);return;}
         copts=out.j.coins;
         ccoin.innerHTML=copts.map(function(o){return '<option value="'+o.coin+'">'+o.label+'</option>';}).join('');
         cpay.hidden=false;renderCoin();
-        csay('Send from your own wallet, then paste the transaction hash below.');
+        csay(T_('pay.js_ownwallet','ownwallet'));
       });
-    }).catch(function(){csay('Something went wrong. Try again.',true);});
+    }).catch(function(){csay(T_('pay.js_wrong','wrong'),true);});
   };
   document.getElementById('crypto-submit').onclick=function(){
     var o=copts[ccoin.selectedIndex]||copts[0],tx=document.getElementById('crypto-tx').value.trim(),btn=this;
-    if(!o){csay('Choose a coin first.',true);return;}
-    if(tx.length<16){csay('Paste the full transaction hash from your wallet.',true);return;}
-    btn.disabled=true;csay('Submitting…');
+    if(!o){csay(T_('pay.js_pickcoin','pickcoin'),true);return;}
+    if(tx.length<16){csay(T_('pay.c_tx','tx'),true);return;}
+    btn.disabled=true;csay(T_('pay.js_submitting','submitting'));
     fetch('/api/billing/crypto/checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tier:ctier.value,coin:o.coin})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(out){
-      if(!out.ok)throw new Error((out.j&&out.j.error)||'Checkout failed.');
+      if(!out.ok)throw new Error((out.j&&out.j.error)||T_('pay.js_checkout_fail','fail'));
       return fetch('/api/billing/crypto/submit',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({reference:out.j.reference,tx_hash:tx})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});});
     }).then(function(out){
       btn.disabled=false;
-      if(out.ok){cpay.hidden=true;document.getElementById('crypto-tx').value='';csay(out.j.message||'Received.');}
-      else csay((out.j&&out.j.error)||'Submission failed. Try again.',true);
+      if(out.ok){cpay.hidden=true;document.getElementById('crypto-tx').value='';csay(out.j.message||T_('pay.js_received','received'));}
+      else csay((out.j&&out.j.error)||T_('pay.js_submit_fail','submitfail'),true);
     }).catch(function(e){btn.disabled=false;csay(e.message,true);});
   };
   document.querySelectorAll('[data-tier]').forEach(function(btn){
@@ -166,13 +168,13 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
       btn.disabled=true;
       fetch('/api/billing/status').then(function(r){return r.json();}).then(function(s){
         if(!s.authenticated){location.href='/signup';return;}
-        if(s.role==='owner'){say('The owner account already has full access.');btn.disabled=false;return;}
-        if(!s.configured){say('Online payment is being connected. Please check back soon.',true);btn.disabled=false;return;}
+        if(s.role==='owner'){say(T_('pay.js_owner2','owner2'));btn.disabled=false;return;}
+        if(!s.configured){say(T_('pay.js_connecting2','connecting2'),true);btn.disabled=false;return;}
         return fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tier:btn.dataset.tier,currency:cur})}).then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});}).then(function(out){
           if(out.ok&&out.j.authorization_url){location.href=out.j.authorization_url;return;}
-          say((out.j&&out.j.error)||'Checkout failed. Try again.',true);btn.disabled=false;
+          say((out.j&&out.j.error)||T_('pay.js_checkout_fail2','fail2'),true);btn.disabled=false;
         });
-      }).catch(function(){say('Something went wrong. Try again.',true);btn.disabled=false;});
+      }).catch(function(){say(T_('pay.js_wrong','wrong'),true);btn.disabled=false;});
     };
   });
 })();

@@ -1,4 +1,5 @@
 /* Studio console: client records, manual plan control, payment approvals. Owner only. */
+var T_ = window.T || function (k, f) { return f; };
 var CLIENTS = {users: [], pending: [], news: 0};
 function clientsApi(path, method, body) {
   var options = {method: method || 'GET', headers: {'Content-Type': 'application/json'}};
@@ -7,7 +8,7 @@ function clientsApi(path, method, body) {
   if (body !== undefined) options.body = JSON.stringify(body);
   return fetch(path, options).then(function (r) {
     return r.json().catch(function () { return {}; }).then(function (data) {
-      if (!r.ok) throw new Error(data.error || 'Request failed');
+      if (!r.ok) throw new Error(data.error || T_('wsj.cl_fail','Request failed'));
       return data;
     });
   });
@@ -40,15 +41,14 @@ function renderClients() {
   var banner = document.getElementById('clients-pending');
   if (CLIENTS.pending.length) {
     banner.style.display = '';
-    banner.innerHTML = '<strong>' + CLIENTS.pending.length + ' crypto payment' +
-      (CLIENTS.pending.length > 1 ? 's' : '') + ' awaiting approval.</strong> Confirm the coins in your wallet app, then approve below. ' +
+    banner.innerHTML = '<strong>' + (CLIENTS.pending.length > 1 ? T_('wsj.cl_paym','{n} crypto payments') : T_('wsj.cl_pay1','{n} crypto payment')).replace('{n}', CLIENTS.pending.length) + ' ' + T_('wsj.cl_pay2','awaiting approval.') + '</strong> ' + T_('wsj.cl_pay3','Confirm the coins in your wallet app, then approve below.') + ' ' +
       CLIENTS.pending.map(function (p) {
         return '<span style="white-space:nowrap">' + esc(p.email) + ' → ' + esc(p.tier) +
-          ' <button class="secondary" onclick="approvePayment(\'' + esc(p.reference) + '\')">Approve</button>' +
-          ' <button class="secondary" onclick="rejectPayment(\'' + esc(p.reference) + '\')">Reject</button></span>';
+          ' <button class="secondary" onclick="approvePayment(\'' + esc(p.reference) + '\')">' + T_('wsj.cl_approve','Approve') + '</button>' +
+          ' <button class="secondary" onclick="rejectPayment(\'' + esc(p.reference) + '\')">' + T_('wsj.cl_reject','Reject') + '</button></span>';
       }).join(' · ');
   } else { banner.style.display = 'none'; banner.innerHTML = ''; }
-  document.getElementById('newsletter-count').textContent = CLIENTS.news + ' newsletter subscriber' + (CLIENTS.news === 1 ? '' : 's');
+  document.getElementById('newsletter-count').textContent = (CLIENTS.news === 1 ? T_('wsj.cl_news1','{n} newsletter subscriber') : T_('wsj.cl_newsm','{n} newsletter subscribers')).replace('{n}', CLIENTS.news);
   var rows = CLIENTS.users.filter(function (u) {
     if (tier && u.tier !== tier) return false;
     if (q && (u.email || '').toLowerCase().indexOf(q) < 0 && (u.name || '').toLowerCase().indexOf(q) < 0) return false;
@@ -58,48 +58,48 @@ function renderClients() {
     var pays = (u.payments || []).map(function (p) {
       var label = esc(p.reference.slice(0, 12)) + ' · ' + esc(p.tier) + ' · ' + esc(p.status);
       if (p.status === 'paid') label = '<a href="/api/billing/receipt/' + esc(p.reference) + '.pdf">' + label + ' ↓</a>';
-      else if (p.status === 'awaiting_approval') label += ' <button class="secondary" onclick="approvePayment(\'' + esc(p.reference) + '\')">Approve</button> <button class="secondary" onclick="rejectPayment(\'' + esc(p.reference) + '\')">Reject</button>';
+      else if (p.status === 'awaiting_approval') label += ' <button class="secondary" onclick="approvePayment(\'' + esc(p.reference) + '\')">' + T_('wsj.cl_approve','Approve') + '</button> <button class="secondary" onclick="rejectPayment(\'' + esc(p.reference) + '\')">' + T_('wsj.cl_reject','Reject') + '</button>';
       return '<div class="small">' + label + (p.tx_hash ? ' <span class="muted">tx ' + esc(String(p.tx_hash).slice(0, 18)) + '…</span>' : '') + '</div>';
-    }).join('') || '<div class="small muted">No payments yet.</div>';
+    }).join('') || '<div class="small muted">' + T_('wsj.cl_nopay','No payments yet.') + '</div>';
     return '<article class="card" style="margin-bottom:14px"><div class="section-top"><div><h3>' + esc(u.name || u.email) + '</h3>' +
-      '<p class="small muted">' + esc(u.email) + ' · since ' + clientsWhen(u.created) +
-      (u.email_verified ? ' · ✓ verified' : ' · unverified') + '</p></div>' +
+      '<p class="small muted">' + esc(u.email) + T_('wsj.cl_since',' · since {d}').replace('{d}', clientsWhen(u.created)) +
+      (u.email_verified ? T_('wsj.cl_verified',' · ✓ verified') : T_('wsj.cl_unverified',' · unverified')) + '</p></div>' +
       '<span class="badge">' + esc(u.tier) + (u.tier_expires ? ' → ' + clientsWhen(u.tier_expires) : '') + '</span></div>' +
       pays +
-      '<div class="table-toolbar" style="margin-top:10px"><label class="small">Plan <select id="tier-' + esc(u.id) + '">' +
-      ['free', 'starter', 'pro'].map(function (t) { return '<option value="' + t + '"' + (u.tier === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') +
-      '</select></label><label class="small">Days <input id="days-' + esc(u.id) + '" type="number" value="30" min="1" max="3650" style="width:70px"></label>' +
-      '<label class="small">Note <input id="note-' + esc(u.id) + '" placeholder="bank transfer, goodwill…" style="width:170px"></label>' +
-      '<button class="primary" onclick="saveClient(\'' + esc(u.id) + '\')">Save plan</button>' +
-      '<button class="secondary" onclick="toggleClient(\'' + esc(u.id) + '\',' + (u.is_active ? '0' : '1') + ')">' + (u.is_active ? 'Pause account' : 'Unpause') + '</button></div></article>';
+      '<div class="table-toolbar" style="margin-top:10px"><label class="small">' + T_('wsj.cl_plan','Plan') + ' <select id="tier-' + esc(u.id) + '">' +
+      ['free', 'starter', 'pro'].map(function (t) { var tn = t === 'free' ? T_('pay.t_free','Free') : t === 'starter' ? T_('pay.t_st','Starter') : T_('pay.t_pro','Pro'); return '<option value="' + t + '"' + (u.tier === t ? ' selected' : '') + '>' + tn + '</option>'; }).join('') +
+      '</select></label><label class="small">' + T_('wsj.cl_days','Days') + ' <input id="days-' + esc(u.id) + '" type="number" value="30" min="1" max="3650" style="width:70px"></label>' +
+      '<label class="small">' + T_('wsj.cl_note','Note') + ' <input id="note-' + esc(u.id) + '" ' + T_('wsj.cl_noteph','bank transfer, goodwill…') + ' style="width:170px"></label>' +
+      '<button class="primary" onclick="saveClient(\'' + esc(u.id) + '\')">' + T_('wsj.cl_save','Save plan') + '</button>' +
+      '<button class="secondary" onclick="toggleClient(\'' + esc(u.id) + '\',' + (u.is_active ? '0' : '1') + ')">' + (u.is_active ? T_('wsj.cl_pause','Pause account') : T_('wsj.cl_unpause','Unpause')) + '</button></div></article>';
   }).join('');
-  document.getElementById('client-list').innerHTML = html || '<p class="small muted">No clients match.</p>';
+  document.getElementById('client-list').innerHTML = html || '<p class="small muted">' + T_('wsj.cl_nomatch','No clients match.') + '</p>';
 }
 function saveClient(uid) {
   var tier = document.getElementById('tier-' + uid).value;
   var days = parseInt(document.getElementById('days-' + uid).value, 10) || 30;
   var note = document.getElementById('note-' + uid).value;
   clientsApi('/api/admin/users/' + uid, 'PATCH', {tier: tier, days: days, note: note}).then(function () {
-    if (window.toast) toast('Plan saved.');
+    if (window.toast) toast(T_('wsj.cl_saved','Plan saved.'));
     loadClients();
   }).catch(function (e) { if (window.toast) toast(e.message, true); });
 }
 function toggleClient(uid, active) {
   clientsApi('/api/admin/users/' + uid, 'PATCH', {is_active: !!active}).then(function () {
-    if (window.toast) toast(active ? 'Account unpaused.' : 'Account paused.');
+    if (window.toast) toast(active ? T_('wsj.cl_unpaused','Account unpaused.') : T_('wsj.cl_paused','Account paused.'));
     loadClients();
   }).catch(function (e) { if (window.toast) toast(e.message, true); });
 }
 function approvePayment(ref) {
   clientsApi('/api/admin/payments/' + ref + '/approve', 'POST', {}).then(function () {
-    if (window.toast) toast('Payment approved — plan activated.');
+    if (window.toast) toast(T_('wsj.cl_approved','Payment approved — plan activated.'));
     loadClients();
   }).catch(function (e) { if (window.toast) toast(e.message, true); });
 }
 function rejectPayment(ref) {
-  if (!confirm('Reject this payment? The client keeps their current plan.')) return;
+  if (!confirm(T_('wsj.cl_rejectq','Reject this payment? The client keeps their current plan.'))) return;
   clientsApi('/api/admin/payments/' + ref + '/reject', 'POST', {}).then(function () {
-    if (window.toast) toast('Payment rejected.');
+    if (window.toast) toast(T_('wsj.cl_rejected','Payment rejected.'));
     loadClients();
   }).catch(function (e) { if (window.toast) toast(e.message, true); });
 }

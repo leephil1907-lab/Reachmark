@@ -2,6 +2,7 @@
 import re, uuid, time, hashlib, hmac, secrets, os, ssl, smtplib
 from datetime import datetime, timezone, timedelta
 from flask import request, jsonify, session, render_template, redirect, url_for, Response
+from web.i18n import t as _t, locale_now
 from werkzeug.security import generate_password_hash, check_password_hash
 from email.message import EmailMessage
 
@@ -35,6 +36,7 @@ def branded_html(title, text_body, cta_url=None, cta_label=None, base_url=None):
     base = (base_url or 'https://reachmark.co').rstrip('/')
     host = base.replace('https://', '').replace('http://', '')
     safe = text_body.replace('\n', '<br>')
+    foot = _t('au.m_foot', locale_now(), email=support_email())
     cta = f'<p style="margin:22px 0"><a href="{cta_url}" style="display:inline-block;background:#0f1a0a;color:#d5f268;padding:13px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-family:Manrope,Arial,sans-serif">{cta_label}</a></p>' if cta_url else ''
     html = f"""<!doctype html><html><body style="margin:0;background:#eef6d1;font-family:Manrope,Arial,sans-serif;color:#1a2315">
 <div style="max-width:560px;margin:0 auto;padding:28px">
@@ -43,7 +45,7 @@ def branded_html(title, text_body, cta_url=None, cta_label=None, base_url=None):
 <h1 style="margin:8px 0 10px;font-size:20px;letter-spacing:-0.5px;color:#0f1a0a">{title}</h1>
 <div style="line-height:1.7;color:#33402a;font-size:14px">{safe}</div>
 {cta}
-<div style="margin-top:22px;padding-top:16px;border-top:1px solid #eef1e4;font-size:12px;color:#8a9976">If you didn't ask for this, you can ignore this email. Reply to {support_email()} for help.</div>
+<div style="margin-top:22px;padding-top:16px;border-top:1px solid #eef1e4;font-size:12px;color:#8a9976">{foot}</div>
 </div>
 <div style="text-align:center;margin-top:14px;font-size:11px;color:#8a9976">Reachmark · Global · {host}</div>
 </div></body></html>"""
@@ -188,8 +190,9 @@ def register_accounts(app, db, log):
 
     @app.get('/forgot')
     def forgot_page():
-        return render_template('forgot.html') if os.path.exists(os.path.join(app.root_path,'templates','forgot.html')) else Response("""
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reset password · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><style>
+        _fl = locale_now()
+        return render_template('forgot.html') if os.path.exists(os.path.join(app.root_path,'templates','forgot.html')) else Response(("""
+<!doctype html><html lang="__LOC__"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reset password · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><style>
 .auth-page{margin:0;background:#e9edde;color:#26351e;min-height:100vh;display:grid;place-items:center;font-family:Manrope,Arial,sans-serif}.auth-card{box-sizing:border-box;width:min(480px,calc(100% - 32px));padding:40px;background:#fff;border:1px solid #d2d8c7;border-radius:22px;box-shadow:0 22px 70px #24311b10}
 .auth-card h1{font-size:28px;letter-spacing:-1px;margin:14px 0 8px}.auth-card p{line-height:1.7;color:#535f4c;font-size:14px}
 .auth-card label{display:block;margin:14px 0 6px;font-weight:600;font-size:13px}.auth-card input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #a1ad95;border-radius:8px;font-size:15px}
@@ -199,39 +202,41 @@ def register_accounts(app, db, log):
 <script>
 let csrf='';(async()=>{try{let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\\"csrf_token\\" value=\\"([^\\"]+)\\"/);csrf=m?m[1]:''}catch(e){}})();
 const f=document.getElementById('f'),msg=document.getElementById('msg'),ok=document.getElementById('ok');
-f.onsubmit=async e=>{e.preventDefault();msg.style.display='none';ok.style.display='none';try{let r=await fetch('/api/auth/forgot',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({email:document.getElementById('email').value.trim()})});let j=await r.json();if(!r.ok) throw new Error(j.error||'Could not send link');ok.textContent='If an account exists, a reset link has been sent. Check your email (and spam).';ok.style.display='block';}catch(err){msg.textContent=err.message;msg.style.display='block';}};
-</script></body></html>""", mimetype='text/html')
+f.onsubmit=async e=>{e.preventDefault();msg.style.display='none';ok.style.display='none';try{let r=await fetch('/api/auth/forgot',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({email:document.getElementById('email').value.trim()})});let j=await r.json();if(!r.ok) throw new Error(j.error||'__NOLINK__');ok.textContent='__SENT__';ok.style.display='block';}catch(err){msg.textContent=err.message;msg.style.display='block';}};
+</script></body></html>""".replace('__LOC__', _fl).replace('<h1>Reset your password.</h1>', '<h1>'+_t('au.f_h', _fl)+'</h1>').replace("<p>Enter your work email and we'll send a secure link. It expires in 60 minutes.</p>", '<p>'+_t('au.f_p', _fl)+'</p>').replace('<label for="email">Work email</label>', '<label for="email">'+_t('au.s_email', _fl)+'</label>').replace('<button type="submit">Send reset link →</button>', '<button type="submit">'+_t('au.f_send', _fl)+'</button>').replace('Remembered? <a href="/signin">Sign in</a> · <a href="/">About</a>', _t('au.f_rem', _fl)+' <a href="/signin">'+_t('au.s_signin', _fl)+'</a> · <a href="/">'+_t('au.f_about', _fl)+'</a>').replace('__NOLINK__', _t('au.f_nolink', _fl)).replace('__SENT__', _t('au.f_sent', _fl))), mimetype='text/html')
 
     @app.get('/reset/<token>')
     def reset_page(token):
-        return render_template('reset.html', token=token) if os.path.exists(os.path.join(app.root_path,'templates','reset.html')) else Response(f"""
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Choose new password · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><style>
+        _rl = locale_now()
+        return render_template('reset.html', token=token) if os.path.exists(os.path.join(app.root_path,'templates','reset.html')) else Response((f"""
+<!doctype html><html lang="{_rl}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Choose new password · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"><style>
 .auth-page{{margin:0;background:#e9edde;color:#26351e;min-height:100vh;display:grid;place-items:center;font-family:Manrope,Arial,sans-serif}}.auth-card{{box-sizing:border-box;width:min(480px,calc(100% - 32px));padding:40px;background:#fff;border:1px solid #d2d8c7;border-radius:22px;box-shadow:0 22px 70px #24311b10}}
 .auth-card h1{{font-size:28px;letter-spacing:-1px;margin:14px 0 8px}}.auth-card p{{line-height:1.7;color:#535f4c;font-size:14px}}
 .auth-card label{{display:block;margin:14px 0 6px;font-weight:600;font-size:13px}}.auth-card input{{box-sizing:border-box;width:100%;padding:12px;border:1px solid #a1ad95;border-radius:8px;font-size:15px}}
 .auth-card button{{width:100%;margin:18px 0 10px;padding:13px;background:#d2e985;border:0;border-radius:8px;color:#26351e;font-weight:700;font-size:15px;cursor:pointer}}
 .auth-error{{background:#f9e7e1;padding:10px;color:#8b3524;border-radius:6px;font-size:13px;display:none}}.auth-ok{{background:#eef6d1;padding:12px;border:1px solid #d8e9b8;border-radius:8px;color:#2d4a0a;font-size:13px;display:none}}
-</style></head><body class="auth-page"><main class="auth-card"><a href="/"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:38px"></a><h1>Choose a new password.</h1><p>At least 8 characters. This link expires in 60 minutes and can be used once.</p><div id="msg" class="auth-error"></div><div id="ok" class="auth-ok"></div><form id="f"><label>New password</label><input id="pw" type="password" required minlength="8"><label>Confirm</label><input id="pw2" type="password" required><button type="submit">Update password →</button></form><p style="font-size:12px;color:#8a9976"><a href="/signin">Back to sign in</a></p></main>
+</style></head><body class="auth-page"><main class="auth-card"><a href="/"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:38px"></a><h1>{_t('au.r_h', _rl)}</h1><p>{_t('au.r_p', _rl)}</p><div id="msg" class="auth-error"></div><div id="ok" class="auth-ok"></div><form id="f"><label>{_t('au.r_pw', _rl)}</label><input id="pw" type="password" required minlength="8"><label>{_t('au.r_conf', _rl)}</label><input id="pw2" type="password" required><button type="submit">{_t('au.r_upd', _rl)}</button></form><p style="font-size:12px;color:#8a9976"><a href="/signin">{_t('au.r_back', _rl)}</a></p></main>
 <script>
 let csrf='';(async()=>{{try{{let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\\"csrf_token\\" value=\\"([^\\"]+)\\"/);csrf=m?m[1]:''}}catch(e){{}}}})();
 const f=document.getElementById('f'),msg=document.getElementById('msg'),ok=document.getElementById('ok');
-f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=document.getElementById('pw').value, pw2=document.getElementById('pw2').value; if(pw!==pw2){{msg.textContent='Passwords do not match.';msg.style.display='block';return}}; try{{let r=await fetch('/api/auth/reset',{{method:'POST',headers:{{'Content-Type':'application/json','X-CSRF-Token':csrf}},body:JSON.stringify({{token:"{token}",password:pw}})}});let j=await r.json();if(!r.ok) throw new Error(j.error||'Could not reset'); ok.textContent='Password updated. Redirecting to sign in…';ok.style.display='block'; setTimeout(()=>location.href='/signin',1200);}}catch(err){{msg.textContent=err.message;msg.style.display='block';}} }};
-</script></body></html>""", mimetype='text/html')
+f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=document.getElementById('pw').value, pw2=document.getElementById('pw2').value; if(pw!==pw2){{msg.textContent='{_t('au.js_nomatch', _rl)}';msg.style.display='block';return}}; try{{let r=await fetch('/api/auth/reset',{{method:'POST',headers:{{'Content-Type':'application/json','X-CSRF-Token':csrf}},body:JSON.stringify({{token:"{token}",password:pw}})}});let j=await r.json();if(!r.ok) throw new Error(j.error||'{_t('au.r_noreset', _rl)}'); ok.textContent='{_t('au.r_done', _rl)}';ok.style.display='block'; setTimeout(()=>location.href='/signin',1200);}}catch(err){{msg.textContent=err.message;msg.style.display='block';}} }};
+</script></body></html>"""), mimetype='text/html')
 
     @app.get('/verify/<token>')
     def verify_page(token):
         # Verify token and show result — avoid nesting db() inside open transaction
+        _vl = locale_now()
         row = None
         with db() as c:
             row = c.execute('SELECT * FROM users WHERE verification_token=?', (token,)).fetchone()
             if row:
                 row = dict(row)
         if not row:
-            return Response("""<!doctype html><html><body style="font-family:Manrope,Arial,sans-serif;background:#e9edde;display:grid;place-items:center;min-height:100vh"><div style="background:#fff;padding:32px;border-radius:16px;max-width:480px"><h2>Link invalid or expired.</h2><p>Request a new verification email from your dashboard or sign-in page.</p><a href="/signin">Sign in</a></div></body></html>""", mimetype='text/html'), 400
+            return Response(f"""<!doctype html><html lang="{_vl}"><body style="font-family:Manrope,Arial,sans-serif;background:#e9edde;display:grid;place-items:center;min-height:100vh"><div style="background:#fff;padding:32px;border-radius:16px;max-width:480px"><h2>{_t('au.v_inv_h', _vl)}</h2><p>{_t('au.v_inv_p', _vl)}</p><a href="/signin">{_t('au.s_signin', _vl)}</a></div></body></html>""", mimetype='text/html'), 400
         exp = row['verification_expires']
         try:
             if exp and datetime.fromisoformat(exp) < datetime.now(timezone.utc):
-                return Response("""<!doctype html><html><body style="font-family:Manrope,Arial,sans-serif;background:#e9edde;display:grid;place-items:center;min-height:100vh"><div style="background:#fff;padding:32px;border-radius:16px;max-width:480px"><h2>Link expired.</h2><p>Your verification link was valid for 24 hours. Request a new one.</p><a href="/signin">Sign in</a></div></body></html>""", mimetype='text/html'), 400
+                return Response(f"""<!doctype html><html lang="{_vl}"><body style="font-family:Manrope,Arial,sans-serif;background:#e9edde;display:grid;place-items:center;min-height:100vh"><div style="background:#fff;padding:32px;border-radius:16px;max-width:480px"><h2>{_t('au.v_exp_h', _vl)}</h2><p>{_t('au.v_exp_p', _vl)}</p><a href="/signin">{_t('au.s_signin', _vl)}</a></div></body></html>""", mimetype='text/html'), 400
         except Exception:
             pass
         with db() as c:
@@ -242,17 +247,17 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
             pass
         try:
             base = get_base_url()
-            send_branded(row['email'], 'Welcome to Reachmark — email verified',
-                         f"Hi {row['email']},\n\nYour email is verified and your Reachmark account is ready.\n\nFree plan: samples, enquiries and your own invoices and projects.\n\nNeed the working tools? See workspace plans:\n{base}/pricing\n\n— Reachmark · Global",
-                         html_title='Welcome to Reachmark', cta_url=f'{base}/dashboard',
-                         cta_label='Open your dashboard →', db=db)
+            send_branded(row['email'], _t('au.m_w_sub', _vl),
+                         _t('au.m_w_body', _vl, email=row['email'], url=f'{base}/pricing'),
+                         html_title=_t('au.m_w_title', _vl), cta_url=f'{base}/dashboard',
+                         cta_label=_t('au.m_w_cta', _vl), db=db)
         except Exception:
             pass
         if session.get('client_id'):
-            next_btn = '<a href="/dashboard" style="display:inline-block;margin-top:12px;background:#0f1a0a;color:#d5f268;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">Continue to your dashboard →</a>'
+            next_btn = '<a href="/dashboard" style="display:inline-block;margin-top:12px;background:#0f1a0a;color:#d5f268;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">' + _t('au.v_cont_d', _vl) + '</a>'
         else:
-            next_btn = '<a href="/signin" style="display:inline-block;margin-top:12px;background:#0f1a0a;color:#d5f268;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">Continue to sign in →</a>'
-        return Response(f"""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Email verified · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"></head><body style="margin:0;background:#e9edde;display:grid;place-items:center;min-height:100vh;font-family:Manrope,Arial,sans-serif"><div style="background:#fff;border:1px solid #d2d8c7;border-radius:22px;padding:40px;max-width:480px;text-align:center"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:38px"><h1 style="font-size:26px;letter-spacing:-0.8px">Email verified ✓</h1><p style="color:#535f4c;line-height:1.6">Your Reachmark account is now verified. You can close this tab and continue to your dashboard.</p>{next_btn}</div></body></html>""", mimetype='text/html')
+            next_btn = '<a href="/signin" style="display:inline-block;margin-top:12px;background:#0f1a0a;color:#d5f268;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:700">' + _t('au.v_cont_s', _vl) + '</a>'
+        return Response(f"""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Email verified · Reachmark</title><link rel="stylesheet" href="/static/fonts.css"></head><body style="margin:0;background:#e9edde;display:grid;place-items:center;min-height:100vh;font-family:Manrope,Arial,sans-serif"><div style="background:#fff;border:1px solid #d2d8c7;border-radius:22px;padding:40px;max-width:480px;text-align:center"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:38px"><h1 style="font-size:26px;letter-spacing:-0.8px">{_t('au.v_ok_h', _vl)}</h1><p style="color:#535f4c;line-height:1.6">{_t('au.v_ok_p', _vl)}</p>{next_btn}</div></body></html>""", mimetype='text/html')
 
     # --- Auth APIs ---
     def _create_verification(user_id, email):
@@ -263,8 +268,9 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
         base = get_base_url()
         host = base.replace("https://", "").replace("http://", "")
         link = f"{base}/verify/{token}"
-        text = f"Hi {email},\n\nConfirm your Reachmark account by opening this link (valid 24 hours):\n{link}\n\nIf you didn't create an account, you can ignore this email.\n\n— Reachmark · Global\n{host}"
-        send_branded(email, "Confirm your Reachmark account", text, html_title="Confirm your email", cta_url=link, cta_label="Verify email →", db=db)
+        _cl = locale_now()
+        text = _t('au.m_c_body', _cl, email=email, link=link, host=host)
+        send_branded(email, _t('au.m_c_sub', _cl), text, html_title=_t('au.m_c_title', _cl), cta_url=link, cta_label=_t('au.m_c_cta', _cl), db=db)
         return token
 
     @app.post('/api/auth/signup')
@@ -274,20 +280,20 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
         password = str(data.get('password',''))
         name = str(data.get('name','')).strip()
         if not valid_email(email):
-            return jsonify(error='Enter a valid email address.'),400
+            return jsonify(error=_t('au.e_email', locale_now())),400
         if len(password) < 8 or len(password) > 1024:
-            return jsonify(error='Password must be at least 8 characters.'),400
+            return jsonify(error=_t('au.e_pw8', locale_now())),400
         if len(name) > 120:
-            return jsonify(error='Name is too long.'),400
+            return jsonify(error=_t('au.e_namelong', locale_now())),400
         if get_user_by_email(email):
-            return jsonify(error='An account with that email already exists. Try signing in.'),409
+            return jsonify(error=_t('au.e_exists', locale_now())),409
         client_hash = hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()
         with db() as c:
             c.execute('BEGIN IMMEDIATE')
             c.execute('DELETE FROM login_attempts WHERE blocked_until < ?', (time.time()-3600,))
             row = c.execute('SELECT * FROM login_attempts WHERE client=?', (client_hash,)).fetchone()
             if row and row['failures'] >= 10 and row['blocked_until'] > time.time():
-                return jsonify(error='Too many attempts. Wait a few minutes.'),429
+                return jsonify(error=_t('au.e_many', locale_now())),429
         uid = uuid.uuid4().hex
         hashed = generate_password_hash(password)
         stamp = now_iso()
@@ -298,7 +304,7 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
                           (uid, email.strip().lower(), name[:120], hashed, 'client', stamp, stamp))
                 c.execute('DELETE FROM login_attempts WHERE client=?', (client_hash,))
         except Exception:
-            return jsonify(error='Could not create account. Try again.'),500
+            return jsonify(error=_t('au.e_nocreate', locale_now())),500
         # Create verification email (non-blocking)
         try:
             _create_verification(uid, email.strip().lower())
@@ -319,14 +325,14 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
         email = str(data.get('email','')).strip()
         password = str(data.get('password',''))
         if not valid_email(email) or not password:
-            return jsonify(error='Enter your email and password.'),400
+            return jsonify(error=_t('au.e_both', locale_now())),400
         client_hash = hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()
         with db() as c:
             c.execute('BEGIN IMMEDIATE')
             c.execute('DELETE FROM login_attempts WHERE blocked_until < ?', (time.time()-3600,))
             row = c.execute('SELECT * FROM login_attempts WHERE client=?', (client_hash,)).fetchone()
             if row and row['failures'] >= 5 and row['blocked_until'] > time.time():
-                return jsonify(error='Too many attempts. Wait 15 minutes before trying again.'),429
+                return jsonify(error=_t('au.e_lock', locale_now())),429
             user = c.execute('SELECT * FROM users WHERE lower(email)=lower(?)', (email,)).fetchone()
             valid = False
             if user and user['is_active']:
@@ -334,7 +340,7 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
             if not valid:
                 failures = (row['failures'] if row and row['blocked_until'] > time.time() else 0) + 1
                 c.execute('INSERT OR REPLACE INTO login_attempts VALUES(?,?,?)', (client_hash, failures, time.time()+900))
-                return jsonify(error='Invalid email or password.'),401
+                return jsonify(error=_t('au.e_invalid', locale_now())),401
             c.execute('DELETE FROM login_attempts WHERE client=?', (client_hash,))
             uid = user['id']
             needs_verification = not bool(user['email_verified'])
@@ -381,9 +387,9 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
         elif email and valid_email(email):
             target = get_user_by_email(email)
         else:
-            return jsonify(error='Sign in or provide your email.'),400
+            return jsonify(error=_t('au.e_signin_email', locale_now())),400
         if not target:
-            return jsonify(error='Account not found.'),404
+            return jsonify(error=_t('au.e_noacct', locale_now())),404
         if target['email_verified']:
             return jsonify(ok=True, already_verified=True)
         # Rate limit: don't spam
@@ -407,7 +413,7 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
         data = request.get_json(silent=True) or {}
         email = str(data.get('email','')).strip()
         if not valid_email(email):
-            return jsonify(error='Enter a valid email address.'),400
+            return jsonify(error=_t('au.e_email', locale_now())),400
         user = get_user_by_email(email)
         # Always return ok to avoid enumeration
         if user and user['is_active']:
@@ -417,8 +423,9 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
                 c.execute('UPDATE users SET reset_token=?, reset_expires=?, updated=? WHERE id=?', (token, expires, now_iso(), user['id']))
             base = get_base_url()
             link = f"{base}/reset/{token}"
-            text = f"Hi {user['name'] or user['email']},\n\nReset your Reachmark password by opening this link (valid 60 minutes, one-time):\n{link}\n\nIf you didn't ask for this, you can ignore this email — your password won't change.\n\n— Reachmark"
-            send_branded(user['email'], "Reset your Reachmark password", text, html_title="Reset your password", cta_url=link, cta_label="Choose new password →", db=db)
+            _ml = locale_now()
+            text = _t('au.m_r_body', _ml, name=user['name'] or user['email'], link=link)
+            send_branded(user['email'], _t('au.m_r_sub', _ml), text, html_title=_t('au.m_r_title', _ml), cta_url=link, cta_label=_t('au.m_r_cta', _ml), db=db)
             log('account', f'Password reset requested: {user["email"]}')
         return jsonify(ok=True)
 
@@ -428,19 +435,19 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
         token = str(data.get('token','')).strip()
         password = str(data.get('password',''))
         if not token or len(password) < 8 or len(password) > 1024:
-            return jsonify(error='Invalid token or password must be 8+ characters.'),400
+            return jsonify(error=_t('au.e_token', locale_now())),400
         with db() as c:
             row = c.execute('SELECT * FROM users WHERE reset_token=?', (token,)).fetchone()
             if not row:
-                return jsonify(error='This reset link is invalid or has already been used.'),400
+                return jsonify(error=_t('au.e_used', locale_now())),400
             if not row['is_active']:
-                return jsonify(error='Account is closed.'),400
+                return jsonify(error=_t('au.e_closed', locale_now())),400
             try:
                 exp = datetime.fromisoformat(row['reset_expires']) if row['reset_expires'] else None
                 if not exp or exp < datetime.now(timezone.utc):
-                    return jsonify(error='This reset link has expired. Request a new one from /forgot.'),400
+                    return jsonify(error=_t('au.e_exp_forgot', locale_now())),400
             except Exception:
-                return jsonify(error='This reset link has expired.'),400
+                return jsonify(error=_t('au.e_exp', locale_now())),400
             hashed = generate_password_hash(password)
             c.execute('UPDATE users SET password_hash=?, reset_token=NULL, reset_expires=NULL, updated=? WHERE id=?', (hashed, now_iso(), row['id']))
             # Invalidate other sessions? Clear login attempts
@@ -452,11 +459,11 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
     def export_account():
         cid = session.get('client_id')
         if not cid or session.get('role')!='client':
-            return jsonify(error='Sign in required.'),401
+            return jsonify(error=_t('au.e_signin_req', locale_now())),401
         user = get_user_by_id(cid)
         if not user or not user['is_active']:
             session.clear()
-            return jsonify(error='Account not found.'),401
+            return jsonify(error=_t('au.e_noacct', locale_now())),401
         with db() as c:
             # Projects, invoices, documents linked to this user
             projects = [dict(r) for r in c.execute('SELECT * FROM projects WHERE client_user_id=? ORDER BY updated DESC', (cid,))] if c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='projects'").fetchone() else []
@@ -482,12 +489,12 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
     def close_account():
         cid = session.get('client_id')
         if not cid or session.get('role')!='client':
-            return jsonify(error='Sign in required.'),401
+            return jsonify(error=_t('au.e_signin_req', locale_now())),401
         data = request.get_json(silent=True) or {}
         confirm = str(data.get('confirm','')).strip().lower()
         # Require explicit confirmation
         if confirm not in ('close','delete','confirm'):
-            return jsonify(error='Type "close" to confirm.'),400
+            return jsonify(error=_t('au.e_close', locale_now())),400
         with db() as c:
             c.execute('UPDATE users SET is_active=0, updated=? WHERE id=?', (now_iso(), cid))
         log('account', f'Client account closed: {cid}')
@@ -497,7 +504,7 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
     @app.get('/api/clients')
     def list_clients():
         if not session.get('owner'):
-            return jsonify(error='Owner login required.'),401
+            return jsonify(error=_t('rx.e_owner', locale_now())),401
         with db() as c:
             rows = [dict(r) for r in c.execute('SELECT id,email,name,created,email_verified,is_active FROM users WHERE role="client" ORDER BY created DESC')]
         return jsonify(clients=rows)

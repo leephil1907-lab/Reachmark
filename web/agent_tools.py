@@ -8,6 +8,7 @@ code as the workspace buttons (internal dispatch), so guardrails cannot
 drift. Every run is logged.
 """
 import os
+from web.i18n import t as _t, locale_now
 import uuid
 
 LEAD_STAGES = ['New', 'Drafted', 'Contacted', 'Replied', 'Won', 'Not a fit']
@@ -82,7 +83,7 @@ def tool_lead_get(db, now, log, p, ctx):
     with db() as c:
         row = c.execute('SELECT * FROM leads WHERE id=?', (str(p.get('id', '')),)).fetchone()
     if not row:
-        raise ToolError('Lead not found.', 404)
+        raise ToolError(_t('er_061', locale_now()), 404)
     return {'lead': dict(row)}
 
 
@@ -90,7 +91,7 @@ def tool_lead_create(db, now, log, p, ctx):
     from web.app import add_lead
     name = str(p.get('name', '')).strip()
     if not name:
-        raise ToolError('Business name is required.')
+        raise ToolError(_t('er_012', locale_now()))
     key = 'agent:' + uuid.uuid4().hex
     v = {'name': name[:200], 'email': str(p.get('email', '')).strip()[:250],
          'phone': str(p.get('phone', '')).strip()[:100],
@@ -98,7 +99,7 @@ def tool_lead_create(db, now, log, p, ctx):
          'city': str(p.get('city', '')).strip()[:200],
          'source': 'Owner agent', 'source_key': key}
     if add_lead(v) != 1:
-        raise ToolError('Could not save that lead.')
+        raise ToolError(_t('er_032', locale_now()))
     note = str(p.get('note', ''))[:2000]
     with db() as c:
         if note:
@@ -114,16 +115,16 @@ def tool_lead_update(db, now, log, p, ctx):
     with db() as c:
         cur = c.execute('SELECT * FROM leads WHERE id=?', (lid,)).fetchone()
     if not cur:
-        raise ToolError('Lead not found.', 404)
+        raise ToolError(_t('er_061', locale_now()), 404)
     cur = dict(cur)
     allowed = {'name', 'email', 'phone', 'website', 'note', 'stage', 'subject', 'body'}
     data = {k: str(v)[:10000] for k, v in (p or {}).items() if k in allowed and isinstance(v, str)}
     if 'name' in data and not data['name'].strip():
-        raise ToolError('Business name is required.')
+        raise ToolError(_t('er_012', locale_now()))
     if 'stage' in data and data['stage'] not in LEAD_STAGES:
-        raise ToolError('Invalid stage.')
+        raise ToolError(_t('er_057', locale_now()))
     if not data:
-        raise ToolError('Nothing to update.')
+        raise ToolError(_t('er_080', locale_now()))
     if 'website' in data:
         data['status'] = classify(data['website'])
         if data['website'] != cur['website']:
@@ -142,7 +143,7 @@ def tool_lead_delete(db, now, log, p, ctx):
     with db() as c:
         cur = c.execute('SELECT name FROM leads WHERE id=?', (str(p.get('id', '')),)).fetchone()
         if not cur:
-            raise ToolError('Lead not found.', 404)
+            raise ToolError(_t('er_061', locale_now()), 404)
         c.execute('DELETE FROM leads WHERE id=?', (str(p.get('id', '')),))
     log('agent', f"Owner agent deleted {cur['name']}")
     return {'ok': True}
@@ -152,7 +153,7 @@ def tool_lead_send(db, now, log, p, ctx):
     from web.app import send as send_view
     basis = str(p.get('basis', '')).strip()
     if len(basis) < 10:
-        raise ToolError('Describe the lawful basis for this send (10+ characters).')
+        raise ToolError(_t('er_034', locale_now()))
     lid = str(p.get('id', ''))
     code, data = _dispatch(ctx['app'], send_view, f'/api/leads/{lid}/send',
                            {'approved': True, 'basis': basis}, lid)
@@ -208,18 +209,18 @@ def tool_enquiry_list(db, now, log, p, ctx):
 def tool_enquiry_get(db, now, log, p, ctx):
     row = _enquiry_row(db, str(p.get('id', '')))
     if not row:
-        raise ToolError('Enquiry not found.', 404)
+        raise ToolError(_t('er_040', locale_now()), 404)
     return {'enquiry': dict(row)}
 
 
 def tool_enquiry_update(db, now, log, p, ctx):
     eid = str(p.get('id', ''))
     if not _enquiry_row(db, eid):
-        raise ToolError('Enquiry not found.', 404)
+        raise ToolError(_t('er_040', locale_now()), 404)
     status = str(p.get('status', '')).strip()
     notes = str(p.get('notes', ''))
     if status not in ENQUIRY_STATUSES or len(notes) > 5000:
-        raise ToolError('Choose a valid status and keep notes under 5,000 characters.')
+        raise ToolError(_t('er_019', locale_now()))
     with db() as c:
         c.execute('UPDATE enquiries SET status=?,notes=?,updated=? WHERE id=?',
                   (status, notes, now(), eid))
@@ -242,7 +243,7 @@ def tool_invoice_get(db, now, log, p, ctx):
     with db() as c:
         row = c.execute('SELECT * FROM invoices WHERE id=?', (str(p.get('id', '')),)).fetchone()
     if not row:
-        raise ToolError('Invoice not found.', 404)
+        raise ToolError(_t('er_059', locale_now()), 404)
     return {'invoice': dict(row)}
 
 
@@ -258,7 +259,7 @@ def tool_contract_get(db, now, log, p, ctx):
     with db() as c:
         row = c.execute('SELECT * FROM contracts WHERE id=?', (str(p.get('id', '')),)).fetchone()
     if not row:
-        raise ToolError('Contract not found.', 404)
+        raise ToolError(_t('er_029', locale_now()), 404)
     return {'contract': dict(row)}
 
 
@@ -274,18 +275,18 @@ def tool_project_update(db, now, log, p, ctx):
     pid = str(p.get('id', ''))
     with db() as c:
         if not c.execute('SELECT 1 FROM projects WHERE id=?', (pid,)).fetchone():
-            raise ToolError('Project not found.', 404)
+            raise ToolError(_t('er_091', locale_now()), 404)
     data = {}
     if 'stage' in (p or {}) and isinstance(p.get('stage'), str):
         if p['stage'] not in STAGES:
-            raise ToolError('Invalid stage.')
+            raise ToolError(_t('er_057', locale_now()))
         data['stage'] = p['stage']
     if 'next_action' in (p or {}) and isinstance(p.get('next_action'), str):
         if len(p['next_action']) > 500:
-            raise ToolError('Keep the next action under 500 characters.')
+            raise ToolError(_t('er_060', locale_now()))
         data['next_action'] = p['next_action']
     if not data:
-        raise ToolError('Nothing to update.')
+        raise ToolError(_t('er_080', locale_now()))
     data['updated'] = now()
     with db() as c:
         c.execute('UPDATE projects SET ' + ','.join(k + '=?' for k in data) + ' WHERE id=?',
@@ -319,6 +320,6 @@ ACT_TOOLS = {
 
 def run_tool(app, db, now, log, tool, params):
     if tool not in ACT_TOOLS:
-        raise ToolError('Unknown tool. Available: ' + ', '.join(sorted(ACT_TOOLS)))
+        raise ToolError(_t('er_148', locale_now(), v=', '.join(sorted(ACT_TOOLS))))
     fn, _ = ACT_TOOLS[tool]
     return fn(db, now, log, params or {}, {'app': app})

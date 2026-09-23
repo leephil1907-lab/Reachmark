@@ -9,6 +9,7 @@ reported as sent), and when something fails the failure is recorded verbatim.
 Extra crew-only limits: one message per lead per 24 hours, and a hard cap per run.
 """
 import os, re, ssl, smtplib, uuid
+from web.i18n import t as _t, locale_now
 from datetime import datetime, timezone, timedelta
 from email.message import EmailMessage
 
@@ -106,7 +107,7 @@ def send_email(db, now, log, lead, subject, body, settings, approval_id='', run_
         port = int(os.getenv('SMTP_PORT', '587'))
         mode = os.getenv('SMTP_SECURITY', 'starttls')
         if mode not in ('ssl', 'starttls'):
-            raise ValueError('TLS is required')
+            raise ValueError(_t('er_117', locale_now()))
         client = smtplib.SMTP_SSL if mode == 'ssl' else smtplib.SMTP
         with client(os.environ['SMTP_HOST'], port, timeout=25) as server:
             if mode == 'starttls':

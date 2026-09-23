@@ -152,3 +152,4 @@
 .rx-aurora>*{position:relative}
 @keyframes rx-aurora-drift{from{transform:translate3d(-2%,-1%,0) scale(1)}to{transform:translate3d(2%,2%,0) scale(1.06)}}
 @media (prefers-reduced-motion:reduce){.rx-aurora::before{animation:none}}
+.locale-select{font:700 12px Manrope,Arial,sans-serif;padding:8px 10px;border-radius:10px;border:1px solid #e2e7d6;background:#fff;color:#0f1a0a;cursor:pointer}

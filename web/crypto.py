@@ -22,6 +22,7 @@ import uuid
 from flask import jsonify, request, session
 
 from web.billing import TIERS
+from web.i18n import t as _t, locale_now
 
 COINS = {
     'BTC': {'label': 'Bitcoin', 'coingecko': 'bitcoin', 'env': 'BTC_WALLET', 'decimals': 8,
@@ -102,39 +103,41 @@ def register_crypto(app, db, now, log):
                 continue
             px = prices.get(meta['coingecko']) or 0
             amount = round(usd / px, meta['decimals']) if px else None
+            _ck = {'BTC': 'pay.coin_btc', 'ETH': 'pay.coin_eth', 'SOL': 'pay.coin_sol',
+                   'USDT_ERC20': 'pay.coin_usdt_e', 'USDT_TRC20': 'pay.coin_usdt_t'}[coin]
             options.append({'coin': coin, 'label': meta['label'], 'address': addr,
                             'qr': qr_data_uri(addr), 'usd': usd, 'coin_amount': amount,
-                            'note': meta['note']})
+                            'note': _t(_ck, locale_now())})
         return options
 
     @app.get('/api/billing/crypto')
     def crypto_options():
         who = _client_id()
         if not who:
-            return jsonify(error='Sign in to pay with crypto.'), 401
+            return jsonify(error=_t('pay.c_signin', locale_now())), 401
         tier = (request.args.get('tier') or '').lower()
         if tier not in ('starter', 'pro'):
-            return jsonify(error='Choose the Starter or Pro plan.'), 400
+            return jsonify(error=_t('pay.e_tier', locale_now())), 400
         return jsonify(tier=tier, coins=quote(tier))
 
     @app.post('/api/billing/crypto/checkout')
     def crypto_checkout():
         who = _client_id()
         if not who or who == 'owner':
-            return jsonify(error='Sign in as a client to pay with crypto.'), 401
+            return jsonify(error=_t('pay.c_client', locale_now())), 401
         v = request.get_json() or {}
         tier = str(v.get('tier', '')).lower()
         coin = str(v.get('coin', '')).upper()
         if tier not in ('starter', 'pro') or coin not in COINS:
-            return jsonify(error='Choose a plan and a coin.'), 400
+            return jsonify(error=_t('pay.c_pick', locale_now())), 400
         addr = wallets()[coin]
         if not addr:
-            return jsonify(error='This coin is not enabled yet.'), 400
+            return jsonify(error=_t('pay.c_off', locale_now())), 400
         with db() as c:
             row = c.execute('SELECT * FROM users WHERE id=? AND is_active=1', (who,)).fetchone()
         if not row:
             session.clear()
-            return jsonify(error='Account not found. Sign in again.'), 401
+            return jsonify(error=_t('pay.e_acct', locale_now())), 401
         option = next(o for o in quote(tier) if o['coin'] == coin)
         ref = 'crypto-' + uuid.uuid4().hex[:20]
         amount = TIERS[tier]['usd_minor']
@@ -155,21 +158,20 @@ def register_crypto(app, db, now, log):
     def crypto_submit():
         who = _client_id()
         if not who or who == 'owner':
-            return jsonify(error='Sign in as a client to pay with crypto.'), 401
+            return jsonify(error=_t('pay.c_client', locale_now())), 401
         v = request.get_json() or {}
         ref = str(v.get('reference', ''))[:64]
         tx = str(v.get('tx_hash', '')).strip()
         if len(tx) < 16 or len(tx) > 200:
-            return jsonify(error='Paste the full transaction hash from your wallet.'), 400
+            return jsonify(error=_t('pay.c_tx', locale_now())), 400
         with db() as c:
             row = c.execute('SELECT * FROM payments WHERE reference=? AND user_id=?',
                             (ref, who)).fetchone()
             if not row:
-                return jsonify(error='Payment not found.'), 404
+                return jsonify(error=_t('pay.c_nopay', locale_now())), 404
             if dict(row)['status'] != 'pending':
-                return jsonify(error='This payment was already submitted.'), 400
+                return jsonify(error=_t('pay.c_dup', locale_now())), 400
             c.execute("UPDATE payments SET tx_hash=?,status='awaiting_approval' WHERE reference=?",
                       (tx, ref))
         log('billing', f'Crypto payment {ref} awaiting owner approval.')
-        return jsonify(ok=True, message='Received. The studio confirms the coins and activates '
-                                        'your plan — usually within a day.')
+        return jsonify(ok=True, message=_t('pay.c_ok', locale_now()))

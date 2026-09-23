@@ -21,6 +21,16 @@ from datetime import datetime, timezone, timedelta
 # chat API, the crew and the tests keep one import path each.
 from crew.business import (BRAIN_VERSION, KB_PATH, MIN_SCORE, STOPWORDS, detect_intent, load_knowledge,
                            match_answer, public as brand_public)
+from web.i18n import t as _t
+
+
+def _loc():
+    """Visitor locale inside a request, plain English outside one (tests, crew)."""
+    try:
+        from flask import has_app_context, g as _g
+        return _g.get('locale', 'en') if has_app_context() else 'en'
+    except Exception:
+        return 'en'
 
 EMAIL_RE = re.compile(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+')
 PHONE_RE = re.compile(r'(?:\+?\d[\d\s().\-]{7,}\d)')
@@ -126,9 +136,11 @@ def answer(db, now, message, thread_token=None, visitor_hash='', page='', settin
            name='', email='', business=''):
     """Answer one visitor message. Returns a dict for the widget and stores the transcript."""
     settings = settings or (lambda: {})
+    loc = _loc()
+    human_line, handoff_line, review_offer = _t('rx.b_human', loc), _t('rx.b_handoff', loc), _t('rx.b_review', loc)
     message = (message or '').strip()[:2000]
     if len(message) < 2:
-        return {'error': 'Type a message first.', 'ok': False}
+        return {'error': _t('rx.b_type', loc), 'ok': False}
     thread = _thread(db, now, thread_token, visitor_hash, page)
     _store(db, now, thread['id'], 'visitor', message)
 
@@ -146,16 +158,13 @@ def answer(db, now, message, thread_token=None, visitor_hash='', page='', settin
     business = (business or thread.get('business') or '').strip()
 
     if intent == 'human':
-        reply = HUMAN_LINE
+        reply = human_line
         actions.append('handoff')
     elif intent == 'new_project':
-        reply = ('That is exactly what the studio does. The fastest route: open /enquire, describe the business and '
-                 'what you need, and you will get a tailored estimate — no commitment until you approve the scope. '
-                 + REVIEW_OFFER)
+        reply = _t('rx.b_new', loc) + ' ' + review_offer
         actions.append('offer_review_link')
     elif intent == 'greeting':
-        reply = ('Hello — this is the Reachmark front desk. I can explain how the studio works, what the published '
-                 'tiers cost, what happens after an enquiry, or put you in touch with the studio owner.')
+        reply = _t('rx.b_greet', loc)
     elif score >= MIN_SCORE and kb_answer:
         reply = kb_answer
         if intent == 'pricing':
@@ -163,10 +172,10 @@ def answer(db, now, message, thread_token=None, visitor_hash='', page='', settin
         if intent in ('samples', 'timeline'):
             actions.append('offer_enquiry')
     else:
-        reply = HANDOFF_LINE
+        reply = handoff_line
         actions.append('handoff')
 
-    if allow_llm and reply not in (HUMAN_LINE, HANDOFF_LINE):
+    if allow_llm and reply not in (human_line, handoff_line):
         phrased, meta = _llm_phrase(settings, message, reply, intent)
         if phrased:
             reply = phrased
@@ -185,7 +194,7 @@ def answer(db, now, message, thread_token=None, visitor_hash='', page='', settin
                               (lid, 'receptionist:' + email, (business or name or 'Website visitor')[:200], '',
                                '', '', (phone_found.group(0) if phone_found else ''), email, '', 'NOT_LISTED', 'Replied',
                                'Website receptionist', '', uuid.uuid4().hex,
-                               f'Captured by the AI receptionist. First question: {message[:280]}', now(), now()))
+                               f"{_t('rx.b_note', loc)} {message[:280]}", now(), now()))
                     lead_id = lid
                 else:
                     lead_id = existing['id']
@@ -196,11 +205,11 @@ def answer(db, now, message, thread_token=None, visitor_hash='', page='', settin
             c.execute('INSERT INTO enquiries(id,name,email,business,kind,budget,timeline,message,sample,fingerprint,status,notes,created,updated) '
                       'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                       (enquiry_id, (name or business or 'Website visitor')[:120], email, business[:200], 'Other enquiry',
-                       '', '', (f'From the AI receptionist.\n\n{message[:1500]}\n\nAssistant’s answer: {reply[:800]}')[:5000],
+                       '', '', (f"{_t('rx.b_from', loc)}\n\n{message[:1500]}\n\n{_t('rx.b_answ', loc)} {reply[:800]}")[:5000],
                        '', visitor_hash, 'New', f'intent: {intent}', now(), now()))
         actions.append('enquiry_created')
         if not re.search(r'(?i)(reply|touch|contact you|in touch)', reply):
-            reply += ' I have passed your details to the studio owner — expect a personal reply.'
+            reply += ' ' + _t('rx.b_passed', loc)
         if name:
             with db() as c:
                 c.execute('UPDATE receptionist_threads SET email=?,name=?,business=?,lead_id=?,intent=?,updated=? WHERE id=?',
@@ -234,6 +243,7 @@ def _money(minor, currency):
 
 def owner_command(db, now, text, thread_token, visitor_hash):
     """Run a `/command` from the signed-in owner inside the chat flow."""
+    loc = _loc()
     parts = (text or '').split(None, 1)
     cmd = parts[0].lower() if parts else ''
     arg = parts[1].strip()[:120] if len(parts) > 1 else ''
@@ -242,34 +252,34 @@ def owner_command(db, now, text, thread_token, visitor_hash):
     if cmd == '/stats':
         st = tool_stats(db, now, None, {}, {})
         inv = ', '.join(f'{k}: {v}' for k, v in st['invoices_by_status'].items()) or 'none yet'
-        reply = (f"Leads: {st['leads']} · New enquiries: {st['new_enquiries']} · Projects: {st['projects']} · "
-                 f'Open chats: {st["open_threads"]}\nInvoices — {inv}.')
+        reply = _t('rx.b_stats', loc, a=st['leads'], b=st['new_enquiries'], c=st['projects'],
+                     d=st['open_threads'], e=inv)
     elif cmd == '/leads':
         rows = tool_lead_list(db, now, None, {'q': arg, 'limit': 10}, {})['leads']
-        reply = ('No leads match.' if not rows else '\n'.join(
+        reply = (_t('rx.b_no_leads', loc) if not rows else '\n'.join(
             f"\u2022 {r['name']} — {r.get('stage') or 'New'} ({r.get('city') or 'no city'}) [{r['id'][:8]}]" for r in rows))
     elif cmd == '/enquiries':
         rows = tool_enquiry_list(db, now, None, {'status': arg or 'New'}, {})['enquiries']
-        reply = ('Nothing there.' if not rows else '\n'.join(
+        reply = (_t('rx.b_nothing', loc) if not rows else '\n'.join(
             f"\u2022 {r['name']} — {r.get('business') or r.get('email') or ''} [{r['status']}]".rstrip() for r in rows))
     elif cmd == '/invoices':
         rows = tool_invoice_list(db, now, None, {}, {})['invoices']
-        reply = ('No invoices yet.' if not rows else '\n'.join(
+        reply = (_t('rx.b_no_inv', loc) if not rows else '\n'.join(
             f"\u2022 {r.get('number') or r['id'][:8]} · {r.get('client_name') or ''} · "
             f"{_money(r.get('total_minor'), r.get('currency'))} · {r.get('status') or 'unset'}" for r in rows))
     elif cmd == '/projects':
         rows = tool_project_list(db, now, None, {}, {})['projects']
-        reply = ('No projects yet.' if not rows else '\n'.join(
+        reply = (_t('rx.b_no_proj', loc) if not rows else '\n'.join(
             f"\u2022 {r['title']} — {r.get('stage') or ''}".rstrip() for r in rows))
     else:
-        reply = OWNER_HELP
+        reply = _t('rx.b_help', loc)
     _store(db, now, thread['id'], 'assistant', reply, 'owner_command', {'command': cmd})
     return {'ok': True, 'reply': reply, 'intent': 'owner_command', 'topic': '', 'score': 1.0,
             'actions': ['owner_command'], 'thread': thread['token'], 'handoff': False, 'sources': []}
 
 
 def register_receptionist(app, db, now, log, settings):
-    from flask import request, jsonify, session, render_template
+    from flask import request, jsonify, session, render_template, g
     ensure_tables(db)
 
     def rate_ok(fingerprint, limit=40):
@@ -318,9 +328,10 @@ def register_receptionist(app, db, now, log, settings):
         ]
         brand = brand_public()
         tiers = {row['id']: row for row in brand['tiers']}
-        tier_notes = {'starter': 'One striking page, receptionist included',
-                      'growth': 'Up to 5 pages plus blog, receptionist included',
-                      'bespoke': 'Custom build, receptionist tailored to it'}
+        loc = g.get('locale', 'en')
+        tier_notes = {'starter': _t('rx.tn_starter', loc),
+                      'growth': _t('rx.tn_growth', loc),
+                      'bespoke': _t('rx.tn_bespoke', loc)}
         return render_template('receptionist-page.html', seo=seo, google_verification=gsv,
                                structured=structured, ga_id=ga_id, gt_id=gt_id, gtm_id=gtm_id,
                                faqs=faqs, brand=brand, tiers=tiers, tier_notes=tier_notes)
@@ -335,16 +346,17 @@ def register_receptionist(app, db, now, log, settings):
     @app.post('/api/receptionist/message')
     def receptionist_message():
         body = request.get_json(silent=True)
+        loc = g.get('locale', 'en')
         if not isinstance(body, dict):
-            return jsonify(error='Send your message as a JSON object.'), 400
+            return jsonify(error=_t('rx.e_json', loc)), 400
         fingerprint = hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()[:32]
         if body.get('company_url'):
-            return jsonify(error='Unable to accept this message.'), 400
+            return jsonify(error=_t('rx.e_trap', loc)), 400
         if session.get('owner') and str(body.get('message', '')).strip().startswith('/'):
             return jsonify(owner_command(db, now, str(body.get('message', ''))[:2000],
                                          str(body.get('thread', ''))[:64] or None, fingerprint))
         if not rate_ok(fingerprint):
-            return jsonify(error='That is a lot of messages in one hour. Please use the enquiry form at /enquire and the studio will reply directly.'), 429
+            return jsonify(error=_t('rx.e_rate', loc)), 429
         result = answer(db, now, str(body.get('message', ''))[:2000], str(body.get('thread', ''))[:64] or None,
                         fingerprint, str(body.get('page', ''))[:200], settings,
                         allow_llm=True, name=str(body.get('name', ''))[:120], email=str(body.get('email', ''))[:200],
@@ -362,20 +374,20 @@ def register_receptionist(app, db, now, log, settings):
         """Offer the review-link route from the chat, without creating it for a stranger."""
         body = request.get_json(silent=True) or {}
         business = str(body.get('business', ''))[:200].strip()
+        loc = g.get('locale', 'en')
         if len(business) < 2:
-            return jsonify(error='Tell me the business name first.'), 400
-        return jsonify(ok=True, reply=(f'Happy to do that for {business}. I have passed the name to the studio — '
-                                       'they prepare the concept and send you one private review link. Leave an e-mail '
-                                       'address in this chat and it will reach them straight away.'))
+            return jsonify(error=_t('rx.e_biz', loc)), 400
+        return jsonify(ok=True, reply=_t('rx.e_offer', loc, b=business))
 
     @app.post('/api/receptionist/act')
     def receptionist_act():
         """Owner-only agent actions: the front desk doing real work."""
+        loc = g.get('locale', 'en')
         if owner_locked() and not session.get('owner'):
-            return jsonify(error='Owner login required.'), 403
+            return jsonify(error=_t('rx.e_owner', loc)), 403
         body = request.get_json(silent=True)
         if not isinstance(body, dict):
-            return jsonify(error='Send a JSON object.'), 400
+            return jsonify(error=_t('enq.err_json', loc)), 400
         try:
             result = run_tool(app, db, now, log, str(body.get('tool', '')), body.get('params') or {})
         except ToolError as e:
@@ -386,7 +398,7 @@ def register_receptionist(app, db, now, log, settings):
     @app.get('/api/receptionist/threads')
     def receptionist_threads_route():
         if session.get('client_id') and not session.get('owner'):
-            return jsonify(error='Owner login required.'), 403
+            return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
         status = request.args.get('status') or None
         return jsonify({'threads': threads(db, status=status),
                         'knowledge_topics': [t['topic'] for t in load_knowledge()]})
@@ -394,11 +406,11 @@ def register_receptionist(app, db, now, log, settings):
     @app.get('/api/receptionist/threads/<thread_id>')
     def receptionist_thread_route(thread_id):
         if session.get('client_id') and not session.get('owner'):
-            return jsonify(error='Owner login required.'), 403
+            return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
         with db() as c:
             row = c.execute('SELECT * FROM receptionist_threads WHERE id=?', (thread_id,)).fetchone()
         if not row:
-            return jsonify(error='Thread not found.'), 404
+            return jsonify(error=_t('rx.e_thread', g.get('locale', 'en'))), 404
         return jsonify(thread=dict(row), transcript=transcript(db, thread_id))
 
     @app.post('/api/receptionist/threads/<thread_id>')
@@ -406,11 +418,11 @@ def register_receptionist(app, db, now, log, settings):
         body = request.get_json(silent=True) or {}
         status = str(body.get('status', 'open'))
         if status not in ('open', 'handled', 'closed'):
-            return jsonify(error='Use open, handled or closed.'), 400
+            return jsonify(error=_t('rx.e_status', g.get('locale', 'en'))), 400
         note = str(body.get('note', ''))[:3000]
         with db() as c:
             if not c.execute('SELECT 1 FROM receptionist_threads WHERE id=?', (thread_id,)).fetchone():
-                return jsonify(error='Thread not found.'), 404
+                return jsonify(error=_t('rx.e_thread', g.get('locale', 'en'))), 404
             c.execute('UPDATE receptionist_threads SET status=?,updated=? WHERE id=?', (status, now(), thread_id))
         if note:
             _store(db, now, thread_id, 'owner', note, 'note', {'status': status})
