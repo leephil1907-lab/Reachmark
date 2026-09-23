@@ -15,7 +15,7 @@ from web.i18n import t as _t, locale_now
 
 from web.accounts import send_branded, valid_email
 from web.agent_tools import owner_locked
-from web.billing import PERIOD_DAYS, TIERS, grant_tier
+from web.billing import ANNUAL_DAYS, PERIOD_DAYS, TIERS, grant_tier
 
 
 def ensure_console(db):
@@ -136,7 +136,8 @@ def register_console(app, db, now, log):
                 return jsonify(error=_t('er_081', locale_now())), 400
             c.execute("UPDATE payments SET status='paid',paid_at=? WHERE reference=?",
                       (now(), p['reference']))
-        grant_tier(db, now, log, p['user_id'], p['tier'], PERIOD_DAYS)
+        _days = ANNUAL_DAYS if (p.get('period') or 'monthly') == 'annual' else PERIOD_DAYS
+        grant_tier(db, now, log, p['user_id'], p['tier'], _days)
         log('billing', f"Owner approved {p['reference']} ({p['email']} → {p['tier']}).")
         return jsonify(ok=True)
 

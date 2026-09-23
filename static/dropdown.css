@@ -1,0 +1,21 @@
+/* Standard Reachmark dropdown — applied by dropdown.js to native selects. */
+.ui-dd{position:relative;display:inline-block;min-width:160px;max-width:100%;vertical-align:middle}
+.ui-dd.block{display:block;width:100%}
+.ui-dd select.ui-dd-src{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;opacity:0!important;pointer-events:none!important;margin:0!important}
+.ui-dd-btn{display:flex;align-items:center;gap:10px;width:100%;font:600 14px Manrope,Arial,sans-serif;color:#1a2315;background:#fbfdf4;border:1px solid #d4dcc4;border-radius:10px;padding:11px 12px;cursor:pointer;text-align:left;white-space:nowrap}
+.ui-dd-btn:hover{border-color:#7aa53a;background:#fff}
+.ui-dd-btn:focus-visible{outline:2px solid #7aa53a;outline-offset:2px}
+.ui-dd-btn .lbl{flex:1;overflow:hidden;text-overflow:ellipsis}
+.ui-dd-btn .chev{flex:none;font-size:10px;color:#7a8a5f;transition:transform .2s}
+.ui-dd.open .ui-dd-btn{border-color:#7aa53a;background:#fff}
+.ui-dd.open .ui-dd-btn .chev{transform:rotate(180deg)}
+.ui-dd.disabled .ui-dd-btn{opacity:.55;cursor:not-allowed;background:#eef3df}
+.ui-dd-menu{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid #e2e7d6;border-radius:12px;box-shadow:0 18px 44px rgba(26,35,21,.18);padding:6px;display:none;z-index:300;max-height:264px;overflow:auto}
+.ui-dd.open .ui-dd-menu{display:block}
+.ui-dd-menu.up{top:auto;bottom:calc(100% + 6px)}
+.ui-dd-opt{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;padding:10px 12px;border-radius:8px;font:600 13.5px Manrope,Arial,sans-serif;color:#1a2315;cursor:pointer;text-align:left}
+.ui-dd-opt:hover,.ui-dd-opt.focus{background:#f2f5e8}
+.ui-dd-opt.on{color:#3c5a1e}
+.ui-dd-opt .tick{margin-left:auto;color:#7aa53a;font-weight:800}
+.ui-dd-opt:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:640px){.ui-dd-menu{max-height:220px}}

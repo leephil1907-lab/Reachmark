@@ -21,7 +21,7 @@ import uuid
 
 from flask import jsonify, request, session
 
-from web.billing import TIERS
+from web.billing import TIERS, price_for
 from web.i18n import t as _t, locale_now
 
 COINS = {
@@ -93,8 +93,8 @@ def _client_id():
 def register_crypto(app, db, now, log):
     ensure_crypto(db)
 
-    def quote(tier):
-        usd = TIERS[tier]['usd_minor'] / 100
+    def quote(tier, period='monthly'):
+        usd = price_for(tier, 'USD', period)[0] / 100
         prices = coin_prices()
         options = []
         for coin, meta in COINS.items():
@@ -118,7 +118,10 @@ def register_crypto(app, db, now, log):
         tier = (request.args.get('tier') or '').lower()
         if tier not in ('starter', 'pro'):
             return jsonify(error=_t('pay.e_tier', locale_now())), 400
-        return jsonify(tier=tier, coins=quote(tier))
+        period = (request.args.get('period') or 'monthly').lower()
+        if period not in ('monthly', 'annual'):
+            return jsonify(error=_t('pay.e_period', locale_now())), 400
+        return jsonify(tier=tier, period=period, coins=quote(tier, period))
 
     @app.post('/api/billing/crypto/checkout')
     def crypto_checkout():
@@ -130,6 +133,9 @@ def register_crypto(app, db, now, log):
         coin = str(v.get('coin', '')).upper()
         if tier not in ('starter', 'pro') or coin not in COINS:
             return jsonify(error=_t('pay.c_pick', locale_now())), 400
+        period = str(v.get('period', 'monthly')).lower()
+        if period not in ('monthly', 'annual'):
+            return jsonify(error=_t('pay.e_period', locale_now())), 400
         addr = wallets()[coin]
         if not addr:
             return jsonify(error=_t('pay.c_off', locale_now())), 400
@@ -138,17 +144,18 @@ def register_crypto(app, db, now, log):
         if not row:
             session.clear()
             return jsonify(error=_t('pay.e_acct', locale_now())), 401
-        option = next(o for o in quote(tier) if o['coin'] == coin)
+        option = next(o for o in quote(tier, period) if o['coin'] == coin)
         ref = 'crypto-' + uuid.uuid4().hex[:20]
-        amount = TIERS[tier]['usd_minor']
+        amount = price_for(tier, 'USD', period)[0]
         with db() as c:
             c.execute('INSERT INTO payments(id,user_id,email,tier,currency,amount_minor,reference,'
-                      'status,paid_at,created,raw,tx_hash,coin_amount,coin_address) '
-                      'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                      'status,paid_at,created,raw,tx_hash,coin_amount,coin_address,period) '
+                      'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                       (uuid.uuid4().hex, who, dict(row)['email'], tier, coin, amount, ref,
                        'pending', '', now(), json.dumps({'method': 'crypto', 'coin': coin,
                                                          'address': addr, 'coin_amount': option['coin_amount'],
-                                                         'usd': option['usd']}), '', str(option['coin_amount'] or ''), addr))
+                                                         'usd': option['usd']}), '', str(option['coin_amount'] or ''), addr,
+                       period))
         log('billing', f'Crypto checkout started: {tier} via {coin}.')
         return jsonify(reference=ref, coin=coin, label=option['label'], address=addr,
                        qr=option['qr'], usd=option['usd'], coin_amount=option['coin_amount'],

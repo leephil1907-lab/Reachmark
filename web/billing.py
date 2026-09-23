@@ -29,21 +29,35 @@ TIERS = {
                      'Workspace overview stats'],
     },
     'starter': {
-        'name': 'Starter', 'rank': 1, 'usd_minor': 2500, 'ngn_minor': 3500000,
-        'usd': '$25', 'ngn': '₦35,000', 'per': '30 days',
+        'name': 'Starter', 'rank': 1, 'usd_minor': 1900, 'ngn_minor': 3000000,
+        'usd': '$19', 'ngn': '₦30,000',
+        'usd_minor_annual': 19000, 'ngn_minor_annual': 30000000,
+        'usd_annual': '$190', 'ngn_annual': '₦300,000', 'per': '30 days',
         'tag': 'Find businesses that need websites.',
         'features': ['Everything in Free', 'Lead directory: add, import & manage',
                      'Website health audits', 'Business discovery & map search', 'CSV exports'],
     },
     'pro': {
-        'name': 'Pro', 'rank': 2, 'usd_minor': 3500, 'ngn_minor': 5000000,
-        'usd': '$35', 'ngn': '₦50,000', 'per': '30 days',
+        'name': 'Pro', 'rank': 2, 'usd_minor': 5900, 'ngn_minor': 9000000,
+        'usd': '$59', 'ngn': '₦90,000',
+        'usd_minor_annual': 59000, 'ngn_minor_annual': 90000000,
+        'usd_annual': '$590', 'ngn_annual': '₦900,000', 'per': '30 days',
         'tag': 'Outreach and automation, unlocked.',
         'features': ['Everything in Starter', 'Outreach composer & sending', 'AI crew campaigns',
                      'Review-link creation', 'Mail templates & outbox'],
     },
 }
 PERIOD_DAYS = 30
+ANNUAL_DAYS = 365
+
+def price_for(tier, currency, period):
+    """Return (amount_minor, days) for a tier/currency/period combo."""
+    t = TIERS[tier]
+    if period == 'annual':
+        key = 'usd_minor_annual' if currency == 'USD' else 'ngn_minor_annual'
+        return t[key], ANNUAL_DAYS
+    key = 'usd_minor' if currency == 'USD' else 'ngn_minor'
+    return t[key], PERIOD_DAYS
 
 # First regex match wins — specific rules before general ones. Anything not
 # listed here stays owner-only (the guard answers 403 as before).
@@ -87,7 +101,11 @@ def ensure_billing(db):
         c.execute('''CREATE TABLE IF NOT EXISTS payments(
             id TEXT PRIMARY KEY, user_id TEXT, email TEXT, tier TEXT, currency TEXT,
             amount_minor INTEGER, reference TEXT UNIQUE, status TEXT, paid_at TEXT,
-            created TEXT, raw TEXT, tx_hash TEXT, coin_amount TEXT, coin_address TEXT)''')
+            created TEXT, raw TEXT, tx_hash TEXT, coin_amount TEXT, coin_address TEXT,
+            period TEXT DEFAULT 'monthly')''')
+        pcols = {r[1] for r in c.execute('PRAGMA table_info(payments)')}
+        if 'period' not in pcols:
+            c.execute("ALTER TABLE payments ADD COLUMN period TEXT DEFAULT 'monthly'")
 
 
 def tier_status(user):
@@ -174,7 +192,8 @@ def public_prices():
     out = {}
     for k, v in TIERS.items():
         nk, tk, pk, fks = _TIER_I18N[k]
-        out[k] = {'usd': v['usd'], 'ngn': v['ngn'], 'per': _t(pk, loc), 'name': _t(nk, loc)}
+        out[k] = {'usd': v['usd'], 'ngn': v['ngn'], 'per': _t(pk, loc), 'name': _t(nk, loc),
+                    'usd_annual': v.get('usd_annual', ''), 'ngn_annual': v.get('ngn_annual', '')}
     return out
 
 
@@ -235,7 +254,8 @@ def register_billing(app, db, now, log):
             stamp = now()
             c.execute('UPDATE payments SET status=?,paid_at=?,raw=? WHERE reference=?',
                       ('paid', stamp, json.dumps(verify_data or {})[:4000], reference))
-        grant_tier(db, now, log, p['user_id'], p['tier'], PERIOD_DAYS)
+        days = ANNUAL_DAYS if (p.get('period') or 'monthly') == 'annual' else PERIOD_DAYS
+        grant_tier(db, now, log, p['user_id'], p['tier'], days)
         log('billing', f"{p['email']} upgraded to {p['tier']} ({p['currency']}).")
         try:
             from web.accounts import get_base_url, send_branded
@@ -244,7 +264,7 @@ def register_billing(app, db, now, log):
             _tname = localized_tiers(_bloc)[p['tier']]['name']
             _rurl = f"{base}/api/billing/receipt/{reference}.pdf"
             send_branded(p['email'], _t('pay.mail_sub', _bloc, name=_tname),
-                         _t('pay.mail_body', _bloc, email=p['email'], name=_tname, days=PERIOD_DAYS,
+                         _t('pay.mail_body', _bloc, email=p['email'], name=_tname, days=days,
                             ref=reference, url=_rurl),
                          html_title=_t('pay.mail_title', _bloc), cta_url=_rurl,
                          cta_label=_t('pay.mail_cta', _bloc), db=db)
@@ -288,28 +308,32 @@ def register_billing(app, db, now, log):
             return jsonify(error=_t('pay.e_tier', locale_now())), 400
         if currency not in ('USD', 'NGN'):
             return jsonify(error=_t('pay.e_cur', locale_now())), 400
+        period = str(v.get('period', 'monthly')).lower()
+        if period not in ('monthly', 'annual'):
+            return jsonify(error=_t('pay.e_period', locale_now())), 400
         with db() as c:
             row = c.execute('SELECT * FROM users WHERE id=? AND is_active=1', (cid,)).fetchone()
         if not row:
             session.clear()
             return jsonify(error=_t('pay.e_acct', locale_now())), 401
         user = dict(row)
-        amount = TIERS[tier]['usd_minor' if currency == 'USD' else 'ngn_minor']
+        amount, _days = price_for(tier, currency, period)
         try:
             data = paystack_request('POST', '/transaction/initialize', {
                 'email': user['email'], 'amount': amount, 'currency': currency,
                 'reference': 'rm-' + uuid.uuid4().hex[:24],
                 'callback_url': request.url_root.rstrip('/') + '/billing/callback',
-                'metadata': {'user_id': cid, 'tier': tier, 'purpose': 'workspace-plan'}})
+                'metadata': {'user_id': cid, 'tier': tier, 'period': period, 'purpose': 'workspace-plan'}})
         except BillingError as e:
             return jsonify(error=str(e)), 503
         with db() as c:
             c.execute('INSERT INTO payments(id,user_id,email,tier,currency,amount_minor,reference,'
-                      'status,paid_at,created,raw) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+                      'status,paid_at,created,raw,period) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
                       (uuid.uuid4().hex, cid, user['email'], tier, currency, amount,
                        data['reference'], 'pending', '', now(),
                        json.dumps({'method': 'paystack',
-                                   'authorization_url': data.get('authorization_url')})))
+                                   'authorization_url': data.get('authorization_url')}),
+                       period))
         return jsonify(authorization_url=data['authorization_url'], reference=data['reference'])
 
     @app.get('/billing/callback')
@@ -405,9 +429,10 @@ def register_billing(app, db, now, log):
         amount = (_t('pay.pdf_recorded', _ploc) if p['currency'] == 'MANUAL'
                   else f"{p['currency']} {(p['amount_minor'] or 0) / 100:,.2f}")
         _pname = localized_tiers(_ploc).get(p['tier'], {}).get('name', p['tier'])
+        _days = ANNUAL_DAYS if (p.get('period') or 'monthly') == 'annual' else PERIOD_DAYS
         blob = pdf(_t('pay.pdf_title', _ploc),
                    _t('pay.pdf_sub', _ploc, name=_pname),
-                   [(_t('pay.pdf_plan', _ploc), f"{_pname} — {_t('pay.pdf_days', _ploc, n=PERIOD_DAYS)}"),
+                   [(_t('pay.pdf_plan', _ploc), f"{_pname} — {_t('pay.pdf_days', _ploc, n=_days)}"),
                     (_t('pay.pdf_amount', _ploc), amount), (_t('pay.pdf_ref', _ploc), p['reference']),
                     (_t('pay.pdf_paid', _ploc), p['paid_at'] or ''), (_t('pay.pdf_method', _ploc), method),
                     (_t('pay.pdf_bill', _ploc), p['email'])], now(), 'Reachmark', loc=_ploc)

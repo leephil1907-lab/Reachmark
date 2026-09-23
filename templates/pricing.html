@@ -1,9 +1,10 @@
 <!DOCTYPE html><html lang="{{ locale }}"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Workspace plans · Reachmark</title>
-<meta name="description" content="Reachmark workspace plans: Free, Starter and Pro. Pay in USD or NGN with Paystack. One payment unlocks 30 days.">
+<meta name="description" content="Reachmark workspace plans: Free, Starter and Pro. Pay in USD or NGN with Paystack. Monthly or annual billing in USD or NGN with Paystack.">
 <meta name="csrf-token" content="{{ csrf_token() }}"><script src="/static/i18n.js"></script>
 <link rel="stylesheet" href="/static/fonts.css">
+<link rel="stylesheet" href="/static/dropdown.css">
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:'Manrope',Arial,sans-serif;background:#f2f5e8;color:#1a2315}
 .public-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 28px;background:#fff;border-bottom:1px solid #e2e7d6;position:sticky;top:0;z-index:5}
@@ -14,7 +15,7 @@
 .eyebrow{font-size:12px;letter-spacing:2px;font-weight:800;color:#7a8a5f}
 h1{font-size:clamp(30px,4.6vw,46px);letter-spacing:-1px;margin:10px 0 8px}
 .sub{color:#5a6650;max-width:640px;line-height:1.7;margin:0 0 26px}
-.cur-toggle{display:inline-flex;background:#fff;border:1px solid #e2e7d6;border-radius:12px;padding:4px;margin-bottom:26px}
+.cur-toggle{display:inline-flex;background:#fff;border:1px solid #e2e7d6;border-radius:12px;padding:4px;margin:0 10px 26px 0;vertical-align:top}
 .cur-toggle button{border:0;background:transparent;padding:9px 22px;border-radius:9px;font:700 14px 'Manrope',sans-serif;color:#5a6650;cursor:pointer}
 .cur-toggle button.on{background:#1a2315;color:#fff}
 #plan-note{display:none;background:#fff;border:1px solid #dfe9c8;border-radius:12px;padding:13px 18px;margin-bottom:22px;font-size:14px}
@@ -62,13 +63,14 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
 <p class="sub">{{ t('pay.sub') }}</p>
 {% include 'adsense-footer.html' %}
 <div class="cur-toggle" role="group" aria-label="{{ t('pay.cur_aria') }}"><button type="button" id="cur-usd" class="on">USD $</button><button type="button" id="cur-ngn">NGN ₦</button></div>
+<div class="cur-toggle" role="group" aria-label="{{ t('pay.per_aria') }}"><button type="button" id="per-monthly" class="on">{{ t('pay.period_m') }}</button><button type="button" id="per-annual">{{ t('pay.period_y') }} · {{ t('pay.save') }}</button></div>
 <div id="plan-note" role="status"></div>
 <div class="cards">
 {% for tier_id, tier in tiers.items() %}
 <article class="card{% if tier_id == 'pro' %} pop{% endif %}">
 {% if tier_id == 'pro' %}<span class="pop-tag">{{ t('pay.pop') }}</span>{% endif %}
 <h2>{{ tier.name }}</h2><p class="tagline">{{ tier.tag }}</p>
-<p class="price"><span class="amt" data-usd="{{ tier.usd }}" data-ngn="{{ tier.ngn }}">{{ tier.usd }}</span> <small>/ {{ tier.per }}</small></p>
+<p class="price"><span class="amt" data-usd="{{ tier.usd }}" data-ngn="{{ tier.ngn }}" data-usd-a="{{ tier.usd_annual }}" data-ngn-a="{{ tier.ngn_annual }}">{{ tier.usd }}</span> <small>/ <span class="per" data-per="{{ tier.per }}">{% if tier.usd_annual %}{{ t('pay.per_mo') }}{% else %}{{ tier.per }}{% endif %}</span></small></p>
 <ul>{% for f in tier.features %}<li>{{ f }}</li>{% endfor %}</ul>
 {% if tier_id == 'free' %}<a class="btn btn-ghost" href="/signup">{{ t('pay.free_btn') }}</a>
 {% elif tier_id == 'starter' %}<button type="button" class="btn-dark" data-tier="starter">{{ t('pay.starter_btn') }}</button>
@@ -79,6 +81,7 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
 <section class="crypto" id="crypto"><h2>{{ t('pay.c_h') }}</h2>
 <p class="muted">{{ t('pay.c_p') }}</p>
 <div class="crypto-grid"><div>
+<label>{{ t('pay.c_per') }}<select id="crypto-period"><option value="monthly">{{ t('pay.period_m') }}</option><option value="annual">{{ t('pay.period_y') }}</option></select></label>
 <label>{{ t('pay.c_plan') }}<select id="crypto-tier"><option value="starter">{{ t('pay.c_os') }}</option><option value="pro">{{ t('pay.c_op') }}</option></select></label>
 <label>{{ t('pay.c_coin') }}<select id="crypto-coin"></select></label>
 <button type="button" class="btn-dark" id="crypto-start">{{ t('pay.c_show') }}</button>
@@ -109,22 +112,26 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
 <script>
 (function(){
   var T_=window.T||function(k,f){return f;};
-  var cur='USD', note=document.getElementById('plan-note');
+  var cur='USD', per='monthly', note=document.getElementById('plan-note');
   function say(msg,err){note.textContent=msg;note.className='show'+(err?' err':'');}
   var q=new URLSearchParams(location.search).get('error');
   if(q==='verify')say(T_('pay.js_verify','verify'),true);
   else if(q==='payment')say(T_('pay.js_nopay','nopay'),true);
   else if(q==='missing')say(T_('pay.js_missing','missing'),true);
-  function setCur(c){cur=c;document.getElementById('cur-usd').classList.toggle('on',c==='USD');document.getElementById('cur-ngn').classList.toggle('on',c==='NGN');document.querySelectorAll('.amt').forEach(function(el){el.textContent=c==='USD'?el.dataset.usd:el.dataset.ngn;});}
+  function paint(){document.querySelectorAll('.amt').forEach(function(el){var v=per==='annual'?(cur==='USD'?el.dataset.usdA:el.dataset.ngnA):(cur==='USD'?el.dataset.usd:el.dataset.ngn);el.textContent=v||(cur==='USD'?el.dataset.usd:el.dataset.ngn);});document.querySelectorAll('.card').forEach(function(card){var amt=card.querySelector('.amt'),lab=card.querySelector('.per');if(!amt||!lab)return;var hasA=!!(cur==='USD'?amt.dataset.usdA:amt.dataset.ngnA);lab.textContent=hasA?(per==='annual'?T_('pay.per_yr','year'):T_('pay.per_mo','month')):lab.dataset.per;});}
+  function setCur(c){cur=c;document.getElementById('cur-usd').classList.toggle('on',c==='USD');document.getElementById('cur-ngn').classList.toggle('on',c==='NGN');paint();}
+  function setPer(p){per=p;document.getElementById('per-monthly').classList.toggle('on',p==='monthly');document.getElementById('per-annual').classList.toggle('on',p==='annual');paint();}
   document.getElementById('cur-usd').onclick=function(){setCur('USD');};
   document.getElementById('cur-ngn').onclick=function(){setCur('NGN');};
+  document.getElementById('per-monthly').onclick=function(){setPer('monthly');};
+  document.getElementById('per-annual').onclick=function(){setPer('annual');};
   var csrf=(document.querySelector('meta[name=csrf-token]')||{}).content||'';
   fetch('/api/billing/status').then(function(r){return r.json();}).then(function(s){
     if(!s.configured)say(T_('pay.js_connecting','connecting'));
     else if(s.authenticated&&s.role==='client'&&s.tier!=='free'&&s.tier_active)say(T_('pay.js_until','until').replace('{t}',s.tier.charAt(0).toUpperCase()+s.tier.slice(1)).replace('{d}',new Date(s.tier_expires).toLocaleDateString()));
     else if(s.authenticated&&s.role==='owner')say(T_('pay.js_owner','owner'));
   }).catch(function(){});
-  var ctier=document.getElementById('crypto-tier'),ccoin=document.getElementById('crypto-coin'),cpay=document.getElementById('crypto-pay'),cmsg=document.getElementById('crypto-msg'),copts=[];
+  var ctier=document.getElementById('crypto-tier'),cper=document.getElementById('crypto-period'),ccoin=document.getElementById('crypto-coin'),cpay=document.getElementById('crypto-pay'),cmsg=document.getElementById('crypto-msg'),copts=[];
   function csay(m,err){cmsg.textContent=m;cmsg.className='show'+(err?' err':'');}
   function renderCoin(){
     var o=copts[ccoin.selectedIndex]||copts[0];if(!o)return;
@@ -140,7 +147,7 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
     fetch('/api/billing/status').then(function(r){return r.json();}).then(function(s){
       if(!s.authenticated){location.href='/signup';return;}
       if(s.role==='owner'){csay(T_('pay.js_owner2','owner2'));return;}
-      fetch('/api/billing/crypto?tier='+ctier.value).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(out){
+      fetch('/api/billing/crypto?tier='+ctier.value+'&period='+cper.value).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(out){
         if(!out.ok||!out.j.coins||!out.j.coins.length){csay((out.j&&out.j.error)||T_('pay.js_coff','coff'),true);return;}
         copts=out.j.coins;
         ccoin.innerHTML=copts.map(function(o){return '<option value="'+o.coin+'">'+o.label+'</option>';}).join('');
@@ -154,7 +161,7 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
     if(!o){csay(T_('pay.js_pickcoin','pickcoin'),true);return;}
     if(tx.length<16){csay(T_('pay.c_tx','tx'),true);return;}
     btn.disabled=true;csay(T_('pay.js_submitting','submitting'));
-    fetch('/api/billing/crypto/checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tier:ctier.value,coin:o.coin})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(out){
+    fetch('/api/billing/crypto/checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tier:ctier.value,coin:o.coin,period:cper.value})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(out){
       if(!out.ok)throw new Error((out.j&&out.j.error)||T_('pay.js_checkout_fail','fail'));
       return fetch('/api/billing/crypto/submit',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({reference:out.j.reference,tx_hash:tx})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});});
     }).then(function(out){
@@ -170,7 +177,7 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
         if(!s.authenticated){location.href='/signup';return;}
         if(s.role==='owner'){say(T_('pay.js_owner2','owner2'));btn.disabled=false;return;}
         if(!s.configured){say(T_('pay.js_connecting2','connecting2'),true);btn.disabled=false;return;}
-        return fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tier:btn.dataset.tier,currency:cur})}).then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});}).then(function(out){
+        return fetch('/api/billing/checkout',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tier:btn.dataset.tier,currency:cur,period:per})}).then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});}).then(function(out){
           if(out.ok&&out.j.authorization_url){location.href=out.j.authorization_url;return;}
           say((out.j&&out.j.error)||T_('pay.js_checkout_fail2','fail2'),true);btn.disabled=false;
         });
@@ -180,4 +187,5 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
 })();
 </script>
 <script src="/static/pwa.js" defer></script>
+<script src="/static/dropdown.js" defer></script>
 </body></html>

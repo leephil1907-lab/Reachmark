@@ -2332,5 +2332,13 @@
  "cc.pro_about": "Experiência profissional com trato pessoal. Ouvimos primeiro e entregamos trabalho que o faz avançar — a tempo e conforme pedido.",
  "cc.pro_o1": "Aconselhamento experiente — Orientação clara e prática de profissionais experientes.",
  "cc.pro_o2": "Serviço completo — Entregue-nos tudo, do início ao fim.",
- "cc.pro_o3": "Conversa clara — Prazos honestos, preços transparentes, sem jargão."
+ "cc.pro_o3": "Conversa clara — Prazos honestos, preços transparentes, sem jargão.",
+ "pay.period_m": "Mensal",
+ "pay.period_y": "Anual",
+ "pay.per_mo": "mês",
+ "pay.per_yr": "ano",
+ "pay.save": "Poupe 17%",
+ "pay.e_period": "Escolha faturação mensal ou anual.",
+ "pay.per_aria": "Período de faturação",
+ "pay.c_per": "Período"
 }

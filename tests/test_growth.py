@@ -121,8 +121,8 @@ class CryptoTests(SwitchedBase):
             self.assertEqual(len(coins), 5)
             btc = next(c for c in coins if c['coin'] == 'BTC')
             self.assertTrue(btc['qr'].startswith('data:image/png;base64,'))
-            self.assertEqual(btc['usd'], 25)
-            self.assertAlmostEqual(btc['coin_amount'], 25 / 50000.0, places=8)
+            self.assertEqual(btc['usd'], 19)
+            self.assertAlmostEqual(btc['coin_amount'], 19 / 50000.0, places=8)
             usdt = next(c for c in coins if c['coin'] == 'USDT_ERC20')
             self.assertEqual(usdt['address'], WALLETS['ETH_WALLET'])
             # Checkout an unconfigured coin is refused.

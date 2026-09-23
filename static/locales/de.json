@@ -2332,5 +2332,13 @@
  "cc.pro_about": "Professionelle Expertise mit persönlicher Note. Wir hören zuerst zu und liefern Arbeit, die dich voranbringt — pünktlich und auf den Punkt.",
  "cc.pro_o1": "Expertenberatung — Klare, umsetzbare Empfehlungen von erfahrenen Profis.",
  "cc.pro_o2": "Rundum-Service — Gib es ab und betrachte es als erledigt, von Anfang bis Ende.",
- "cc.pro_o3": "Klare Worte — Ehrliche Fristen, transparente Preise, kein Fachchinesisch."
+ "cc.pro_o3": "Klare Worte — Ehrliche Fristen, transparente Preise, kein Fachchinesisch.",
+ "pay.period_m": "Monatlich",
+ "pay.period_y": "Jährlich",
+ "pay.per_mo": "Monat",
+ "pay.per_yr": "Jahr",
+ "pay.save": "17 % sparen",
+ "pay.e_period": "Wähle monatliche oder jährliche Abrechnung.",
+ "pay.per_aria": "Abrechnungszeitraum",
+ "pay.c_per": "Zeitraum"
 }

@@ -2332,5 +2332,13 @@
  "cc.pro_about": "Professional expertise with a personal approach. We listen first, then deliver work that moves you forward — on time and on brief.",
  "cc.pro_o1": "Expert advice — Clear, actionable guidance from seasoned professionals.",
  "cc.pro_o2": "Done-for-you service — Hand it over and consider it handled, end to end.",
- "cc.pro_o3": "Straight talk — Honest timelines, transparent fees, no jargon."
+ "cc.pro_o3": "Straight talk — Honest timelines, transparent fees, no jargon.",
+ "pay.period_m": "Monthly",
+ "pay.period_y": "Annual",
+ "pay.per_mo": "month",
+ "pay.per_yr": "year",
+ "pay.save": "Save 17%",
+ "pay.e_period": "Choose Monthly or Annual billing.",
+ "pay.per_aria": "Billing period",
+ "pay.c_per": "Billing period"
 }

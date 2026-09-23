@@ -7,7 +7,8 @@
 <meta name="theme-color" content="#20251f"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180">
 <link rel="stylesheet" href="/static/fonts.css">
 <link rel="stylesheet" href="/static/receptionist-page.css">
-<link rel="stylesheet" href="/static/reveal.css"><script src="/static/i18n.js"></script>
+<link rel="stylesheet" href="/static/reveal.css">
+<link rel="stylesheet" href="/static/dropdown.css"><script src="/static/i18n.js"></script>
 </head><body class="rx-page">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}
 <nav class="rx-nav" aria-label="{{ t('rx.nav_aria') }}"><a href="/" class="rx-brand"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
@@ -209,7 +210,8 @@
 {% endif %}
 
 <script src="/static/receptionist-page.js" defer></script>
-<script src="/static/reveal.js" defer></script>
+<script src="/static/reveal.js" defer>
+<script src="/static/dropdown.js" defer></script></script>
 <script src="/static/magnet.js" defer></script>
 <script src="/static/pwa.js" defer></script>
 </body></html>

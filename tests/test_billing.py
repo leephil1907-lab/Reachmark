@@ -166,7 +166,7 @@ class CheckoutTests(BillingBase):
         self.assertEqual(r.get_json()['authorization_url'], 'https://pay.test/abc')
         args = m.call_args[0]
         self.assertEqual(args[1], '/transaction/initialize')
-        self.assertEqual(args[2]['amount'], 3500000)
+        self.assertEqual(args[2]['amount'], 3000000)
         self.assertEqual(args[2]['currency'], 'NGN')
         with module.db() as c:
             row = c.execute('SELECT * FROM payments WHERE reference=?', ('rm-testref1',)).fetchone()
@@ -176,7 +176,7 @@ class CheckoutTests(BillingBase):
     def test_callback_activates_plan(self):
         self.make_client()
         init = {'authorization_url': 'https://pay.test/abc', 'reference': 'rm-testref2'}
-        verify = {'status': 'success', 'amount': 2500, 'currency': 'USD', 'reference': 'rm-testref2'}
+        verify = {'status': 'success', 'amount': 1900, 'currency': 'USD', 'reference': 'rm-testref2'}
 
         def fake(method, path, payload=None):
             return init if path == '/transaction/initialize' else verify
@@ -195,7 +195,7 @@ class CheckoutTests(BillingBase):
     def test_callback_rejects_failed_payment(self):
         self.make_client()
         init = {'authorization_url': 'https://pay.test/abc', 'reference': 'rm-testref3'}
-        verify = {'status': 'failed', 'amount': 2500, 'currency': 'USD', 'reference': 'rm-testref3'}
+        verify = {'status': 'failed', 'amount': 1900, 'currency': 'USD', 'reference': 'rm-testref3'}
 
         def fake(method, path, payload=None):
             return init if path == '/transaction/initialize' else verify
@@ -213,10 +213,10 @@ class CheckoutTests(BillingBase):
     def test_webhook_activates_with_valid_signature(self):
         self.make_client()
         with module.db() as c:
-            c.execute("INSERT INTO payments(id,user_id,email,tier,currency,amount_minor,reference,status,paid_at,created,raw) VALUES('p1','bill-client','bill@example.test','pro','USD',3500,'rm-hook1','pending','',?,?)",
+            c.execute("INSERT INTO payments(id,user_id,email,tier,currency,amount_minor,reference,status,paid_at,created,raw) VALUES('p1','bill-client','bill@example.test','pro','USD',5900,'rm-hook1','pending','',?,?)",
                       (module.now(), '{}'))
         event = {'event': 'charge.success',
-                 'data': {'status': 'success', 'amount': 3500, 'currency': 'USD', 'reference': 'rm-hook1'}}
+                 'data': {'status': 'success', 'amount': 5900, 'currency': 'USD', 'reference': 'rm-hook1'}}
         raw = json.dumps(event)
         sig = hmac.new(b'whsec-test', raw.encode(), hashlib.sha512).hexdigest()
         with patch.dict('os.environ', {'PAYSTACK_SECRET_KEY': 'whsec-test'}):
@@ -299,3 +299,140 @@ class AgentToolTests(BillingBase):
         r = self.client.post('/api/receptionist/message', json={'message': 'hello there'})
         self.assertEqual(r.status_code, 200)
         self.assertNotEqual(r.get_json().get('intent'), 'owner_command')
+
+
+import os
+
+_BILLING_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(module.__file__)))
+
+
+def _repo(path):
+    with open(os.path.join(_BILLING_ROOT, path), encoding='utf-8') as f:
+        return f.read()
+
+
+class PeriodCheckoutTests(BillingBase):
+    def _checkout(self, payload, ref):
+        self.make_client()
+        fake = {'authorization_url': 'https://pay.test/x', 'reference': ref}
+        with patch('web.billing.paystack_request', return_value=fake) as m, \
+                patch.dict('os.environ', {'PAYSTACK_SECRET_KEY': 'sk_test_x'}):
+            r = self.client.post('/api/billing/checkout', json=payload, headers=self.csrf())
+        return r, m
+
+    def test_annual_checkout_charges_annual_price(self):
+        r, m = self._checkout({'tier': 'starter', 'currency': 'USD', 'period': 'annual'}, 'rm-per1')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(m.call_args[0][2]['amount'], 19000)
+        with module.db() as c:
+            row = c.execute('SELECT period FROM payments WHERE reference=?', ('rm-per1',)).fetchone()
+        self.assertEqual(row['period'], 'annual')
+
+    def test_pro_annual_ngn_and_monthly_default(self):
+        r, m = self._checkout({'tier': 'pro', 'currency': 'NGN', 'period': 'annual'}, 'rm-per2')
+        self.assertEqual(m.call_args[0][2]['amount'], 90000000)
+        r, m = self._checkout({'tier': 'starter', 'currency': 'USD'}, 'rm-per3')
+        self.assertEqual(m.call_args[0][2]['amount'], 1900)
+        with module.db() as c:
+            row = c.execute('SELECT period FROM payments WHERE reference=?', ('rm-per3',)).fetchone()
+        self.assertEqual(row['period'], 'monthly')
+
+    def test_bad_period_rejected(self):
+        self.make_client()
+        with patch.dict('os.environ', {'PAYSTACK_SECRET_KEY': 'sk_test_x'}):
+            r = self.client.post('/api/billing/checkout',
+                                 json={'tier': 'starter', 'currency': 'USD', 'period': 'weekly'},
+                                 headers=self.csrf())
+        self.assertEqual(r.status_code, 400)
+
+
+class PeriodActivationTests(BillingBase):
+    def _days_granted(self, ref, amount, period):
+        self.make_client()
+        init = {'authorization_url': 'https://pay.test/x', 'reference': ref}
+        verify = {'status': 'success', 'amount': amount, 'currency': 'USD', 'reference': ref}
+
+        def fake(method, path, payload=None):
+            return init if path == '/transaction/initialize' else verify
+
+        with patch('web.billing.paystack_request', side_effect=fake), \
+                patch.dict('os.environ', {'PAYSTACK_SECRET_KEY': 'sk_test_x'}):
+            self.client.post('/api/billing/checkout',
+                             json={'tier': 'starter', 'currency': 'USD', 'period': period},
+                             headers=self.csrf())
+            t0 = datetime.now(timezone.utc)
+            r = self.client.get(f'/billing/callback?reference={ref}')
+        self.assertEqual(r.status_code, 302)
+        with module.db() as c:
+            u = c.execute('SELECT tier_expires FROM users WHERE id=?', ('bill-client',)).fetchone()
+        return (datetime.fromisoformat(u['tier_expires']) - t0).days
+
+    def test_annual_grants_365_days(self):
+        self.assertEqual(self._days_granted('rm-perA', 19000, 'annual'), 365)
+
+    def test_monthly_grants_30_days(self):
+        self.assertEqual(self._days_granted('rm-perM', 1900, 'monthly'), 30)
+
+
+class PeriodStatusTests(BillingBase):
+    def test_status_lists_annual_prices(self):
+        data = self.client.get('/api/billing/status').get_json()
+        self.assertEqual(data['prices']['starter']['usd_annual'], '$190')
+        self.assertEqual(data['prices']['starter']['ngn_annual'], '₦300,000')
+        self.assertEqual(data['prices']['pro']['usd_annual'], '$590')
+        self.assertEqual(data['prices']['pro']['ngn_annual'], '₦900,000')
+
+
+class CryptoPeriodTests(BillingBase):
+    def test_crypto_options_echo_period(self):
+        self.make_client()
+        with patch.dict('os.environ', {'BTC_WALLET': '', 'ETH_WALLET': '',
+                                       'SOL_WALLET': '', 'USDT_TRC20_WALLET': ''}, clear=False):
+            r = self.client.get('/api/billing/crypto?tier=starter&period=annual')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.get_json()['period'], 'annual')
+
+    def test_crypto_bad_period_rejected(self):
+        self.make_client()
+        r = self.client.get('/api/billing/crypto?tier=starter&period=weekly')
+        self.assertEqual(r.status_code, 400)
+
+
+class PricingPeriodUITests(BillingBase):
+    def test_pricing_shows_period_choice(self):
+        body = self.client.get('/pricing').data.decode()
+        for needle in ('Monthly', 'Annual', 'Save 17%', 'data-usd-a=', 'data-ngn-a=',
+                       '>month</span>', 'crypto-period', 'dropdown.css', 'dropdown.js'):
+            self.assertIn(needle, body)
+
+
+class SwitcherFlagTests(BillingBase):
+    def test_home_switcher_renders_six_flags(self):
+        body = self.client.get('/').data.decode()
+        for code in ('en', 'es', 'fr', 'de', 'pt', 'zh'):
+            self.assertIn("%s:'<svg" % code, body)
+        self.assertIn('id="locale-select"', body)
+
+    def test_switcher_template_has_flags_and_fallback(self):
+        s = _repo('templates/locale-switcher.html')
+        self.assertGreaterEqual(s.count('<svg'), 6)
+        self.assertIn('id="locale-select"', s)
+        self.assertIn('setLocale', s)
+
+
+class DropdownStandardTests(BillingBase):
+    def test_enhancer_skips_native_and_multi(self):
+        s = _repo('static/dropdown.js')
+        for needle in ('data-native', 'multiple', 'aria-expanded', 'ReachmarkDropdown'):
+            self.assertIn(needle, s)
+
+    def test_select_pages_load_standard_dropdown(self):
+        for page in ('index.html', 'pricing.html', 'receptionist-page.html', 'enquire.html', 'about.html'):
+            s = _repo('templates/' + page)
+            self.assertIn('dropdown.css', s, page)
+            self.assertIn('dropdown.js', s, page)
+
+    def test_form_selects_opt_into_standard(self):
+        s = _repo('templates/enquiry-form.html')
+        self.assertIn('<select', s)
+        self.assertNotIn('data-native', s)

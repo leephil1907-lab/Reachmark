@@ -2332,5 +2332,13 @@
  "cc.pro_about": "Experiencia profesional con trato personal. Escuchamos primero y entregamos trabajo que te hace avanzar: a tiempo y según lo pedido.",
  "cc.pro_o1": "Asesoría experta — Orientación clara y accionable de profesionales curtidos.",
  "cc.pro_o2": "Servicio integral — Déjalo en nuestras manos, de principio a fin.",
- "cc.pro_o3": "Claridad total — Plazos honestos, tarifas transparentes, sin jerga."
+ "cc.pro_o3": "Claridad total — Plazos honestos, tarifas transparentes, sin jerga.",
+ "pay.period_m": "Mensual",
+ "pay.period_y": "Anual",
+ "pay.per_mo": "mes",
+ "pay.per_yr": "año",
+ "pay.save": "Ahorra 17%",
+ "pay.e_period": "Elige facturación mensual o anual.",
+ "pay.per_aria": "Período de facturación",
+ "pay.c_per": "Período"
 }

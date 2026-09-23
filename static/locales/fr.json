@@ -2332,5 +2332,13 @@
  "cc.pro_about": "Une expertise pro avec une approche personnelle. Nous écoutons d'abord, puis livrons un travail qui vous fait avancer — à temps et dans les règles.",
  "cc.pro_o1": "Conseil expert — Des recommandations claires et concrètes de pros aguerris.",
  "cc.pro_o2": "Service clé en main — Confiez-nous tout, de bout en bout.",
- "cc.pro_o3": "Franc-parler — Délais honnêtes, tarifs transparents, sans jargon."
+ "cc.pro_o3": "Franc-parler — Délais honnêtes, tarifs transparents, sans jargon.",
+ "pay.period_m": "Mensuel",
+ "pay.period_y": "Annuel",
+ "pay.per_mo": "mois",
+ "pay.per_yr": "an",
+ "pay.save": "−17 %",
+ "pay.e_period": "Choisissez une facturation mensuelle ou annuelle.",
+ "pay.per_aria": "Période de facturation",
+ "pay.c_per": "Période"
 }
