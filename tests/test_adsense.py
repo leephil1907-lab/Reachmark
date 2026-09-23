@@ -44,6 +44,8 @@ class AdSenseTests(unittest.TestCase):
         policy = self.client.get('/').headers.get('Content-Security-Policy', '')
         self.assertIn('https://pagead2.googlesyndication.com', policy)
         self.assertIn('https://googleads.g.doubleclick.net', policy)
+        self.assertNotIn('\\', policy)
+        self.assertIn("img-src 'self'", policy)
 
     def test_about_template_file_is_untouched(self):
         with open(os.path.join(ROOT, 'templates', 'about.html'), encoding='utf-8') as handle:

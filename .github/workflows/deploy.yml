@@ -26,7 +26,7 @@ jobs:
           ref: ${{ env.RELEASE_COMMIT }}
       - uses: actions/setup-python@v5
         with: {python-version: '3.13'}
-      - run: pip install -r requirements.txt && python -m unittest tests.test_app tests.test_operations tests.test_maps.MapTests tests.test_production tests.test_crew tests.test_video tests.test_receptionist_page tests.test_brain -q
+      - run: pip install -r requirements.txt && python -m unittest tests.test_app tests.test_operations tests.test_maps.MapTests tests.test_production tests.test_crew tests.test_video tests.test_receptionist_page tests.test_brain tests.test_design tests.test_adsense -q
       - uses: actions/setup-node@v4
         with: {node-version: '22', cache: npm}
       - run: npm ci && npm run build
