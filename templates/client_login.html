@@ -66,7 +66,7 @@ button[type=submit]:hover{background:#1a2a12;transform:translateY(-1px)}
     </form>
     <div id="oauth-btns" style="display:none;gap:8px;margin:14px 0 4px"></div>
     <div class="divider">{{ t('au.c_or') }}</div>
-    <p class="auth-note" style="margin-top:0">{{ t('au.c_noacct') }} <a href="/signup">{{ t('au.c_create1') }}</a> · <a href="/pricing">{{ t('au.s_plans') }}</a> · <a href="#" onclick="requestVerify(event)">{{ t('au.c_resend2') }}</a></p>
+    <p class="auth-note" style="margin-top:0">{{ t('au.c_noacct') }} <a href="/signup">{{ t('au.c_create1') }}</a> · <a href="/pricing">{{ t('au.s_plans') }}</a> · <a href="#" onclick="requestVerify(event)">{{ t('au.c_resend2') }}</a> · <a href="/terms">{{ t('foot.terms') }}</a> · <a href="/privacy">{{ t('foot.privacy') }}</a></p>
     <p id="verify-note" class="auth-note" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:10px;border-radius:10px;color:#2d4a0a">{{ t('au.c_vnote') }} <a href="#" onclick="requestVerify(event)">{{ t('au.c_resend2') }}</a></p>
     <p class="social">{{ t('au.c_social') }}</p>
     <div class="meta"><span>◎ {{ t('au.s_meta1') }}</span><span>⌁ {{ t('au.c_health') }}</span><span>↗ {{ t('au.s_meta3') }}</span></div>

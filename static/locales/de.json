@@ -2268,5 +2268,9 @@
  "au.o_error": "Der Anbieter hat nicht geantwortet. Bitte erneut versuchen.",
  "au.o_noemail": "Ihr Anbieterkonto hat keine E-Mail-Adresse.",
  "au.e_oauth_unknown": "Unbekannter Anbieter.",
- "au.e_oauth_off": "Diese Anmeldemethode ist nicht verfügbar."
+ "au.e_oauth_off": "Diese Anmeldemethode ist nicht verfügbar.",
+ "foot.legal": "Rechtliches",
+ "foot.privacy": "Datenschutz",
+ "foot.terms": "Bedingungen",
+ "foot.disclosure": "Offenlegungen"
 }

@@ -2268,5 +2268,9 @@
  "au.o_error": "Le fournisseur n'a pas répondu. Réessayez.",
  "au.o_noemail": "Votre compte fournisseur n'a pas d'adresse e-mail.",
  "au.e_oauth_unknown": "Fournisseur inconnu.",
- "au.e_oauth_off": "Cette méthode est indisponible."
+ "au.e_oauth_off": "Cette méthode est indisponible.",
+ "foot.legal": "Mentions légales",
+ "foot.privacy": "Confidentialité",
+ "foot.terms": "Conditions",
+ "foot.disclosure": "Divulgations"
 }

@@ -2268,5 +2268,9 @@
  "au.o_error": "The provider did not respond. Please try again.",
  "au.o_noemail": "Your provider account has no email address to sign in with.",
  "au.e_oauth_unknown": "Unknown sign-in provider.",
- "au.e_oauth_off": "This sign-in method is not available."
+ "au.e_oauth_off": "This sign-in method is not available.",
+ "foot.legal": "Legal",
+ "foot.privacy": "Privacy",
+ "foot.terms": "Terms",
+ "foot.disclosure": "Disclosures"
 }

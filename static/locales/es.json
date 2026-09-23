@@ -2268,5 +2268,9 @@
  "au.o_error": "El proveedor no respondió. Inténtalo de nuevo.",
  "au.o_noemail": "Tu cuenta del proveedor no tiene correo para acceder.",
  "au.e_oauth_unknown": "Proveedor desconocido.",
- "au.e_oauth_off": "Este método no está disponible."
+ "au.e_oauth_off": "Este método no está disponible.",
+ "foot.legal": "Legal",
+ "foot.privacy": "Privacidad",
+ "foot.terms": "Términos",
+ "foot.disclosure": "Divulgaciones"
 }

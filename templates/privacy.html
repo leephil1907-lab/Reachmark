@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Privacy Policy · Reachmark</title><meta name="description" content="How Reachmark collects, uses, shares and protects personal data."/><link rel="icon" href="/static/icon.svg" type="image/svg+xml"/><style>body{margin:0;background:#f4f6ef;color:#1a2315;font:400 15px/1.75 Manrope,Arial,sans-serif}header{background:#0f1a0a;color:#eaf3de;padding:20px 24px;display:flex;align-items:center;gap:14px}header img{height:28px}header nav{margin-left:auto;display:flex;gap:18px}header nav a{color:#d5f268;text-decoration:none;font-weight:700;font-size:13px}main{max-width:780px;margin:0 auto;padding:36px 22px 60px;background:#fff}h1{font-size:30px;letter-spacing:-1px;margin:0 0 4px}h2{font-size:19px;margin:32px 0 8px;color:#0f1a0a}p,li{color:#33402a}table{border-collapse:collapse;width:100%;font-size:13px;margin:12px 0}th,td{border:1px solid #dfe8cc;padding:8px 10px;text-align:left}th{background:#f4f6ef}footer{background:#0f1a0a;color:#8c9c77;padding:26px;text-align:center;font-size:12px}footer a{color:#d5f268;margin:0 10px;text-decoration:none}</style></head><body>
+<header><a href="/" aria-label="Reachmark home"><img src="/static/logo-inverse.svg" alt="Reachmark"/></a><nav><a href="/">Home</a><a href="/pricing">Pricing</a><a href="/signin">Sign in</a></nav></header>
+<main>
+<h1>Privacy Policy</h1>
+<p><b>Effective:</b> 23 September 2026 · <b>Controller:</b> Reachmark (“we”, “us”) · <b>Contact:</b> <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+<p>This policy explains what personal data Reachmark collects, why, who sees it, and the rights you have. The service is for people aged 18 and over.</p>
+<h2>1. Data we collect</h2>
+<ul>
+<li><b>Account data.</b> When you sign up: your name, e-mail address, and a salted hash of your password (we never store the password itself). If you sign in with Google or Microsoft we receive your name and e-mail address from them — never your provider password.</li>
+<li><b>Business lead data.</b> The workspace stores business information you add or discover: business names, categories, cities, e-mail addresses, phone numbers, websites, notes, and your outreach history with them.</li>
+<li><b>Networking content.</b> Digital business cards you create, event records, scanned card photos you upload, booking requests visitors submit on your booking page, and webhook delivery logs.</li>
+<li><b>Communications.</b> E-mails you send through the service (kept in the mail log with the contact basis you confirm), enquiry messages, and support chats.</li>
+<li><b>Technical data.</b> Hashed IP identifiers used only for rate-limiting and abuse prevention, and strictly-necessary cookies (session, CSRF token, language preference). We run no cross-site tracking of our own; pages that show Google AdSense are subject to Google's own cookies (see Disclosures).</li>
+<li><b>Payments.</b> Paid plans are processed by Paystack. Card details go directly to Paystack — we only keep the plan, amount, currency, and payment status.</li>
+</ul>
+<h2>2. Why we use it (legal bases)</h2>
+<ul>
+<li>To provide the service you signed up for (contract): accounts, workspace, lead tools, e-mail sending, bookings.</li>
+<li>With your consent: verification e-mails, marketing/newsletter where you opt in (unsubscribe any time).</li>
+<li>Legitimate interests: security, abuse prevention, and product improvement — balanced against your rights and never involving sale of data.</li>
+<li>Legal obligations: tax/accounting records and complying with lawful requests.</li>
+</ul>
+<h2>3. Who sees your data</h2>
+<ul>
+<li><b>Google / Microsoft</b> — only to verify your identity when you choose social sign-in.</li>
+<li><b>Your SMTP provider</b> — to deliver e-mails you approve for sending.</li>
+<li><b>Railway (hosting)</b> — where the service and its database run.</li>
+<li><b>Paystack</b> — to process plan payments.</li>
+<li><b>Webhook endpoints you configure</b> — lead events are pushed only to URLs you add yourself.</li>
+</ul>
+<p>We do not sell personal data, and we do not share it for third-party advertising.</p>
+<h2>4. Your rights</h2>
+<p>You may request access, correction, export, or deletion of your personal data at any time by e-mailing <a href="mailto:{{ support_email }}">{{ support_email }}</a>. Clients can also export or close their account directly from the app, which removes the account record. Opt-outs are permanent: addresses on the suppression list are never mailed again, even if re-imported.</p>
+<h2>5. Retention</h2>
+<p>Account and workspace data is kept while your account is active. Mail logs and suppression entries are kept for legitimate-interest and compliance purposes (to prove consent/basis and to honour opt-outs). Backups age out on the host's normal cycle.</p>
+<h2>6. Security</h2>
+<p>Transport is encrypted (TLS), passwords are salted hashes, owner areas are credential-gated, and webhook calls carry HMAC signatures. No system is perfectly secure; if we discover a breach affecting your data we will notify you and take reasonable remediation steps.</p>
+<h2>7. International transfers</h2>
+<p>The service is operated from Lagos and hosted on cloud infrastructure that may process data outside your country. By using the service you consent to such transfers as needed to provide it.</p>
+<h2>8. Children</h2>
+<p>Reachmark is not directed at children and we do not knowingly collect data from anyone under 18. If you believe a child has provided data, contact us and we will delete it.</p>
+<h2>9. Changes</h2>
+<p>We will post material changes here with a new effective date. Continued use after changes take effect constitutes acceptance.</p>
+</main>
+<footer><a href="/">Home</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/disclosure">Disclosures</a><br/><br/>© 2026 Reachmark · <a href="mailto:{{ support_email }}">{{ support_email }}</a></footer>
+{% include 'tawkto.html' %}
+</body></html>

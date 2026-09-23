@@ -2268,5 +2268,9 @@
  "au.o_error": "服务商无响应，请重试。",
  "au.o_noemail": "您的服务商账号没有可用的电子邮箱。",
  "au.e_oauth_unknown": "未知的登录服务商。",
- "au.e_oauth_off": "此登录方式不可用。"
+ "au.e_oauth_off": "此登录方式不可用。",
+ "foot.legal": "Aviso legal",
+ "foot.privacy": "隐私政策",
+ "foot.terms": "服务条款",
+ "foot.disclosure": "信息披露"
 }

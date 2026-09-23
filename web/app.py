@@ -255,6 +255,22 @@ def about():
     gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'  # second Google tag alongside GA4
     gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
     return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
+
+# Legal pages — English-authoritative like /about (standard for legal documents).
+@app.route('/privacy')
+def privacy():
+    from web.accounts import support_email
+    return render_template('privacy.html', support_email=support_email())
+
+@app.route('/terms')
+def terms():
+    from web.accounts import support_email
+    return render_template('terms.html', support_email=support_email())
+
+@app.route('/disclosure')
+def disclosure():
+    from web.accounts import support_email
+    return render_template('disclosure.html', support_email=support_email())
 @app.after_request
 def pwa_headers(response):
     """Let the service worker control the whole site, and never cache the worker itself."""
