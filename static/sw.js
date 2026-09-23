@@ -14,6 +14,10 @@
                     up on the next visit without anyone clearing storage. Bumping CACHE
                     drops every older entry.
 
+   Faster loads:    native navigation preload is enabled where supported, so the
+                    network fetch starts while the worker boots; the preloaded
+                    response is used (and cached) instead of a duplicate fetch.
+
    When offline:    a previously visited page is served from cache with an honest
                     "you are offline" note; an unvisited page gets an offline page that
                     says so. Nothing pretends to be live data.
@@ -68,6 +72,11 @@ self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (keys) {
       return Promise.all(keys.map(function (key) { return key === CACHE ? null : caches.delete(key); }));
+    }).then(function () {
+      /* Native navigation preload: the browser starts the network fetch in
+         parallel with worker boot. No library needed. */
+      if ('navigationPreload' in self.registration) return self.registration.navigationPreload.enable();
+      return null;
     }).then(function () { return self.clients.claim(); })
   );
 });
@@ -84,8 +93,12 @@ self.addEventListener('fetch', function (event) {
   /* Navigations: cache first for speed, refresh in the background, honest offline fallback. */
   if (request.mode === 'navigate') {
     event.respondWith(
-      caches.match(request).then(function (cached) {
-        var network = fetch(request).then(function (response) {
+      Promise.all([
+        caches.match(request),
+        event.preloadResponse ? event.preloadResponse.catch(function () { return null; }) : null
+      ]).then(function (both) {
+        var cached = both[0], preloaded = both[1];
+        var network = (preloaded ? Promise.resolve(preloaded) : fetch(request)).then(function (response) {
           if (response && response.ok) {
             caches.open(CACHE).then(function (cache) { cache.put(request, response.clone()); });
           }

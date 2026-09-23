@@ -1,0 +1,10 @@
+{# Google AdSense display placement. Renders only when ADSENSE_DISPLAY_SLOT is
+   configured (slot IDs come from the AdSense console: Ads > By ad unit > Display).
+   Self-styled so it works on any page with zero CSS changes. #}
+{% if adsense_display_slot %}
+<div role="complementary" aria-label="Advertisement" style="margin:28px auto;max-width:1060px;padding:18px 16px 14px;background:#fff;border:1px solid #e2e7d6;border-radius:16px;text-align:center">
+  <div style="font:700 9px Manrope,Arial,sans-serif;letter-spacing:2px;color:#8a9976;margin-bottom:10px">ADVERTISEMENT</div>
+  <ins class="adsbygoogle" style="display:block" data-ad-client="{{ adsense_client }}" data-ad-slot="{{ adsense_display_slot }}" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+{% endif %}

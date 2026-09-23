@@ -81,6 +81,10 @@ def inject_branding():
     try: s=settings()
     except Exception: s={}
     return {'app_settings': s}
+@app.context_processor
+def inject_adsense():
+    return {'adsense_client': ADSENSE_CLIENT,
+            'adsense_display_slot': os.getenv('ADSENSE_DISPLAY_SLOT','').strip()}
 @app.before_request
 def custom_domain_redirect():
     # If a custom domain is set via PUBLIC_BASE_URL (e.g. https://reachmark.co), redirect the temporary Railway host to it for SEO/canonical

@@ -5,6 +5,7 @@ must stay byte-identical — are never touched.
 """
 import os
 import unittest
+from unittest.mock import patch
 
 import tests.test_app as test_app
 
@@ -46,6 +47,25 @@ class AdSenseTests(unittest.TestCase):
         self.assertIn('https://googleads.g.doubleclick.net', policy)
         self.assertNotIn('\\', policy)
         self.assertIn("img-src 'self'", policy)
+
+    def test_content_security_policy_allows_display_ad_creatives(self):
+        policy = self.client.get('/').headers.get('Content-Security-Policy', '')
+        self.assertIn('https://tpc.googlesyndication.com', policy)
+
+    def test_display_placements_render_when_slot_configured(self):
+        with patch.dict(os.environ, {'ADSENSE_DISPLAY_SLOT': '1234567890'}):
+            for path in ('/', '/showcase'):
+                body = self.client.get(path).get_data(as_text=True)
+                self.assertIn('ADVERTISEMENT', body, path)
+                self.assertIn('data-ad-slot="1234567890"', body, path)
+                self.assertIn(f'data-ad-client="{CLIENT}"', body, path)
+
+    def test_display_placements_hidden_without_slot(self):
+        with patch.dict(os.environ, {'ADSENSE_DISPLAY_SLOT': ''}):
+            for path in ('/', '/showcase'):
+                body = self.client.get(path).get_data(as_text=True)
+                self.assertNotIn('data-ad-slot', body, path)
+                self.assertNotIn('ADVERTISEMENT', body, path)
 
     def test_about_template_file_is_untouched(self):
         with open(os.path.join(ROOT, 'templates', 'about.html'), encoding='utf-8') as handle:

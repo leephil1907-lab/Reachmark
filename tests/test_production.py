@@ -181,6 +181,8 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
         self.assertNotIn('I hunt missing websites',home)
         self.assertIn('Three steps. No maze.',home)
         self.assertIn('© 2026 Reachmark',home)
+        self.assertNotIn('Questions? Ask the front desk',home)
+        self.assertIn('Clients, in their own words',home)
         about=self.client.get('/about').get_data(as_text=True)
         self.assertLess(len(home),len(about)//2)
     def test_about_and_reviews_keep_the_full_page(self):
