@@ -191,7 +191,8 @@ def healthz():
 
 @app.route('/ads.txt')
 def ads_txt():
-    return Response('google.com, %s, DIRECT, f08c47fec0942fa0\n' % ADSENSE_CLIENT, mimetype='text/plain')
+    seller = ADSENSE_CLIENT[3:] if ADSENSE_CLIENT.startswith('ca-') else ADSENSE_CLIENT
+    return Response('google.com, %s, DIRECT, f08c47fec0942fa0\n' % seller, mimetype='text/plain')
 @app.route('/about')
 def about():
     base=settings()['public_base_url'].rstrip('/')

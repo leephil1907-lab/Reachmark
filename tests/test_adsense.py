@@ -38,7 +38,7 @@ class AdSenseTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('text/plain', response.headers.get('Content-Type', ''))
         self.assertEqual(response.get_data(as_text=True),
-                         f'google.com, {CLIENT}, DIRECT, f08c47fec0942fa0\n')
+                         'google.com, pub-3894582071697384, DIRECT, f08c47fec0942fa0\n')
 
     def test_content_security_policy_allows_the_loader(self):
         policy = self.client.get('/').headers.get('Content-Security-Policy', '')
