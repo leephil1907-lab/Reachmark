@@ -93,5 +93,7 @@ form.onsubmit=async e=>{
     location.href='/dashboard';
   }catch(err){msg.textContent=err.message;msg.style.display='block';btn.disabled=false;btn.textContent=T_('au.c_signin_btn','signin');}
 };
+(function(){const q=new URLSearchParams(location.search).get('oauth');if(!q)return;const m={invalid:T_('au.o_invalid','expired'),denied:T_('au.o_denied','cancelled'),error:T_('au.o_error','no response'),noemail:T_('au.o_noemail','no email')};msg.textContent=m[q]||q;msg.style.display='block';})();
+(async()=>{try{const r=await fetch('/api/auth/oauth');if(!r.ok)return;const j=await r.json();const on=(j.providers||[]).filter(p=>p.configured);if(!on.length)return;const w=document.getElementById('oauth-btns');w.style.display='grid';w.innerHTML=on.map(p=>`<a href="/api/auth/oauth/${p.id}?mode=signin" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:1px solid #dfe8cc;border-radius:12px;background:#fff;color:#0f1a0a;font:700 13px 'Manrope',sans-serif;text-decoration:none"><span style="width:22px;height:22px;border-radius:50%;background:#0f1a0a;color:#d5f268;display:inline-flex;align-items:center;justify-content:center;font-size:11px">${p.id==='google'?'G':'M'}</span>${p.id==='google'?T_('au.o_google','Continue with Google'):T_('au.o_ms','Continue with Microsoft')}</a>`).join('');}catch(e){}})();
 </script>
 </body></html>

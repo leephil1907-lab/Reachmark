@@ -294,3 +294,30 @@ class OAuthTests(NetworkBase):
         r = self.client.get('/api/auth/oauth/google/callback?state=nope&code=x')
         self.assertEqual(r.status_code, 302)
         self.assertIn('/signin?oauth=invalid', r.headers['Location'])
+
+    def test_redirect_uri_forces_https_for_public_hosts(self):
+        from web.oauth import _redirect_uri
+        with module.app.test_request_context('/', base_url='http://example.com'):
+            uri = _redirect_uri('google')
+        self.assertEqual(uri, 'https://example.com/api/auth/oauth/google/callback')
+
+    def test_redirect_uri_keeps_http_for_localhost(self):
+        from web.oauth import _redirect_uri
+        with module.app.test_request_context('/', base_url='http://localhost:5000'):
+            uri = _redirect_uri('google')
+        self.assertEqual(uri, 'http://localhost:5000/api/auth/oauth/google/callback')
+
+    def test_signup_page_has_chooser_and_oauth_mount(self):
+        r = self.client.get('/signup')
+        self.assertEqual(r.status_code, 200)
+        body = r.data.decode()
+        for marker in ('id="who-team"', 'id="who-me"', 'id="oauth-wrap"', 'whoPick(',
+                       'Who will be using Reachmark?'):
+            self.assertIn(marker, body)
+
+    def test_signin_page_has_oauth_mount_and_logic(self):
+        r = self.client.get('/signin')
+        self.assertEqual(r.status_code, 200)
+        body = r.data.decode()
+        for marker in ('id="oauth-btns"', 'URLSearchParams', '/api/auth/oauth'):
+            self.assertIn(marker, body)

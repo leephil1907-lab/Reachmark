@@ -61,6 +61,14 @@ button[type=submit]:disabled{opacity:.6;cursor:not-allowed;transform:none}
     <div class="top"><div class="eyebrow">{{ t('au.s_f_eyebrow') }}</div><h2>{{ t('au.s_f_h') }}</h2><p class="lead">{{ t('au.s_lead') }}</p></div>{% include 'locale-switcher.html' %}
     <div id="msg" role="alert" class="auth-error"></div>
     <div id="verify-hint" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:12px;border-radius:10px;color:#2d4a0a;font:600 12px 'Manrope',sans-serif;margin-top:14px">{{ t('au.s_v1') }} <a href="#" onclick="requestVerify(event)" style="color:#1a3310">{{ t('au.s_resend') }}</a></div>
+    <div class="who" style="margin:16px 0 4px"><p style="font:700 12px 'Manrope',sans-serif;color:#0f1a0a;margin:0 0 8px">{{ t('au.o_who') }}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button type="button" id="who-team" onclick="whoPick('team')" style="text-align:left;padding:12px 14px;border:2px solid #dfe8cc;border-radius:12px;background:#fcfcf8;cursor:pointer"><b style="font:700 13px 'Manrope',sans-serif;color:#0f1a0a">▦ {{ t('au.o_team') }}</b><br><small style="color:#6b7a5a">{{ t('au.o_team_d') }}</small></button>
+        <button type="button" id="who-me" onclick="whoPick('me')" style="text-align:left;padding:12px 14px;border:2px solid #7a9a3a;border-radius:12px;background:#f4fae6;cursor:pointer"><b style="font:700 13px 'Manrope',sans-serif;color:#0f1a0a">◍ {{ t('au.o_me') }}</b><br><small style="color:#6b7a5a">{{ t('au.o_me_d') }}</small></button>
+      </div>
+      <div id="who-team-go" style="display:none;margin-top:10px;padding:12px 14px;border-radius:12px;background:#0f1a0a;color:#eaf3de;font:600 12px 'Manrope',sans-serif"><a href="/login" style="color:#d5f268;font-weight:700">{{ t('au.o_goto') }} →</a></div>
+    </div>
+    <div id="oauth-wrap" style="display:none;margin-top:14px"><div style="display:flex;align-items:center;gap:10px;color:#8c9c77;font:600 11px 'Manrope',sans-serif"><span style="flex:1;height:1px;background:#e5ebd5"></span>{{ t('au.o_or') }}<span style="flex:1;height:1px;background:#e5ebd5"></span></div><div id="oauth-btns" style="display:grid;gap:8px;margin-top:10px"></div></div>
     <form id="signup-form" novalidate>
       <label for="name">{{ t('au.s_name') }}</label>
       <input id="name" name="name" maxlength="120" placeholder="Ada Lovelace" autocomplete="name">

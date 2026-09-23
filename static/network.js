@@ -131,8 +131,7 @@ async function nwScan(){const evs=await api('/api/events').catch(()=>({events:[]
 nwBody(`<div class="card"><h3>${T_('nw.w_scan','Scan')}</h3>
 <label>${T_('nw.w_up','Upload card photo')}<input type="file" id="scan-file" accept="image/jpeg,image/png,image/webp"/></label>
 <label>${T_('nw.w_events','Events')}<select id="scan-ev">${evs.events.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select></label>
-<div id="scan-out"></div></div>
-<script>null<\/script>`);
+<div id="scan-out"></div></div>`);
 document.getElementById('scan-file').onchange=async e=>{const f=e.target.files[0];if(!f)return;
 const form=new FormData();form.append('photo',f);
 try{const r=await api('/api/scans','POST',form);

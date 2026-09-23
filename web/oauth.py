@@ -44,7 +44,13 @@ def configured(p):
 
 
 def _redirect_uri(provider):
-    return request.url_root.rstrip('/') + f'/api/auth/oauth/{provider}/callback'
+    root = request.url_root.rstrip('/')
+    host = (urllib.parse.urlparse(root).hostname or '').lower()
+    local = host in ('localhost', '127.0.0.1', '::1') or host.startswith(('10.', '192.168.')) or host.endswith('.localhost')
+    if root.startswith('http://') and not local:
+        # Some proxies swallow X-Forwarded-Proto; never hand Google an http URI for a public host.
+        root = 'https://' + root[len('http://'):]
+    return root + f'/api/auth/oauth/{provider}/callback'
 
 
 def _http_json(url, data=None, headers=None, timeout=8):
