@@ -83,6 +83,18 @@ SHOWCASE = {
                         '/static/concept/food/offer-cakes.jpg'],
              'craft': '/static/concept/food/craft-baker.jpg',
              'strip': '/static/concept/food/case-pastries.jpg'},
+    'beauty': {'hero': '/static/concept/beauty/hero.jpg',
+               'offers': ['/static/concept/beauty/offer-1.jpg',
+                          '/static/concept/beauty/offer-2.jpg',
+                          '/static/concept/beauty/offer-3.jpg'],
+               'craft': '/static/concept/beauty/craft.jpg',
+               'strip': '/static/concept/beauty/strip.jpg'},
+    # Health craft/strip land with the next shoot; the template guards
+    # missing slots, so partial showcases still render complete pages.
+    'health': {'hero': '/static/concept/health/hero.jpg',
+               'offers': ['/static/concept/health/offer-1.jpg',
+                          '/static/concept/health/offer-2.jpg',
+                          '/static/concept/health/offer-3.jpg']},
 }
 SERIF_HINTS = ('serif', 'georgia', 'times', 'garamond', 'playfair', 'merriweather',
                'lora', 'cormorant', 'bodoni', 'didot', 'fraunces', 'dm serif')

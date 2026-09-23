@@ -175,3 +175,39 @@ class PreviewBrandTests(CrewBase):
                        '/static/concept/food/hero-oven.jpg', 'hero-split',
                        'Concept photography', 'Be found first'):
             self.assertIn(needle, body)
+
+
+class ShowcaseTests(CrewBase):
+    def _mklead(self, lid, token, name, category, city):
+        with module.db() as c:
+            c.execute('INSERT OR REPLACE INTO leads(id,source_key,name,category,city,phone,email,address,stage,token,created,updated) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',
+                      (lid, lid, name, category, city, '+1 555 010 0200', 'hi@example.test',
+                       '9 Main St', 'New', token, module.now(), module.now()))
+
+    def test_wired_showcase_files_exist_on_disk(self):
+        from web.concept import SHOWCASE
+        root = os.path.join(os.path.dirname(module.__file__), '..')
+        for arch, slots in SHOWCASE.items():
+            urls = [slots.get(k, '') for k in ('hero', 'craft', 'strip')]
+            urls.extend(slots.get('offers', []))
+            for url in urls:
+                if url:
+                    self.assertTrue(os.path.isfile(os.path.join(root, url.lstrip('/'))),
+                                    f'{arch}: {url}')
+
+    def test_beauty_preview_full_showcase(self):
+        self._mklead('scb1', 'sctok_b', 'Velvet & Vine', 'Hair Salon', 'Portland')
+        body = self.client.get('/preview/sctok_b').data.decode()
+        for needle in ('hero-split', '/static/concept/beauty/hero.jpg',
+                       'beauty/offer-1.jpg', 'craft-photo rv', 'strip-banner rv',
+                       'Book a chair', 'pays for itself', '--accent:#f0a3c4'):
+            self.assertIn(needle, body)
+
+    def test_health_partial_showcase_degrades_cleanly(self):
+        self._mklead('sch1', 'sctok_h', 'Clearwater Dental', 'Dental Clinic', 'Bristol')
+        body = self.client.get('/preview/sctok_h').data.decode()
+        for needle in ('hero-split', '/static/concept/health/hero.jpg',
+                       'health/offer-2.jpg', 'Request a visit', 'pays for itself'):
+            self.assertIn(needle, body)
+        for absent in ('strip-banner rv', 'craft-photo rv', '<img class="mini"'):
+            self.assertNotIn(absent, body)
