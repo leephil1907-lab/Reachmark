@@ -94,7 +94,9 @@ class PreviewPageTests(CrewBase):
 class ThemeTests(CrewBase):
     def test_food_trade_palette_is_not_studio_lime(self):
         theme = build_theme('food', {})
-        self.assertEqual(theme['colors']['accent'], '#f2a45c')
+        self.assertEqual(theme['colors']['accent'], '#b3541e')
+        self.assertEqual(theme['colors']['bg'], '#faf4e9')
+        self.assertIn('hero-oven.jpg', theme['showcase']['hero'])
         self.assertNotIn('#d5f268', ' '.join(v for v in theme['colors'].values()
                                              if isinstance(v, str)))
         self.assertEqual(theme['archetype'], 'food')
@@ -166,6 +168,10 @@ class PreviewBrandTests(CrewBase):
     def test_preview_without_brand_uses_trade_palette(self):
         self._mklead()
         body = self.client.get('/preview/pvtoken1').data.decode()
-        self.assertIn('--accent:#f2a45c', body)
+        self.assertIn('--accent:#b3541e', body)
         self.assertNotIn('id="gallery"', body)
         self.assertIn('Order ahead', body)
+        for needle in ('Fresh from the oven', 'pays for itself',
+                       '/static/concept/food/hero-oven.jpg', 'hero-split',
+                       'Concept photography', 'Be found first'):
+            self.assertIn(needle, body)
