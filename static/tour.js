@@ -82,7 +82,7 @@
     });
     show(0);
   }
-  function startIfNew() { if (!seen()) start(); }
+  function startIfNew() { if (!seen() && !location.hash) start(); }  // deep links win: the tour must not steal them
   window.startTour = start;
   window.startTourIfNew = startIfNew;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startIfNew);

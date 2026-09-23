@@ -35,6 +35,7 @@ def main():
     os.environ['SMTP_HOST'] = ''
     os.environ['SMTP_FROM'] = ''
     os.environ.pop('DASHBOARD_PASSWORD', None)
+    os.environ['ALLOW_CREW_DEMO'] = '1'  # smoke proves the loop on fixtures, never the network
     os.chdir(ROOT)
 
     import web.app as application
@@ -109,7 +110,7 @@ def main():
     check('review page renders', page.status_code == 200, f'{len(page.data)} bytes')
     check('page says it is not the official website', b'not the official website' in page.data)
     check('page asks the one question', b'Would you like this built' in page.data)
-    check('receptionist widget is on the page', b'Ask the studio' in page.data)
+    check('single tawk bubble on the page', b'embed.tawk.to' in page.data and b'Ask the studio' not in page.data)
     check('unknown token 404s', client.get('/r/not-a-real-token').status_code == 404)
     answered = client.post(f'/api/r/{token}/respond',
                            json={'choice': 'want', 'name': 'Demo Owner', 'email': 'owner@example.test',

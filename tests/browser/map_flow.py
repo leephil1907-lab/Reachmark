@@ -15,7 +15,7 @@ with tempfile.TemporaryDirectory() as temp:
         with patch('web.maps.query_overpass',return_value={'elements':[{'type':'node','id':999,'lat':6.52,'lon':3.32,'tags':{'name':'Disposable map fixture','shop':'bakery'}}]}),sync_playwright() as p:
             b=p.chromium.launch();page=b.new_page(viewport={'width':1440,'height':1100});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.on('dialog',lambda d:d.accept())
             page.route('https://tile.openstreetmap.org/**',lambda route:route.abort())
-            page.goto(base+'/#global');page.locator('#world-map.leaflet-container').wait_for()
+            page.goto(base+'/workspace#global');page.locator('#world-map.leaflet-container').wait_for()
             page.locator('#map-search').fill('6.52, 3.32');page.locator('#map-search-btn').click();page.locator('#map-category').select_option('Bakery');page.locator('#map-start').click()
             expect(page.locator('#map-records')).to_contain_text('1 mapped',timeout=15000)
             assert '1 mapped' in page.locator('#map-records').inner_text()
