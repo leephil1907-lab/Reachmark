@@ -63,6 +63,16 @@ RULES = [
     (r'^/api/documents/(invoice|brief|proposal)(/|$)', 'free'),
     (r'^/api/documents/audit', 'starter'),
     (r'^/api/state$', 'free'),
+    (r'^/api/cards(/|$)', 'free'),
+    (r'^/api/qr', 'free'),
+    (r'^/api/events(/|$)', 'starter'),
+    (r'^/api/scans(/|$)', 'starter'),
+    (r'^/api/leads/[^/]+/followup$', 'pro'),
+    (r'^/api/booking(/|$)', 'starter'),
+    (r'^/api/book(/|$)', 'free'),
+    (r'^/api/bookings(/|$)', 'starter'),
+    (r'^/api/webhooks(/|$)', 'pro'),
+    (r'^/api/auth/oauth', 'free'),
 ]
 
 

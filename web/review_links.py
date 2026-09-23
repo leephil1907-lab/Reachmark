@@ -252,6 +252,17 @@ def register_review_links(app, db, now, log, settings):
         except ValueError as exc:
             return jsonify(error=str(exc)), 400
         log('review', f"Review link answered: {response['label']}")
+        try:
+            from web.network import dispatch
+            with db() as c:
+                lead = c.execute('SELECT owner_user_id FROM leads WHERE id=?',
+                                 (link.get('lead_id'),)).fetchone()
+            dispatch(db, now, log, (lead['owner_user_id'] if lead else None) or 'owner',
+                     'response.received',
+                     {'link_id': link.get('id'), 'choice': response['choice'],
+                      'label': response['label']})
+        except Exception:
+            pass
         return jsonify(ok=True, response=response), 201
 
     @app.post('/api/r/<token>/seen')

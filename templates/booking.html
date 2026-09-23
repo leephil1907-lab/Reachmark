@@ -1,0 +1,83 @@
+<!DOCTYPE html><html lang="{{ locale }}"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>{{ t('nw.b_k') }} — {{ studio }}</title>
+<meta name="description" content="{{ t('nw.b_pick', s=studio) }}"/>
+<meta name="robots" content="noindex,nofollow,noarchive"/><meta name="theme-color" content="#20251F"/>
+<link rel="manifest" href="/static/manifest.webmanifest"/><link rel="icon" href="/static/icon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"/>
+<link rel="stylesheet" href="/static/fonts.css"/>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Manrope,Arial,sans-serif;background:#eef6d1;color:#1a2315;min-height:100vh;display:grid;place-items:center;padding:24px}
+.shell{width:min(620px,100%);background:#fff;border:1px solid #e2e7d6;border-radius:24px;padding:36px 32px}
+.brand img{height:30px}.eyebrow{margin-top:14px;font-size:9px;letter-spacing:2px;color:#8c9c77}
+h1{font-size:28px;letter-spacing:-1px;margin:8px 0 6px}.lead{font-size:13px;color:#6b7a5a;margin:0 0 18px}
+.day{margin:16px 0 8px;font-weight:700;font-size:12px}.slots{display:flex;flex-wrap:wrap;gap:8px}
+.slot{padding:9px 14px;border-radius:10px;border:1px solid #dfe8cc;background:#fcfcf8;font:700 12px Manrope,Arial,sans-serif;cursor:pointer}
+.slot.sel{background:#0f1a0a;color:#d5f268;border-color:#0f1a0a}
+label{display:block;font-weight:700;font-size:11px;margin:16px 0 6px}
+input,textarea{width:100%;padding:12px 14px;border:1px solid #dfe8cc;border-radius:12px;font:500 14px Manrope,Arial,sans-serif}
+button.send{width:100%;margin-top:18px;padding:14px;background:#0f1a0a;color:#eaf3de;border:0;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer}
+#msg{margin-top:12px;font-size:12px;font-weight:700}.hp{position:absolute;left:-9999px}
+.done{background:#eef6d1;border:1px solid #d8e9b8;border-radius:12px;padding:14px;margin-top:14px;font-size:13px;display:none}
+</style>
+</head><body>
+<main class="shell">
+  <a class="brand" href="/" aria-label="{{ studio }}"><img src="/static/logo-primary.svg" alt="{{ studio }}"/></a>
+  <div class="eyebrow">{{ t('nw.b_k') }}</div>
+  <h1>{{ studio }}</h1>
+  <p class="lead">{{ t('nw.b_pick', s=studio) }}</p>
+  {% if slots %}
+  <div id="slot-list">
+    {% set ns = namespace(day='') %}
+    {% for s in slots %}
+      {% set d = s.start[:10] %}
+      {% if d != ns.day %}{% set ns.day = d %}<div class="day">{{ d }}</div><div class="slots">{% endif %}
+      <button type="button" class="slot" data-slot="{{ s.start }}">{{ s.start[11:] }}–{{ s.end[11:] }}</button>
+      {% if loop.last or slots[loop.index].start[:10] != d %}</div>{% endif %}
+    {% endfor %}
+  </div>
+  <form id="book-form">
+    <p class="small" style="font-size:12px;color:#6b7a5a">{{ t('nw.b_slot') }}: <b id="slot-pick">—</b></p>
+    <label>{{ t('nw.b_name') }}<input name="name" required maxlength="120" autocomplete="name"/></label>
+    <label>{{ t('nw.b_email') }}<input name="email" type="email" required maxlength="250" autocomplete="email"/></label>
+    <label>{{ t('nw.b_note') }}<textarea name="note" rows="3" maxlength="1000"></textarea></label>
+    <input type="text" name="company_url" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>
+    <button class="send" type="submit">{{ t('nw.b_send') }}</button>
+  </form>
+  <div id="msg" role="status"></div>
+  <div class="done" id="done"><span id="done-text"></span><br/><a id="ics-link" href="#">{{ t('nw.b_ics') }}</a></div>
+  {% else %}
+  <p>{{ t('nw.b_none') }}</p>
+  {% endif %}
+  <div style="margin-top:14px">{% include 'locale-switcher.html' %}</div>
+</main>
+{% if slots %}
+<script src="/static/i18n.js" defer></script>
+<script>
+(function(){
+var pick=null,msg=document.getElementById('msg'),label=document.getElementById('slot-pick');
+document.querySelectorAll('.slot').forEach(function(b){
+  b.onclick=function(){
+    document.querySelectorAll('.slot').forEach(function(x){x.classList.remove('sel')});
+    b.classList.add('sel');pick=b.dataset.slot;label.textContent=pick.replace('T',' ');
+  };
+});
+document.getElementById('book-form').onsubmit=function(e){
+  e.preventDefault();msg.textContent='';
+  if(!pick){return}
+  var f=e.target;
+  fetch('/api/book/{{ token }}',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({slot_start:pick,name:f.name.value,email:f.email.value,note:f.note.value,company_url:f.company_url.value})})
+  .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j}})})
+  .then(function(x){
+    if(!x.ok){msg.textContent=x.j.error||'Error';return}
+    document.getElementById('done-text').textContent={{ t('nw.b_ok')|tojson }};
+    document.getElementById('ics-link').href=x.j.ics;
+    document.getElementById('done').style.display='block';f.style.display='none';
+  }).catch(function(){msg.textContent='Error'});
+};
+})();
+</script>
+{% endif %}
+{% include 'tawkto.html' %}
+</body></html>

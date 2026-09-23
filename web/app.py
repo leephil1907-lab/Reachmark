@@ -624,6 +624,8 @@ from web.console import register_console
 register_console(app, db, now, log)
 from web.crypto import register_crypto
 register_crypto(app, db, now, log)
+from web.network import register_network
+register_network(app, db, now, log, settings)
 
 
 # Client reviews — leave a review for good job done

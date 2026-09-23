@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="{{ locale }}"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>{{ card.name }} — {{ studio }}</title>
+<meta name="description" content="{{ t('nw.c_sub') }}: {{ card.name }}{% if card.org %}, {{ card.org }}{% endif %}"/>
+<meta name="robots" content="noindex,nofollow,noarchive"/><meta name="theme-color" content="#20251F"/>
+<link rel="manifest" href="/static/manifest.webmanifest"/><link rel="icon" href="/static/icon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"/>
+<link rel="stylesheet" href="/static/fonts.css"/>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Manrope,Arial,sans-serif;min-height:100vh;display:grid;place-items:center;padding:24px}
+.theme-charcoal{background:#161a15;color:#F5F5EF}.theme-paper{background:#f6f4ee;color:#1a2315}.theme-lime{background:#d5f268;color:#0f1a0a}
+.card{width:min(440px,100%);border-radius:24px;padding:36px 32px;text-align:center;border:1px solid rgba(128,128,128,.25)}
+.theme-charcoal .card{background:#20251F}.theme-paper .card{background:#fff}.theme-lime .card{background:#0f1a0a;color:#F5F5EF}
+.brand img{height:30px}.eyebrow{margin-top:16px;font-size:9px;letter-spacing:2px;opacity:.7}
+h1{font-size:30px;letter-spacing:-1px;margin:10px 0 4px}.role{font-size:13px;opacity:.75;margin:0 0 20px}
+.actions{display:grid;gap:10px;margin:20px 0}.btn{display:block;padding:13px;border-radius:12px;font-weight:700;font-size:13px;text-decoration:none;border:1px solid currentColor;color:inherit;background:transparent;cursor:pointer;width:100%}
+.btn.primary{background:#d5f268;color:#0f1a0a;border-color:#d5f268}.theme-lime .btn.primary{background:#0f1a0a;color:#d5f268;border-color:#0f1a0a}
+.links{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0}
+.links a{font-size:12px;padding:7px 12px;border-radius:20px;border:1px solid currentColor;text-decoration:none;color:inherit}
+.qr{margin:20px auto 6px;background:#fff;padding:14px;border-radius:16px;display:inline-block}
+.qr img{width:180px;height:180px;display:block}.qr small{display:block;color:#1a2315;font-size:10px;margin-top:8px}
+.row{display:flex;gap:10px;margin-top:14px}.row .btn{flex:1}
+.via{margin-top:18px;font-size:11px;opacity:.65}#msg{min-height:20px;font-size:12px;font-weight:700;margin-top:10px}
+.switch{margin-top:14px}
+</style>
+</head><body class="theme-{{ card.theme or 'charcoal' }}">
+<main class="card">
+  <a class="brand" href="/" aria-label="{{ studio }}"><img src="{% if card.theme == 'paper' %}/static/logo-primary.svg{% else %}/static/logo-inverse.svg{% endif %}" alt="{{ studio }}"/></a>
+  <div class="eyebrow">{{ t('nw.c_sub') }}</div>
+  <h1>{{ card.name }}</h1>
+  <p class="role">{% if card.role %}{{ card.role }}{% endif %}{% if card.role and card.org %} · {% endif %}{% if card.org %}{{ card.org }}{% endif %}</p>
+  <div class="actions">
+    {% if card.phone %}<a class="btn primary" href="tel:{{ card.phone|replace(' ','') }}">{{ t('nw.c_call') }}: {{ card.phone }}</a>{% endif %}
+    {% if card.email %}<a class="btn" href="mailto:{{ card.email }}">{{ t('nw.c_mail') }}: {{ card.email }}</a>{% endif %}
+    {% if card.website %}<a class="btn" href="{{ card.website }}" rel="noopener">{{ t('nw.c_site') }} ↗</a>{% endif %}
+  </div>
+  {% if card.links %}<div class="links">{% for link in card.links %}<a href="{{ link.url }}" rel="noopener">{{ link.label }} ↗</a>{% endfor %}</div>{% endif %}
+  {% if book_url %}<a class="btn primary" href="{{ book_url }}">{{ t('nw.c_book') }}</a>{% endif %}
+  <div class="qr"><img src="/api/qr.png?u=/c/{{ card.token }}" alt="QR"/><small>{{ t('nw.c_qr') }}</small></div>
+  <div class="row">
+    <a class="btn" href="/c/{{ card.token }}.vcf" download>{{ t('nw.c_vcf') }}</a>
+    <button class="btn" type="button" id="share-btn">{{ t('nw.c_share') }}</button>
+  </div>
+  <div class="row"><button class="btn" type="button" id="nfc-btn">{{ t('nw.c_nfc') }}</button></div>
+  <div id="msg" role="status"></div>
+  <div class="via">{{ t('nw.c_via', s=studio) }}</div>
+  <div class="switch">{% include 'locale-switcher.html' %}</div>
+</main>
+<script src="/static/i18n.js" defer></script>
+<script>
+(function(){
+var msg=document.getElementById('msg');
+var link=location.origin+'/c/{{ card.token }}';
+document.getElementById('share-btn').onclick=function(){
+  if(navigator.share){navigator.share({title:document.title,url:link}).catch(function(){});return}
+  (navigator.clipboard?navigator.clipboard.writeText(link):Promise.reject()).then(function(){
+    msg.textContent={{ t('nw.c_copied')|tojson }};
+  },function(){window.prompt(link,link)});
+};
+document.getElementById('nfc-btn').onclick=function(){
+  if(!('NDEFReader' in window)){msg.textContent={{ t('nw.c_nfc_no')|tojson }};return}
+  var w=new NDEFReader();
+  w.write({records:[{recordType:'url',data:link}]}).then(function(){
+    msg.textContent={{ t('nw.c_nfc_ok')|tojson }};
+  }).catch(function(){msg.textContent={{ t('nw.c_nfc_no')|tojson }});
+};
+})();
+</script>
+{% include 'tawkto.html' %}
+</body></html>

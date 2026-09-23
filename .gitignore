@@ -12,3 +12,4 @@ checks/
 backups/
 *.pem
 *.key
+uploads/
