@@ -29,6 +29,7 @@ class PWAAndManifestTests(unittest.TestCase):
         self.assertIn('standalone', manifest['display_override'])
         self.assertFalse(manifest['prefer_related_applications'],
                          'installability requires prefer_related_applications to be false')
+        self.assertEqual(manifest['launch_handler'], {'client_mode': 'focus-existing'})
 
     def test_icons_include_a_maskable_and_match_their_declared_size(self):
         from PIL import Image
@@ -212,5 +213,19 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
         body=self.client.get('/receptionist').get_data(as_text=True)
         self.assertIn('rm-receptionist-launch',body)
         self.assertNotIn('embed.tawk.to',body)
+
+class PublicPathsWithAuthConfiguredTests(unittest.TestCase):
+    """With a dashboard password set (like the live box), public pages stay public."""
+    setUp=test_app.ProspectTests.setUp
+    tearDown=test_app.ProspectTests.tearDown
+    def test_public_surface_needs_no_login(self):
+        with patch.dict(os.environ,{'DASHBOARD_PASSWORD':'live-box-password'}):
+            for path in ('/','/about','/offline','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/api/frontdesk/status','/robots.txt','/sitemap.xml'):
+                self.assertEqual(self.client.get(path).status_code,200,path)
+            self.assertEqual(self.client.get('/workspace').status_code,302)
+            self.assertEqual(self.client.get('/api/state').status_code,401)
+    def test_marketing_pages_register_the_service_worker(self):
+        for path in ('/','/showcase','/enquire','/receptionist'):
+            self.assertIn('/static/pwa.js',self.client.get(path).get_data(as_text=True),path)
 
 if __name__=='__main__':unittest.main()

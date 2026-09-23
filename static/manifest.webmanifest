@@ -7,6 +7,7 @@
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui", "browser"],
+  "launch_handler": {"client_mode": "focus-existing"},
   "orientation": "any",
   "background_color": "#f5f5ef",
   "theme_color": "#20251f",

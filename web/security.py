@@ -21,11 +21,11 @@ def install_security(app, db):
     with db() as c:c.execute('CREATE TABLE IF NOT EXISTS login_attempts(client TEXT PRIMARY KEY,failures INTEGER,blocked_until REAL)')
     def public():
         p=request.path
-        if p in ('/','/login','/healthz','/about','/robots.txt','/sitemap.xml','/showcase','/enquire','/signup','/signin','/client-login','/forgot','/reset','/verify'): return True
+        if p in ('/','/login','/healthz','/about','/offline','/robots.txt','/sitemap.xml','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/signup','/signin','/client-login','/forgot','/reset','/verify'): return True
         if p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/','/verify/','/reset/','/forgot')): return True
         # Quick review links a business is invited to answer, and the public AI receptionist.
         if p.startswith(('/r/','/api/r/')): return True
-        if p in ('/api/receptionist/message','/api/receptionist/offer-review-link'): return True
+        if p in ('/api/receptionist/message','/api/receptionist/offer-review-link','/api/frontdesk/status'): return True
         if p.startswith(('/api/auth/verify','/api/auth/forgot','/api/auth/reset','/api/auth/request-verification','/api/deploy-check')): return True
         return p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/')) or (p=='/api/enquiries' and request.method=='POST') or (p in ('/api/auth/signup','/api/auth/login') and request.method=='POST') or (p=='/api/auth/me' and request.method=='GET')
     def csrf():
