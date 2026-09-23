@@ -28,6 +28,7 @@ concept → ask one question → follow up when they answer → never send anyth
 
 | Agent | Job |
 |---|---|
+| ★ Chief | Takes the owner's plain-word orders on the AI-crew page and delegates to the team. Reads and reports only. |
 | ◎ Scout | Finds real businesses (OpenStreetMap / CSV), reads ≤3 public pages each. |
 | ⌁ Auditor | Records measured website facts + a ranked list of observed gaps, each with its source. |
 | ◨ Builder | Composes the concept page and issues the unguessable quick review link `/r/<token>`. |

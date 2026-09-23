@@ -10,7 +10,14 @@
       "upstream_version": "2.11.1 (plugin.json)",
       "vendored_commit": "5b2c0007766c6a1cf1d53fd8fc73e979e0821022",
       "vendored_commit_date": "2026-09-04",
-      "skills": ["cold-email", "copywriting", "cro", "prospecting", "ai-seo", "seo-audit"],
+      "skills": [
+        "cold-email",
+        "copywriting",
+        "cro",
+        "prospecting",
+        "ai-seo",
+        "seo-audit"
+      ],
       "modifications": "none — SKILL.md and references/*.md copied verbatim; evals/ omitted to keep the image small"
     },
     {
@@ -20,8 +27,20 @@
       "license_file": "licenses/brag-LICENSE.txt",
       "vendored_commit": "57ce4c9bb912f01a0078b154318bf67c5cbf780f",
       "vendored_commit_date": "2026-09-21",
-      "skills": ["brag"],
+      "skills": [
+        "brag"
+      ],
       "modifications": "none — SKILL.md copied verbatim; music/sfx/render assets omitted (rendering stays an external step)"
+    },
+    {
+      "repo": "first-party — written for the Reachmark crew",
+      "author": "Reachmark Studio",
+      "license": "same as the project",
+      "license_file": "",
+      "skills": [
+        "chief"
+      ],
+      "modifications": "n/a — original doctrine, not vendored"
     }
   ]
 }

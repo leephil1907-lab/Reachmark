@@ -65,6 +65,14 @@
     </div>
   </div>
 
+  <div class="card crew-chief">
+    <div class="section-top"><h3>★ {{ t('ws.cc_h') }}</h3><span class="badge" id="chief-badge">{{ t('ws.n_crew') }}</span></div>
+    <p class="small muted">{{ t('ws.cc_p') }}</p>
+    <div class="chief-chips" id="chief-chips"><button type="button" data-cmd="status">status</button><button type="button" data-cmd="leads">leads</button><button type="button" data-cmd="showcase">showcase</button><button type="button" data-cmd="help">help</button></div>
+    <div class="chief-log" id="chief-log" aria-live="polite"></div>
+    <form id="chief-form" class="chief-form"><input id="chief-input" maxlength="2000" autocomplete="off" placeholder="{{ t('ws.cc_ph') }}" aria-label="{{ t('ws.cc_h') }}"><button class="primary" type="submit">{{ t('ws.cc_send') }}</button></form>
+  </div>
+
   <div class="card crew-agents">
     <div class="section-top"><h3>{{ t('ws.cr_team') }}</h3><span class="badge" id="crew-agent-count"></span></div>
     <div class="crew-agent-grid" id="crew-agent-grid"></div>

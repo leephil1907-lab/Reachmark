@@ -203,11 +203,27 @@ class ShowcaseTests(CrewBase):
                        'Book a chair', 'pays for itself', '--accent:#f0a3c4'):
             self.assertIn(needle, body)
 
-    def test_health_partial_showcase_degrades_cleanly(self):
+    def test_health_preview_full_showcase(self):
         self._mklead('sch1', 'sctok_h', 'Clearwater Dental', 'Dental Clinic', 'Bristol')
         body = self.client.get('/preview/sctok_h').data.decode()
         for needle in ('hero-split', '/static/concept/health/hero.jpg',
-                       'health/offer-2.jpg', 'Request a visit', 'pays for itself'):
+                       'health/offer-2.jpg', 'craft-photo rv', 'strip-banner rv',
+                       'Request a visit', 'pays for itself', '--accent:#63d6c3'):
             self.assertIn(needle, body)
-        for absent in ('strip-banner rv', 'craft-photo rv', '<img class="mini"'):
+
+    def test_home_preview_full_showcase(self):
+        self._mklead('schm1', 'sctok_m', 'Truefix Plumbing', 'Plumber', 'Manchester')
+        body = self.client.get('/preview/sctok_m').data.decode()
+        for needle in ('hero-split', '/static/concept/home/hero.jpg',
+                       'home/offer-3.jpg', 'craft-photo rv', 'strip-banner rv',
+                       'Get a quote', '--accent:#e8b04b'):
+            self.assertIn(needle, body)
+
+    def test_stay_teaser_falls_back_to_tilt_cards(self):
+        self._mklead('scs1', 'sctok_s', 'The Lantern House', 'Boutique Hotel', 'Lisbon')
+        body = self.client.get('/preview/scs1'.replace('scs1', 'sctok_s')).data.decode()
+        self.assertIn('hero-split', body)
+        self.assertIn('/static/concept/stay/hero.jpg', body)
+        self.assertIn('Check availability', body)
+        for absent in ('strip-banner rv', 'craft-photo rv', 'class="ocards"'):
             self.assertNotIn(absent, body)

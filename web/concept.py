@@ -89,12 +89,22 @@ SHOWCASE = {
                           '/static/concept/beauty/offer-3.jpg'],
                'craft': '/static/concept/beauty/craft.jpg',
                'strip': '/static/concept/beauty/strip.jpg'},
-    # Health craft/strip land with the next shoot; the template guards
-    # missing slots, so partial showcases still render complete pages.
     'health': {'hero': '/static/concept/health/hero.jpg',
                'offers': ['/static/concept/health/offer-1.jpg',
                           '/static/concept/health/offer-2.jpg',
-                          '/static/concept/health/offer-3.jpg']},
+                          '/static/concept/health/offer-3.jpg'],
+               'craft': '/static/concept/health/craft.jpg',
+               'strip': '/static/concept/health/strip.jpg'},
+    'home': {'hero': '/static/concept/home/hero.jpg',
+             'offers': ['/static/concept/home/offer-1.jpg',
+                        '/static/concept/home/offer-2.jpg',
+                        '/static/concept/home/offer-3.jpg'],
+             'craft': '/static/concept/home/craft.jpg',
+             'strip': '/static/concept/home/strip.jpg'},
+    # Stay teaser: hero + first offer. The template guards missing slots,
+    # so partial showcases still render complete pages.
+    'stay': {'hero': '/static/concept/stay/hero.jpg',
+             'offers': ['/static/concept/stay/offer-1.jpg']},
 }
 SERIF_HINTS = ('serif', 'georgia', 'times', 'garamond', 'playfair', 'merriweather',
                'lora', 'cormorant', 'bodoni', 'didot', 'fraunces', 'dm serif')

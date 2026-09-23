@@ -77,3 +77,15 @@
 .crew-transcript .assistant b{color:#42502f}
 .crew-demo-note{font-size:12px;color:#7a5c12;background:#fffbe6;border:1px solid #f0e0a0;border-radius:10px;padding:9px 11px;margin-top:10px}
 @media(max-width:900px){.crew-hero{grid-template-columns:1fr}.crew-two{grid-template-columns:1fr}}
+
+.chief-chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.chief-chips button{border:1px solid #d5dcc4;background:#f4f7ea;border-radius:99px;padding:6px 14px;font:700 12px Manrope,Arial,sans-serif;color:#3c4732;cursor:pointer}
+.chief-chips button:hover{border-color:#7aa53a;color:#1a2315}
+.chief-log{display:flex;flex-direction:column;gap:10px;max-height:340px;overflow-y:auto;padding:4px 2px 12px}
+.chief-msg{max-width:88%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.chief-user{align-self:flex-end;background:#1a2315;color:#f2f5ea;border-bottom-right-radius:4px}
+.chief-chief{align-self:flex-start;background:#eef3df;color:#1a2315;border-bottom-left-radius:4px}
+.chief-chief a{color:#3c6e00;font-weight:700;overflow-wrap:anywhere}
+.chief-thinking{opacity:.6;font-style:italic}
+.chief-form{display:flex;gap:10px;margin-top:4px}
+.chief-form input{flex:1;min-width:0;padding:12px 14px;border:1px solid #d5dcc4;border-radius:12px;font:600 14px Manrope,Arial,sans-serif;background:#fbfdf4;color:#1a2315}

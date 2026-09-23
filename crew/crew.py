@@ -24,6 +24,19 @@ from crew import business as brand_brain
 # --------------------------------------------------------------------------- #
 AGENTS = [
     {
+        'id': 'chief', 'name': 'Chief', 'symbol': '★', 'tier': 'Command',
+        'role': 'Crew chief — takes your orders in plain words',
+        'mission': 'Sit on the AI-crew page, understand directives like “audit Sunrise Bakery”, '
+                   'and delegate to Scout, Auditor and Builder — then report back with receipts.',
+        'tools': ['Directives: status · leads · audit · brand · concept · gaps · showcase',
+                  'Local-model freeform (Ollama) with a rule-based fallback'],
+        'skills': ['chief'], 'handler': 'agents.agent_chief:run',
+        'inputs': ['plain words in the crew chat'],
+        'outputs': ['answers with source receipts', 'audit + brand + concept reports'],
+        'guardrails': ['Reads and reports only — never sends e-mail, SMS or shares',
+                       'Audits stay bounded, robots-aware and labelled as observed'],
+    },
+    {
         'id': 'scout', 'name': 'Scout', 'symbol': '◎', 'tier': 'Prospects',
         'role': 'Lead gathering & web research',
         'mission': 'Find real businesses from public sources, and read the public pages they publish '
@@ -635,6 +648,22 @@ def register_crew(app, db, now, log, settings, add_lead=None, categories=None):
                 'caps': f"{LIMITS['max_dispatches']} dispatches per run · 1 message per business per day",
                 'suppression': 'Opt-outs are checked on every dispatch and kept after a lead is deleted.',
             })
+
+    @app.post('/api/crew/chat')
+    def crew_chat():
+        from agents.agent_chief import answer
+        guard = owner_only()
+        if guard:
+            return guard
+        body = request.get_json(silent=True) or {}
+        message = str(body.get('message', ''))[:2000].strip()
+        if not message:
+            return jsonify(error='Say something first — try “status”.'), 400
+        try:
+            base = (settings().get('public_base_url') or '').rstrip('/') or request.host_url.rstrip('/')
+        except Exception:
+            base = request.host_url.rstrip('/')
+        return jsonify(reply=answer(db, now, message, base_url=base))
 
     @app.post('/api/crew/run')
     def crew_start():

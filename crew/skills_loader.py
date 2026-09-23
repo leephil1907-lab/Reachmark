@@ -24,6 +24,7 @@ PLAYBOOKS = {
     'ai-seo': {'use': 'making the studio findable in AI answers', 'agents': ['brag', 'scribe']},
     'seo-audit': {'use': 'measured on-page observations for the builder', 'agents': ['auditor', 'builder']},
     'brag': {'use': 'launch-kit plan, tone presets, share copy', 'agents': ['brag']},
+    'chief': {'use': 'plain-word directives, delegation, receipts', 'agents': ['chief']},
 }
 
 

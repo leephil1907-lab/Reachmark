@@ -10,7 +10,7 @@
     { page: 'leads', sel: '#page-leads .directory', title: T_('wsj.t_t2','Lead directory'), body: T_('wsj.t_b2','Search, filter and sort saved businesses. Click a row to open its workspace.') },
     { page: 'global', sel: '#page-global .global-grid', title: T_('wsj.t_t3','Global finder'), body: T_('wsj.t_b3','Discover real businesses from OpenStreetMap, one bounded job at a time.') },
     { page: 'health', sel: '#page-health .card', title: T_('wsj.t_t4','Website health'), body: T_('wsj.t_b4','Evidence-first URL checks. A failure is never called a dead site.') },
-    { page: 'crew', sel: '#page-crew', title: T_('wsj.t_t5','AI crew'), body: T_('wsj.t_b5','Scout, verify, concept, outreach — seven agents, and you approve every send.') },
+    { page: 'crew', sel: '#page-crew', title: T_('wsj.t_t5','AI crew'), body: T_('wsj.t_b5','Scout, verify, concept, outreach — eight agents, and you approve every send.') },
     { page: 'settings', sel: '#page-settings .settings-grid', title: T_('wsj.t_t6','Sender profile'), body: T_('wsj.t_b6','Put your name behind outreach before the crew talks to anyone.') }
   ];
   var index = 0;
