@@ -44,7 +44,7 @@ class WorkspaceHooksTests(CrewBase):
         page = self.client.get('/workspace')
         self.assertEqual(page.status_code, 200)
         body = page.data.decode('utf-8')
-        self.assertEqual(body.count('data-countup'), 7, 'every metric animates')
+        self.assertEqual(body.count('data-countup'), 8, 'every metric animates')
         self.assertIn('id="activity-heatmap"', body)
         self.assertIn('id="tour-btn"', body)
         self.assertIn('/static/tour.js', body)

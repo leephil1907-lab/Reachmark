@@ -8,7 +8,7 @@
 .crew-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:12px}
 .crew-stat{background:#fff;border:1px solid #e4e7d8;border-radius:14px;padding:13px 15px}
 .crew-stat b{display:block;font:800 22px 'Manrope','DM Sans',sans-serif;letter-spacing:-.6px}
-.crew-stat span{font:600 10.5px 'Manrope','DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#7b866c}
+.crew-stat span{font:600 10.5px 'Manrope','DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#6c765f}
 .crew-guardrails{background:#20251F;border-radius:16px;padding:16px 18px;color:#dbe4cb;font-size:12.5px;line-height:1.7}
 .crew-guardrails b{color:#D5F268;display:block;font:700 11px 'Manrope','DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
 .crew-guardrails p{margin:0 0 8px}
@@ -28,7 +28,7 @@
 .crew-step.failed,.crew-step.blocked{border-color:#e0a1a1}
 .crew-step.awaiting_approval{border-color:#e8c65a}
 .crew-step b{font:700 12.5px 'Manrope','DM Sans',sans-serif}
-.crew-step small{color:#7b866c;display:block}
+.crew-step small{color:#6c765f;display:block}
 .crew-step .crew-receipt{margin:6px 0 0;padding:0;list-style:none}
 .crew-step .crew-receipt li{font-size:11.5px;color:#5c6752;border-top:1px dashed #eef1e4;padding:5px 0}
 .crew-step .crew-receipt li b{color:#42502f;font-weight:600}
@@ -39,7 +39,7 @@
 .crew-agent .tag{display:inline-block;font:700 9.5px 'Manrope',sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#42502f;background:#EDF3E1;border-radius:999px;padding:4px 9px;margin-bottom:9px}
 .crew-agent h4{margin:0 0 6px;font:700 15px 'Manrope','DM Sans',sans-serif}
 .crew-agent p{margin:0 0 9px;font-size:12.5px;color:#5c6752;line-height:1.6}
-.crew-agent ul{margin:0;padding-left:16px;font-size:11.5px;color:#6d7761}
+.crew-agent ul{margin:0;padding-left:16px;font-size:11.5px;color:#6b755f}
 .crew-agent ul li{margin:3px 0}
 .crew-approval{border:1px solid #e4e7d8;border-radius:16px;padding:16px;margin:12px 0;background:#fff}
 .crew-approval header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
@@ -51,7 +51,7 @@
 .crew-row:first-child{border-top:0}
 .crew-row .grow{flex:1;min-width:0}
 .crew-row b{display:block;font:600 13px 'Manrope','DM Sans',sans-serif}
-.crew-row small{color:#7b866c;display:block;overflow-wrap:anywhere}
+.crew-row small{color:#6c765f;display:block;overflow-wrap:anywhere}
 .crew-row .pill{font:700 10px 'Manrope',sans-serif;text-transform:uppercase;letter-spacing:.06em;border-radius:999px;padding:4px 9px;background:#EDF3E1;color:#42502f;white-space:nowrap}
 .crew-row .pill.amber{background:#fff3d6;color:#7a5c12}
 .crew-row .pill.red{background:#fdeceb;color:#8a3226}
@@ -63,11 +63,11 @@
 .crew-skill-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px;margin-top:12px}
 .crew-skill{border:1px solid #e4e7d8;border-radius:13px;padding:12px 13px;background:#fbfcf7}
 .crew-skill b{display:block;font:700 13px 'Manrope','DM Sans',sans-serif}
-.crew-skill small{color:#7b866c;font-size:11px}
+.crew-skill small{color:#6c765f;font-size:11px}
 .crew-skill p{margin:7px 0 0;font-size:11.5px;color:#5c6752}
 .crew-event{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-top:1px solid #f0f2e8;font-size:12px}
 .crew-event:first-child{border-top:0}
-.crew-event time{color:#9aa48c;font-size:11px;white-space:nowrap}
+.crew-event time{color:#6c7362;font-size:11px;white-space:nowrap}
 .crew-event .who{font:700 11px 'Manrope',sans-serif;color:#42502f;white-space:nowrap}
 .crew-event.warn .msg{color:#7a5c12}
 .crew-event.error .msg{color:#8a3226}
