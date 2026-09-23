@@ -113,6 +113,38 @@ def headers(r):
     if request.path.startswith(('/api/','/preview/','/unsubscribe/','/workspace','/dashboard')): r.headers['X-Robots-Tag']='noindex, nofollow'; r.headers['Cache-Control']='no-store'
     r.headers['X-Content-Type-Options']='nosniff'; r.headers['Referrer-Policy']='strict-origin-when-cross-origin'
     return r
+
+ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-3894582071697384').strip()
+ADSENSE_PATHS = {'/', '/about', '/showcase', '/enquire', '/receptionist'}
+
+@app.after_request
+def adsense_tags(response):
+    """Serve the AdSense loader + account meta on public marketing pages.
+
+    Injected at serve time so templates -- including about.html, which must stay
+    byte-identical -- are never touched. Workspace, APIs, review links and the ad
+    recording stage are excluded.
+    """
+    try:
+        if not ADSENSE_CLIENT or request.path not in ADSENSE_PATHS:
+            return response
+        if 'text/html' not in response.headers.get('Content-Type', ''):
+            return response
+        body = response.get_data(as_text=True)
+        if 'googlesyndication.com/pagead/js/adsbygoogle.js' in body:
+            return response
+        tags = ('\n<meta name="google-adsense-account" content="' + ADSENSE_CLIENT + '">'
+                '\n<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='
+                + ADSENSE_CLIENT + '" crossorigin="anonymous"></script>')
+        updated, count = re.subn(r'(<head[^>]*>)', r'\g<1>' + tags, body, count=1)
+        if not count:
+            return response
+        response.set_data(updated)
+        if 'Content-Length' in response.headers:
+            response.headers['Content-Length'] = str(len(response.get_data()))
+    except Exception:
+        pass
+    return response
 @app.errorhandler(413)
 def too_big(e): return jsonify(error='File too large. Limit: 3 MB.'),413
 @app.route('/')
@@ -156,6 +188,10 @@ def client_dashboard():
 def healthz():
     with db() as c: c.execute('SELECT id FROM leads LIMIT 1').fetchone()
     return jsonify(status='ok',release=os.getenv('RELEASE_SHA','local'))
+
+@app.route('/ads.txt')
+def ads_txt():
+    return Response('google.com, %s, DIRECT, f08c47fec0942fa0\n' % ADSENSE_CLIENT, mimetype='text/plain')
 @app.route('/about')
 def about():
     base=settings()['public_base_url'].rstrip('/')

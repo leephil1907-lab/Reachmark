@@ -12,8 +12,8 @@ The engine is already created and enhanced; it lives across:
 This file re-exports the precise script so you have a single Finder.py to call.
 
 Usage:
-  python scripts/finder.py --location "Lagos, Nigeria" --category "Café" --check
-  python scripts/finder.py --global "Lagos, Nigeria|Accra, Ghana" --category "Clinic" --check
+  python scripts/finder.py --location "Austin, United States" --category "Café" --check
+  python scripts/finder.py --global "Austin, United States|Lisbon, Portugal" --category "Clinic" --check
 """
 
 import os, sys, json
@@ -54,7 +54,7 @@ PRECISE FISHING SCRIPT — how Finder.py fishes exactly your business across the
    -> returns lat/lon + display_name; 1.1s throttle, LRU 128
 2. Build bounded Overpass query (precise, never broad):
    [out:json][timeout:40]; nwr(around:15000,lat,lon)[\"{key}\"=\"{value}\"][\"name\"]; out center tags 80;
-   e.g. Lagos Café -> nwr(around:15000,6.524,3.379)[\"amenity\"=\"cafe\"][\"name\"]; 
+   e.g. Austin Café -> nwr(around:15000,30.267,-97.743)[\"amenity\"=\"cafe\"][\"name\"]; 
    -> fishes only named businesses with that exact OSM tag within 15km
 3. Execute via map_provider.query_overpass — single read-only POST to https://overpass.private.coffee + fallback https://maps.mail.ru
    -> serialized, 2s gap, 8MB cap, rate-limit respecting, no retry around limits
@@ -91,8 +91,8 @@ def fish(location: str, category: str, check_websites: bool = False):
 if __name__ == '__main__':
     import argparse
     p = argparse.ArgumentParser(description='Reachmark Finder — fish clients that match your business')
-    p.add_argument('--location', help='Single location, e.g. \"Lagos, Nigeria\"')
-    p.add_argument('--global', dest='glb', help='Pipe-separated global locations, e.g. \"Lagos, Nigeria|Accra, Ghana|Lisbon, Portugal\"')
+    p.add_argument('--location', help='Single location, e.g. \"Austin, United States\"')
+    p.add_argument('--global', dest='glb', help='Pipe-separated global locations, e.g. \"Austin, United States|Lisbon, Portugal|Accra, Ghana\"')
     p.add_argument('--category', required=True, help='Business category, e.g. Café, Clinic, Lawyer')
     p.add_argument('--check', action='store_true', help='Also scan website account level (audit)')
     args = p.parse_args()

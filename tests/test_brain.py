@@ -78,9 +78,9 @@ class BrainFactsTests(unittest.TestCase):
         self.assertLessEqual(owners, set(crew_module.AGENTS_BY_ID) | {'studio'})
 
     def test_review_ask_is_personal_and_optional(self):
-        ask = business.review_ask('Amara', 'Amara Cuts site')
-        self.assertIn('Amara', ask['subject'])
-        self.assertIn('Amara Cuts site', ask['body'])
+        ask = business.review_ask('Maya', 'Maya Cuts site')
+        self.assertIn('Maya', ask['subject'])
+        self.assertIn('Maya Cuts site', ask['body'])
         self.assertIn('only if', ask['body'].lower())
 
 

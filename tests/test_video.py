@@ -153,5 +153,68 @@ class AdStageRouteTests(unittest.TestCase):
         self.assertIn(b'class="wide"', self.client.get(f"/ads/{link['token']}?fmt=wide").data)
 
 
+class AdStoryTests(unittest.TestCase):
+    """Sample ads may reword the acts — never the facts."""
+
+    STORY = {'problem_body': 'Every order starts in a chat message.',
+             'process_body': 'We studied the business and drafted one page.',
+             'solution_title': 'The styles, the prices, the booking — one page',
+             'solution_body': 'A website that fits the business.',
+             'spoken': 'Test Bakery. A long sample line with Test Studio and room to spare.',
+             'spoken_short': 'Test Bakery. A short sample line, Test Studio.'}
+
+    def script(self, **kwargs):
+        concept = dict(CONCEPT, story=self.STORY)
+        return agent_video.build_script(LEAD, concept, {'token': 't', 'views': 0},
+                                        {'agency': 'Test Studio'}, **kwargs)
+
+    def test_story_rewords_the_acts(self):
+        script = self.script()
+        self.assertEqual(script['beats'][0]['body'], self.STORY['problem_body'])
+        self.assertEqual(script['beats'][1]['body'], self.STORY['process_body'])
+        self.assertEqual(script['beats'][2]['title'], self.STORY['solution_title'])
+        self.assertEqual(script['spoken'], self.STORY['spoken'])
+        self.assertEqual(agent_video.narration(script), self.STORY['spoken_short'])
+
+    def test_story_never_adds_facts_or_moves_the_ask(self):
+        script = self.script()
+        facts = [f for beat in script['beats'] for f in beat['facts']]
+        for value in facts:
+            self.assertTrue(value in ('No website listed in the public listing', 'Demo City',
+                                      'bakery & cafés', 'No charge', 'Nothing published under their name',
+                                      'Reply STOP ends contact'), f'invented fact: {value}')
+        self.assertEqual(script['beats'][-1]['title'], 'Would you like this built?')
+
+    def test_beats_scale_to_the_cut_and_stay_contiguous(self):
+        script = self.script(seconds=40)
+        beats = script['beats']
+        self.assertEqual(len(beats), 4)
+        self.assertEqual(beats[0]['at'], 0.6)
+        self.assertEqual(beats[-1]['until'], 36.8)
+        for first, second in zip(beats, beats[1:]):
+            self.assertEqual(first['until'], second['at'])
+
+    def test_default_timing_matches_the_classic_cut(self):
+        beats = agent_video.build_script(LEAD, CONCEPT, {'token': 't'}, {})['beats']
+        self.assertEqual(beats[-1]['until'], 14.8)
+
+
+class AdStageActsTests(unittest.TestCase):
+    setUp = test_app.ProspectTests.setUp
+    tearDown = test_app.ProspectTests.tearDown
+
+    def test_stage_opens_on_the_case_and_closes_on_the_brand(self):
+        with module.db() as c:
+            c.execute("INSERT INTO leads(id,source_key,name,category,city,token,created,updated) "
+                      "VALUES('L1','k1','Test Bakery','Bakery','Demo City','tok1',?,?)",
+                      (module.now(), module.now()))
+        link = create_link(module.db, module.now, dict(LEAD, token='tok1'), CONCEPT, 'share')
+        body = self.client.get('/ads/' + link['token']).data.decode('utf-8')
+        self.assertIn('id="case"', body)
+        self.assertIn('Needs a website', body)
+        self.assertIn('logo-inverse.svg', body)
+        self.assertIn('No charge', body)
+
+
 if __name__ == '__main__':
     unittest.main()

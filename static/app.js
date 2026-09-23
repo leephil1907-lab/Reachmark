@@ -110,7 +110,7 @@ refresh = async function(){
   return res;
 };
 
-function chooseWorldMix(){const regions=[['Lagos, Nigeria','Accra, Ghana','Nairobi, Kenya'],['London, United Kingdom','Lisbon, Portugal','Berlin, Germany'],['Toronto, Canada','Austin, United States','Vancouver, Canada'],['São Paulo, Brazil','Bogotá, Colombia','Lima, Peru'],['Tokyo, Japan','Mumbai, India','Singapore'],['Sydney, Australia','Auckland, New Zealand','Perth, Australia']];$('#global-locations').value=regions.map(r=>r[Math.floor(Math.random()*r.length)]).join('\n');toast('Six search locations selected across regions. These are search seeds, not business results.');}
+function chooseWorldMix(){const regions=[['Cairo, Egypt','Accra, Ghana','Nairobi, Kenya'],['London, United Kingdom','Lisbon, Portugal','Berlin, Germany'],['Toronto, Canada','Austin, United States','Vancouver, Canada'],['São Paulo, Brazil','Bogotá, Colombia','Lima, Peru'],['Tokyo, Japan','Mumbai, India','Singapore'],['Sydney, Australia','Auckland, New Zealand','Perth, Australia']];$('#global-locations').value=regions.map(r=>r[Math.floor(Math.random()*r.length)]).join('\n');toast('Six search locations selected across regions. These are search seeds, not business results.');}
 
 // --- Theme + Sidebar fixes (simplify + expand) ---
 (function(){

@@ -84,6 +84,28 @@ body.tall .cap p{font-size:14px}
 #end .brand{margin-top:26px;font:700 14px 'Manrope',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#e6f0d6}
 #end .small{margin-top:10px;font-size:12px;color:#7f8d70}
 
+
+/* the case file: act one covers the window with the business and its problem,
+   then lifts to reveal the real concept page underneath */
+#case{position:absolute;top:34px;left:0;right:0;bottom:0;z-index:4;display:grid;place-items:center;
+  background:linear-gradient(165deg,#20281c,#131810);transition:opacity .8s ease,visibility .8s;overflow:hidden}
+body.tall #case{top:30px}
+#case.off{opacity:0;visibility:hidden}
+#case .case-card{text-align:center;max-width:min(640px,82%);animation:casein 1s ease both}
+@keyframes casein{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.case-kicker{font:700 12px 'Manrope',sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#93a381}
+#case h1{font:650 clamp(28px,4.6vw,64px)/1.05 'Manrope',sans-serif;letter-spacing:-.03em;margin:14px 0 10px}
+.case-sub{color:#c9d5b8;font-size:15px;margin:0}
+#case ul{list-style:none;margin:20px auto 0;padding:0;display:grid;gap:10px;max-width:52ch;text-align:left}
+#case li{background:rgba(213,242,104,.08);border:1px solid #3a4433;border-radius:12px;padding:10px 16px 10px 44px;
+  font-size:14px;color:#e6eecf;position:relative}
+#case li::before{content:'\2715';position:absolute;left:16px;color:#e08a7e;font-weight:700}
+.case-stamp{display:inline-block;margin-top:22px;border:2px solid #D5F268;color:#D5F268;border-radius:10px;
+  font:700 13px 'Manrope',sans-serif;letter-spacing:.18em;text-transform:uppercase;padding:10px 20px;transform:rotate(-2deg)}
+/* closing brand row */
+#end .logo{width:min(150px,34vw);height:auto;display:block;margin:0 auto}
+#end .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+#end .chips span{border:1px solid #3a4433;background:#242c20;border-radius:999px;padding:6px 14px;font-size:12px;color:#d9e5c6}
 @keyframes in{to{opacity:1}}
 @media (prefers-reduced-motion: reduce){.chip,.disclaimer,#window,#band{animation:none;opacity:1}}
 </style>
@@ -98,6 +120,13 @@ body.tall .cap p{font-size:14px}
   <div id="window">
     <div id="chrome"><i></i><i></i><i></i><span class="url">{{ business }} — concept page · {{ studio }}</span></div>
     <div id="mask"><iframe id="frame" title="Concept page" scrolling="no" src="/r/{{ token }}"></iframe></div>
+    <div id="case"><div class="case-card">
+      <div class="case-kicker">{{ category }} · {{ place }}</div>
+      <h1>{{ business }}</h1>
+      <p class="case-sub">What a customer finds today</p>
+      <ul>{% for f in problem_facts %}<li>{{ f }}</li>{% endfor %}</ul>
+      <div class="case-stamp">Needs a website</div>
+    </div></div>
   </div>
 
   <div id="band">
@@ -118,7 +147,9 @@ body.tall .cap p{font-size:14px}
   <span class="tag">One question, one tap</span>
   <h1>{{ business }} — <i>would you like this built?</i></h1>
   <p>{{ end_note }}</p>
+  <img class="logo" src="/static/logo-inverse.svg" alt="{{ studio }} logo">
   <div class="brand">{{ studio }}</div>
+  <div class="chips">{% for f in closing_facts %}<span>{{ f }}</span>{% endfor %}</div>
   <div class="small">Concept first. Ask second. Build when they say yes.</div>
 </div></div>
 
@@ -132,7 +163,11 @@ body.tall .cap p{font-size:14px}
   var caps = [].slice.call(document.querySelectorAll('.cap'));
   var end = document.getElementById('end');
   var doc = null, mode = 'pause', travel = 0, aimAt = 0;
-  var panFrom = 0.8, panTo = Math.max(4, seconds * 0.62);
+  var caseEl = document.getElementById('case');
+  var actTwoAt = caps.length > 1 ? Number(caps[1].dataset.at || 6) : 6;
+  /* The camera holds on the case file through act one, then pans the real page. */
+  var askAt = caps.length > 3 ? Number(caps[3].dataset.at || 0) : 0;
+  var panFrom = actTwoAt + 0.4, panTo = Math.max(actTwoAt + 3, askAt || seconds * 0.62);
 
   /* Camera, in order of fidelity:
      'natural' — the page keeps its own viewport-sized layout and scrolls itself, the way a
@@ -148,7 +183,8 @@ body.tall .cap p{font-size:14px}
          itself is untouched and still ships the widget. */
       if (!doc.__adClean) {
         var style = doc.createElement('style');
-        style.textContent = '#rm-receptionist-launch,#rm-receptionist{display:none!important}';
+        style.textContent = '#rm-receptionist-launch,#rm-receptionist{display:none!important}' +
+          '[data-reveal].will-reveal{opacity:1!important;transform:none!important;transition:none!important}';
         (doc.head || doc.documentElement).appendChild(style);
         doc.__adClean = true;
       }
@@ -214,6 +250,7 @@ body.tall .cap p{font-size:14px}
       var at = Number(caps[i].dataset.at || 0), until = Number(caps[i].dataset.until || 0);
       if (t >= at && t < until) { show(i); }
     }
+    if (caseEl && t >= actTwoAt) { caseEl.classList.add('off'); }
     if (t >= seconds - 3.2) { end.classList.add('on'); }
     if (t >= seconds) { if (!done) { done = true; window.__adDone = true; document.title = 'ad-done'; } return; }
     requestAnimationFrame(tick);

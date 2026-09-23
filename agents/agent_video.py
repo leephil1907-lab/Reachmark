@@ -83,13 +83,18 @@ def lead_for(db, link):
     return dict(row) if row else {}
 
 
-def build_script(lead, concept, link, settings=None):
+def build_script(lead, concept, link, settings=None, seconds=None):
     """Return the caption beats and the spoken script for one concept.
 
     Facts come from the lead record and the measured audit only. If a value was never
     measured it is not mentioned — the beat shortens instead of inventing.
+
+    ``seconds`` scales the four acts to the cut: problem, process, solution, ask.
+    A concept may carry a ``story`` dict that rewords the acts (used for sample ads);
+    the facts stay record-only either way.
     """
     settings = settings or {}
+    story = concept.get('story') or {}
     studio = _clean(settings.get('agency') or STUDIO['name'], 40)
     name = _clean(lead.get('name') or 'this business', 60)
     place = _clean(lead.get('city') or '', 40)
@@ -103,39 +108,49 @@ def build_script(lead, concept, link, settings=None):
     else:
         find_line = 'Right now there is nothing of their own for a customer to land on.'
 
+    length = float(seconds or 18)
+    close_at = max(6.0, length - 3.2)
+    marks = [0.6]
+    for weight in (0.30, 0.27, 0.20):
+        marks.append(round(marks[-1] + (close_at - 0.6) * weight, 1))
+    marks.append(round(close_at, 1))
+
     beats = [
-        {'at': 0.6, 'until': 6.0, 'kicker': 'The situation',
-         'title': f"{name}: what a customer finds today",
-         'body': find_line,
-         'facts': [f for f in (facts or [('No website listed in the public listing',)])[:2]]},
-        {'at': 6.0, 'until': 12.0, 'kicker': 'What we did instead of asking',
-         'title': 'An independent concept, built from public details only',
-         'body': 'One page, about a minute to read, ending in a single question.',
+        {'at': marks[0], 'until': marks[1], 'kicker': 'Act one · The problem',
+         'title': story.get('problem_title') or f'{name}: what a customer finds today',
+         'body': story.get('problem_body') or find_line,
+         'facts': facts or ['No website listed in the public listing']},
+        {'at': marks[1], 'until': marks[2], 'kicker': 'Act two · The process',
+         'title': story.get('process_title') or 'Researched, drafted, sent with one question',
+         'body': story.get('process_body') or
+                 'We read the public listing, drafted a one-page concept from those details, and sent it to the business.',
          'facts': [f for f in (place, concept.get('family_label') or '') if f]},
-        {'at': 12.0, 'until': 18.0, 'kicker': 'The ask',
+        {'at': marks[2], 'until': marks[3], 'kicker': 'Act three · The solution',
+         'title': story.get('solution_title') or 'A website that fits',
+         'body': story.get('solution_body') or
+                 'One page from their own public details — about a minute to read, ending in a single question.',
+         'facts': []},
+        {'at': marks[3], 'until': marks[4], 'kicker': 'The ask',
          'title': 'Would you like this built?',
          'body': 'Three answers: yes, not right now, or “we already have a website”. A no ends it.',
          'facts': ['No charge', 'Nothing published under their name', 'Reply STOP ends contact']},
     ]
     views = int(link.get('views') or 0)
     watched = (f"It has been opened {views} time{'s' if views != 1 else ''} so far. "
-               if views else "It has just gone out to them. ")
+               if views else 'It has just gone out to them. ')
     spoken = (
-        f"{name}. {find_line} So instead of pitching, we built an independent concept page "
-        "from the details already public — about a minute to read, and one question at the end. "
-        f"{watched}{studio} answers either way: concept first, ask second."
+        f'{name}. {find_line} We read the public listing and drafted a one-page concept '
+        f'from those details. {watched}{studio} answers either way: concept first, ask second.'
     )
-    # A short narration for the 16-second cut: same facts, fewer words, no rush.
     spoken_short = (
-        f"{name}. {find_line} So instead of pitching them, we built a concept page from the "
-        "details already public. One question at the end: would you like this built? "
-        f"{studio} — concept first, ask second."
+        f'{name}. {find_line} We drafted a concept page from the details already public. '
+        f'One question at the end: would you like this built? {studio} — concept first, ask second.'
     )
     return {
         'studio': studio, 'business': name, 'place': place,
         'beats': beats,
-        'spoken': _clean(spoken, 900),
-        'spoken_short': _clean(spoken_short, 500),
+        'spoken': _clean(story.get('spoken') or spoken, 1200),
+        'spoken_short': _clean(story.get('spoken_short') or spoken_short, 900),
         'end_note': f'Prepared by {studio} as an independent concept. No reviews, prices, hours or photographs were invented.',
     }
 
@@ -181,16 +196,21 @@ def _to_mp4(webm, out_path, fmt, voice=None):
     if voice and os.path.exists(voice):
         # 0.6 s of air before the first word: the opening beat lands before the voice does.
         # all=1 so the delay applies however many channels the narration has.
-        cmd += ['-c:a', 'aac', '-b:a', '128k', '-af', 'adelay=600:all=1', '-shortest']
+        cmd += ['-c:a', 'aac', '-b:a', '128k', '-af', 'adelay=600:all=1']
+        # An explicit stop, not -shortest: -shortest deadlocks against -r 30 + adelay
+        # on longer cuts (ffmpeg stalls mid-encode waiting on stream interleaving).
+        stop = _audio_seconds(voice)
+        if stop > 0:
+            cmd += ['-t', f'{stop + 1.2:.2f}']
     else:
         cmd += ['-an']
     cmd += [out_path]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
-        lines = [ln.strip() for ln in result.stderr.strip().splitlines()
-                 if ln.strip() and not ln.startswith('frame=')]
-        detail = (lines[-3:] or result.stderr.strip().splitlines()[-1:])[-1][:200]
-        raise RuntimeError(f'ffmpeg failed: {detail}')
+        tail = [ln.strip() for ln in result.stderr.strip().splitlines()
+                if ln.strip() and not ln.startswith(('frame=', '[libx264 @'))]
+        detail = ' | '.join(tail[-4:])[:400] or 'no ffmpeg output'
+        raise RuntimeError(f'ffmpeg failed (rc={result.returncode}): {detail}')
     return out_path
 
 
@@ -207,18 +227,22 @@ def render(concept, lead, link, settings, out_dir, formats=('wide', 'tall'), voi
                   'the renderer is not installed on this machine')
         raise RuntimeError(f'{reason}. Install with: {state["install"]}')
 
-    script = build_script(lead, concept, link, settings)
     os.makedirs(out_dir, exist_ok=True)
     made, started = {}, time.monotonic()
+    audio_len = _audio_seconds(voice) if voice else 0.0
+    wanted = [f for f in formats if f in FORMATS]
+    lengths = {}
+    for fmt in wanted:
+        length = int(seconds or DEFAULT_SECONDS.get(fmt, 18))
+        if audio_len:
+            # hold the closing card until the narration has finished
+            length = max(length, int(audio_len + 2.5))
+        lengths[fmt] = length
+    script = build_script(lead, concept, link, settings,
+                          seconds=max(lengths.values()) if lengths else None)
     with tempfile.TemporaryDirectory(prefix='reachmark-ad-') as tmp:
-        audio_len = _audio_seconds(voice) if voice else 0.0
-        for fmt in formats:
-            if fmt not in FORMATS:
-                continue
-            length = int(seconds or DEFAULT_SECONDS.get(fmt, 18))
-            if audio_len:
-                # hold the closing card until the narration has finished
-                length = max(length, int(audio_len + 2.5))
+        for fmt in wanted:
+            length = lengths[fmt]
             webm = _record(base_url, link['token'], fmt, length, os.path.join(tmp, fmt), script['beats'])
             name = f"{(lead.get('name') or 'concept').lower().replace(' ', '-')[:40]}-{fmt}.mp4"
             out = os.path.join(out_dir, re.sub(r'[^a-z0-9.-]+', '-', name))

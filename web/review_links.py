@@ -186,11 +186,15 @@ def register_review_links(app, db, now, log, settings):
         concept = link.get('concept') or {}
         from agents.agent_video import build_script, lead_for, DEFAULT_SECONDS
         lead = lead_for(db, link) or {'name': 'this business'}
-        script = build_script(lead, concept, link, settings())
         fmt = 'tall' if (request.args.get('fmt') or '').lower() in ('tall', 'portrait', '9:16') else 'wide'
         seconds = max(8, min(int(request.args.get('seconds') or DEFAULT_SECONDS.get(fmt, 18)), 60))
+        script = build_script(lead, concept, link, settings(), seconds=seconds)
         response = make_response(render_template('ad-stage.html', token=token, fmt=fmt,
                                                 business=script['business'], studio=script['studio'],
+                                                category=lead.get('category') or 'local business',
+                                                place=script['place'],
+                                                problem_facts=[str(f) for f in script['beats'][0]['facts']][:4],
+                                                closing_facts=script['beats'][-1]['facts'],
                                                 captions=script['beats'], end_note=script['end_note'],
                                                 seconds=seconds))
         response.headers['X-Robots-Tag'] = 'noindex, nofollow'
