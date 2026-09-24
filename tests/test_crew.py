@@ -267,8 +267,12 @@ class ReviewLinkTests(CrewBase):
                                                          'sections': [{'title': 'a', 'body': 'b'}]}, 'share')
         page = self.client.get('/r/' + link['token'])
         self.assertEqual(page.status_code, 200)
-        self.assertIn(b'Would you like this built', page.data)
+        # The website the business opens is a clean, finished one-page site for them:
+        # their name, their trade, and the honest "independent concept" strip \u2014 no
+        # question, no proposal. Those live in the branded e-mail that carries the link.
+        self.assertIn(b'Test Bakery', page.data)
         self.assertIn(b'not the official website', page.data)
+        self.assertNotIn(b'Would you like this built', page.data)
         self.assertEqual(get_link(module.db, token=link['token'])['views'], 1)
         record_view(module.db, module.now, link['token'], count=False)
         self.assertEqual(get_link(module.db, token=link['token'])['views'], 1, 'a returning tab must not inflate views')
@@ -487,7 +491,10 @@ class ResourceWiringTests(CrewBase):
         run = {'id': 'r-bad', 'params': {'limit': 5, 'lead_ids': ['BAD']}, 'agent': 'closer'}
         ctx = Ctx(run, {'db': module.db, 'now': module.now, 'log': module.log, 'settings': module.settings,
                         'deadline': time.monotonic() + 20})
-        result = agent_closer.run(ctx)
+        # The crew sends the branded proposal e-mail; force that build to fail so the
+        # saved (bad) draft is what would go out \u2014 and must be held back.
+        with patch('web.outreach_email.build_outreach_email_for', side_effect=RuntimeError('no branded build')):
+            result = agent_closer.run(ctx)
         self.assertEqual(result['data']['raised'], 0)
         self.assertTrue(any('held back' in r['detail'] for r in ctx.receipts),
                         [r['detail'] for r in ctx.receipts])
@@ -835,22 +842,40 @@ class ScribeFaultObservationTests(unittest.TestCase):
 
 
 class ReviewFaultsRenderTests(CrewBase):
-    def test_proposal_page_shows_the_measured_faults(self):
-        from agents.agent_builder import attach_site_faults, compose_concept
+    def test_branded_email_shows_the_measured_faults(self):
+        """The measured faults now live in the branded e-mail, not on the website.
+
+        The website the business opens is a clean, finished one-page site. The
+        proposal \u2014 including what we honestly measured on their current site \u2014 is
+        carried by the Reachmark-branded e-mail that holds the link.
+        """
+        from web.outreach_email import build_outreach_email
+        lead = {'id': 'LF', 'name': 'Faulty Bakes', 'category': 'Bakery', 'city': 'Demo'}
+        audit = {'created': '2026-09-22T10:00:00',
+                 'gaps': {'gaps': [{'key': 'missing_title', 'weight': 1,
+                                    'reason': 'No page title found.', 'source': 'Measured on page'}]}}
+        link = {'token': 'tokf'}
+        site = {'copy': {'tag': 'Fresh bakes daily', 'about': 'A neighbourhood bakery.'}}
+        settings = {'agency': 'Reachmark', 'sender_name': 'Lee',
+                    'reply_email': 'reachmarkofficial@gmail.com',
+                    'public_base_url': 'https://reachmark.example'}
+        email = build_outreach_email(lead, link, site, settings, audit=audit, locale='en')
+        self.assertIn('What we noticed on your current site', email['text'])
+        self.assertIn('No page title found.', email['text'])
+        self.assertIn('What we noticed on your current site', email['html'])
+        self.assertIn('No page title found.', email['html'])
+        self.assertIn('https://reachmark.example/r/tokf', email['html'])
+        self.assertIn('/r/tokf/answer/want', email['html'])
+        self.assertIn('logo-primary.png', email['html'])
+        # And the website itself stays clean \u2014 no faults, no question.
         with module.db() as c:
             c.execute("INSERT INTO leads(id,source_key,name,category,city,token,created,updated) VALUES('LF','kf','Faulty Bakes','Bakery','Demo','tokf',?,?)",
                       (module.now(), module.now()))
-        lead = {'id': 'LF', 'name': 'Faulty Bakes', 'category': 'Bakery', 'city': 'Demo'}
-        concept = attach_site_faults(compose_concept(lead, {}, 'Professional'),
-                                     {'created': '2026-09-22T10:00:00',
-                                      'gaps': {'gaps': [{'key': 'missing_title', 'weight': 1,
-                                                         'reason': 'No page title found.', 'source': 'Measured on page'}]}})
-        link = create_link(module.db, module.now, lead, concept, 'share')
-        page = self.client.get('/r/' + link['token'])
+        link_row = create_link(module.db, module.now, lead, {'theme': 'ember'}, 'share')
+        page = self.client.get('/r/' + link_row['token'])
         self.assertEqual(page.status_code, 200)
-        self.assertIn(b'What we noticed on your current site', page.data)
-        self.assertIn(b'No page title found.', page.data)
-        self.assertIn(b'Measured 2026-09-22', page.data)
+        self.assertNotIn(b'What we noticed on your current site', page.data)
+        self.assertNotIn(b'Would you like this built', page.data)
 
 
 if __name__ == '__main__':

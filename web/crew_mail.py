@@ -54,16 +54,34 @@ def preflight(db, now, lead, settings):
     return True, ''
 
 
-def queue_to_outbox(db, now, lead, subject, body, reason):
+def queue_to_outbox(db, now, lead, subject, body, reason, html=''):
     """SMTP is not configured: keep the message, say so plainly, never claim it was sent."""
     outbox_id = uuid.uuid4().hex
     with db() as c:
         has_outbox = c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='mail_outbox'").fetchone()
         if has_outbox:
             c.execute('INSERT INTO mail_outbox(id,to_email,subject,body,html,created,state) VALUES(?,?,?,?,?,?,?)',
-                      (outbox_id, lead.get('email', ''), subject[:200], body[:20000], '', now(),
+                      (outbox_id, lead.get('email', ''), subject[:200], body[:20000], (html or '')[:60000], now(),
                        'queued: ' + reason[:80]))
     return outbox_id
+
+
+def _branded(db, now, lead, settings, subject, body):
+    """Prefer the Reachmark-branded proposal e-mail for the crew's outbound message.
+
+    The business receives the same message the Outreach studio sends: the logo, the
+    write-up built from their own saved fields and measured audit, a button to open the
+    finished one-page website, and the single question with one-tap answers. Falls back
+    to the reviewed draft if the branded build is unavailable.
+    """
+    try:
+        from web.outreach_email import build_outreach_email_for
+        email = build_outreach_email_for(db, now, lead, settings)
+        if email.get('subject') and email.get('text'):
+            return email['subject'], email['text'], email.get('html', '')
+    except Exception:
+        pass
+    return subject, body, ''
 
 
 def send_email(db, now, log, lead, subject, body, settings, approval_id='', run_id=''):
@@ -72,11 +90,16 @@ def send_email(db, now, log, lead, subject, body, settings, approval_id='', run_
     if not ok:
         return {'ok': False, 'state': 'blocked', 'detail': reason}
     recipient = lead['email'].strip().lower()
+    subject, body, html = _branded(db, now, lead, settings, subject, body)
     if '\n' in subject or '\r' in subject or not subject.strip():
         return {'ok': False, 'state': 'blocked', 'detail': 'The subject line is empty or contains a line break.'}
 
     dispatch_id = uuid.uuid4().hex
-    full_body = body.rstrip() + '\n\n—\n' + _footer(settings, lead)
+    if html:
+        # The branded e-mail already carries the sender identity and the opt-out line.
+        full_body = body.rstrip()
+    else:
+        full_body = body.rstrip() + '\n\n—\n' + _footer(settings, lead)
     with db() as c:
         c.execute('BEGIN IMMEDIATE')
         c.execute('INSERT INTO crew_dispatch(id,run_id,lead_id,approval_id,channel,recipient,subject,body,state,detail,created,updated) '
@@ -88,7 +111,7 @@ def send_email(db, now, log, lead, subject, body, settings, approval_id='', run_
         c.execute('INSERT OR IGNORE INTO optout_links VALUES(?,?)', (lead.get('token') or uuid.uuid4().hex, recipient))
 
     if not smtp_ready():
-        outbox_id = queue_to_outbox(db, now, lead, subject, full_body, 'SMTP is not configured')
+        outbox_id = queue_to_outbox(db, now, lead, subject, full_body, 'SMTP is not configured', html)
         with db() as c:
             c.execute("UPDATE crew_dispatch SET state='queued',detail=?,updated=? WHERE id=?", ('Queued in the outbox — SMTP not configured.', now(), dispatch_id))
             c.execute("UPDATE sends SET state='failed',error='SMTP not configured' WHERE id=?", (send_id,))
@@ -103,6 +126,10 @@ def send_email(db, now, log, lead, subject, body, settings, approval_id='', run_
     message['Subject'] = subject
     message['Message-ID'] = f'<{send_id}@{os.environ["SMTP_FROM"].split("@")[-1]}>'
     message.set_content(full_body)
+    if html:
+        # The branded proposal e-mail: Reachmark logo, the write-up, the finished
+        # one-page website link, and the single question with one-tap answers.
+        message.add_alternative(html, subtype='html')
     try:
         port = int(os.getenv('SMTP_PORT', '587'))
         mode = os.getenv('SMTP_SECURITY', 'starttls')

@@ -1,118 +1,177 @@
-<!DOCTYPE html><html lang="{{ locale }}"><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>{% if lead.name %}A website concept for {{ lead.name }}{% else %}Website concept{% endif %} — {{ studio }}</title>
-<meta name="description" content="An independent website concept prepared by {{ studio }}, with one simple question at the end."/>
-<meta name="robots" content="noindex,nofollow,noarchive"/><meta name="theme-color" content="#20251F"/><link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180">
-<link rel="icon" href="/static/icon.svg" type="image/svg+xml"/>
-<link rel="stylesheet" href="/static/fonts.css"/><link rel="stylesheet" href="/static/review.css"/><link rel="stylesheet" href="/static/reveal.css"/>
-<meta name="csrf-token" content=""/>
-</head><body class="theme-{{ link.theme or 'charcoal' }}" data-token="{{ link.token }}">
+<!DOCTYPE html><html lang="{{ locale }}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% if lead.name %}{{ lead.name }}{% if lead.city %} — {{ lead.city }}{% endif %}{% else %}Website{% endif %}</title>
+<meta name="description" content="{{ site.copy.tag if site else '' }} {{ site.copy.about if site else '' }}">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="{{ site.theme.colors.bg if site else '#20251F' }}">
+<link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180">
+<link rel="stylesheet" href="/static/review-site.css">
+<style>:root{--bg:{{ site.theme.colors.bg if site else '#F5F5EF' }};--surface:{{ site.theme.colors.surface if site else '#EDEFE6' }};--card:{{ site.theme.colors.card if site else '#ffffff' }};--ink:{{ site.theme.colors.ink if site else '#20251F' }};--muted:{{ site.theme.colors.muted if site else '#4b5544' }};--faint:{{ site.theme.colors.faint if site else '#7b866c' }};--accent:{{ site.theme.colors.accent if site else '#20251F' }};--accent-ink:{{ site.theme.colors.accent_ink if site else '#fff8ef' }};--line:{{ site.theme.colors.line if site else 'rgba(32,37,31,.22)' }};--soft:{{ site.theme.colors.soft if site else '#EDEFE6' }}}
+.nav .brand .mark{display:inline-flex;align-items:center}.nav .brand .mark svg{height:34px;width:34px;display:block;border-radius:8px}</style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head><body class="vibe-{{ site.theme.colors.vibe if site else 'sans' }}" data-token="{{ link.token }}">
 
-<div class="bar">
-  <strong>{{ t('rv.bar') }}</strong>
-  <span>{{ t('rv.bar_p', s=studio, n=lead.name) }}</span>
-{% include 'locale-switcher.html' %}
-</div>
+<div class="concept"><b>{{ t('rv.bar') }}</b><br>{{ t('rv.bar_p', s=studio, n=lead.name) }}</div>
+<div id="progress" aria-hidden="true"></div>
 
-<header class="top review-aurora">
-  <div class="wrap top-inner">
-    <span class="brand">{{ lead.name }}<i>.</i></span>
-    <span class="chip">{{ lead.category or t('rv.cat') }}{% if lead.city %} · {{ lead.city }}{% endif %}</span>
-  </div>
+<header class="nav" id="nav">
+  <a class="brand" href="#top">{% if site and site.theme.logo %}<img src="{{ site.theme.logo }}" alt="{{ lead.name }} logo" onerror="this.remove()">{% elif site and site.brandmark %}<span class="mark">{{ site.brandmark|safe }}</span>{% endif %}{{ lead.name }}<i>.</i></a>
+  <nav class="links">
+    <a href="#about">{{ t('pc.about') }}</a>
+    <a href="#offers">{{ t('pc.offers_k') }}</a>
+    {% if site and site.images %}<a href="#gallery">{{ t('pc.gallery') }}</a>{% endif %}
+    <a href="#pays">{{ t('pc.pay_k') }}</a>
+    <a href="#contact">{{ t('pc.touch') }}</a>
+  </nav>
+  {% if lead.phone %}<a class="call mag" href="tel:{{ lead.phone|replace(' ','') }}">☎ {{ t('pc.call') }}</a>{% endif %}
 </header>
 
+{% if site and site.theme.showcase.hero %}
+<section class="hero hero-split" id="top">
+  <canvas id="stars" data-accent="{{ site.theme.colors.accent }}" data-ink="{{ site.theme.colors.ink }}" aria-hidden="true"></canvas>
+  <div class="orb orb-a"></div><div class="orb orb-b"></div>
+  <div class="hero-inner"><div class="split-grid"><div>
+    <div class="eyebrow rv">{{ lead.category or t('pc.cat') }}{% if lead.city %} · {{ lead.city }}{% endif %}</div>
+    <h1 class="rv rv-d1">{{ lead.name }}</h1>
+    <p class="tagline rv rv-d2">{{ site.copy.tag }}</p>
+    <p class="lede rv rv-d2">{{ site.copy.about }}</p>
+    <div class="ctas rv rv-d3">
+      {% if lead.phone %}<a class="btn btn-solid mag" href="tel:{{ lead.phone|replace(' ','') }}">☎ {{ t('pc.call') }}</a>{% endif %}
+      {% if wa %}<a class="btn btn-ghost mag" href="https://wa.me/{{ wa }}">✆ {{ t('pc.wa') }}</a>{% endif %}
+      {% if lead.email %}<a class="btn btn-ghost mag" href="mailto:{{ lead.email }}">✉ {{ t('pc.mail_cta') }}</a>{% endif %}
+      {% if not lead.phone and not lead.email %}<a class="btn btn-solid mag" href="#contact">{{ t('pc.cta') }} ↗</a>{% endif %}
+    </div>
+  </div><div class="hero-photo rv rv-d2 js-tilt"><img class="main" src="{{ site.theme.showcase.hero }}" alt="{{ lead.name }}">{% if site.theme.showcase.strip %}<img class="mini" src="{{ site.theme.showcase.strip }}" alt="">{% endif %}</div></div>
+  <div class="stats rv rv-d3"><div class="stat"><b><span data-count="24">0</span>/7</b><span>{{ t('pc.s1l') }}</span></div><div class="stat"><b><span data-count="100">0</span>%</b><span>{{ t('pc.s2l') }}</span></div><div class="stat"><b><span data-count="3">0</span></b><span>{{ t('pc.s3l') }}</span></div></div>
+  </div><div class="scroll-cue">{{ t('pc.scroll') }}<i>↓</i></div>
+</section>
+{% else %}
+<section class="hero" id="top">
+  {% if site and site.images %}<div class="hero-bg" id="hero-bg" style="background-image:url('{{ site.images[0].url }}')"></div><div class="hero-shade"></div>{% endif %}
+  <canvas id="stars" data-accent="{{ site.theme.colors.accent if site else '#20251F' }}" data-ink="#f2f5ea" aria-hidden="true"></canvas>
+  <div class="orb orb-a"></div><div class="orb orb-b"></div>
+  <div class="hero-inner">
+    <div class="eyebrow rv">{{ lead.category or t('pc.cat') }}{% if lead.city %} · {{ lead.city }}{% endif %}</div>
+    <h1 class="rv rv-d1">{{ lead.name }}</h1>
+    <p class="tagline rv rv-d2">{{ site.copy.tag if site else '' }}</p>
+    <p class="lede rv rv-d2">{{ site.copy.about if site else '' }}</p>
+    <div class="ctas rv rv-d3">
+      {% if lead.phone %}<a class="btn btn-solid mag" href="tel:{{ lead.phone|replace(' ','') }}">☎ {{ t('pc.call') }}</a>{% endif %}
+      {% if wa %}<a class="btn btn-ghost mag" href="https://wa.me/{{ wa }}">✆ {{ t('pc.wa') }}</a>{% endif %}
+      {% if lead.email %}<a class="btn btn-ghost mag" href="mailto:{{ lead.email }}">✉ {{ t('pc.mail_cta') }}</a>{% endif %}
+      {% if not lead.phone and not lead.email %}<a class="btn btn-solid mag" href="#contact">{{ t('pc.cta') }} ↗</a>{% endif %}
+    </div>
+    <div class="stats rv rv-d3"><div class="stat"><b><span data-count="24">0</span>/7</b><span>{{ t('pc.s1l') }}</span></div><div class="stat"><b><span data-count="100">0</span>%</b><span>{{ t('pc.s2l') }}</span></div><div class="stat"><b><span data-count="3">0</span></b><span>{{ t('pc.s3l') }}</span></div></div>
+  </div><div class="scroll-cue">{{ t('pc.scroll') }}<i>↓</i></div>
+</section>
+{% endif %}
+
+<div class="marquee" aria-hidden="true"><div><span>{{ t('pc.r1') }}</span><em>✦</em><span>{{ t('pc.r2') }}</span><em>✦</em><span>{{ t('pc.r3') }}</span><em>✦</em><span>{{ site.copy.tag if site else lead.name }}</span><em>✦</em><span>{{ t('pc.r1') }}</span><em>✦</em><span>{{ t('pc.r2') }}</span><em>✦</em><span>{{ t('pc.r3') }}</span><em>✦</em><span>{{ site.copy.tag if site else lead.name }}</span><em>✦</em></div></div>
+
 <main class="wrap">
-  <section data-reveal class="hero">
-    <p class="eyebrow">{{ t('rv.k') }}</p>
-    <h1>{{ link.headline }}</h1>
-    <p class="lead">{{ link.intro }}</p>
-    <div class="hero-actions">
-      <a data-magnet class="btn primary" href="#answer">{{ t('rv.answer_btn') }} <span>↓</span></a>
-      <a data-magnet class="btn ghost" href="#idea">{{ t('rv.idea') }}</a>
-    </div>
-    <p class="fineprint">{{ t('rv.fine1', n=lead.name) }}</p>
+  <section id="about" style="scroll-margin-top:90px">
+    {% if site and site.theme.showcase.craft %}<div class="about-split"><div>{% endif %}
+      <div class="sec-eyebrow rv">{{ t('pc.about') }}</div>
+      <h2 class="rv rv-d1">{{ t('pc.why', n=lead.name) }}</h2>
+      <p class="about-p rv rv-d2">{{ site.copy.about if site else '' }}</p>
+      <div class="chips rv rv-d3">{% if lead.category %}<span class="chip">{{ lead.category }}</span>{% endif %}{% if lead.city %}<span class="chip">◎ {{ lead.city }}</span>{% endif %}{% if site %}<span class="chip">✓ {{ site.copy.tag }}</span>{% endif %}</div>
+    {% if site and site.theme.showcase.craft %}</div><div class="craft-photo rv rv-d2 js-tilt"><img src="{{ site.theme.showcase.craft }}" alt="{{ lead.name }} — {{ t('pc.case_h') }}"></div></div>{% endif %}
   </section>
 
-  <section data-reveal id="idea" class="block">
-    <h2>{{ t('rv.give') }}</h2>
-    <div class="cards">
-      {% for section in link.sections %}
-      <article class="card"><span class="num">{{ '%02d'|format(loop.index) }}</span><h3>{{ section.title }}</h3><p>{{ section.body }}</p></article>
-      {% endfor %}
-    </div>
-  </section>
-
-  {% if link.concept.facts %}
-  <section data-reveal class="block">
-    <h2>{{ t('rv.det') }}</h2>
-    <ul class="facts">{% for fact in link.concept.facts %}<li>{{ fact }}</li>{% endfor %}</ul>
-    <p class="fineprint">{{ t('rv.fine2') }}</p>
-  </section>
-  {% endif %}
-
-  {% if link.concept.site_faults %}
-  <section data-reveal class="block">
-    <h2>{{ t('rv.noticed') }}</h2>
-    <ul class="faults">{% for fault in link.concept.site_faults %}<li>{{ fault.reason }} <span class="src">({{ fault.source }})</span></li>{% endfor %}</ul>
-    <p class="fineprint">{{ t('rv.fine3', d=link.concept.faults_checked_at) }}</p>
-  </section>
-  {% endif %}
-
-  <section data-reveal class="block answer" id="answer">
-    <h2>{{ t('rv.would', n=lead.name) }}</h2>
-    <p class="lead small">{{ t('rv.pick1') }}</p>
-    <div class="choices" role="group" aria-label="{{ t('rv.aria') }}">
-      <button type="button" class="choice" data-choice="want"><b>{{ t('rv.want') }}</b><span>{{ t('rv.want_s') }}</span></button>
-      <button type="button" class="choice" data-choice="later"><b>{{ t('rv.later') }}</b><span>{{ t('rv.later_s') }}</span></button>
-      <button type="button" class="choice" data-choice="have"><b>{{ t('rv.have') }}</b><span>{{ t('rv.have_s') }}</span></button>
-    </div>
-    <form id="answer-form" class="form" hidden>
-      <p class="chosen" id="chosen-label"></p>
-      <label>{{ t('rv.name') }}<input type="text" name="name" maxlength="120" autocomplete="name" placeholder="{{ t('rv.opt') }}"/></label>
-      <label>{{ t('rv.email') }}<input type="email" name="email" maxlength="200" autocomplete="email" placeholder="{{ t('rv.email_ph') }}"/></label>
-      <label>{{ t('rv.add') }}<textarea name="note" rows="3" maxlength="1200" placeholder="{{ t('rv.add_ph') }}"></textarea></label>
-      <input type="text" name="company_url" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>
-            <fieldset class="stars-field"><legend>{{ t('rv.stars') }}</legend><div class="stars">
-      <input type="radio" id="st5" name="rating" value="5"/><label for="st5" title="{{ t('rv.st5') }}">★</label>
-      <input type="radio" id="st4" name="rating" value="4"/><label for="st4" title="4">★</label>
-      <input type="radio" id="st3" name="rating" value="3"/><label for="st3" title="3">★</label>
-      <input type="radio" id="st2" name="rating" value="2"/><label for="st2" title="2">★</label>
-      <input type="radio" id="st1" name="rating" value="1"/><label for="st1" title="1">★</label>
-      </div></fieldset>
-      <button data-magnet type="submit" class="btn primary" id="send-answer">{{ t('rv.send_btn') }} <span>↗</span></button>
-      <p class="fineprint">{{ t('rv.fine4') }}</p>
-    </form>
-    <div id="answer-done" class="done" hidden>
-      <b>{{ t('rv.thanks') }}</b>
-      <p id="done-copy">{{ t('rv.have_it') }}</p>
-    </div>
-  </section>
-
-  {% if lead.phone or lead.email or lead.address or lead.opening_hours %}
-  <section data-reveal class="block">
-    <h2>{{ t('rv.listed') }}</h2>
-    <dl class="contact">
-      {% if lead.phone %}<dt>{{ t('rv.ph') }}</dt><dd><a href="tel:{{ lead.phone|replace(' ','') }}">{{ lead.phone }}</a></dd>{% endif %}
-      {% if lead.email %}<dt>{{ t('rv.em') }}</dt><dd>{{ lead.email }}</dd>{% endif %}
-      {% if lead.address %}<dt>{{ t('rv.addr') }}</dt><dd>{{ lead.address }}</dd>{% endif %}
-      {% if lead.opening_hours %}<dt>{{ t('rv.hours') }}</dt><dd>{{ lead.opening_hours }}</dd>{% endif %}
-    </dl>
-    <p class="fineprint">{{ t('rv.fine5') }}</p>
-  </section>
-  {% endif %}
-
-  <section data-reveal class="block close">
-    <h2>{{ t('rv.why') }}</h2>
-    <p>{{ t('rv.why_p', s=studio) }}</p>
-    <p class="fineprint">{{ link.concept.disclaimer }}</p>
+  <section id="offers" style="scroll-margin-top:90px;margin-top:84px">
+    <div class="sec-eyebrow rv">{% if site and site.theme.showcase.offers and site.theme.showcase.offers|length >= 3 %}{{ t('pc.case_k') }}{% else %}{{ t('pc.offers_k') }}{% endif %}</div>
+    <h2 class="rv rv-d1">{{ t('pc.meet', n=lead.name) }}</h2>
+    {% if site and site.theme.showcase.offers and site.theme.showcase.offers|length >= 3 %}
+    <div class="ocards">{% for o in site.copy.offers %}<article class="ocard rv rv-d{{ loop.index }}"><img src="{{ site.theme.showcase.offers[loop.index0] }}" alt="{{ o.t }}" loading="lazy"><div class="pad"><div class="num">0{{ loop.index }}</div><h3>{{ o.t }}</h3><p>{{ o.d }}</p></div></article>{% endfor %}</div>
+    <p class="case-note rv">{{ t('pc.case_note') }}</p>
+    {% else %}
+    <div class="cards">{% for o in site.copy.offers %}<article class="tilt rv rv-d{{ loop.index }}"><div class="num">0{{ loop.index }}</div><h3>{{ o.t }}</h3><p>{{ o.d }}</p></article>{% endfor %}</div>
+    {% endif %}
   </section>
 </main>
 
-<footer class="foot wrap">
-  <span>{{ studio }}{% if reply_email %} · {{ reply_email }}{% endif %}</span>
-  <span>{{ t('rv.foot') }}</span>
-</footer>
+{% if site and site.theme.showcase.strip %}
+<section class="strip-banner rv"><div class="bg" id="strip-bg" style="background-image:url('{{ site.theme.showcase.strip }}')"></div><div class="shade"></div><div class="in"><blockquote>“{{ site.copy.tag }}”</blockquote><cite>{{ lead.name }}{% if lead.city %} · {{ lead.city }}{% endif %}</cite></div></section>
+{% endif %}
 
+{% if site and site.images %}
+<div class="band"><div class="wrap" style="padding-top:70px;padding-bottom:70px"><section id="gallery" style="scroll-margin-top:90px">
+  <div class="sec-eyebrow rv">{{ t('pc.gallery') }}</div>
+  <h2 class="rv rv-d1">{{ t('pc.meet', n=lead.name) }}</h2>
+  <div class="shots">{% for img in site.images[:6] %}<button type="button" class="rv rv-d{{ loop.index }}" data-full="{{ img.url }}" data-cap="{{ img.alt or lead.name }}" aria-label="{{ lead.name }} — {{ loop.index }}"><img src="{{ img.url }}" alt="{{ img.alt or lead.name }}" loading="lazy" onerror="this.closest('button').remove()"><figcaption>{{ img.alt or lead.name }}</figcaption></button>{% endfor %}</div>
+</section></div></div>
+<dialog id="lightbox" aria-label="{{ t('pc.gallery') }}"><img id="lb-img" src="" alt=""><p id="lb-cap"></p></dialog>
+{% endif %}
 
-<script src="/static/i18n.js" defer></script><script src="/static/review.js" defer></script><script src="/static/reveal.js" defer></script><script src="/static/magnet.js" defer></script><script src="/static/pwa.js" defer></script>{% include 'tawkto.html' %}
+<div class="wrap" style="padding-top:20px">
+  <section id="pays" style="scroll-margin-top:90px;margin-top:64px">
+    <div class="sec-eyebrow rv">{{ t('pc.pay_k') }}</div>
+    <h2 class="rv rv-d1">{{ t('pc.pay_h') }}</h2>
+    <div class="pay-grid">
+      <article class="tilt rv rv-d1"><div class="num">01</div><h3>{{ t('pc.b1t') }}</h3><p>{{ t('pc.b1d') }}</p></article>
+      <article class="tilt rv rv-d2"><div class="num">02</div><h3>{{ t('pc.b2t') }}</h3><p>{{ t('pc.b2d') }}</p></article>
+      <article class="tilt rv rv-d3"><div class="num">03</div><h3>{{ t('pc.b3t') }}</h3><p>{{ t('pc.b3d') }}</p></article>
+      <article class="tilt rv rv-d2"><div class="num">04</div><h3>{{ t('pc.b4t') }}</h3><p>{{ t('pc.b4d') }}</p></article>
+    </div>
+  </section>
+
+  <section class="widget rv" id="order" style="scroll-margin-top:90px">
+    <span class="demo-badge"><i></i>{{ t('pc.w_demo') }}</span>
+    <div class="widget-grid"><div>
+      <div class="sec-eyebrow">{{ site.theme.widget_key and t(site.theme.widget_key) if site else t('pc.w_demo') }}</div>
+      <h2>{{ t('pc.good_a') }}<br>{{ t('pc.good_b') }}</h2>
+      <p class="about-p">{{ t('pc.w_hint') }}</p>
+      <div class="tools"><small>{{ t('pc.tools') }}</small>{% if site %}{% for tool in site.theme.colors.tools %}<span class="tool">⌁ {{ tool }}</span>{% endfor %}{% endif %}</div>
+    </div><div>
+      <form id="w-form" novalidate>
+        <label>{{ t('pc.w_name') }}<input name="w-name" id="w-name" autocomplete="name" maxlength="80" required></label>
+        <label>{{ t('pc.w_contact') }}<input name="w-contact" id="w-contact" autocomplete="tel" maxlength="120" required></label>
+        <label>{{ t('pc.w_detail') }}<textarea name="w-detail" id="w-detail" maxlength="500" required></textarea></label>
+        <p id="w-sum" aria-live="polite"></p>
+        <button class="btn btn-solid mag" type="submit">{{ t('pc.w_go') }} →</button>
+      </form>
+      <div id="w-done" role="status"><b>✓</b> {{ t('pc.w_done') }}<p id="w-echo" style="color:var(--muted);font-size:13.5px"></p></div>
+    </div></div>
+  </section>
+
+  <section class="contact rv" id="contact" style="scroll-margin-top:90px">
+    <div>
+      <div class="sec-eyebrow">{{ t('pc.touch') }}</div>
+      <h2>{{ t('pc.good_a') }}<br>{{ t('pc.good_b') }}</h2>
+      <p class="lede2">{{ t('pc.verify') }}</p>
+    </div>
+    <div>
+      {% if lead.phone %}<small>{{ t('pc.phone') }}</small><a class="big" href="tel:{{ lead.phone|replace(' ','') }}">{{ lead.phone }}</a>{% endif %}
+      {% if lead.email %}<small>{{ t('pc.email') }}</small><a class="big" href="mailto:{{ lead.email }}">{{ lead.email }}</a>{% endif %}
+      {% if lead.address %}<small>{{ t('pc.loc') }}</small><p class="addr">{{ lead.address }}</p>{% elif lead.city %}<small>{{ t('pc.area') }}</small><p class="addr">{{ t('pc.visit') }}: {{ lead.city }}</p>{% endif %}
+      {% set _where = (lead.address or '') %}{% if lead.city and lead.city not in _where %}{% set _where = ((_where + ', ') if _where else '') + lead.city %}{% endif %}
+      {% if lead.address or lead.city %}<div class="row"><a class="btn btn-ghost mag" href="https://www.google.com/maps/search/?api=1&query={{ _where|urlencode }}">◎ {{ t('pc.dir') }}</a></div>{% endif %}
+      {% if not lead.phone and not lead.email %}<p class="addr">{{ t('pc.nocontact') }}</p>{% endif %}
+      <div class="row">{% if wa %}<a class="btn btn-solid mag" href="https://wa.me/{{ wa }}">✆ {{ t('pc.wa') }}</a>{% endif %}</div>
+    </div>
+  </section>
+</div>
+
+<div class="footer">
+  <span>{{ lead.name }} · {{ t('pc.foot') }}</span>
+  <span>{{ t('pc.by', s=studio) }}{% if reply_email %} · {{ reply_email }}{% endif %}</span>
+  <span class="note">{{ t('pc.note') }} {{ t('pc.note2') }}</span>
+</div>
+
+{% if lead.phone %}<div class="sticky-cta" id="sticky"><a class="sc-call" href="tel:{{ lead.phone|replace(' ','') }}">☎ {{ t('pc.call') }}</a>{% if wa %}<a class="sc-wa" href="https://wa.me/{{ wa }}">✆ {{ t('pc.wa') }}</a>{% endif %}</div>{% endif %}
+
+{% include 'tawkto.html' %}{% include 'locale-switcher.html' %}
+<script>(function(){var RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+var prog=document.getElementById('progress'),nav=document.getElementById('nav'),heroBg=document.getElementById('hero-bg'),stripBg=document.getElementById('strip-bg');
+function onScroll(){var h=document.documentElement,max=h.scrollHeight-h.clientHeight;if(prog)prog.style.width=(max>0?(h.scrollTop/max*100):0)+'%';if(nav)nav.classList.toggle('scrolled',h.scrollTop>10);if(heroBg&&!RM){heroBg.style.transform='translateY('+(h.scrollTop*.22)+'px)'}if(stripBg&&!RM){var r=stripBg.parentElement.getBoundingClientRect();stripBg.style.transform='translateY('+(-r.top*.12)+'px)'}}
+addEventListener('scroll',function(){requestAnimationFrame(onScroll)},{passive:true});onScroll();
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);if(e.target.querySelector('[data-count]'))runCounts(e.target);}})},{threshold:.18});
+document.querySelectorAll('.rv').forEach(function(el){if(RM){el.classList.add('in')}else{io.observe(el)}});
+if(RM){document.querySelectorAll('[data-count]').forEach(function(s){s.textContent=s.dataset.count})}else{var heroIO=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){runCounts(e.target);heroIO.disconnect()}})},{threshold:.3});var st=document.querySelector('.stats');if(st)heroIO.observe(st)}
+function runCounts(root){root.querySelectorAll('[data-count]').forEach(function(s){var end=+s.dataset.count,t0=null;function f(ts){if(!t0)t0=ts;var p=Math.min(1,(ts-t0)/1400),e=1-Math.pow(1-p,3);s.textContent=Math.round(end*e);if(p<1)requestAnimationFrame(f)}requestAnimationFrame(f)})}
+if(!RM&&matchMedia('(pointer:fine)').matches){document.querySelectorAll('.tilt,.js-tilt').forEach(function(card){card.addEventListener('pointermove',function(e){var r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;card.style.transform='rotateY('+(x*10)+'deg) rotateX('+(-y*10)+'deg) translateY(-4px)'});card.addEventListener('pointerleave',function(){card.style.transform=''})});
+document.querySelectorAll('.mag').forEach(function(b){b.addEventListener('pointermove',function(e){var r=b.getBoundingClientRect();b.style.translate=((e.clientX-r.left-r.width/2)/r.width*10)+'px '+((e.clientY-r.top-r.height/2)/r.height*8)+'px'});b.addEventListener('pointerleave',function(){b.style.translate=''})})}
+var cv=document.getElementById('stars');if(cv&&!RM){var AC=cv.dataset.accent||'#b3541e';function hexRGB(h){var m=/^#([0-9a-f]{6})$/i.exec(h||'');if(!m)return[179,84,30];return[parseInt(m[1].slice(0,2),16),parseInt(m[1].slice(2,4),16),parseInt(m[1].slice(4,6),16)]}var ARC=hexRGB(AC),BC=hexRGB(cv.dataset.ink||'#f2f5ea');var ctx=cv.getContext('2d'),W,H,ps=[];function size(){var h=cv.parentElement;W=cv.width=h.offsetWidth;H=cv.height=h.offsetHeight}size();addEventListener('resize',size);for(var i=0;i<90;i++)ps.push({x:Math.random(),y:Math.random(),r:Math.random()*1.6+.4,s:Math.random()*1.2+.3,p:Math.random()*6.28,l:Math.random()<.25});(function loop(t){ctx.clearRect(0,0,W,H);for(var i=0;i<ps.length;i++){var p=ps[i];p.y-=p.s/H*2;if(p.y<-.02){p.y=1.02;p.x=Math.random()}var tw=.35+.65*Math.abs(Math.sin(t/1600+p.p));ctx.beginPath();ctx.arc(p.x*W,p.y*H,p.r,0,6.28);ctx.fillStyle=p.l?'rgba('+ARC[0]+','+ARC[1]+','+ARC[2]+','+(tw*.9)+')':'rgba('+BC[0]+','+BC[1]+','+BC[2]+','+(tw*.5)+')';ctx.fill()}requestAnimationFrame(loop)})(0)}
+var lb=document.getElementById('lightbox');if(lb){var lbImg=document.getElementById('lb-img'),lbCap=document.getElementById('lb-cap');document.querySelectorAll('.shots button').forEach(function(b){b.addEventListener('click',function(){lbImg.src=b.dataset.full;lbImg.alt=b.dataset.cap;lbCap.textContent=b.dataset.cap;if(lb.showModal)lb.showModal()})});lb.addEventListener('click',function(e){if(e.target===lb)lb.close()})}
+var wf=document.getElementById('w-form');if(wf){var wn=document.getElementById('w-name'),wc=document.getElementById('w-contact'),wd=document.getElementById('w-detail'),sum=document.getElementById('w-sum');function echo(){var bits=[wn.value.trim(),wc.value.trim(),wd.value.trim()].filter(Boolean);sum.textContent=bits.join('  ·  ').slice(0,110)}[wn,wc,wd].forEach(function(el){el.addEventListener('input',echo)});wf.addEventListener('submit',function(e){e.preventDefault();if(!wn.value.trim()||!wc.value.trim()||!wd.value.trim()){sum.textContent='…';[wn,wc,wd].forEach(function(el){if(!el.value.trim())el.focus()});return}wf.style.display='none';document.getElementById('w-echo').textContent=sum.textContent;document.getElementById('w-done').classList.add('show')})}
+var sk=document.getElementById('sticky');if(sk){addEventListener('scroll',function(){sk.classList.toggle('show',scrollY>innerHeight*.75)},{passive:true})}})();</script>
+<script src="/static/i18n.js" defer></script><script src="/static/reveal.js" defer></script><script src="/static/magnet.js" defer></script><script src="/static/pwa.js" defer></script>
 </body></html>
