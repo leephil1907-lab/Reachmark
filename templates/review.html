@@ -2,6 +2,13 @@
 <title>{% if lead.name %}{{ lead.name }}{% if lead.city %} — {{ lead.city }}{% endif %}{% else %}Website{% endif %}</title>
 <meta name="description" content="{{ site.copy.tag if site else '' }} {{ site.copy.about if site else '' }}">
 <meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="{{ site.theme.colors.bg if site else '#20251F' }}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ lead.name }}{% if lead.city %} — {{ lead.city }}{% endif %}">
+<meta property="og:description" content="{{ site.copy.tag if site else '' }}">
+{% if site and site.images %}<meta property="og:image" content="{{ site.images[0].url }}">{% elif site and site.theme.showcase.hero %}<meta property="og:image" content="{{ base }}{{ site.theme.showcase.hero }}">{% endif %}
+{% if base %}<meta property="og:url" content="{{ base }}/r/{{ link.token }}">{% endif %}
+<meta name="twitter:card" content="summary_large_image">
+{% if site and site.jsonld %}<script type="application/ld+json">{{ site.jsonld|tojson }}</script>{% endif %}
 <link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180">
 <link rel="stylesheet" href="/static/review-site.css">
 <style>:root{--bg:{{ site.theme.colors.bg if site else '#F5F5EF' }};--surface:{{ site.theme.colors.surface if site else '#EDEFE6' }};--card:{{ site.theme.colors.card if site else '#ffffff' }};--ink:{{ site.theme.colors.ink if site else '#20251F' }};--muted:{{ site.theme.colors.muted if site else '#4b5544' }};--faint:{{ site.theme.colors.faint if site else '#7b866c' }};--accent:{{ site.theme.colors.accent if site else '#20251F' }};--accent-ink:{{ site.theme.colors.accent_ink if site else '#fff8ef' }};--line:{{ site.theme.colors.line if site else 'rgba(32,37,31,.22)' }};--soft:{{ site.theme.colors.soft if site else '#EDEFE6' }}}
@@ -18,7 +25,9 @@
     <a href="#about">{{ t('pc.about') }}</a>
     <a href="#offers">{{ t('pc.offers_k') }}</a>
     {% if site and site.images %}<a href="#gallery">{{ t('pc.gallery') }}</a>{% endif %}
-    <a href="#pays">{{ t('pc.pay_k') }}</a>
+    {% if site and site.reviews %}<a href="#reviews">{{ t('pc.rev_k') }}</a>{% endif %}
+    {% if site and (site.hours or site.map) %}<a href="#visit">{{ t('pc.map_k') }}</a>{% endif %}
+    {% if site and site.faq %}<a href="#faq">{{ t('pc.faq_k') }}</a>{% endif %}
     <a href="#contact">{{ t('pc.touch') }}</a>
   </nav>
   {% if lead.phone %}<a class="call mag" href="tel:{{ lead.phone|replace(' ','') }}">☎ {{ t('pc.call') }}</a>{% endif %}
@@ -86,6 +95,63 @@
     <div class="cards">{% for o in site.copy.offers %}<article class="tilt rv rv-d{{ loop.index }}"><div class="num">0{{ loop.index }}</div><h3>{{ o.t }}</h3><p>{{ o.d }}</p></article>{% endfor %}</div>
     {% endif %}
   </section>
+
+  {% if site and site.reviews %}
+  <section id="reviews" style="scroll-margin-top:90px;margin-top:84px">
+    <div class="sec-eyebrow rv">{{ t('pc.rev_k') }}</div>
+    <h2 class="rv rv-d1">{{ t('pc.rev_h') }}</h2>
+    <div class="rev-card rv rv-d2">
+      {% if site.reviews.rating %}
+      <div class="rev-score">
+        <b>{{ site.reviews.rating }}</b>
+        <div class="rev-stars" aria-hidden="true">{% for i in range(5) %}<span class="{% if i < site.reviews.stars %}on{% endif %}">★</span>{% endfor %}</div>
+        <span class="rev-meta">{{ t('pc.rev_rated', r=site.reviews.rating) }}{% if site.reviews.count %} · {{ t('pc.rev_count', n=site.reviews.count) }}{% endif %}</span>
+      </div>
+      {% else %}
+      <p class="rev-invite">{{ t('pc.rev_invite') }}</p>
+      {% endif %}
+      {% if site.reviews.review_url %}<a class="btn btn-solid mag" href="{{ site.reviews.review_url }}" target="_blank" rel="noopener">★ {{ t('pc.rev_leave') }}</a>{% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if site and (site.hours or site.map) %}
+  <section id="visit" style="scroll-margin-top:90px;margin-top:84px">
+    <div class="sec-eyebrow rv">{{ t('pc.map_k') }}</div>
+    <h2 class="rv rv-d1">{{ t('pc.map_h') }}</h2>
+    <div class="visit-grid">
+      {% if site.hours %}
+      <div class="hours rv rv-d2">
+        <div class="hours-k">{{ t('pc.hours_k') }}</div>
+        <table class="hours-table"><tbody>
+          {% for row in site.hours %}<tr><th>{{ row.day }}</th><td>{{ row.time }}</td></tr>{% endfor %}
+        </tbody></table>
+      </div>
+      {% endif %}
+      {% if site.map %}
+      <div class="map-card rv rv-d2">
+        <iframe src="{{ site.map.embed }}" title="{{ lead.name }} — {{ t('pc.map_k') }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div class="map-foot"><span>{{ site.map.label }}</span><a class="btn btn-ghost mag" href="{{ site.map.link }}" target="_blank" rel="noopener">◎ {{ t('pc.map_open') }}</a></div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if site and site.faq %}
+  <section id="faq" style="scroll-margin-top:90px;margin-top:84px">
+    <div class="sec-eyebrow rv">{{ t('pc.faq_k') }}</div>
+    <h2 class="rv rv-d1">{{ t('pc.faq_h') }}</h2>
+    <div class="faq-list">
+      {% for item in site.faq %}
+      <details class="faq rv rv-d{{ (loop.index0 % 3) + 1 }}"{% if loop.first %} open{% endif %}>
+        <summary>{{ item.q }}</summary>
+        <p>{{ item.a }}</p>
+      </details>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 </main>
 
 {% if site and site.theme.showcase.strip %}
