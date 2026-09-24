@@ -191,7 +191,7 @@ def home():
     canonical = (base + '/') if base else None
     seo = {
         'title': 'Reachmark — Find Potential. Make Your Mark. | World-class website designer',
-        'description': 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals. 8 premium Figma-inspired samples, live 3D previews, OpenStreetMap discovery — no Google API key needed.',
+        'description': 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals. 10 premium Figma-inspired samples, live 3D previews, OpenStreetMap discovery — no Google API key needed.',
         'keywords': 'website designer, Figma templates, 3D website previews, OpenStreetMap leads, business discovery, Reachmark',
         'canonical': canonical,
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
@@ -237,7 +237,7 @@ def about():
     canonical = (base + '/about') if base else None
     seo = {
         'title': 'About Reachmark — World-class website designer | Global discovery & 3D previews',
-        'description': 'Reachmark is a world-class website designer — Figma-inspired, Framer-smooth. Global OpenStreetMap discovery, honest website health checks, live 3D previews. 8 templates, crystal green design.',
+        'description': 'Reachmark is a world-class website designer — Figma-inspired, Framer-smooth. Global OpenStreetMap discovery, honest website health checks, live 3D previews. 10 templates, crystal green design.',
         'keywords': 'about Reachmark, world-class website designer, OpenStreetMap, website health check, Figma to website',
         'canonical': canonical,
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
@@ -311,7 +311,7 @@ def sitemap():
     from datetime import datetime, timezone
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
     now = datetime.now(timezone.utc).date().isoformat()
-    # Core public pages + all 8 showcase samples — every indexable route for Google
+    # Core public pages + all 10 showcase samples — every indexable route for Google
     paths = ['/','/about','/showcase','/enquire','/receptionist','/pricing'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
     urls = []
     for path in paths:

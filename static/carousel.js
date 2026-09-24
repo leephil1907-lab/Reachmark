@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await fetch('/api/client-reviews', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         const j = await res.json();
         if (!res.ok) throw new Error(j.error || T_('show.js_failed','Failed'));
-        if (toast) { toast.textContent = T_('show.js_thanks','Thank you — your review is live! Refresh to see it alongside Trustpilot.'); toast.className = 'review-toast ok'; toast.style.display = 'block'; }
+        if (toast) { toast.textContent = T_('show.js_thanks','Thank you — your review is live! Refresh to see it on the wall.'); toast.className = 'review-toast ok'; toast.style.display = 'block'; }
         form.reset(); rating = 0; stars.forEach(s => s.classList.remove('active'));
         // append to list instantly (no wait)
         const list = document.getElementById('client-review-list');
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetch('/api/client-reviews').then(r => r.json()).then(rows => {
       const list = document.getElementById('client-review-list');
       if (!list || !Array.isArray(rows) || rows.length === 0) return;
-      // keep first Trustpilot-style card? just prepend client reviews
+      // prepend real client reviews above the empty-state card
       rows.slice(0, 6).forEach(rw => {
         const card = document.createElement('div');
         card.className = 'client-review-card';
