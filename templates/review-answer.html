@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="{{ locale }}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ lead.name or 'Thank you' }} — {{ t('rv.thanks') }}</title>
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#20251F">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/review-site.css">
+<style>
+  body{margin:0;background:#F5F5EF;color:#20251F;font-family:Manrope,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{max-width:560px;width:100%;background:#fff;border:1px solid rgba(32,37,31,.12);border-radius:20px;padding:40px 34px;box-shadow:0 24px 60px -30px rgba(32,37,31,.35)}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:26px}
+  .brand img{height:34px}
+  .brand b{font-size:18px;letter-spacing:-.4px}
+  .brand small{display:block;font-size:10px;letter-spacing:1.4px;color:#8c9c77}
+  .tick{width:52px;height:52px;border-radius:50%;background:#D5F268;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:18px}
+  h1{font-size:26px;line-height:1.2;margin:0 0 12px;letter-spacing:-.6px}
+  p{font-size:15px;line-height:1.7;color:#4b5544;margin:0 0 14px}
+  .answer{display:inline-block;background:#20251F;color:#D5F268;font-weight:700;font-size:13px;padding:9px 16px;border-radius:999px;margin-bottom:18px}
+  .note{background:#F5F5EF;border-radius:12px;padding:14px 16px;font-size:14px;color:#33402a;margin-bottom:18px}
+  a.back{color:#20251F;font-weight:700;text-decoration:none;border-bottom:2px solid #D5F268}
+  .foot{margin-top:26px;padding-top:18px;border-top:1px solid rgba(32,37,31,.1);font-size:12px;color:#8a9976;line-height:1.6}
+</style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head><body>
+<div class="card">
+  <div class="brand"><img src="/static/logo-primary.png" alt="Reachmark" onerror="this.style.display='none'"><span><b>Reachmark</b><small>FIND POTENTIAL · MAKE YOUR MARK</small></span></div>
+  <div class="tick">✓</div>
+  <h1>{{ t('rv.thanks') }}</h1>
+  <span class="answer">{{ response.label }}</span>
+  <p>{{ t('rv.c_' + response.choice) }}</p>
+  {% if response.note %}<div class="note">“{{ response.note }}”</div>{% endif %}
+  <p><a class="back" href="/r/{{ link.token }}">← {{ t('rv.idea') }}</a></p>
+  <div class="foot">{{ t('rv.bar_p', s=studio, n=lead.name) }}<br>{{ t('rv.foot') }}</div>
+</div>
+</body></html>

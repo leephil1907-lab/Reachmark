@@ -43,7 +43,7 @@ with db() as c:
 # Non-destructive migrations for earlier workspaces.
 with db() as c:
     columns={r[1] for r in c.execute('PRAGMA table_info(leads)')}
-    for name,kind in [('audit_status','TEXT'),('audit_reason','TEXT'),('checked_at','TEXT'),('http_code','INTEGER'),('latitude','REAL'),('longitude','REAL'),('opening_hours','TEXT'),('social_url','TEXT'),('source_tags','TEXT'),('owner_user_id','TEXT')]:
+    for name,kind in [('audit_status','TEXT'),('audit_reason','TEXT'),('checked_at','TEXT'),('http_code','INTEGER'),('latitude','REAL'),('longitude','REAL'),('opening_hours','TEXT'),('social_url','TEXT'),('source_tags','TEXT'),('owner_user_id','TEXT'),('html','TEXT')]:
         if name not in columns: c.execute(f'ALTER TABLE leads ADD COLUMN {name} {kind}')
     if 'owner_user_id' not in {r[1] for r in c.execute('PRAGMA table_info(jobs)')}:
         c.execute('ALTER TABLE jobs ADD COLUMN owner_user_id TEXT')
@@ -526,8 +526,25 @@ def audit_lead(lid):
     result=save_audit(lid);log('audit',f"Website checked for {lead(lid)['name']}: {result['status']}");return jsonify(result)
 
 def compose(l, tone, include_preview):
+    """Build the outreach message for a lead.
+
+    The message the business receives is the Reachmark-branded proposal e-mail: the
+    logo, the write-up built from the business's own saved fields and measured audit,
+    a button to open the finished one-page website, and the single question with three
+    one-tap answers. Returns ``(subject, text, html)``; ``html`` is ``''`` only if the
+    branded build is unavailable, in which case the plain-text draft is used.
+    """
     _cl=locale_now()
-    s=settings(); who=s['sender_name'] or _t('oc.who',_cl); agency=s['agency'] or _t('oc.ag',_cl)
+    s=settings()
+    try:
+        from web.outreach_email import build_outreach_email_for
+        email=build_outreach_email_for(db, now, l, s, _cl)
+        if email.get('subject') and email.get('text'):
+            return email['subject'], email['text'], email.get('html','')
+    except Exception:
+        pass
+    # Plain-text fallback (kept so a draft is always available).
+    who=s['sender_name'] or _t('oc.who',_cl); agency=s['agency'] or _t('oc.ag',_cl)
     subject=_t('oc.sub',_cl,n=l['name'])
     intro=_t('oc.intro',_cl,n=l['name'])
     context=_t('oc.ctx',_cl,w=who,a=agency,c=_t('oc.ctx_city',_cl,c=l['city']) if l['city'] else '')
@@ -544,12 +561,12 @@ def compose(l, tone, include_preview):
     if s['postal_address']: footer+='\n'+s['postal_address']
     footer+='\n\n'+_t('oc.optout',_cl)
     if s['public_base_url']: footer+='\n'+_t('oc.opturl',_cl,u=s['public_base_url'].rstrip('/')+'/unsubscribe/'+l['token'])
-    return subject,'\n\n'.join(x for x in [intro,context,pitch,preview,close,footer] if x)
+    return subject,'\n\n'.join(x for x in [intro,context,pitch,preview,close,footer] if x),''
 @app.route('/api/leads/<lid>/compose',methods=['POST'])
 def draft(lid):
-    l=lead(lid); v=request.get_json() or {}; subject,body=compose(l,v.get('tone','Professional'),v.get('preview',True))
-    with db() as c: c.execute("UPDATE leads SET subject=?,body=?,stage=CASE WHEN stage='New' THEN 'Drafted' ELSE stage END,updated=? WHERE id=?",(subject,body,now(),lid))
-    log('draft',f'Draft created for {l["name"]}'); return jsonify(subject=subject,body=body)
+    l=lead(lid); v=request.get_json() or {}; subject,body,html=compose(l,v.get('tone','Professional'),v.get('preview',True))
+    with db() as c: c.execute("UPDATE leads SET subject=?,body=?,html=?,stage=CASE WHEN stage='New' THEN 'Drafted' ELSE stage END,updated=? WHERE id=?",(subject,body,html,now(),lid))
+    log('draft',f'Draft created for {l["name"]}'); return jsonify(subject=subject,body=body,html=bool(html))
 @app.route('/preview/<token>')
 def preview(token):
     with db() as c: r=c.execute('SELECT * FROM leads WHERE token=?',(token,)).fetchone()
@@ -605,10 +622,17 @@ def send(lid):
     try:
         msg=EmailMessage(); msg['From']=os.environ['SMTP_FROM']; msg['To']=recipient; msg['Reply-To']=s['reply_email']; msg['Subject']=l['subject']; msg['Message-ID']=f'<{sid}@{os.environ["SMTP_FROM"].split("@")[-1]}>'
         body=l['body']
-        # Keep sender identification and opt-out instructions even if the draft was edited.
-        body+=f"\n\n—\n{s['sender_name']} | {s['agency']}\n{s['postal_address']}\nContact: {s['reply_email']}\nTo stop receiving emails, reply ‘no thanks’."
-        if s['public_base_url']: body+=f"\nOpt out: {s['public_base_url'].rstrip('/')}/unsubscribe/{l['token']}"
+        html=(l.get('html') or '').strip()
+        if not html:
+            # Plain-text fallback: keep sender identification and opt-out instructions
+            # even if the draft was edited.
+            body+=f"\n\n—\n{s['sender_name']} | {s['agency']}\n{s['postal_address']}\nContact: {s['reply_email']}\nTo stop receiving emails, reply ‘no thanks’."
+            if s['public_base_url']: body+=f"\nOpt out: {s['public_base_url'].rstrip('/')}/unsubscribe/{l['token']}"
         msg.set_content(body)
+        if html:
+            # The branded proposal e-mail: Reachmark logo, the write-up, the finished
+            # one-page website link, and the single question with one-tap answers.
+            msg.add_alternative(html, subtype='html')
         host=os.environ['SMTP_HOST']; port=int(os.getenv('SMTP_PORT','587')); mode=os.getenv('SMTP_SECURITY','starttls')
         if mode not in ('ssl','starttls'): raise ValueError(_t('er_117', locale_now()))
         cls=smtplib.SMTP_SSL if mode=='ssl' else smtplib.SMTP

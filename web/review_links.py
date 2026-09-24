@@ -18,6 +18,36 @@ RESPONSES = {'want': 'Yes — build my website', 'later': 'Not right now', 'have
 EMAIL_RE = re.compile(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+')
 
 
+def _build_site_for(db, lead, link):
+    """Build the business-specific one-page website spec for the review page.
+
+    Uses the newest measured audit (for the harvested brand) when one exists, and
+    always falls back to a complete, renderable spec so the page never breaks.
+    """
+    audit = None
+    try:
+        from agents.agent_auditor import latest_audit, ensure_tables as ensure_audit_tables
+        ensure_audit_tables(db)
+        audit = latest_audit(db, lead.get('id'))
+    except Exception:
+        audit = None
+    try:
+        from web.sitegen import build_site
+        site = build_site(lead, audit, locale=locale_now())
+        if site:
+            return site
+    except Exception:
+        pass
+    # Deterministic fallback: still a real, themed page built from saved fields.
+    from web.concept import detect_archetype, concept_copy, build_theme
+    arch = detect_archetype(lead.get('category') or lead.get('name'))
+    concept = link.get('concept') or {}
+    return {'archetype': arch, 'theme': build_theme(arch, {}),
+            'copy': concept_copy(arch, locale_now()), 'brandmark': '',
+            'brandmark_generated': False, 'images': [],
+            'facts': concept.get('facts') or [], 'profile': {}, 'generated': False}
+
+
 def ensure_tables(db):
     with db() as c:
         c.execute('''CREATE TABLE IF NOT EXISTS review_links(
@@ -238,8 +268,57 @@ def register_review_links(app, db, now, log, settings):
         reply_email = (settings().get('reply_email') or '').strip()
         base = (settings().get('public_base_url') or '').rstrip('/')
         log('review', 'A review link was opened')
-        return render_template('review.html', link=link, lead=dict(lead), studio=studio,
-                              reply_email=reply_email, base=base, responses=RESPONSES)
+        lead = dict(lead)
+        # The link the business opens IS the finished one-page website, dressed in
+        # their own trade palette (or their observed brand) and written from their
+        # own saved fields. The single question is integrated into that page.
+        site = _build_site_for(db, lead, link)
+        digits = re.sub(r'\D', '', lead.get('phone') or '')
+        wa = digits if len(digits) >= 7 else ''
+        return render_template('review.html', link=link, lead=lead, studio=studio,
+                              reply_email=reply_email, base=base, responses=RESPONSES,
+                              site=site, wa=wa)
+
+    @app.get('/r/<token>/answer/<choice>')
+    def review_answer(token, choice):
+        """One-tap answer from the branded e-mail.
+
+        The business taps a button in the e-mail and lands here: the answer is
+        recorded exactly like the in-page form, the owner is e-mailed straight away,
+        and the business sees a small, branded thank-you page. No question is ever
+        shown on the website itself \u2014 this is only the landing for the e-mail link.
+        """
+        link = get_link(db, token=token)
+        if not link or link['status'] == 'superseded':
+            abort(404)
+        if choice not in RESPONSES:
+            abort(404)
+        with db() as c:
+            lead_row = c.execute('SELECT * FROM leads WHERE id=?', (link['lead_id'],)).fetchone()
+        if not lead_row:
+            abort(404)
+        lead = dict(lead_row)
+        fingerprint = hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()[:32]
+        try:
+            response, link = record_response(db, now, token, {'choice': choice}, fingerprint)
+        except ValueError as exc:
+            return render_template('error.html', message=str(exc)), 400
+        log('review', f"Review link answered by e-mail tap: {response['label']}")
+        # The owner hears about it as an e-mail, immediately.
+        try:
+            from web.outreach_email import notify_owner_of_response
+            notify_owner_of_response(db, now, log, link, response, settings(), lead=lead)
+        except Exception:
+            pass
+        try:
+            from web.network import dispatch
+            dispatch(db, now, log, lead.get('owner_user_id') or 'owner', 'response.received',
+                     {'link_id': link.get('id'), 'choice': response['choice'], 'label': response['label']})
+        except Exception:
+            pass
+        studio = (settings().get('agency') or 'Reachmark').strip()
+        return render_template('review-answer.html', link=link, lead=lead, response=response,
+                              studio=studio, locale=locale_now())
 
     @app.post('/api/r/<token>/respond')
     def review_respond(token):
@@ -252,6 +331,14 @@ def register_review_links(app, db, now, log, settings):
         except ValueError as exc:
             return jsonify(error=str(exc)), 400
         log('review', f"Review link answered: {response['label']}")
+        try:
+            from web.outreach_email import notify_owner_of_response
+            with db() as c:
+                lead_row = c.execute('SELECT * FROM leads WHERE id=?', (link.get('lead_id'),)).fetchone()
+            notify_owner_of_response(db, now, log, link, response, settings(),
+                                     lead=dict(lead_row) if lead_row else None)
+        except Exception:
+            pass
         try:
             from web.network import dispatch
             with db() as c:
