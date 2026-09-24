@@ -92,7 +92,7 @@ class PublicHooksTests(CrewBase):
         self.assertIn('/static/magnet.js', showcase)
         self.assertIn('data-magnet', showcase)
 
-    def test_review_page_reveals_aurora_magnets_and_stars(self):
+    def test_review_page_is_a_clean_business_site(self):
         with module.db() as c:
             c.execute("INSERT INTO leads(id,source_key,name,category,city,token,created,updated) "
                       "VALUES('LD','kd','Design Cafe','Cafe','Demo','tokd',?,?)",
@@ -102,14 +102,18 @@ class PublicHooksTests(CrewBase):
                            {'theme': 'ember', 'headline': 'Hello', 'intro': 'x',
                             'sections': [{'title': 'a', 'body': 'b'}]}, 'share')
         body = self.client.get('/r/' + link['token']).data.decode('utf-8')
-        self.assertGreaterEqual(body.count('data-reveal'), 4)
-        self.assertIn('<section data-reveal class="hero">', body)
-        self.assertIn('<section data-reveal class="block answer" id="answer">', body)
-        self.assertIn('review-aurora', body)
-        self.assertIn('data-magnet', body)
-        self.assertIn('class="stars-field"', body)
-        self.assertIn('name="rating"', body)
+        # A clean, finished one-page website for the business \u2014 their name, their
+        # trade, the honest "independent concept" strip, and the motion hooks.
+        self.assertIn('Design Cafe', body)
+        self.assertIn('not the official website', body)
+        self.assertGreaterEqual(body.count('class="rv'), 4)
+        self.assertIn('id="stars"', body)
+        self.assertIn('mag"', body)
         self.assertIn('/static/reveal.js', body)
+        self.assertIn('/static/magnet.js', body)
+        # No question, no proposal, no rating form on the website itself.
+        self.assertNotIn('Would you like this built', body)
+        self.assertNotIn('name="rating"', body)
 
     def test_about_page_references_no_new_assets(self):
         body = self.client.get('/about').data.decode('utf-8')

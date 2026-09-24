@@ -138,8 +138,20 @@ def _raise(ctx):
             ok, reason = preflight(ctx.db, ctx.now, lead, settings)
             basis = ETHICS['contact_basis'].format(source=lead.get('source') or 'saved record',
                                                    date=(lead.get('created') or '')[:10])
-            draft = lead.get('body') or ''
-            problems = _recheck(draft) if draft else ['no draft text on this lead yet']
+            subject = lead.get('subject') or f"A website idea for {lead['name']}"
+            body = lead.get('body') or ''
+            # The message the business receives is the Reachmark-branded proposal e-mail.
+            # Build it now so the owner reviews exactly what would go out (and so the
+            # finished one-page website link it carries exists before approval).
+            try:
+                from web.outreach_email import build_outreach_email_for
+                email = build_outreach_email_for(ctx.db, ctx.now, lead, settings)
+                if email.get('subject') and email.get('text'):
+                    subject, body = email['subject'], email['text']
+                    link = email.get('link') or link
+            except Exception:
+                pass
+            problems = _recheck(body) if body else ['no draft text on this lead yet']
             if problems:
                 # Held here rather than at send time: the owner should never be asked to
                 # approve something the crew would refuse to send.
@@ -149,8 +161,8 @@ def _raise(ctx):
                 'lead_id': lead['id'],
                 'title': f"E-mail {lead['email']} — {lead['name']}",
                 'to': lead['email'], 'channel': 'email',
-                'subject': lead.get('subject') or f"A website idea for {lead['name']}",
-                'body': lead.get('body') or '',
+                'subject': subject,
+                'body': body,
                 'review_link': (f"/r/{link['token']}" if link else ''),
                 'preflight': 'ready' if ok else reason,
                 'contact_basis': basis,

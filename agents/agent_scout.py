@@ -241,7 +241,23 @@ def discover_from_sources(location, category, limit, ctx):
     ctx.receipt('source', f'OpenStreetMap query: "{category}" within 15 km of "{location}".')
     rows, display_name = discover_location(location, tag, limit=limit)
     ctx.receipt('source', f'Source returned {len(rows)} named listings for {display_name}.', url='https://www.openstreetmap.org/copyright')
-    return rows
+
+    # Google Maps is a second, key-gated source. It is only read when the owner
+    # has configured GOOGLE_PLACES_API_KEY; OpenStreetMap stays the default.
+    try:
+        from web import places_provider
+    except Exception:
+        places_provider = None
+    if places_provider and places_provider.available():
+        g_rows, reason = places_provider.discover_places(location, category, limit=min(limit, 20))
+        if g_rows:
+            ctx.receipt('source', f'Google Maps returned {len(g_rows)} business profile(s) for "{category}" in {location}.',
+                        url='https://maps.google.com')
+            rows = places_provider.merge_rows(rows, g_rows)
+            ctx.receipt('source', f'Merged sources: {len(rows)} unique business(es) after de-duplication.')
+        elif reason:
+            ctx.receipt('source', f'Google Maps contributed nothing this run: {reason}')
+    return rows, display_name
 
 
 def _enrich(ctx, name, website, seed):

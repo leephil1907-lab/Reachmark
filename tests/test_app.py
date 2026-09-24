@@ -49,7 +49,10 @@ class ProspectTests(unittest.TestCase):
         self.assertIn(b'One',self.client.get('/api/export').data)
     def test_template_and_preview(self):
         l=self.create();draft=self.ready(l)
-        self.assertIn('Example Bakery',draft['body']);self.assertIn('/preview/'+l['token'],draft['body']);self.assertNotIn('no website',draft['body'])
+        # The draft is now the Reachmark-branded proposal e-mail: it carries the link to
+        # the finished one-page website (/r/<token>) and the single question.
+        self.assertIn('Example Bakery',draft['body']);self.assertIn('/r/',draft['body']);self.assertNotIn('no website',draft['body'])
+        self.assertTrue(draft.get('html'))
         self.assertEqual(self.client.get('/preview/'+l['token']).status_code,200)
     def test_review_required(self):
         l=self.create();self.ready(l)

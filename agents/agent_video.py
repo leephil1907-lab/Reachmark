@@ -141,12 +141,12 @@ def build_script(lead, concept, link, settings=None, seconds=None, locale=None):
     watched = ((_t('ad_opened1', loc, v=views) if views == 1 else _t('ad_openedn', loc, v=views))
                if views else _t('ad_opened0', loc))
     spoken = (
-        f'{name}. {find_line} {_t('ad_sp1', loc)}'
-        f'{watched}{_t('ad_sp2', loc, s=studio)}'
+        f'{name}. {find_line} {_t("ad_sp1", loc)}'
+        f'{watched}{_t("ad_sp2", loc, s=studio)}'
     )
     spoken_short = (
-        f'{name}. {find_line} {_t('ad_ss1', loc)}'
-        f'{_t('ad_ss2', loc)}{_t('ad_ss3', loc, s=studio)}'
+        f'{name}. {find_line} {_t("ad_ss1", loc)}'
+        f'{_t("ad_ss2", loc)}{_t("ad_ss3", loc, s=studio)}'
     )
     return {
         'studio': studio, 'business': name, 'place': place,

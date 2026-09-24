@@ -100,12 +100,17 @@ class TemplateRenderTests(unittest.TestCase):
         for loc in LOCALES:
             with module.app.test_request_context('/'):
                 g.locale = loc
-                html = render_template('review.html', link=link, lead=dict(lead),
-                                       studio='Reachmark', reply_email='', base='', responses={})
-                self.assertIn(f'<html lang="{loc}"', html)
-                self.assertIn('id="locale-select"', html)
                 from web.concept import build_theme, concept_copy, detect_archetype
                 arch = detect_archetype(lead['category'])
+                site = {'archetype': arch, 'theme': build_theme(arch, {}),
+                        'copy': concept_copy(arch, loc), 'brandmark': '',
+                        'brandmark_generated': False, 'images': [], 'facts': [],
+                        'profile': {}, 'generated': False}
+                html = render_template('review.html', link=link, lead=dict(lead),
+                                       studio='Reachmark', reply_email='', base='',
+                                       responses={}, site=site, wa='')
+                self.assertIn(f'<html lang="{loc}"', html)
+                self.assertIn('id="locale-select"', html)
                 html = render_template('preview.html', lead=dict(lead), studio='Reachmark',
                                        copy=concept_copy(arch, loc), wa='',
                                        theme=build_theme(arch, {}))
