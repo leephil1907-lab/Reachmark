@@ -43,7 +43,7 @@ with db() as c:
 # Non-destructive migrations for earlier workspaces.
 with db() as c:
     columns={r[1] for r in c.execute('PRAGMA table_info(leads)')}
-    for name,kind in [('audit_status','TEXT'),('audit_reason','TEXT'),('checked_at','TEXT'),('http_code','INTEGER'),('latitude','REAL'),('longitude','REAL'),('opening_hours','TEXT'),('social_url','TEXT'),('source_tags','TEXT'),('owner_user_id','TEXT'),('html','TEXT')]:
+    for name,kind in [('audit_status','TEXT'),('audit_reason','TEXT'),('checked_at','TEXT'),('http_code','INTEGER'),('latitude','REAL'),('longitude','REAL'),('opening_hours','TEXT'),('social_url','TEXT'),('source_tags','TEXT'),('owner_user_id','TEXT'),('html','TEXT'),('rating','REAL'),('review_count','INTEGER'),('place_id','TEXT')]:
         if name not in columns: c.execute(f'ALTER TABLE leads ADD COLUMN {name} {kind}')
     if 'owner_user_id' not in {r[1] for r in c.execute('PRAGMA table_info(jobs)')}:
         c.execute('ALTER TABLE jobs ADD COLUMN owner_user_id TEXT')
@@ -84,7 +84,7 @@ def add_lead(v):
         cur=c.execute('INSERT OR IGNORE INTO leads(id,source_key,name,category,city,address,phone,email,website,status,source,source_url,token,created,updated,owner_user_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',(lid,key,v['name'][:200],v.get('category','')[:100],v.get('city','')[:200],v.get('address','')[:500],v.get('phone','')[:100],v.get('email','')[:250],website[:1000],classify(website),v.get('source','CSV'),v.get('source_url',''),uuid.uuid4().hex,stamp,stamp,v.get('owner_user_id')))
         count=cur.rowcount
         if count:
-            c.execute('UPDATE leads SET latitude=?,longitude=?,opening_hours=?,social_url=?,source_tags=? WHERE id=?',(v.get('latitude'),v.get('longitude'),v.get('opening_hours',''),v.get('social_url',''),json.dumps(v.get('source_tags',{})),lid))
+            c.execute('UPDATE leads SET latitude=?,longitude=?,opening_hours=?,social_url=?,source_tags=?,rating=?,review_count=?,place_id=? WHERE id=?',(v.get('latitude'),v.get('longitude'),v.get('opening_hours',''),v.get('social_url',''),json.dumps(v.get('source_tags',{})),v.get('rating'),v.get('review_count'),v.get('place_id',''),lid))
         c.execute('UPDATE leads SET source_seen_at=? WHERE source_key=?',(stamp,key))
         return count
 from web.security import install_security
@@ -191,7 +191,7 @@ def home():
     canonical = (base + '/') if base else None
     seo = {
         'title': 'Reachmark — Find Potential. Make Your Mark. | World-class website designer',
-        'description': 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals. 8 premium Figma-inspired samples, live 3D previews, OpenStreetMap discovery — no Google API key needed.',
+        'description': 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals. 10 premium Figma-inspired samples, live 3D previews, OpenStreetMap discovery — no Google API key needed.',
         'keywords': 'website designer, Figma templates, 3D website previews, OpenStreetMap leads, business discovery, Reachmark',
         'canonical': canonical,
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
@@ -237,7 +237,7 @@ def about():
     canonical = (base + '/about') if base else None
     seo = {
         'title': 'About Reachmark — World-class website designer | Global discovery & 3D previews',
-        'description': 'Reachmark is a world-class website designer — Figma-inspired, Framer-smooth. Global OpenStreetMap discovery, honest website health checks, live 3D previews. 8 templates, crystal green design.',
+        'description': 'Reachmark is a world-class website designer — Figma-inspired, Framer-smooth. Global OpenStreetMap discovery, honest website health checks, live 3D previews. 10 templates, crystal green design.',
         'keywords': 'about Reachmark, world-class website designer, OpenStreetMap, website health check, Figma to website',
         'canonical': canonical,
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
@@ -311,7 +311,7 @@ def sitemap():
     from datetime import datetime, timezone
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
     now = datetime.now(timezone.utc).date().isoformat()
-    # Core public pages + all 8 showcase samples — every indexable route for Google
+    # Core public pages + all 10 showcase samples — every indexable route for Google
     paths = ['/','/about','/showcase','/enquire','/receptionist','/pricing'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
     urls = []
     for path in paths:
@@ -669,6 +669,8 @@ from crew.crew import register_crew
 crew = register_crew(app, db, now, log, settings, add_lead, CATEGORIES)
 from web.review_links import register_review_links
 register_review_links(app, db, now, log, settings)
+from web.pipeline import register_pipeline
+register_pipeline(app, db, now, log, settings)
 from web.receptionist import register_receptionist
 register_receptionist(app, db, now, log, settings)
 from web.billing import register_billing

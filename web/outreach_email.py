@@ -145,7 +145,16 @@ def _html_body(lead, link, site, settings, audit, locale):
     answers = ''.join(_button(answer_url(base, token, choice), _t('rv.' + choice, locale),
                               primary=(choice == 'want')) for choice in CHOICES)
 
-    return f"""<!doctype html><html><body style="margin:0;background:#eef6d1;font-family:Manrope,Arial,sans-serif;color:#1a2315">
+    # Open-tracking pixel: a 1x1 transparent image served by /t/<token>/o.gif. It
+    # records a single 'open' event so the owner can measure real open rates. It is
+    # invisible and degrades to nothing if images are blocked.
+    try:
+        from web.pipeline import pixel_html
+        pixel = pixel_html(base, token)
+    except Exception:
+        pixel = ''
+
+    return f"""<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;background:#eef6d1;font-family:Manrope,Arial,sans-serif;color:#1a2315">
 <div style="max-width:600px;margin:0 auto;padding:28px">
 <div style="background:#ffffff;border:1px solid #e2e7d6;border-radius:16px;padding:30px">
 <div style="margin-bottom:20px"><img src="{logo}" alt="Reachmark" style="height:36px" onerror="this.style.display='none'"><div style="font-weight:800;letter-spacing:-0.5px;font-size:18px;color:#0f1a0a">Reachmark</div><div style="font-size:11px;letter-spacing:1.2px;color:#8c9c77">FIND POTENTIAL &middot; MAKE YOUR MARK</div></div>
@@ -167,7 +176,7 @@ def _html_body(lead, link, site, settings, audit, locale):
 </div>
 </div>
 <div style="text-align:center;margin-top:14px;font-size:11px;color:#8a9976">Reachmark &middot; Global &middot; {html.escape(host)}</div>
-</div></body></html>"""
+</div>{pixel}</body></html>"""
 
 
 def build_outreach_email(lead, link, site, settings, audit=None, locale=None):

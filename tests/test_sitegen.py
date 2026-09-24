@@ -1,7 +1,7 @@
 """Business-specific website generator: profile, brandmark, copy, theme, facts."""
 from tests.test_crew import CrewBase
 from web.sitegen import (BANNED, DIGIT_RE, _validate_copy, brandmark_svg,
-                         build_site, business_profile, generate_copy)
+                         build_site, business_profile, generate_copy, parse_hours)
 
 
 class ProfileTests(CrewBase):
@@ -96,3 +96,111 @@ class BuildSiteTests(CrewBase):
         self.assertIn('theme', site)
         self.assertIn('copy', site)
         self.assertEqual(site['archetype'], 'pro')
+
+
+class HoursTests(CrewBase):
+    def test_parses_a_weekday_range(self):
+        rows = parse_hours('Mo-Fr 07:00-15:00')
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]['day'], 'Monday \u2013 Friday')
+        self.assertEqual(rows[0]['time'], '07:00 \u2013 15:00')
+
+    def test_parses_multiple_groups(self):
+        rows = parse_hours('Mo,Tu,We 09:00-17:00; Sa 10:00-14:00')
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]['day'], 'Monday \u2013 Wednesday')
+        self.assertEqual(rows[1]['day'], 'Saturday')
+
+    def test_parses_twenty_four_seven(self):
+        rows = parse_hours('24/7')
+        self.assertEqual(rows, [{'day': 'Every day', 'time': 'Open 24 hours'}])
+
+    def test_unparseable_hours_return_empty(self):
+        self.assertEqual(parse_hours('by appointment'), [])
+        self.assertEqual(parse_hours(''), [])
+
+
+class MapTests(CrewBase):
+    def test_map_uses_coordinates_when_present(self):
+        site = build_site({'name': 'Cafe', 'category': 'Cafe', 'latitude': 38.71,
+                           'longitude': -9.14, 'address': 'Rua do Ouro 1'}, None,
+                          locale='en', use_llm=False)
+        self.assertIsNotNone(site['map'])
+        self.assertIn('openstreetmap.org', site['map']['embed'])
+        self.assertIn('38.71', site['map']['embed'])
+        self.assertEqual(site['map']['source'], 'OpenStreetMap')
+
+    def test_map_falls_back_to_address_search(self):
+        site = build_site({'name': 'Cafe', 'category': 'Cafe', 'address': '1 Main St, Austin'},
+                          None, locale='en', use_llm=False)
+        self.assertIsNotNone(site['map'])
+        self.assertIn('google.com/maps', site['map']['embed'])
+        self.assertEqual(site['map']['source'], 'Google Maps')
+
+    def test_map_is_none_without_location(self):
+        site = build_site({'name': 'Cafe', 'category': 'Cafe'}, None, locale='en', use_llm=False)
+        self.assertIsNone(site['map'])
+
+
+class ReviewsTests(CrewBase):
+    def test_reviews_use_real_rating_and_place_id(self):
+        site = build_site({'name': 'Cafe', 'category': 'Cafe', 'rating': 4.6,
+                           'review_count': 128, 'place_id': 'ChIJabc'}, None,
+                          locale='en', use_llm=False)
+        rev = site['reviews']
+        self.assertEqual(rev['rating'], 4.6)
+        self.assertEqual(rev['count'], 128)
+        self.assertEqual(rev['stars'], 5)
+        self.assertIn('placeid=ChIJabc', rev['review_url'])
+
+    def test_reviews_offer_a_leave_link_without_a_rating(self):
+        site = build_site({'name': 'Cafe', 'category': 'Cafe', 'city': 'Austin'}, None,
+                          locale='en', use_llm=False)
+        self.assertIsNotNone(site['reviews'])
+        self.assertIsNone(site['reviews']['rating'])
+        self.assertIn('google.com/maps', site['reviews']['review_url'])
+
+    def test_reviews_none_without_name_or_rating(self):
+        site = build_site({'category': 'Cafe'}, None, locale='en', use_llm=False)
+        self.assertIsNone(site['reviews'])
+
+
+class FaqTests(CrewBase):
+    def test_faq_always_has_contact_and_get_started(self):
+        site = build_site({'name': 'Cafe', 'category': 'Cafe'}, None, locale='en', use_llm=False)
+        self.assertGreaterEqual(len(site['faq']), 2)
+        self.assertTrue(all(item['q'] and item['a'] for item in site['faq']))
+
+    def test_faq_adds_location_and_hours_when_known(self):
+        site = build_site({'name': 'Cafe', 'category': 'Cafe', 'city': 'Austin',
+                           'opening_hours': 'Mo-Fr 07:00-15:00'}, None, locale='en', use_llm=False)
+        self.assertEqual(len(site['faq']), 4)
+
+    def test_faq_is_localized(self):
+        site = build_site({'name': 'Cafe', 'category': 'Cafe'}, None, locale='es', use_llm=False)
+        en = build_site({'name': 'Cafe', 'category': 'Cafe'}, None, locale='en', use_llm=False)
+        self.assertNotEqual(site['faq'][0]['q'], en['faq'][0]['q'])
+
+
+class JsonLdTests(CrewBase):
+    def test_jsonld_is_localbusiness_with_saved_fields(self):
+        site = build_site({'name': 'Sunrise Bakery', 'category': 'Bakery', 'city': 'Austin',
+                           'address': '1 Main St', 'phone': '+1 512 555 0100',
+                           'email': 'hi@sunrise.test', 'website': 'https://sunrise.test',
+                           'latitude': 30.27, 'longitude': -97.74, 'rating': 4.8,
+                           'review_count': 64, 'opening_hours': 'Mo-Fr 07:00-15:00'},
+                          None, locale='en', use_llm=False)
+        ld = site['jsonld']
+        self.assertEqual(ld['@type'], 'LocalBusiness')
+        self.assertEqual(ld['name'], 'Sunrise Bakery')
+        self.assertEqual(ld['telephone'], '+1 512 555 0100')
+        self.assertEqual(ld['address']['addressLocality'], 'Austin')
+        self.assertEqual(ld['geo']['latitude'], 30.27)
+        self.assertEqual(ld['aggregateRating']['ratingValue'], 4.8)
+
+    def test_jsonld_omits_absent_fields(self):
+        site = build_site({'name': 'Bare'}, None, locale='en', use_llm=False)
+        ld = site['jsonld']
+        self.assertNotIn('telephone', ld)
+        self.assertNotIn('aggregateRating', ld)
+        self.assertNotIn('geo', ld)

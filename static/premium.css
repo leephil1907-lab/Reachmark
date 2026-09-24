@@ -62,14 +62,14 @@ html{ scroll-behavior:smooth; }
 /* Premium illustration for hero */
 .hero-illustration{ position:absolute; right:-10px; top:-10px; width:120px; height:120px; opacity:.08; pointer-events:none; }
 
-/* Trustpilot — world-class social proof */
+/* Client reviews — honest social proof */
 .trustpilot-section{ background:#fcfdf8; border:1px solid #eef1e4; border-radius:16px; padding:42px; margin:70px 0 60px; box-shadow:0 8px 32px rgba(32,45,22,.06); }
 .trustpilot-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:30px; margin-bottom:32px; }
 .trustpilot-badge{ display:flex; align-items:center; gap:14px; background:#fff; border:1px solid #e2e7d6; border-radius:12px; padding:14px 18px; box-shadow:0 4px 16px rgba(32,45,22,.06); }
-.trustpilot-badge .tp-logo{ font:800 18px 'Manrope',sans-serif; letter-spacing:-.5px; color:#00b67a; display:flex; align-items:center; gap:8px; }
-.trustpilot-badge .tp-logo span{ color:#191919; }
+.trustpilot-badge .tp-logo{ font:800 18px 'Manrope',sans-serif; letter-spacing:-.5px; color:#5b7d2a; display:flex; align-items:center; gap:8px; }
+.trustpilot-badge .tp-logo span{ color:#1e2e15; }
 .trustpilot-badge .tp-stars{ display:flex; gap:3px; }
-.trustpilot-badge .tp-stars span{ width:22px; height:22px; background:#00b67a; color:#fff; display:grid; place-items:center; font-size:12px; border-radius:3px; }
+.trustpilot-badge .tp-stars span{ width:22px; height:22px; background:#5b7d2a; color:#fff; display:grid; place-items:center; font-size:12px; border-radius:3px; }
 .trustpilot-meta{ font-size:10px; color:#6b7a5a; line-height:1.6; }
 .trustpilot-meta strong{ color:#1e2e15; font-size:13px; }
 .trustpilot-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }

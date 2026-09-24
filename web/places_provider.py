@@ -38,6 +38,8 @@ FIELD_MASK = ','.join([
     'places.primaryTypeDisplayName',
     'places.googleMapsUri',
     'places.regularOpeningHours.weekdayDescriptions',
+    'places.rating',
+    'places.userRatingCount',
 ])
 
 _lock = threading.Lock()
@@ -93,6 +95,9 @@ def _row(place, location):
         'latitude': loc.get('latitude'),
         'longitude': loc.get('longitude'),
         'opening_hours': _hours(place),
+        'rating': place.get('rating'),
+        'review_count': place.get('userRatingCount'),
+        'place_id': pid,
         'social_url': '',
         'source_tags': {
             'google_place_id': pid,

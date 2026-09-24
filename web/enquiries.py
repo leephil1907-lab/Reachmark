@@ -64,6 +64,13 @@ def register_enquiries(app, db, now, log):
     def enquire():
         from flask import request
         slug=request.args.get('sample','')
+        plan=request.args.get('plan','').strip().lower()
+        PLANS={
+            'starter':{'label':'Starter','budget':'$650 (Starter)','msg':'I\u2019d like the Starter plan \u2014 a single-page premium website.'},
+            'growth':{'label':'Growth','budget':'$1,250 (Growth)','msg':'I\u2019d like the Growth plan \u2014 a multi-page website with CMS, booking and SEO.'},
+            'bespoke':{'label':'Bespoke','budget':'Custom (Bespoke)','msg':'I\u2019d like a bespoke estimate \u2014 custom Figma, integrations and scale.'},
+        }
+        plan_meta=PLANS.get(plan,{})
         try:
             from web.app import settings
             base = settings()['public_base_url'].rstrip('/')
@@ -81,7 +88,7 @@ def register_enquiries(app, db, now, log):
         gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'
         gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'
         structured=[{'@context':'https://schema.org','@type':'ContactPage','name':'Enquire — Reachmark','description': seo['description'], 'url': seo['canonical'] or request.url}]
-        return render_template('enquire.html',samples=localized_samples(),chosen_sample=slug if find_sample(slug) else '',seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
+        return render_template('enquire.html',samples=localized_samples(),chosen_sample=slug if find_sample(slug) else '',chosen_plan=plan if plan in PLANS else '',plan_label=plan_meta.get('label',''),plan_budget=plan_meta.get('budget',''),plan_message=plan_meta.get('msg',''),seo=seo,google_verification=gsv,structured=structured,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
 
     @app.route('/api/enquiries',methods=['POST'])
     def submit_enquiry():
