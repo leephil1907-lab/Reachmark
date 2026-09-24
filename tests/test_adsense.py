@@ -20,7 +20,8 @@ class AdSenseTests(unittest.TestCase):
     tearDown = test_app.ProspectTests.tearDown
 
     def test_public_pages_carry_the_tags_exactly_once(self):
-        for path in ('/', '/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/workspace'):
+        for path in ('/', '/about', '/showcase', '/showcase/ember-coffee', '/enquire',
+                     '/receptionist', '/reviews', '/pricing', '/workspace'):
             body = self.client.get(path).get_data(as_text=True)
             self.assertIn(META, body, path)
             self.assertIn(LOADER, body, path)
@@ -63,6 +64,9 @@ class AdSenseTests(unittest.TestCase):
         for path in ('/showcase', '/enquire', '/pricing', '/receptionist'):
             body = self.client.get(path).get_data(as_text=True)
             self.assertIn('data-ad-slot="6774661404"', body, path)
+        sample = self.client.get('/showcase/ember-coffee').get_data(as_text=True)
+        self.assertIn('adsense-footer', sample)
+        self.assertIn('data-ad-slot="6774661404"', sample)
         desk = self.client.get('/workspace').get_data(as_text=True)
         self.assertIn('adsense-sidebar', desk)
         self.assertIn('data-ad-slot="2566903210"', desk)

@@ -1,0 +1,12 @@
+{# Shared public header — include once per marketing page with:
+   {% include 'header-public.html' %}. Slim nav everywhere (never Samples or
+   Receptionist up top — the footer sitemap carries the full map). #}
+<header class="pub-head" id="pub-head">
+  <div class="pub-head-in">
+    <a href="/" class="pub-logo" aria-label="{{ t('common.home_aria') }}"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
+    <nav class="main" aria-label="{{ t('common.nav_primary') }}"><a href="/reviews"{% if request.path == '/reviews' %} aria-current="page"{% endif %}>{{ t('nav.reviews') }}</a><a href="/about"{% if request.path == '/about' %} aria-current="page"{% endif %}>{{ t('nav.about') }}</a><a href="/enquire"{% if request.path == '/enquire' %} aria-current="page"{% endif %}>{{ t('nav.enquire') }}</a><a href="/pricing"{% if request.path == '/pricing' %} aria-current="page"{% endif %}>{{ t('nav.plans') }}</a></nav>
+    <div class="head-cta">{% include 'locale-switcher.html' %}<button id="theme-toggle-public" type="button" aria-label="{{ t('common.theme') }}" title="{{ t('common.theme') }}">◐</button>{% if client_logged_in %}<a class="btn primary" href="/dashboard">{{ t('nav.dashboard') }}</a>{% elif owner_logged_in %}<a class="btn primary" href="/workspace">{{ t('nav.workspace') }}</a>{% else %}<a class="btn ghost" href="/signin">{{ t('nav.signin') }}</a><a class="btn primary" href="/signup">{{ t('nav.signup') }}</a>{% endif %}<button id="pub-menu-btn" type="button" aria-label="{{ t('common.menu') }}" aria-expanded="false" aria-controls="pub-menu">☰</button></div>
+  </div>
+  <div class="pub-menu" id="pub-menu"><a href="/reviews">{{ t('nav.reviews') }}</a><a href="/about">{{ t('nav.about') }}</a><a href="/enquire">{{ t('nav.enquire') }}</a><a href="/pricing">{{ t('nav.plans') }}</a>{% if client_logged_in %}<a href="/dashboard">{{ t('nav.dashboard') }}</a>{% elif owner_logged_in %}<a href="/workspace">{{ t('nav.workspace') }}</a>{% else %}<a href="/signin">{{ t('nav.signin') }}</a><a href="/signup">{{ t('nav.signup') }}</a>{% endif %}</div>
+</header>
+<div class="page-veil" aria-hidden="true"></div>

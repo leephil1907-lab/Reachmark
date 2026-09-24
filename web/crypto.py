@@ -95,6 +95,7 @@ def register_crypto(app, db, now, log):
 
     def quote(tier, period='monthly'):
         usd = price_for(tier, 'USD', period)[0] / 100
+        usd = int(usd) if float(usd).is_integer() else round(usd, 2)
         prices = coin_prices()
         options = []
         for coin, meta in COINS.items():

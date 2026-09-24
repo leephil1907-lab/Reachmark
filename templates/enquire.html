@@ -5,7 +5,9 @@
 <style>body{background:#eef6d1 !important; color:#0f1a0a} nav{background:#ffffff !important; border-color:#e2e7d6 !important; box-shadow:0 2px 12px rgba(32,45,22,.06) !important} .logo{width:200px !important}</style>
 <link rel="stylesheet" href="/static/public.css">
 <link rel="stylesheet" href="/static/premium.css">
-<link rel="stylesheet" href="/static/dropdown.css"><script src="/static/i18n.js"></script>
+<link rel="stylesheet" href="/static/dropdown.css">
+<link rel="stylesheet" href="/static/header.css">
+<link rel="stylesheet" href="/static/motion.css"><script src="/static/i18n.js"></script>
 <style>
 [data-theme="dark"]{color-scheme:dark}
 [data-theme="dark"] body{background:#1b2518;color:#e8f0d0}
@@ -28,7 +30,7 @@
 [data-theme="dark"] .public-main, [data-theme="dark"] main{background:transparent !important}
 </style>
 <title>{{ seo.title if seo is defined and seo.title else 'Enquire — Reachmark' }}</title><meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Tell Reachmark about your project.' }}">{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">{% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}<meta property="og:type" content="website"><meta property="og:title" content="{{ seo.title if seo is defined else 'Enquire — Reachmark' }}"><meta property="og:description" content="{{ seo.description if seo is defined else '' }}"><meta property="og:image" content="{{ seo.og_image if seo is defined else '/static/social-card.png' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}<meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script></head><body class="public-page">
-{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}<nav class="public-nav"><a href="/"><img class="public-logo" src="/static/logo-primary.svg" alt="Reachmark"></a><div class="public-links"><a href="/">{{ t('foot.about') }}</a><a href="/showcase">{{ t('foot.samples') }}</a><a href="/pricing">{{ t('nav.plans') }}</a>{% if client_logged_in %}<a href="/dashboard">{{ t('nav.dashboard') }}</a>{% elif owner_logged_in %}<a href="/workspace">{{ t('nav.workspace') }}</a>{% endif %}<a class="public-btn outline" href="#enquiry">{{ t('enq.nav_btn') }}</a>{% include 'locale-switcher.html' %}<button id="theme-toggle-public" aria-label="{{ t('common.theme') }}" title="{{ t('common.theme') }}" style="background:transparent;border:1px solid #e2e7d6;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:16px">◐</button></div></nav><main class="public-main">{% include 'enquiry-form.html' %}{% include 'adsense-footer.html' %}</main>
+{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}{% include 'header-public.html' %}<main class="public-main" data-motion="fade-up">{% include 'enquiry-form.html' %}{% include 'adsense-footer.html' %}</main>
 <section class="trustpilot-section premium-reveal" style="padding:28px; margin:40px 0 20px;">
   <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:14px;">
@@ -103,6 +105,7 @@
     </div>
   </div>
 </footer><script src="/static/enquiry.js" defer></script>{% include 'tawkto.html' %}
-<script src="/static/theme.js" defer></script><script src="/static/magnet.js" defer>
+<script src="/static/theme.js" defer></script>
+<script src="/static/motion.js" defer></script><script src="/static/magnet.js" defer>
 <script src="/static/dropdown.js" defer></script></script><script src="/static/pwa.js" defer></script>
 </body></html>

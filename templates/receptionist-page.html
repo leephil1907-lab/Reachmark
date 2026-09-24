@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/static/fonts.css">
 <link rel="stylesheet" href="/static/receptionist-page.css">
 <link rel="stylesheet" href="/static/reveal.css">
-<link rel="stylesheet" href="/static/dropdown.css"><script src="/static/i18n.js"></script>
+<link rel="stylesheet" href="/static/dropdown.css"><link rel="stylesheet" href="/static/motion.css"><script src="/static/i18n.js"></script>
 </head><body class="rx-page">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}
 <nav class="rx-nav" aria-label="{{ t('rx.nav_aria') }}"><a href="/" class="rx-brand"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
@@ -16,7 +16,8 @@
 <main>
 <header class="rx-hero rx-aurora"><div class="rx-hero-copy">
 <p class="rx-eyebrow">{{ t('rx.eyebrow') }}</p>
-<h1>{{ t('rx.h1') }}</h1>
+<div class="page-veil" aria-hidden="true"></div>
+<h1 data-split>{{ t('rx.h1') }}</h1>
 <p class="rx-sub">{{ t('rx.sub') }}</p>
 <ul class="rx-checks">
 <li>{{ t('rx.c1') }}</li>
@@ -210,8 +211,9 @@
 {% endif %}
 
 <script src="/static/receptionist-page.js" defer></script>
-<script src="/static/reveal.js" defer>
-<script src="/static/dropdown.js" defer></script></script>
+<script src="/static/reveal.js" defer></script>
+<script src="/static/dropdown.js" defer></script>
 <script src="/static/magnet.js" defer></script>
+<script src="/static/motion.js" defer></script>
 <script src="/static/pwa.js" defer></script>
 </body></html>

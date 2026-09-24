@@ -64,11 +64,15 @@ class ResolutionTests(unittest.TestCase):
 class FallbackTests(unittest.TestCase):
     def test_missing_key_falls_back_to_english(self):
         from web.i18n import _cache
+        had = 'es' in _cache
         _cache.setdefault('es', {})['__probe__'] = None
         try:
             del _cache['es']['__probe__']
         except KeyError:
             pass
+        finally:
+            if not had:
+                _cache.pop('es', None)
         # Key absent everywhere renders the raw key (last resort, never a crash)
         self.assertEqual(t('__no_such_key__', 'es'), '__no_such_key__')
 

@@ -5,12 +5,10 @@
 <meta name="csrf-token" content="{{ csrf_token() }}"><script src="/static/i18n.js"></script>
 <link rel="stylesheet" href="/static/fonts.css">
 <link rel="stylesheet" href="/static/dropdown.css">
+<link rel="stylesheet" href="/static/header.css">
+<link rel="stylesheet" href="/static/motion.css">
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:'Manrope',Arial,sans-serif;background:#f2f5e8;color:#1a2315}
-.public-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 28px;background:#fff;border-bottom:1px solid #e2e7d6;position:sticky;top:0;z-index:5}
-.public-logo{height:30px}.public-links{display:flex;align-items:center;gap:20px;font-size:14px}
-.public-links a{color:#3c4732;text-decoration:none;font-weight:600}.public-links a[aria-current]{color:#5b7d2a}
-.public-btn{background:#1a2315;color:#fff!important;padding:10px 18px;border-radius:10px}
 .wrap{max-width:1060px;margin:0 auto;padding:56px 24px 70px}
 .eyebrow{font-size:12px;letter-spacing:2px;font-weight:800;color:#7a8a5f}
 h1{font-size:clamp(30px,4.6vw,46px);letter-spacing:-1px;margin:10px 0 8px}
@@ -38,7 +36,7 @@ h1{font-size:clamp(30px,4.6vw,46px);letter-spacing:-1px;margin:10px 0 8px}
 .faq summary{font-weight:800;cursor:pointer}.faq p{color:#5a6650;font-size:14px;line-height:1.7;margin:10px 0 0}
 footer.site{border-top:1px solid #e2e7d6;background:#fff;padding:26px;text-align:center;color:#7a8a5f;font-size:13px}
 footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
-@media(max-width:820px){.cards,.steps{grid-template-columns:1fr}.public-links a:not(.public-btn){display:none}}
+@media(max-width:820px){.cards,.steps{grid-template-columns:1fr}}
 .crypto{background:#fff;border:1px solid #e2e7d6;border-radius:18px;padding:30px;margin:34px 0}
 .crypto h2{margin:0 0 6px;font-size:24px;letter-spacing:-.5px}.crypto .muted{color:#5a6650;font-size:14px;line-height:1.7}
 .crypto-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:26px;margin-top:18px}
@@ -55,34 +53,33 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
 .btn-dark:disabled{opacity:.5}
 .locale-select{font:700 12px Manrope,Arial,sans-serif;padding:8px 10px;border-radius:10px;border:1px solid #e2e7d6;background:#fff;color:#0f1a0a;cursor:pointer}
 </style></head><body>
-<nav class="public-nav"><a href="/"><img class="public-logo" src="/static/logo-primary.svg" alt="Reachmark"></a>
-<div class="public-links"><a href="/">{{ t('foot.about') }}</a><a href="/showcase">{{ t('foot.samples') }}</a><a href="/pricing" aria-current="page">{{ t('nav.plans') }}</a>{% if client_logged_in %}<a class="public-btn" href="/dashboard">{{ t('nav.dashboard') }}</a>{% elif owner_logged_in %}<a class="public-btn" href="/workspace">{{ t('nav.workspace') }}</a>{% else %}<a href="/signin">{{ t('pay.signin') }}</a><a class="public-btn" href="/signup">{{ t('pay.create') }}</a>{% endif %}{% include 'locale-switcher.html' %}</div></nav>
+{% include 'header-public.html' %}
 <main class="wrap">
 <p class="eyebrow">{{ t('pay.eyebrow') }}</p>
-<h1>{{ t('pay.h1') }}</h1>
+<h1 data-split>{{ t('pay.h1') }}</h1>
 <p class="sub">{{ t('pay.sub') }}</p>
 {% include 'adsense-footer.html' %}
 <div class="cur-toggle" role="group" aria-label="{{ t('pay.cur_aria') }}"><button type="button" id="cur-usd" class="on">USD $</button><button type="button" id="cur-ngn">NGN ₦</button></div>
 <div class="cur-toggle" role="group" aria-label="{{ t('pay.per_aria') }}"><button type="button" id="per-monthly" class="on">{{ t('pay.period_m') }}</button><button type="button" id="per-annual">{{ t('pay.period_y') }} · {{ t('pay.save') }}</button></div>
 <div id="plan-note" role="status"></div>
-<div class="cards">
+<div class="cards" data-motion="fade-up">
 {% for tier_id, tier in tiers.items() %}
 <article class="card{% if tier_id == 'pro' %} pop{% endif %}">
 {% if tier_id == 'pro' %}<span class="pop-tag">{{ t('pay.pop') }}</span>{% endif %}
 <h2>{{ tier.name }}</h2><p class="tagline">{{ tier.tag }}</p>
 <p class="price"><span class="amt" data-usd="{{ tier.usd }}" data-ngn="{{ tier.ngn }}" data-usd-a="{{ tier.usd_annual }}" data-ngn-a="{{ tier.ngn_annual }}">{{ tier.usd }}</span> <small>/ <span class="per" data-per="{{ tier.per }}">{% if tier.usd_annual %}{{ t('pay.per_mo') }}{% else %}{{ tier.per }}{% endif %}</span></small></p>
 <ul>{% for f in tier.features %}<li>{{ f }}</li>{% endfor %}</ul>
-{% if tier_id == 'free' %}<a class="btn btn-ghost" href="/signup">{{ t('pay.free_btn') }}</a>
-{% elif tier_id == 'starter' %}<button type="button" class="btn-dark" data-tier="starter">{{ t('pay.starter_btn') }}</button>
-{% else %}<button type="button" class="btn-lime" data-tier="pro">{{ t('pay.pro_btn') }}</button>{% endif %}
+{% if tier_id == 'free' %}<a class="btn btn-ghost" data-magnet href="/signup">{{ t('pay.free_btn') }}</a>
+{% elif tier_id == 'starter' %}<button type="button" class="btn-dark" data-magnet data-tier="starter">{{ t('pay.starter_btn') }}</button>
+{% else %}<button type="button" class="btn-lime" data-magnet data-tier="pro">{{ t('pay.pro_btn') }}</button>{% endif %}
 </article>
 {% endfor %}
 </div>
-<section class="crypto" id="crypto"><h2>{{ t('pay.c_h') }}</h2>
+<section class="crypto" id="crypto" data-motion="fade-up"><h2>{{ t('pay.c_h') }}</h2>
 <p class="muted">{{ t('pay.c_p') }}</p>
 <div class="crypto-grid"><div>
 <label>{{ t('pay.c_per') }}<select id="crypto-period"><option value="monthly">{{ t('pay.period_m') }}</option><option value="annual">{{ t('pay.period_y') }}</option></select></label>
-<label>{{ t('pay.c_plan') }}<select id="crypto-tier"><option value="starter">{{ t('pay.c_os') }}</option><option value="pro">{{ t('pay.c_op') }}</option></select></label>
+<label>{{ t('pay.c_plan') }}<select id="crypto-tier"><option value="starter" data-n="{{ tiers.starter.name }}" data-m="{{ tiers.starter.usd }}" data-a="{{ tiers.starter.usd_annual }}">{{ tiers.starter.name }} — {{ tiers.starter.usd }}</option><option value="pro" data-n="{{ tiers.pro.name }}" data-m="{{ tiers.pro.usd }}" data-a="{{ tiers.pro.usd_annual }}">{{ tiers.pro.name }} — {{ tiers.pro.usd }}</option></select></label>
 <label>{{ t('pay.c_coin') }}<select id="crypto-coin"></select></label>
 <button type="button" class="btn-dark" id="crypto-start">{{ t('pay.c_show') }}</button>
 </div><div id="crypto-pay" hidden>
@@ -94,13 +91,13 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
 <button type="button" class="btn-lime" id="crypto-submit">{{ t('pay.c_sent') }}</button>
 </div></div>
 <p id="crypto-msg" role="status"></p></section>
-<section class="how"><h2>{{ t('pay.how_h') }}</h2>
+<section class="how" data-motion="fade-up"><h2>{{ t('pay.how_h') }}</h2>
 <div class="steps">
 <div><b>{{ t('pay.s1h') }}</b><p>{{ t('pay.s1p') }}</p></div>
 <div><b>{{ t('pay.s2h') }}</b><p>{{ t('pay.s2p') }}</p></div>
 <div><b>{{ t('pay.s3h') }}</b><p>{{ t('pay.s3p') }}</p></div>
 </div></section>
-<section class="faq">
+<section class="faq" data-motion="fade-up">
 <details><summary>{{ t('pay.f1q') }}</summary><p>{{ t('pay.f1p') }}</p></details>
 <details><summary>{{ t('pay.f2q') }}</summary><p>{{ t('pay.f2p') }}</p></details>
 <details><summary>{{ t('pay.f3q') }}</summary><p>{{ t('pay.f3p') }}</p></details>
@@ -141,6 +138,8 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
     var qr=document.getElementById('crypto-qr');if(o.qr){qr.src=o.qr;qr.style.display='';}else{qr.style.display='none';}
   }
   ccoin.onchange=renderCoin;
+  function paintCryptoTiers(){var a=cper.value==='annual';Array.prototype.forEach.call(ctier.options,function(o){o.textContent=o.dataset.n+' — '+(a?o.dataset.a:o.dataset.m);});}
+  cper.onchange=paintCryptoTiers;paintCryptoTiers();
   document.getElementById('crypto-copy').onclick=function(){var t=document.getElementById('crypto-addr').textContent;if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){csay(T_('pay.js_copied','copied'));});};
   document.getElementById('crypto-start').onclick=function(){
     csay('');cpay.hidden=true;copts=[];
@@ -186,6 +185,9 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
   });
 })();
 </script>
+<script src="/static/theme.js" defer></script>
+<script src="/static/motion.js" defer></script>
+<script src="/static/magnet.js" defer></script>
 <script src="/static/pwa.js" defer></script>
 <script src="/static/dropdown.js" defer></script>
 </body></html>

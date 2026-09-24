@@ -60,7 +60,7 @@ button[type=submit]:disabled{opacity:.6;cursor:not-allowed;transform:none}
   <div class="form">
     <div class="top"><div class="eyebrow">{{ t('au.s_f_eyebrow') }}</div><h2>{{ t('au.s_f_h') }}</h2><p class="lead">{{ t('au.s_lead') }}</p></div>{% include 'locale-switcher.html' %}
     <div id="msg" role="alert" class="auth-error"></div>
-    <div id="verify-hint" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:12px;border-radius:10px;color:#2d4a0a;font:600 12px 'Manrope',sans-serif;margin-top:14px">{{ t('au.s_v1') }} <a href="#" onclick="requestVerify(event)" style="color:#1a3310">{{ t('au.s_resend') }}</a></div>
+    <div id="verify-hint" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:12px;border-radius:10px;color:#2d4a0a;font:600 12px 'Manrope',sans-serif;margin-top:14px">{{ t('au.s_v1') }} <button type="button" onclick="requestVerify(event)" style="background:none;border:0;padding:0;color:#1a3310;font:inherit;text-decoration:underline;cursor:pointer">{{ t('au.s_resend') }}</button></div>
     <div class="who" style="margin:16px 0 4px"><p style="font:700 12px 'Manrope',sans-serif;color:#0f1a0a;margin:0 0 8px">{{ t('au.o_who') }}</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <button type="button" id="who-team" onclick="whoPick('team')" style="text-align:left;padding:12px 14px;border:2px solid #dfe8cc;border-radius:12px;background:#fcfcf8;cursor:pointer"><b style="font:700 13px 'Manrope',sans-serif;color:#0f1a0a">▦ {{ t('au.o_team') }}</b><br><small style="color:#6b7a5a">{{ t('au.o_team_d') }}</small></button>

@@ -153,7 +153,8 @@ def headers(r):
     return r
 
 ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-3894582071697384').strip()
-ADSENSE_PATHS = {'/', '/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/workspace'}
+ADSENSE_PATHS = {'/', '/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/workspace'}
+ADSENSE_PREFIXES = ('/showcase/',)
 
 @app.after_request
 def adsense_tags(response):
@@ -161,10 +162,12 @@ def adsense_tags(response):
 
     Injected at serve time so templates -- including about.html, which must stay
     byte-identical -- are never touched. /workspace is included for the sidebar
-    unit; APIs, review links and the ad recording stage stay excluded.
+    unit; sample detail pages match by prefix; APIs, review links and the ad
+    recording stage stay excluded.
     """
     try:
-        if not ADSENSE_CLIENT or request.path not in ADSENSE_PATHS:
+        if not ADSENSE_CLIENT or (request.path not in ADSENSE_PATHS
+                                  and not request.path.startswith(ADSENSE_PREFIXES)):
             return response
         if 'text/html' not in response.headers.get('Content-Type', ''):
             return response
@@ -304,7 +307,7 @@ is not.</p>
 @app.route('/robots.txt')
 def robots():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
-    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /showcase\nAllow: /enquire\nAllow: /receptionist\nAllow: /pricing\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
+    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /showcase\nAllow: /enquire\nAllow: /receptionist\nAllow: /reviews\nAllow: /pricing\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
 @app.route('/sitemap.xml')
 def sitemap():
     from xml.sax.saxutils import escape
@@ -312,7 +315,7 @@ def sitemap():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
     now = datetime.now(timezone.utc).date().isoformat()
     # Core public pages + all 8 showcase samples — every indexable route for Google
-    paths = ['/','/about','/showcase','/enquire','/receptionist','/pricing'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
+    paths = ['/','/about','/showcase','/enquire','/receptionist','/reviews','/pricing'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
     urls = []
     for path in paths:
         loc = escape(base+path)

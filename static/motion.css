@@ -1,0 +1,58 @@
+/* Reachmark motion — React Bits + Framer Motion patterns, dependency-free.
+   Inspired by React Bits (SplitText/BlurText, ScrollReveal, Magnet, CountUp)
+   and Framer Motion (spring easings, AnimatePresence-style page veil,
+   whileTap press). No libraries: IntersectionObserver + rAF + CSS.
+   Reduced-motion and no-JS visitors always see the final state. */
+:root{--rm-ease:cubic-bezier(.16,1,.3,1);--rm-spring:cubic-bezier(.34,1.4,.4,1)}
+/* Scroll reveals: [data-motion] starts visible; JS adds .rm-pre only when it
+   can animate, then .rm-in on entry. */
+.rm-pre{opacity:0}
+.rm-pre[data-motion="fade-up"]{transform:translateY(22px)}
+.rm-pre[data-motion="fade"]{transform:none}
+.rm-pre[data-motion="zoom"]{transform:scale(.96)}
+.rm-pre[data-motion="slide-left"]{transform:translateX(28px)}
+.rm-pre[data-motion="slide-right"]{transform:translateX(-28px)}
+.rm-in{opacity:1!important;transform:none!important;
+  transition:opacity .7s var(--rm-ease),transform .7s var(--rm-ease)}
+/* Split/blur hero text: words rise out of a blur, one after another. */
+[data-split] .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em;margin-bottom:-.08em}
+.rm-pre-split .w>span{display:inline-block;opacity:0;filter:blur(8px);transform:translateY(.55em)}
+.rm-split-in .w>span{opacity:1;filter:blur(0);transform:none;
+  transition:opacity .6s var(--rm-ease),transform .6s var(--rm-ease),filter .6s var(--rm-ease)}
+/* whileTap press on magnetic CTAs. */
+[data-magnet]{transition:transform .25s var(--rm-ease)}
+[data-magnet]:active{transform:scale(.96)!important}
+/* Page veil — Framer-style crossfade between pages. */
+.page-veil{position:fixed;inset:0;z-index:200;background:#0f1a0a;opacity:0;
+  pointer-events:none;transition:opacity .18s ease-out}
+.page-veil.on{opacity:1;pointer-events:all}
+.page-veil.enter{opacity:0;transition:opacity .3s ease}
+/* Live pipeline illustrator. */
+.pipeline{position:relative}
+.pipeline ol{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.pipeline li{position:relative;display:grid;grid-template-columns:44px 1fr;gap:14px;
+  padding:14px 16px;border-radius:14px;border:1px solid transparent;
+  transition:background .35s var(--rm-ease),border-color .35s var(--rm-ease),transform .35s var(--rm-ease)}
+.pipeline li .dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+  font:800 14px 'Manrope',Arial,sans-serif;background:#eef3df;color:#5c7a2e;
+  border:1px solid #e2e7d6;transition:background .35s var(--rm-ease),color .35s,transform .35s var(--rm-spring)}
+.pipeline li b{display:block;font:800 14px 'Manrope',Arial,sans-serif;color:#0f1a0a}
+.pipeline li span{font:400 13px/1.6 'Manrope',Arial,sans-serif;color:#4c5a41}
+.pipeline li.on{background:#fff;border-color:#d5f268;transform:translateX(6px);
+  box-shadow:0 12px 30px rgba(26,35,21,.10)}
+.pipeline li.on .dot{background:#0f1a0a;color:#d5f268;transform:scale(1.08)}
+.pipeline li:not(:last-child)::after{content:'';position:absolute;left:37px;top:62px;bottom:-6px;
+  width:2px;background:#e2e7d6}
+.pipeline li.on:not(:last-child)::after{background:linear-gradient(#7aa53a,#d5f268)}
+.pipeline .pulse{position:absolute;left:37px;width:2px;height:26px;border-radius:2px;
+  background:#7aa53a;opacity:0;pointer-events:none}
+.pipeline.run .pulse{opacity:1;animation:pulseDown 12s linear infinite}
+@keyframes pulseDown{from{top:8%}to{top:88%}}
+.pipeline-dots{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.pipeline-dots button{width:26px;height:6px;border-radius:4px;border:0;background:#dfe5cf;cursor:pointer;padding:0}
+.pipeline-dots button.on{background:#5c7a2e}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  .rm-pre{opacity:1!important;transform:none!important}
+  .page-veil{display:none!important}
+}
