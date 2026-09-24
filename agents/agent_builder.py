@@ -98,9 +98,31 @@ def family_for(category, name=''):
 
 
 def compose_concept(lead, settings, tone='Professional'):
-    """Deterministic concept copy from the saved record. No invented specifics."""
+    """Deterministic concept copy from the saved record. No invented specifics.
+
+    When the lead's trade matches a stored Builder-memory brief, the brief's
+    structure (promise + feature sections) directs the page while the
+    business's own name, facts and brand stay untouched. Service blueprints
+    and unmatched trades fall back to the family template.
+    """
     family = family_for(lead.get('category'), lead.get('name'))
     template = FAMILIES[family]
+    memory_meta = {'applied': False}
+    try:
+        from builder.memory import apply_prompt, match_prompt
+        brief = match_prompt(lead.get('category'), lead.get('name'))
+        if brief is not None and brief.get('kind') == 'website':
+            directed = apply_prompt(brief, lead)
+            theme_family = directed['theme_family']
+            template = {'theme': FAMILIES[theme_family]['theme'],
+                        'label': directed['label'],
+                        'promise': directed['promise'],
+                        'sections': [(s['title'], s['body']) for s in directed['sections']]}
+            family = theme_family
+            memory_meta = directed['memory']
+    except Exception:
+        template = FAMILIES[family]
+        memory_meta = {'applied': False}
     studio = (settings.get('agency') or STUDIO['name']).strip()
     place = (lead.get('city') or '').strip()
     name = lead.get('name') or 'this business'
@@ -128,6 +150,7 @@ def compose_concept(lead, settings, tone='Professional'):
     ] if line]
     return {
         'theme': template['theme'], 'family': family, 'family_label': template['label'],
+        'memory': memory_meta,
         'headline': headline[:140], 'intro': intro[:600],
         'sections': [{'title': title, 'body': body} for title, body in template['sections']],
         'facts': facts,
@@ -241,8 +264,13 @@ def run(ctx):
         except Exception:
             concept.setdefault('site_faults', [])
         checks, words = cro_checks(concept)
+        mem = concept.get('memory') or {}
+        mem_note = (f" Builder memory {mem['prompt_id']} (v{mem['memory_version']}) applied;"
+                    f" placeholders swapped for the business's own name."
+                    if mem.get('applied') else '')
         ctx.receipt('concept', f"{lead['name']}: concept composed from {len(concept['facts'])} saved field(s) "
-                               f"({concept['family_label']} direction, {words} words).", url=lead.get('source_url', ''))
+                               f"({concept['family_label']} direction, {words} words).{mem_note}",
+                    url=lead.get('source_url', ''))
         for check in checks:
             if not check['ok']:
                 ctx.receipt('cro', f"{lead['name']}: CRO check needs attention — {check['name']} ({check['detail']})")
