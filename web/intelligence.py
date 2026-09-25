@@ -5,8 +5,8 @@ from flask import jsonify, session
 FIT_MAP = {
     'restaurant': ('Editorial hospitality','Reservations / calls',['Home','Menu','About','Gallery','Reservations','Contact'],['Sticky booking CTA','Menu highlights','Location + hours','Gallery']),
     'cafe': ('Editorial hospitality','Visits / orders',['Home','Menu','Story','Gallery','Visit'],['Menu highlights','Location + hours','Order/booking CTA','Gallery']),
-    'clinic': ('Clinical trust','Appointments',['Home','Treatments','Team','Patient information','FAQ','Contact'],['Appointment CTA','Treatment pathways','Team profiles','Verified trust signals']),
     'dental': ('Clinical editorial','Appointments',['Home','Treatments','Dentists','Reviews','FAQ','Contact'],['Book appointment CTA','Treatment pathways','Team profiles','FAQ']),
+    'clinic': ('Clinical trust','Appointments',['Home','Treatments','Team','Patient information','FAQ','Contact'],['Appointment CTA','Treatment pathways','Team profiles','Verified trust signals']),
     'law': ('Editorial authority','Consultation enquiries',['Home','Practice Areas','People','Insights','About','Contact'],['Consultation CTA','Practice-area pathways','Attorney profiles','Insights']),
     'real estate': ('Immersive property editorial','Property enquiries / viewings',['Home','Properties','Agents','Neighbourhoods','About','Contact'],['Property search','Map','Property cards','Viewing CTA']),
     'saas': ('Product-led conversion','Demo / signup',['Home','Product','Features','Pricing','Security','FAQ'],['Interactive product preview','Feature grid','Pricing','FAQ']),
