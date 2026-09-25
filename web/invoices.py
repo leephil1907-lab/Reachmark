@@ -74,21 +74,6 @@ def register_invoices(app, db, now, log):
             amount_minor INTEGER,
             created TEXT
         );''')
-        # Migration: add client_user_id to projects if missing
-        proj_cols = {r[1] for r in c.execute('PRAGMA table_info(projects)')}
-        if 'client_user_id' not in proj_cols and 'projects' in [r[1] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")]:
-            try:
-                c.execute('ALTER TABLE projects ADD COLUMN client_user_id TEXT')
-            except Exception:
-                pass
-        # Add client_user_id to invoices if missing (for older DBs)
-        inv_cols = {r[1] for r in c.execute('PRAGMA table_info(invoices)')}
-        if 'client_user_id' not in inv_cols:
-            try:
-                c.execute('ALTER TABLE invoices ADD COLUMN client_user_id TEXT')
-            except Exception:
-                pass
-
     def is_owner():
         return bool(session.get('owner'))
 
