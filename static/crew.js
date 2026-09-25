@@ -155,7 +155,7 @@
         ((agent.skills || []).length ? '<p class="small muted">' + ((agent.skills || []).length > 1 ? T_('wsj.cr_pb2','Playbooks') : T_('wsj.cr_pb1','Playbook')) +
           ': ' + (agent.skills || []).map(esc).join(' · ') + ' <span class="pill">' + esc(data.playbook_version || 'vendored') + '</span></p>' : '') +
         '<ul>' + (agent.guardrails || []).slice(0, 2).map(function (line) { return '<li>' + esc(line) + '</li>'; }).join('') + '</ul>' +
-        '<div class="crew-actions"><button onclick="crewRunAgent(\'' + esc(agent.id) + '\')>' + T_('wsj.cr_runonly','Run {n} only').replace('{n}', esc(agent.name)) + '</button></div>' +
+        '<div class="crew-actions"><button onclick="crewRunAgent(\'' + esc(agent.id) + '\')">' + T_('wsj.cr_runonly','Run {n} only').replace('{n}', esc(agent.name)) + '</button></div>' +
         '</article>';
     }).join('');
     var count = $('crew-agent-count');
