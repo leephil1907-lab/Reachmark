@@ -273,7 +273,7 @@ class ReviewLinkTests(CrewBase):
         self.assertIn(b'Test Bakery', page.data)
         self.assertIn(b'not the official website', page.data)
         self.assertIn(b'Would you like this built', page.data)
-        self.assertIn(b'Yes — build my website', page.data)
+        self.assertIn('Yes — build my website'.encode(), page.data)
         self.assertIn(b'Not right now', page.data)
         self.assertIn(b'I already have a website', page.data)
         self.assertEqual(get_link(module.db, token=link['token'])['views'], 1)
