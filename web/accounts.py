@@ -130,19 +130,6 @@ def register_accounts(app, db, log):
             updated TEXT,
             is_active INTEGER DEFAULT 1
         );''')
-        # Ensure columns exists for older DBs
-        cols = {r[1] for r in c.execute('PRAGMA table_info(users)')}
-        for col, typ in [
-            ('is_active','INTEGER DEFAULT 1'),
-            ('name','TEXT'),
-            ('email_verified','INTEGER DEFAULT 0'),
-            ('verification_token','TEXT'),
-            ('verification_expires','TEXT'),
-            ('reset_token','TEXT'),
-            ('reset_expires','TEXT'),
-        ]:
-            if col not in cols:
-                c.execute(f'ALTER TABLE users ADD COLUMN {col} {typ}')
         # Outbox for branded mail when SMTP not configured
         c.executescript('''CREATE TABLE IF NOT EXISTS mail_outbox(
             id TEXT PRIMARY KEY,
