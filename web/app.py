@@ -261,13 +261,21 @@ def disclosure():
     return render_template('disclosure.html', support_email=support_email())
 @app.after_request
 def pwa_headers(response):
-    """Let the service worker control the whole site, and never cache the worker itself."""
+    """Keep PWA registration present on public HTML and protect worker assets from stale caching."""
     if request.path == '/static/sw.js':
         response.headers['Service-Worker-Allowed'] = '/'
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     elif request.path == '/static/manifest.webmanifest':
         response.headers['Content-Type'] = 'application/manifest+json'
         response.headers['Cache-Control'] = 'public, max-age=3600'
+    elif 'text/html' in response.headers.get('Content-Type', '') and request.path in {
+        '/', '/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews'
+    }:
+        body = response.get_data(as_text=True)
+        if '/static/pwa.js' not in body and '</body>' in body:
+            response.set_data(body.replace('</body>', '<script src="/static/pwa.js" defer></script></body>', 1))
+            if 'Content-Length' in response.headers:
+                response.headers['Content-Length'] = str(len(response.get_data()))
     return response
 
 
