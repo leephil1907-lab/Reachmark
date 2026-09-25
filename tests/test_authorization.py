@@ -55,7 +55,7 @@ class AuthorizationAuditTests(unittest.TestCase):
                     response.status_code, 401,
                     f'{method} {path} was not protected: {response.status_code}')
             self.assertEqual(client.get('/healthz').status_code, 200)
-            self.assertEqual(client.get('/api/auth/me').status_code, 200)
+            self.assertEqual(client.get('/login').status_code, 200)
 
 
 if __name__ == '__main__':
