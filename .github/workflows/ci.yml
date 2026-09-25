@@ -16,6 +16,27 @@ jobs:
       - run: python -m unittest tests.test_app tests.test_operations tests.test_maps.MapTests tests.test_production tests.test_crew tests.test_video tests.test_receptionist_page tests.test_brain tests.test_design tests.test_adsense -q
       - run: for f in static/*.js; do node --check "$f"; done
       - run: pip install playwright && python -m playwright install --with-deps chromium
-      - run: PYTHONPATH=. python tests/browser/production_flow.py && PYTHONPATH=. python tests/browser/map_flow.py
+      - name: Playwright production flow
+        run: PYTHONPATH=. python tests/browser/production_flow.py
+      - name: Playwright map flow (independent)
+        run: PYTHONPATH=. python tests/browser/map_flow.py
+      - name: Mobile and PWA audit
+        run: PYTHONPATH=. python tests/mobile_pwa_audit.py
+      - name: Start local release candidate
+        env:
+          DATABASE_PATH: /tmp/reachmark-lighthouse.sqlite3
+          APP_ENV: development
+          SECRET_KEY: ci-only-development-secret
+        run: |
+          nohup python -m web.app >/tmp/reachmark.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/healthz && break || sleep 1; done
+      - name: Lighthouse mobile audit
+        run: |
+          npx --yes lighthouse http://127.0.0.1:8000/ --output=json --output-path=/tmp/lighthouse-mobile.json --chrome-flags='--headless --no-sandbox' --only-categories=performance,accessibility,best-practices,seo --preset=perf
+          python scripts/lighthouse_gate.py /tmp/lighthouse-mobile.json mobile
+      - name: Lighthouse desktop audit
+        run: |
+          npx --yes lighthouse http://127.0.0.1:8000/ --output=json --output-path=/tmp/lighthouse-desktop.json --chrome-flags='--headless --no-sandbox' --only-categories=performance,accessibility,best-practices,seo --preset=desktop
+          python scripts/lighthouse_gate.py /tmp/lighthouse-desktop.json desktop
       - run: python scripts/crew_smoke.py
       - run: docker build --build-arg RELEASE_SHA=${{ github.sha }} -t reachmark:ci .
