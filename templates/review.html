@@ -150,6 +150,58 @@
   </section>
 </div>
 
+
+<section class="widget rv" id="review-answer" aria-labelledby="review-answer-title" style="scroll-margin-top:90px">
+  <div class="widget-grid">
+    <div>
+      <div class="sec-eyebrow">{{ t('rv.answer_btn') }}</div>
+      <h2 id="review-answer-title">{{ t('rv.would', n=lead.name) }}</h2>
+      <p class="about-p">{{ t('rv.pick1') }}</p>
+    </div>
+    <div>
+      <div class="button-group" id="review-choices" role="group" aria-label="{{ t('rv.aria') }}">
+        <button type="button" class="btn btn-solid review-choice" data-choice="want">{{ t('rv.want') }}</button>
+        <button type="button" class="btn btn-ghost review-choice" data-choice="later">{{ t('rv.later') }}</button>
+        <button type="button" class="btn btn-ghost review-choice" data-choice="have">{{ t('rv.have') }}</button>
+      </div>
+      <form id="review-form" hidden>
+        <label>{{ t('rv.name') }}<input id="review-name" name="name" maxlength="120" autocomplete="name"></label>
+        <label>{{ t('rv.email') }}<input id="review-email" name="email" type="email" maxlength="200" autocomplete="email" placeholder="{{ t('rv.email_ph') }}"></label>
+        <label>{{ t('rv.add') }}<textarea id="review-note" name="note" maxlength="1200" placeholder="{{ t('rv.add_ph') }}"></textarea></label>
+        <button class="btn btn-solid" type="submit">{{ t('rv.send_btn') }}</button>
+      </form>
+      <p id="review-status" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+<script>
+(function(){
+  var choice='', form=document.getElementById('review-form'), status=document.getElementById('review-status');
+  document.querySelectorAll('.review-choice').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      choice=btn.dataset.choice;
+      document.querySelectorAll('.review-choice').forEach(function(b){b.setAttribute('aria-pressed', b===btn ? 'true':'false');});
+      form.hidden=false;
+      status.textContent='';
+    });
+  });
+  form.addEventListener('submit',function(event){
+    event.preventDefault();
+    if(!choice){status.textContent={{ t('rv.pick')|tojson }};return;}
+    var payload={choice:choice,name:document.getElementById('review-name').value,email:document.getElementById('review-email').value,note:document.getElementById('review-note').value};
+    fetch('/api/r/{{ link.token }}/respond',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+      .then(function(out){
+        if(!out.ok) throw new Error(out.j.error||{{ t('rv.err')|tojson }});
+        status.textContent={{ t('rv.sent')|tojson }};
+        form.reset();
+        document.querySelectorAll('.review-choice').forEach(function(b){b.disabled=true;});
+      })
+      .catch(function(){status.textContent={{ t('rv.drop')|tojson }};});
+  });
+})();
+</script>
+
 <div class="footer">
   <span>{{ lead.name }} · {{ t('pc.foot') }}</span>
   <span>{{ t('pc.by', s=studio) }}{% if reply_email %} · {{ reply_email }}{% endif %}</span>
