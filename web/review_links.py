@@ -59,13 +59,6 @@ def ensure_tables(db):
         c.execute('''CREATE TABLE IF NOT EXISTS review_responses(
             id TEXT PRIMARY KEY, link_id TEXT, lead_id TEXT, choice TEXT, note TEXT, name TEXT,
             email TEXT, fingerprint TEXT, handled INTEGER DEFAULT 0, rating INTEGER, created TEXT)''')
-        columns = {row[1] for row in c.execute('PRAGMA table_info(review_responses)')}
-        if 'rating' not in columns:
-            c.execute('ALTER TABLE review_responses ADD COLUMN rating INTEGER')
-        columns = {row[1] for row in c.execute('PRAGMA table_info(review_links)')}
-        if 'chat_message' not in columns:
-            # Databases created before the chat-sized share text existed.
-            c.execute('ALTER TABLE review_links ADD COLUMN chat_message TEXT')
         c.execute('CREATE INDEX IF NOT EXISTS review_links_lead ON review_links(lead_id, created)')
         c.execute('CREATE INDEX IF NOT EXISTS review_responses_link ON review_responses(link_id, created)')
 
