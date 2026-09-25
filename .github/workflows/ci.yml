@@ -13,7 +13,7 @@ jobs:
         with: {node-version: '22', cache: npm}
       - run: pip install -r requirements.txt
       - run: npm ci && npm run build
-      - run: python -m unittest tests.test_app tests.test_operations tests.test_maps.MapTests tests.test_production tests.test_crew tests.test_video tests.test_receptionist_page tests.test_brain tests.test_design tests.test_adsense tests.test_migrations -q
+      - run: python -m unittest tests.test_app tests.test_operations tests.test_maps.MapTests tests.test_production tests.test_crew tests.test_video tests.test_receptionist_page tests.test_brain tests.test_design tests.test_adsense tests.test_migrations tests.test_authorization -q
       - run: for f in static/*.js; do node --check "$f"; done
       - run: pip install playwright && python -m playwright install --with-deps chromium
       - run: PYTHONPATH=. python tests/browser/production_flow.py
