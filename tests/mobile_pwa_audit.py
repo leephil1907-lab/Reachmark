@@ -21,8 +21,9 @@ def main():
         assert path.is_file(), f"missing PWA asset: {src}"
 
     sw = (STATIC / "sw.js").read_text(encoding="utf-8")
+    sw_plain = sw.replace('\\/', '/')
     for private in ["/workspace","/dashboard","/api/state","/api/leads","/api/projects","/api/invoices","/api/map/"]:
-        assert private in sw, f"service worker deny-list missing {private}"
+        assert private in sw_plain, f"service worker deny-list missing {private}"
 
     client = app.test_client()
     for path in ["/","/about","/showcase","/enquire","/receptionist"]:
