@@ -1,17 +1,19 @@
 """Authorization regression matrix for the Reachmark API surface."""
 import unittest
+from unittest.mock import patch
 from tests.test_app import ProspectTests
 
 class ApiAuthorizationTests(ProspectTests):
     def test_unauthenticated_private_gets_are_closed(self):
-        for path in [
-            "/api/state", "/api/analytics", "/api/export", "/api/quality",
-            "/api/clients", "/api/settings", "/api/outbox", "/api/snapshots",
-            "/api/projects", "/api/invoices", "/api/contracts",
-            "/api/operations/readiness", "/api/verify-config", "/api/deploy-check",
-        ]:
-            r = self.client.get(path)
-            self.assertIn(r.status_code, (401, 402), path)
+        with patch.dict('os.environ', {'DASHBOARD_PASSWORD':'ci-owner-password'}):
+            for path in [
+                "/api/state", "/api/analytics", "/api/export", "/api/quality",
+                "/api/clients", "/api/settings", "/api/outbox", "/api/snapshots",
+                "/api/projects", "/api/invoices", "/api/contracts",
+                "/api/operations/readiness", "/api/verify-config", "/api/deploy-check",
+            ]:
+                r = self.client.get(path)
+                self.assertIn(r.status_code, (401, 402), path)
 
     def test_unauthenticated_mutations_are_closed(self):
         cases = [
@@ -23,9 +25,10 @@ class ApiAuthorizationTests(ProspectTests):
             ("/api/projects", {"title":"Unauthorized"}),
             ("/api/invoices", {"client_name":"Unauthorized"}),
         ]
-        for path,payload in cases:
-            r = self.client.post(path, json=payload)
-            self.assertIn(r.status_code, (401,402), path)
+        with patch.dict('os.environ', {'DASHBOARD_PASSWORD':'ci-owner-password'}):
+            for path,payload in cases:
+                r = self.client.post(path, json=payload)
+                self.assertIn(r.status_code, (401,402), path)
 
     def test_intentionally_public_auth_and_marketing_endpoints_remain_public(self):
         for path in ["/api/auth/me","/api/auth/oauth","/api/billing/status","/api/client-reviews"]:
