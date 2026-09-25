@@ -36,6 +36,8 @@ class AuthorizationAuditTests(unittest.TestCase):
             ('GET', '/api/outbox'),
             ('GET', '/api/review-links'),
             ('GET', '/api/crew'),
+            ('GET', '/api/intelligence/crew'),
+            ('GET', '/api/intelligence/lead/not-a-real-lead'),
             ('GET', '/api/crew/playbook'),
             ('GET', '/api/receptionist/threads'),
             ('GET', '/api/admin/users'),
