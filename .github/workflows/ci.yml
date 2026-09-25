@@ -37,6 +37,9 @@ jobs:
               with open(f'/tmp/lighthouse-{name}.json', encoding='utf-8') as f:
                   report=json.load(f)
               print(name, {k: round((v.get('score') or 0)*100) if v.get('score') is not None else None for k,v in report.get('categories',{}).items()})
+              for audit_id, audit in report.get('audits', {}).items():
+                  if audit.get('score') is not None and audit.get('score') < 1 and audit.get('scoreDisplayMode') not in ('notApplicable', 'manual', 'informative'):
+                      print(f"  FAIL {audit_id}: {audit.get('scoreDisplayMode')} — {audit.get('title')}")
               if report.get('runtimeError'):
                   raise SystemExit(f"{name} Lighthouse runtime error: {report['runtimeError']}")
           PY
