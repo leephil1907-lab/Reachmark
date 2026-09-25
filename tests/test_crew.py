@@ -272,7 +272,10 @@ class ReviewLinkTests(CrewBase):
         # question, no proposal. Those live in the branded e-mail that carries the link.
         self.assertIn(b'Test Bakery', page.data)
         self.assertIn(b'not the official website', page.data)
-        self.assertNotIn(b'Would you like this built', page.data)
+        self.assertIn(b'Would you like this built', page.data)
+        self.assertIn('Yes — build my website'.encode(), page.data)
+        self.assertIn(b'Not right now', page.data)
+        self.assertIn(b'I already have a website', page.data)
         self.assertEqual(get_link(module.db, token=link['token'])['views'], 1)
         record_view(module.db, module.now, link['token'], count=False)
         self.assertEqual(get_link(module.db, token=link['token'])['views'], 1, 'a returning tab must not inflate views')

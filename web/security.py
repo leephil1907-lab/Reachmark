@@ -31,7 +31,7 @@ def install_security(app, db):
         if p.startswith(('/c/','/book/','/api/book/','/api/qr','/api/auth/oauth')): return True
         if p.startswith('/api/bookings/') and p.endswith('.ics'): return True
         if p in ('/api/receptionist/message','/api/receptionist/offer-review-link','/api/frontdesk/status'): return True
-        if p.startswith(('/api/auth/verify','/api/auth/forgot','/api/auth/reset','/api/auth/request-verification','/api/deploy-check')): return True
+        if p.startswith(('/api/auth/verify','/api/auth/forgot','/api/auth/reset','/api/auth/request-verification')): return True
         return p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/')) or (p=='/api/enquiries' and request.method=='POST') or (p in ('/api/auth/signup','/api/auth/login') and request.method=='POST') or (p=='/api/auth/me' and request.method=='GET')
     def csrf():
         if 'csrf' not in session:session['csrf']=secrets.token_urlsafe(32)
