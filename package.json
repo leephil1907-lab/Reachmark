@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Reachmark — discover business potential and make a thoughtful first impression",
   "scripts": {
-    "build": "npm run build:menu && npm run build:intelligence","build:menu": "esbuild frontend/menu.jsx --bundle --minify --outfile=static/motion-menu.js --define:process.env.NODE_ENV=\"\\\"production\\\""","build:intelligence": "esbuild frontend/intelligence.jsx --bundle --minify --outfile=static/intelligence.js --define:process.env.NODE_ENV=\"\\\"production\\\""
+    "build": "npm run build:menu && npm run build:intelligence",
+    "build:menu": "esbuild frontend/menu.jsx --bundle --minify --outfile=static/motion-menu.js --define:process.env.NODE_ENV=\"production\"",
+    "build:intelligence": "esbuild frontend/intelligence.jsx --bundle --minify --outfile=static/intelligence.js --define:process.env.NODE_ENV=\"production\""
   },
   "keywords": [],
   "author": "",
