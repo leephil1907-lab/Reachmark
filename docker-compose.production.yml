@@ -1,0 +1,53 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        RELEASE_SHA: ${RELEASE_SHA:-local}
+    image: reachmark:${RELEASE_SHA:-local}
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      APP_ENV: production
+      DATABASE_PATH: /data/reachmark.sqlite3
+      PORT: 8000
+      RELEASE_SHA: ${RELEASE_SHA:-local}
+    volumes:
+      - reachmark_data:/data
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks: [reachmark]
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    env_file:
+      - .env.production
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [reachmark]
+
+volumes:
+  reachmark_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  reachmark:
+    driver: bridge
