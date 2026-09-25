@@ -9,6 +9,8 @@ checks/
 *.zip
 .env.*
 !.env.example
+!.env.production.example
+!.env.backup.example
 backups/
 *.pem
 *.key
