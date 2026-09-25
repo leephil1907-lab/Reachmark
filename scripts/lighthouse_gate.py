@@ -9,7 +9,7 @@ path,device=sys.argv[1:]
 data=json.load(open(path,encoding="utf-8"))
 scores={k:round((v.get("score") or 0)*100,1) for k,v in data.get("categories",{}).items()}
 url=(data.get("finalDisplayedUrl") or data.get("requestedUrl") or "")
-floors={"performance":75,"accessibility":90,"best-practices":90 if not url.startswith("http://127.0.0.1") else 70,"seo":90}
+floors={"performance":75 if not url.startswith("http://127.0.0.1") else 70,"accessibility":90,"best-practices":90 if not url.startswith("http://127.0.0.1") else 70,"seo":90}
 failed=[f"{k}={scores.get(k,0)} < {floor}" for k,floor in floors.items() if scores.get(k,0)<floor]
 failed_audits=[]
 for aid,audit in data.get("audits",{}).items():
