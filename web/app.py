@@ -30,17 +30,8 @@ def db():
             yield c
     finally:
         c.close()
-with db() as c:
-    c.execute('PRAGMA journal_mode=WAL')
-    c.executescript('''CREATE TABLE IF NOT EXISTS leads (id TEXT PRIMARY KEY, source_key TEXT UNIQUE, name TEXT NOT NULL, category TEXT, city TEXT, address TEXT, phone TEXT, email TEXT, website TEXT, status TEXT, stage TEXT DEFAULT 'New', source TEXT, source_url TEXT, note TEXT DEFAULT '', subject TEXT DEFAULT '', body TEXT DEFAULT '', token TEXT UNIQUE, created TEXT, updated TEXT, source_seen_at TEXT, owner_user_id TEXT);
-    CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, data TEXT);
-    CREATE TABLE IF NOT EXISTS activity (id INTEGER PRIMARY KEY, kind TEXT, message TEXT, created TEXT);
-    CREATE TABLE IF NOT EXISTS sends (id TEXT PRIMARY KEY, lead_id TEXT, recipient TEXT, state TEXT, error TEXT, created TEXT);
-    CREATE TABLE IF NOT EXISTS suppression (email TEXT PRIMARY KEY, created TEXT);
-    CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY,state TEXT,locations TEXT,category TEXT,progress INTEGER,total INTEGER,added INTEGER,checked INTEGER,message TEXT,created TEXT,updated TEXT,owner_user_id TEXT);
-    CREATE TABLE IF NOT EXISTS optout_links (token TEXT PRIMARY KEY, email TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS client_reviews (id TEXT PRIMARY KEY, name TEXT NOT NULL, business TEXT, rating INTEGER NOT NULL, text TEXT NOT NULL, created TEXT NOT NULL, approved INTEGER DEFAULT 1);''')
-# Legacy schema upgrades are applied centrally after feature tables are registered.
+from web.schema import initialize_database
+initialize_database(db)
 from web.services import discover_location, audit_website
 from web.portfolio import SAMPLES
 DEFAULTS={'sender_name':'','agency':'','reply_email':'','postal_address':'','public_base_url':'','offer':'clear, mobile-friendly websites that make it easier for customers to learn about services and get in touch'}
