@@ -36,7 +36,8 @@ class ProspectTests(unittest.TestCase):
         module.DB = os.path.join(self.tmp.name, 'test.sqlite3')
 
     def test_source_seen_at_schema_and_refresh(self):
-        self.assertIn('source_seen_at', [r[1] for r in module.db().__enter__().execute('PRAGMA table_info(leads)')])
+        with module.db() as c:
+            self.assertIn('source_seen_at', [r[1] for r in c.execute('PRAGMA table_info(leads)')])
         l=module.add_lead({'name':'Seen Bakery','city':'Lagos','source_key':'seen:1'})
         self.assertEqual(l,1)
         with module.db() as c:
