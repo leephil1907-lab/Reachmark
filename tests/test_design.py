@@ -185,6 +185,8 @@ class RatingTests(CrewBase):
                       'lead_id TEXT, choice TEXT, note TEXT, name TEXT, email TEXT, '
                       'fingerprint TEXT, handled INTEGER DEFAULT 0, created TEXT)')
         ensure_tables(module.db)
+        from web.migrations import run_migrations
+        run_migrations(module.db)
         with module.db() as c:
             columns = {row[1] for row in c.execute('PRAGMA table_info(review_responses)')}
         self.assertIn('rating', columns)
