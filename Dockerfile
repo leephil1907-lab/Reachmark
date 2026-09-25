@@ -1,8 +1,11 @@
 FROM python:3.13-slim
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends restic && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends restic nodejs npm && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+COPY package.json package-lock.json ./
+COPY frontend ./frontend
+RUN npm ci && npm run build
 COPY web ./web
 COPY agents ./agents
 COPY crew ./crew
