@@ -30,13 +30,11 @@
 </style>
 <script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script></head><body class="public-page">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}{% include 'header-public.html' %}<main class="public-main"><header class="public-heading" data-motion="fade-up"><div class="public-eyebrow">{{ t('show.eyebrow') }}</div><h1 data-split>{{ t('show.h1a') }}<br>{{ t('show.h1b') }}</h1><p>{{ t('show.sub') }}</p></header>
-<!-- Trustpilot strip — visible ASAP -->
-<div class="premium-reveal" style="max-width:1280px; margin:18px auto 0; padding:0 6%; display:flex; justify-content:center;">
-  <div style="display:inline-flex; align-items:center; gap:12px; background:#fff; border:1px solid #e2e7d6; padding:10px 16px; border-radius:20px; box-shadow:0 4px 16px rgba(32,45,22,.06); flex-wrap:wrap; justify-content:center;">
-    <span style="font:800 12px 'Manrope',sans-serif; color:#00b67a;">★ Trustpilot</span>
-    <span style="font-size:10px; color:#00b67a; letter-spacing:1px;">★★★★★</span>
-    <span style="font:600 11px 'Manrope',sans-serif; color:#1e2e15;">{{ t('tp.rating') }}</span>
-    <span style="font-size:9px; color:#8a9976;">{{ t('tp.strip_note') }}</span>
+<!-- Concept gallery notice: these are original Reachmark design concepts, not client claims. -->
+<div class="premium-reveal concept-gallery-notice" style="max-width:1280px;margin:18px auto 0;padding:0 6%;">
+  <div style="display:flex;align-items:center;justify-content:center;gap:12px;background:#fff;border:1px solid #e2e7d6;padding:12px 18px;border-radius:20px;box-shadow:0 4px 16px rgba(32,45,22,.06);flex-wrap:wrap;text-align:center;">
+    <span style="font:800 10px 'Manrope',sans-serif;letter-spacing:1.4px;color:#5c7a2e;">REACHMARK CONCEPT GALLERY</span>
+    <span style="font:600 11px 'Manrope',sans-serif;color:#5f6c55;">Original design directions created to demonstrate what Reachmark can build.</span>
   </div>
 </div>
 
@@ -52,49 +50,14 @@
 </section>
 
 {% include 'sample-cards.html' %}<div class="sample-explainer premium-reveal">{{ t('show.explainer') }}</div>
-<!-- Trustpilot Reviews — world-class social proof -->
-<section id="trustpilot" class="trustpilot-section premium-reveal">
-  <div class="trustpilot-head">
-    <div>
-      <div class="eyebrow">{{ t('tp.eyebrow') }}</div>
-      <h2 style="font:600 32px/1.15 'Manrope',sans-serif; letter-spacing:-1.2px; color:#1e2e15; margin:12px 0 8px;">{{ t('tp.h1') }}<br>{{ t('tp.h2') }}</h2>
-      <p style="font-size:11px; color:#8a9976; max-width:420px; margin:0;">{{ t('tp.sub') }}</p>
-    </div>
-    <div class="trustpilot-badge">
-      <div class="tp-logo">★ <span>Trustpilot</span></div>
-      <div>
-        <div class="tp-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
-        <div style="font-size:9px; color:#6b7a5a; margin-top:4px;"><strong style="color:#1e2e15; font-size:11px;">{{ t('tp.rating') }}</strong>{{ t('tp.count') }}</div>
-      </div>
-    </div>
-  </div>
-  <div class="trustpilot-grid premium-stagger">
-    <article class="trust-card">
-      <div class="stars">★★★★★</div>
-      <p>“Reachmark found us the perfect local businesses. The 3D preview sold our client before we even pitched. The Figma templates are genuinely premium — world-class.”</p>
-      <div class="author"><div class="avatar">SM</div><div><strong>Sarah M.</strong><small>Boutique owner · London</small></div></div>
-    </article>
-    <article class="trust-card">
-      <div class="stars">★★★★★</div>
-      <p>“Precise lead data from real OpenStreetMap, not fake lists. We closed 2 clinic websites in 3 weeks. The map + health checks save hours of research.”</p>
-      <div class="author"><div class="avatar">DK</div><div><strong>David K.</strong><small>Clinic director · Toronto</small></div></div>
-    </article>
-
-  </div>
-  <div class="trustpilot-foot">{{ t('tp.foot') }} <a href="/showcase" style="color:#8ca650; text-decoration:underline;">{{ t('tp.foot_a') }}</a></div>
-</section>
-
+<!-- No fabricated testimonials, ratings, client counts, or outcome claims. The gallery above is concept work only. -->
 <section class="gallery-callout"><div><h2>{{ t('show.call_h') }}</h2><p>{{ t('show.call_p') }}</p></div><a data-magnet class="public-btn" href="/enquire">{{ t('show.ask') }} ↗</a></section>{% include 'adsense-footer.html' %}</main><footer class="world-footer">
   <div class="world-footer-inner">
     <div class="footer-top">
       <div class="footer-brand">
         <a href="/"><img class="footer-logo" src="/static/logo-primary.svg" alt="{{ t('show.foot_alt') }}"></a>
         <p>{{ t('show.foot_p') }}</p>
-        <div style="display:flex; align-items:center; gap:10px; margin-top:18px; background:#1a2315; border:1px solid #2a3a22; padding:10px 14px; border-radius:10px;">
-          <span style="color:#00b67a; font-size:13px; letter-spacing:2px;">★★★★★</span>
-          <span style="font:600 11px 'Manrope',sans-serif; color:#e6e9dd;">{{ t('tp.rating') }}</span>
-          <span style="font-size:9px; color:#9aa38e;">{{ t('tp.on_tp') }}</span>
-        </div>
+        
         <div style="margin-top:16px; display:flex; gap:10px;">
           <a href="https://instagram.com" aria-label="Instagram" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">◎</a>
           <a href="https://x.com" aria-label="X" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">𝕏</a>
