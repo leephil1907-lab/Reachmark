@@ -677,6 +677,8 @@ from web.network import register_network
 register_network(app, db, now, log, settings)
 from web.oauth import register_oauth
 register_oauth(app, db, now, log)
+from web.intelligence import register_intelligence
+register_intelligence(app, db, now)
 
 
 # Client reviews — leave a review for good job done
