@@ -5,7 +5,7 @@ Migrations are idempotent and run after all feature tables have been registered.
 """
 from datetime import datetime, timezone
 
-MIGRATION_VERSION = 1
+MIGRATION_VERSION = 3
 
 
 def _columns(c, table):
@@ -59,6 +59,7 @@ def run_migrations(db):
                 ('paystack_customer', 'TEXT'), ('expiry_warned', 'TEXT')
             ]
             payment_columns = [('period', "TEXT DEFAULT 'monthly'")]
+
 
             required_tables = ('leads', 'jobs', 'projects', 'invoices', 'review_responses', 'review_links', 'users', 'payments')
             tables = {row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
