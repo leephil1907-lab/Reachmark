@@ -6,7 +6,7 @@ Implemented: studio-owner sessions, **client portal (signup/signin) with assigne
 
 **Not yet activated:** a VPS, domain/DNS, public HTTPS certificates, GitHub deployment secrets/environment, external uptime/error/backup alerts, offsite storage and a dedicated map-data contract. There is no live production deployment to certify yet. Docker is not available in the development sandbox, so the actual container build/start must be checked by CI/on the target host. Local Python/browser/backup tests are not a substitute for that launch test.
 
-Recommended starting architecture: a small VPS with roughly 2 vCPU, 2 GB RAM and 25+ GB disk, Docker Compose, Caddy and one threaded application worker. Reassess storage against lead/source-tag/backup growth. Do not run multiple app replicas: discovery workers use in-process coordination and startup recovery. For multiple users/replicas, migrate job coordination and storage first.
+Primary production architecture (locked for this release): a small VPS with roughly 2 vCPU, 2+ GB RAM and 25+ GB disk, Docker Compose, Caddy, one Gunicorn application container using **1 worker / 4 threads**, persistent SQLite on `/data`, and the dedicated backup service. Reassess storage against lead/source-tag/backup growth. Do not run multiple app replicas: discovery workers use in-process coordination and startup recovery. For multiple users/replicas, migrate job coordination and storage first. This is the single release architecture; Railway/Render-style replicas are not the production target for this release.
 
 ### Zero-budget path (your current situation)
 

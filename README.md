@@ -2,4 +2,4 @@
 
 Find potential. Make your mark.
 
-Live: https://sitegapreveal-production.up.railway.app
+Production: not released yet. The primary target is Docker Compose + Caddy + Gunicorn (1 worker / 4 threads) + persistent SQLite.

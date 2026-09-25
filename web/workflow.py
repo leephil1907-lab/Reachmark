@@ -28,17 +28,8 @@ def duplicates(leads):
 
 def register_workflow(app,db,now,log):
     with db() as c:
-        if 'source_seen_at' not in {r[1] for r in c.execute('PRAGMA table_info(leads)')}:
-            c.execute('ALTER TABLE leads ADD COLUMN source_seen_at TEXT');c.execute('UPDATE leads SET source_seen_at=created')
         c.executescript('''CREATE TABLE IF NOT EXISTS lead_reviews(lead_id TEXT PRIMARY KEY,verification TEXT,note TEXT,evidence_url TEXT,reviewed_at TEXT);
         CREATE TABLE IF NOT EXISTS projects(id TEXT PRIMARY KEY,title TEXT,lead_id TEXT,contract_id TEXT,stage TEXT,next_action TEXT,due_date TEXT,scope TEXT,currency TEXT,quote_minor INTEGER,created TEXT,updated TEXT);''')
-        # Migration for client assignment
-        proj_cols={r[1] for r in c.execute('PRAGMA table_info(projects)')}
-        if 'client_user_id' not in proj_cols:
-            try:
-                c.execute('ALTER TABLE projects ADD COLUMN client_user_id TEXT')
-            except Exception:
-                pass
     @app.get('/api/quality')
     def quality():
         from flask import session

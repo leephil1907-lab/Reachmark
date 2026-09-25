@@ -13,9 +13,31 @@ jobs:
         with: {node-version: '22', cache: npm}
       - run: pip install -r requirements.txt
       - run: npm ci && npm run build
-      - run: python -m unittest tests.test_app tests.test_operations tests.test_maps.MapTests tests.test_production tests.test_crew tests.test_video tests.test_receptionist_page tests.test_brain tests.test_design tests.test_adsense -q
+      - run: python -m unittest tests.test_app tests.test_operations tests.test_maps.MapTests tests.test_production tests.test_crew tests.test_video tests.test_receptionist_page tests.test_brain tests.test_design tests.test_adsense tests.test_migrations tests.test_authorization -q
       - run: for f in static/*.js; do node --check "$f"; done
       - run: pip install playwright && python -m playwright install --with-deps chromium
-      - run: PYTHONPATH=. python tests/browser/production_flow.py && PYTHONPATH=. python tests/browser/map_flow.py
+      - run: PYTHONPATH=. python tests/browser/production_flow.py
+      - run: PYTHONPATH=. python tests/browser/map_flow.py
       - run: python scripts/crew_smoke.py
+      - name: Lighthouse mobile and desktop audit
+        env:
+          APP_ENV: development
+          DATABASE_PATH: /tmp/reachmark-lighthouse.sqlite3
+          SECRET_KEY: lighthouse-local-only
+        run: |
+          nohup python -m flask --app web.app run --host 127.0.0.1 --port 8765 >/tmp/reachmark-lighthouse.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8765/healthz >/dev/null && break; sleep 1; done
+          CHROME_PATH=$(python -c "from playwright.sync_api import sync_playwright; p=sync_playwright().start(); print(p.chromium.executable_path); p.stop()")
+          export CHROME_PATH
+          npx --yes lighthouse@latest http://127.0.0.1:8765/ --form-factor=mobile --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=/tmp/lighthouse-mobile.json --chrome-flags="--headless --no-sandbox"
+          npx --yes lighthouse@latest http://127.0.0.1:8765/ --preset=desktop --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=/tmp/lighthouse-desktop.json --chrome-flags="--headless --no-sandbox"
+          python - <<'PY'
+          import json
+          for name in ('mobile','desktop'):
+              with open(f'/tmp/lighthouse-{name}.json', encoding='utf-8') as f:
+                  report=json.load(f)
+              print(name, {k: round((v.get('score') or 0)*100) if v.get('score') is not None else None for k,v in report.get('categories',{}).items()})
+              if report.get('runtimeError'):
+                  raise SystemExit(f"{name} Lighthouse runtime error: {report['runtimeError']}")
+          PY
       - run: docker build --build-arg RELEASE_SHA=${{ github.sha }} -t reachmark:ci .

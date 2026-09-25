@@ -92,20 +92,11 @@ RULES = [
 
 def ensure_billing(db):
     with db() as c:
-        cols = {r[1] for r in c.execute('PRAGMA table_info(users)')}
-        for col, typ in [('tier', "TEXT DEFAULT 'free'"), ('tier_expires', 'TEXT'),
-                         ('paystack_customer', 'TEXT'), ('expiry_warned', 'TEXT')]:
-            if col not in cols:
-                c.execute(f'ALTER TABLE users ADD COLUMN {col} {typ}')
-        c.execute("UPDATE users SET tier='free' WHERE tier IS NULL OR tier=''")
         c.execute('''CREATE TABLE IF NOT EXISTS payments(
             id TEXT PRIMARY KEY, user_id TEXT, email TEXT, tier TEXT, currency TEXT,
             amount_minor INTEGER, reference TEXT UNIQUE, status TEXT, paid_at TEXT,
             created TEXT, raw TEXT, tx_hash TEXT, coin_amount TEXT, coin_address TEXT,
             period TEXT DEFAULT 'monthly')''')
-        pcols = {r[1] for r in c.execute('PRAGMA table_info(payments)')}
-        if 'period' not in pcols:
-            c.execute("ALTER TABLE payments ADD COLUMN period TEXT DEFAULT 'monthly'")
 
 
 def tier_status(user):
