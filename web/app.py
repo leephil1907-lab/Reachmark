@@ -22,7 +22,7 @@ def db():
     parent = os.path.dirname(os.path.abspath(DB))
     if not os.path.isdir(parent):
         raise RuntimeError('Database directory does not exist: %s. Create it or fix DATABASE_PATH '
-                           '(on Railway: attach a volume mounted at /data).' % parent)
+                           '(on the production host: attach a persistent volume mounted at /data).' % parent)
     c = sqlite3.connect(DB, timeout=20); c.row_factory=sqlite3.Row
     c.execute('PRAGMA busy_timeout=20000')
     try:
@@ -30,24 +30,9 @@ def db():
             yield c
     finally:
         c.close()
-with db() as c:
-    c.execute('PRAGMA journal_mode=WAL')
-    c.executescript('''CREATE TABLE IF NOT EXISTS leads (id TEXT PRIMARY KEY, source_key TEXT UNIQUE, name TEXT NOT NULL, category TEXT, city TEXT, address TEXT, phone TEXT, email TEXT, website TEXT, status TEXT, stage TEXT DEFAULT 'New', source TEXT, source_url TEXT, note TEXT DEFAULT '', subject TEXT DEFAULT '', body TEXT DEFAULT '', token TEXT UNIQUE, created TEXT, updated TEXT, owner_user_id TEXT);
-    CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, data TEXT);
-    CREATE TABLE IF NOT EXISTS activity (id INTEGER PRIMARY KEY, kind TEXT, message TEXT, created TEXT);
-    CREATE TABLE IF NOT EXISTS sends (id TEXT PRIMARY KEY, lead_id TEXT, recipient TEXT, state TEXT, error TEXT, created TEXT);
-    CREATE TABLE IF NOT EXISTS suppression (email TEXT PRIMARY KEY, created TEXT);
-    CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY,state TEXT,locations TEXT,category TEXT,progress INTEGER,total INTEGER,added INTEGER,checked INTEGER,message TEXT,created TEXT,updated TEXT,owner_user_id TEXT);
-    CREATE TABLE IF NOT EXISTS optout_links (token TEXT PRIMARY KEY, email TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS client_reviews (id TEXT PRIMARY KEY, name TEXT NOT NULL, business TEXT, rating INTEGER NOT NULL, text TEXT NOT NULL, created TEXT NOT NULL, approved INTEGER DEFAULT 1);''')
-# Non-destructive migrations for earlier workspaces.
-with db() as c:
-    columns={r[1] for r in c.execute('PRAGMA table_info(leads)')}
-    for name,kind in [('audit_status','TEXT'),('audit_reason','TEXT'),('checked_at','TEXT'),('http_code','INTEGER'),('latitude','REAL'),('longitude','REAL'),('opening_hours','TEXT'),('social_url','TEXT'),('source_tags','TEXT'),('owner_user_id','TEXT'),('html','TEXT')]:
-        if name not in columns: c.execute(f'ALTER TABLE leads ADD COLUMN {name} {kind}')
-    if 'owner_user_id' not in {r[1] for r in c.execute('PRAGMA table_info(jobs)')}:
-        c.execute('ALTER TABLE jobs ADD COLUMN owner_user_id TEXT')
-    c.execute("UPDATE jobs SET state='interrupted',message='Server restarted; start a new search to continue.' WHERE state IN ('queued','running')")
+
+from web.schema import initialize_database
+initialize_database(db)
 from web.services import discover_location, audit_website
 from web.portfolio import SAMPLES
 DEFAULTS={'sender_name':'','agency':'','reply_email':'','postal_address':'','public_base_url':'','offer':'clear, mobile-friendly websites that make it easier for customers to learn about services and get in touch'}
