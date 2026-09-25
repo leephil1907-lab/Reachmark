@@ -714,4 +714,11 @@ def reviews_page():
     return render_template('about.html', base=base, structured=structured, samples=SAMPLES, client_reviews=revs)
 
 
+# Apply all legacy SQLite column upgrades once every feature table exists.
+from web.migrations import run_migrations
+run_migrations(db)
+with db() as c:
+    c.execute("UPDATE jobs SET state='interrupted',message='Server restarted; start a new search to continue.' WHERE state IN ('queued','running')")
+
+
 if __name__=='__main__': app.run(host='0.0.0.0',port=int(os.getenv('PORT','8000')),debug=False)
