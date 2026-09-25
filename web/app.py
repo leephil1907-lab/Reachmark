@@ -40,14 +40,7 @@ with db() as c:
     CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY,state TEXT,locations TEXT,category TEXT,progress INTEGER,total INTEGER,added INTEGER,checked INTEGER,message TEXT,created TEXT,updated TEXT,owner_user_id TEXT);
     CREATE TABLE IF NOT EXISTS optout_links (token TEXT PRIMARY KEY, email TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS client_reviews (id TEXT PRIMARY KEY, name TEXT NOT NULL, business TEXT, rating INTEGER NOT NULL, text TEXT NOT NULL, created TEXT NOT NULL, approved INTEGER DEFAULT 1);''')
-# Non-destructive migrations for earlier workspaces.
-with db() as c:
-    columns={r[1] for r in c.execute('PRAGMA table_info(leads)')}
-    for name,kind in [('audit_status','TEXT'),('audit_reason','TEXT'),('checked_at','TEXT'),('http_code','INTEGER'),('latitude','REAL'),('longitude','REAL'),('opening_hours','TEXT'),('social_url','TEXT'),('source_tags','TEXT'),('owner_user_id','TEXT'),('html','TEXT')]:
-        if name not in columns: c.execute(f'ALTER TABLE leads ADD COLUMN {name} {kind}')
-    if 'owner_user_id' not in {r[1] for r in c.execute('PRAGMA table_info(jobs)')}:
-        c.execute('ALTER TABLE jobs ADD COLUMN owner_user_id TEXT')
-    c.execute("UPDATE jobs SET state='interrupted',message='Server restarted; start a new search to continue.' WHERE state IN ('queued','running')")
+# Legacy schema upgrades are applied centrally after feature tables are registered.
 from web.services import discover_location, audit_website
 from web.portfolio import SAMPLES
 DEFAULTS={'sender_name':'','agency':'','reply_email':'','postal_address':'','public_base_url':'','offer':'clear, mobile-friendly websites that make it easier for customers to learn about services and get in touch'}
