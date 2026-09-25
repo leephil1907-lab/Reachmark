@@ -52,8 +52,15 @@ def run_migrations(db):
             invoice_columns = [('client_user_id', 'TEXT')]
             review_response_columns = [('rating', 'INTEGER')]
             review_link_columns = [('chat_message', 'TEXT')]
+            user_columns = [
+                ('is_active', 'INTEGER DEFAULT 1'), ('name', 'TEXT'), ('email_verified', 'INTEGER DEFAULT 0'),
+                ('verification_token', 'TEXT'), ('verification_expires', 'TEXT'), ('reset_token', 'TEXT'),
+                ('reset_expires', 'TEXT'), ('tier', "TEXT DEFAULT 'free'"), ('tier_expires', 'TEXT'),
+                ('paystack_customer', 'TEXT'), ('expiry_warned', 'TEXT')
+            ]
+            payment_columns = [('period', "TEXT DEFAULT 'monthly'")]
 
-            required_tables = ('leads', 'jobs', 'projects', 'invoices', 'review_responses', 'review_links')
+            required_tables = ('leads', 'jobs', 'projects', 'invoices', 'review_responses', 'review_links', 'users', 'payments')
             tables = {row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
             if all(table in tables for table in required_tables):
                 for column, definition in lead_columns:
@@ -68,6 +75,11 @@ def run_migrations(db):
                     _add_column(c, 'review_responses', column, definition)
                 for column, definition in review_link_columns:
                     _add_column(c, 'review_links', column, definition)
+                for column, definition in user_columns:
+                    _add_column(c, 'users', column, definition)
+                for column, definition in payment_columns:
+                    _add_column(c, 'payments', column, definition)
+                c.execute("UPDATE users SET tier='free' WHERE tier IS NULL OR tier=''")
 
                 # Preserve historical lead timestamps when source_seen_at was
                 # introduced. New writes continue to update it explicitly.
