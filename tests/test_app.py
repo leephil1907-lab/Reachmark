@@ -35,6 +35,18 @@ class ProspectTests(unittest.TestCase):
         self.assertIn('DATABASE_PATH', str(ctx.exception))
         module.DB = os.path.join(self.tmp.name, 'test.sqlite3')
 
+    def test_source_seen_at_schema_and_refresh(self):
+        self.assertIn('source_seen_at', [r[1] for r in module.db().__enter__().execute('PRAGMA table_info(leads)')])
+        l=module.add_lead({'name':'Seen Bakery','city':'Lagos','source_key':'seen:1'})
+        self.assertEqual(l,1)
+        with module.db() as c:
+            first=c.execute("SELECT source_seen_at FROM leads WHERE source_key='seen:1'").fetchone()[0]
+        self.assertTrue(first)
+        self.assertEqual(module.add_lead({'name':'Seen Bakery','city':'Lagos','source_key':'seen:1'}),0)
+        with module.db() as c:
+            second=c.execute("SELECT source_seen_at FROM leads WHERE source_key='seen:1'").fetchone()[0]
+        self.assertTrue(second)
+
     def test_classification(self):
         self.assertEqual(module.classify(''),'NOT_LISTED')
         self.assertEqual(module.classify('https://www.facebook.com/example'),'SOCIAL_ONLY')
