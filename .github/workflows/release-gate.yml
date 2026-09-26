@@ -15,11 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      APP_ENV: production
-      PUBLIC_BASE_URL: https://release-gate.invalid
-      DATABASE_PATH: /data/reachmark.sqlite3
-      SECRET_KEY: release-gate-secret-key-0123456789-abcdefghijklmnopqrstuvwxyz
-      OWNER_PASSWORD_HASH: pbkdf2:sha256:1000$rm-ci-salt-2026$b3ba9a2a8bd242b41cfb66ed75038347c1125d00a38d3b4b780532d9869f27cf
       CI_OWNER_PASSWORD: Reachmark-CI-only-2026!
     steps:
       - name: Checkout
@@ -45,11 +40,11 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/reachmark-data"
           docker run -d --name reachmark-release-gate \
-            -e APP_ENV \
-            -e PUBLIC_BASE_URL \
-            -e DATABASE_PATH \
-            -e SECRET_KEY \
-            -e OWNER_PASSWORD_HASH \
+            -e APP_ENV=production \
+            -e PUBLIC_BASE_URL=https://release-gate.invalid \
+            -e DATABASE_PATH=/data/reachmark.sqlite3 \
+            -e SECRET_KEY=release-gate-secret-key-0123456789-abcdefghijklmnopqrstuvwxyz \
+            -e OWNER_PASSWORD_HASH=pbkdf2:sha256:1000$rm-ci-salt-2026$b3ba9a2a8bd242b41cfb66ed75038347c1125d00a38d3b4b780532d9869f27cf \
             -e RELEASE_SHA="$GITHUB_SHA" \
             -v "$RUNNER_TEMP/reachmark-data:/data" \
             -p 18000:8000 \
