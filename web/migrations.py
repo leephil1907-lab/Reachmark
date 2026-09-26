@@ -1,91 +1,124 @@
-"""Centralized legacy SQLite schema migrations for Reachmark.
+"""Single-source SQLite migrations for Reachmark.
 
-Feature modules own CREATE TABLE statements; this module owns ALTER TABLE upgrades.
-Migrations are idempotent and run after all feature tables have been registered.
+web.schema owns CREATE TABLE bootstrap.
+This module owns every additive schema upgrade and migration version.
 """
 from datetime import datetime, timezone
 
 MIGRATION_VERSION = 3
 
 
+def _tables(c):
+    return {row[0] for row in c.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'"
+    )}
+
+
 def _columns(c, table):
-    return {row[1] for row in c.execute(f'PRAGMA table_info({table})')}
+    return {row[1] for row in c.execute(f"PRAGMA table_info({table})")}
 
 
 def _add_column(c, table, column, definition):
-    if table not in {row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}:
+    if table not in _tables(c):
         return False
     if column in _columns(c, table):
         return False
-    c.execute(f'ALTER TABLE {table} ADD COLUMN {column} {definition}')
+    c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
     return True
 
 
-def run_migrations(db):
-    """Apply all legacy schema upgrades in one place.
+def _apply_v1(c):
+    """Original lead/job audit fields."""
+    lead_columns = [
+        ('audit_status', 'TEXT'),
+        ('audit_reason', 'TEXT'),
+        ('checked_at', 'TEXT'),
+        ('http_code', 'INTEGER'),
+        ('latitude', 'REAL'),
+        ('longitude', 'REAL'),
+        ('opening_hours', 'TEXT'),
+        ('social_url', 'TEXT'),
+        ('source_tags', 'TEXT'),
+        ('owner_user_id', 'TEXT'),
+        ('html', 'TEXT'),
+    ]
+    for column, definition in lead_columns:
+        _add_column(c, 'leads', column, definition)
+    _add_column(c, 'jobs', 'owner_user_id', 'TEXT')
 
-    The function intentionally checks table existence so a partially assembled
-    database can be upgraded safely on the next startup after its feature tables
-    are created.
+
+def _apply_v2(c):
+    """Introduce durable source observation timestamps."""
+    _add_column(c, 'leads', 'source_seen_at', 'TEXT')
+    if 'source_seen_at' in _columns(c, 'leads'):
+        c.execute(
+            "UPDATE leads SET source_seen_at=COALESCE(source_seen_at, created)"
+        )
+
+
+def _apply_v3(c):
+    """Complete legacy feature-table compatibility upgrades."""
+    upgrades = {
+        'projects': [('client_user_id', 'TEXT')],
+        'invoices': [('client_user_id', 'TEXT')],
+        'review_responses': [('rating', 'INTEGER')],
+        'review_links': [('chat_message', 'TEXT')],
+        'users': [
+            ('is_active', 'INTEGER DEFAULT 1'),
+            ('name', 'TEXT'),
+            ('email_verified', 'INTEGER DEFAULT 0'),
+            ('verification_token', 'TEXT'),
+            ('verification_expires', 'TEXT'),
+            ('reset_token', 'TEXT'),
+            ('reset_expires', 'TEXT'),
+            ('tier', "TEXT DEFAULT 'free'"),
+            ('tier_expires', 'TEXT'),
+            ('paystack_customer', 'TEXT'),
+            ('expiry_warned', 'TEXT'),
+        ],
+        'payments': [('period', "TEXT DEFAULT 'monthly'")],
+    }
+    for table, columns in upgrades.items():
+        for column, definition in columns:
+            _add_column(c, table, column, definition)
+
+    if 'users' in _tables(c) and 'tier' in _columns(c, 'users'):
+        c.execute("UPDATE users SET tier='free' WHERE tier IS NULL OR tier=''")
+
+
+def run_migrations(db):
+    """Apply pending migrations in order, idempotently.
+
+    Older databases may already contain migration version 1 or 2 from the
+    previous bootstrap implementation. They are respected and only missing
+    versions are applied. A fresh database receives all three versions.
     """
     with db() as c:
-        c.execute('CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)')
-        applied = {row[0] for row in c.execute('SELECT version FROM schema_migrations')}
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS schema_migrations("
+            "version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)"
+        )
+        applied = {
+            row[0] for row in c.execute(
+                "SELECT version FROM schema_migrations ORDER BY version"
+            )
+        }
 
-        if MIGRATION_VERSION not in applied:
-            lead_columns = [
-                ('audit_status', 'TEXT'),
-                ('audit_reason', 'TEXT'),
-                ('checked_at', 'TEXT'),
-                ('http_code', 'INTEGER'),
-                ('latitude', 'REAL'),
-                ('longitude', 'REAL'),
-                ('opening_hours', 'TEXT'),
-                ('social_url', 'TEXT'),
-                ('source_tags', 'TEXT'),
-                ('owner_user_id', 'TEXT'),
-                ('html', 'TEXT'),
-                ('source_seen_at', 'TEXT'),
-            ]
-            job_columns = [('owner_user_id', 'TEXT')]
-            project_columns = [('client_user_id', 'TEXT')]
-            invoice_columns = [('client_user_id', 'TEXT')]
-            review_response_columns = [('rating', 'INTEGER')]
-            review_link_columns = [('chat_message', 'TEXT')]
-            user_columns = [
-                ('is_active', 'INTEGER DEFAULT 1'), ('name', 'TEXT'), ('email_verified', 'INTEGER DEFAULT 0'),
-                ('verification_token', 'TEXT'), ('verification_expires', 'TEXT'), ('reset_token', 'TEXT'),
-                ('reset_expires', 'TEXT'), ('tier', "TEXT DEFAULT 'free'"), ('tier_expires', 'TEXT'),
-                ('paystack_customer', 'TEXT'), ('expiry_warned', 'TEXT')
-            ]
-            payment_columns = [('period', "TEXT DEFAULT 'monthly'")]
+        migrations = ((1, _apply_v1), (2, _apply_v2), (3, _apply_v3))
+        for version, migration in migrations:
+            if version in applied:
+                continue
+            migration(c)
+            c.execute(
+                "INSERT INTO schema_migrations(version, applied_at) "
+                "VALUES(?, ?)",
+                (version, datetime.now(timezone.utc).isoformat()),
+            )
 
-
-            required_tables = ('leads', 'jobs', 'projects', 'invoices', 'review_responses', 'review_links', 'users', 'payments')
-            tables = {row[0] for row in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-            if all(table in tables for table in required_tables):
-                for column, definition in lead_columns:
-                    _add_column(c, 'leads', column, definition)
-                for column, definition in job_columns:
-                    _add_column(c, 'jobs', column, definition)
-                for column, definition in project_columns:
-                    _add_column(c, 'projects', column, definition)
-                for column, definition in invoice_columns:
-                    _add_column(c, 'invoices', column, definition)
-                for column, definition in review_response_columns:
-                    _add_column(c, 'review_responses', column, definition)
-                for column, definition in review_link_columns:
-                    _add_column(c, 'review_links', column, definition)
-                for column, definition in user_columns:
-                    _add_column(c, 'users', column, definition)
-                for column, definition in payment_columns:
-                    _add_column(c, 'payments', column, definition)
-                c.execute("UPDATE users SET tier='free' WHERE tier IS NULL OR tier=''")
-
-                # Preserve historical lead timestamps when source_seen_at was
-                # introduced. New writes continue to update it explicitly.
-                c.execute("UPDATE leads SET source_seen_at=COALESCE(source_seen_at, created)")
-
-                stamp = datetime.now(timezone.utc).isoformat()
-                c.execute('INSERT INTO schema_migrations(version, applied_at) VALUES(?,?)',
-                          (MIGRATION_VERSION, stamp))
+        # Keep this restart recovery in the centralized database lifecycle.
+        if 'jobs' in _tables(c):
+            c.execute(
+                "UPDATE jobs SET state='interrupted', "
+                "message='Server restarted; start a new search to continue.' "
+                "WHERE state IN ('queued','running')"
+            )
