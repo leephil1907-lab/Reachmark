@@ -177,33 +177,40 @@ STUDIO = {
 }
 
 TIERS = {
-    'starter': {
-        'name': 'Starter', 'price': 650, 'unit': 'per launch',
-        'pages': 'one striking page', 'revisions': 1,
-        'includes': ['your content with a Figma template', 'mobile responsive', 'SEO basics',
-                     'contact form', 'live 3D preview', '1 revision'],
-        'blurb': 'Starter $650 per launch — one striking page with mobile, SEO basics, a contact form, a live 3D preview and 1 revision.',
+    'audit': {
+        'name': 'Audit', 'price': 497, 'unit': 'one-time',
+        'pages': 'full presence review', 'revisions': 1,
+        'includes': ['live technical audit', 'competitor benchmark', 'gap analysis report',
+                     'actionable design roadmap', '1 review session'],
+        'blurb': 'Audit $497 one-time — full technical and design presence audit, gap analysis and actionable roadmap.',
     },
-    'growth': {
-        'name': 'Growth', 'price': 1250, 'unit': 'per launch',
-        'pages': 'up to 5 pages plus blog', 'revisions': 3,
-        'includes': ['CMS for your own updates', 'booking or e-commerce ready', 'SEO + analytics',
-                     '3 revisions', 'priority support'],
-        'blurb': 'Growth $1,250 — up to 5 pages plus blog, CMS for updates, booking or e-commerce ready, SEO + analytics, 3 revisions, priority support.',
+    'build': {
+        'name': 'Build', 'price': 3500, 'unit': 'per launch',
+        'pages': 'complete bespoke website', 'revisions': 3,
+        'includes': ['custom bespoke design', 'CMS for easy updates', 'mobile responsive & SEO ready',
+                     'interactive 3D preview', '3 revisions', 'launch support'],
+        'blurb': 'Build $3,500 — complete custom website with CMS, mobile responsive, SEO ready, interactive 3D preview, 3 revisions, and launch support.',
     },
-    'bespoke': {
-        'name': 'Bespoke', 'price': None, 'unit': 'estimate',
-        'pages': 'custom scope', 'revisions': 'founder-led',
-        'includes': ['custom Figma from scratch', 'API, payment or map integrations',
-                     'performance 95+ target', 'founder-led build'],
-        'blurb': 'Bespoke is custom/estimate — custom Figma from scratch, API/payment/map integrations, performance 95+ target, founder-led build.',
+    'care': {
+        'name': 'Care', 'price': 1800, 'unit': 'per year',
+        'pages': 'ongoing maintenance', 'revisions': 'continuous',
+        'includes': ['managed hosting & security', 'monthly performance tuning', 'content updates',
+                     'priority technical support', 'uptime monitoring'],
+        'blurb': 'Care $1,800 per year — ongoing hosting, security, performance monitoring, monthly updates, and priority support.',
+    },
+    'outreach': {
+        'name': 'Outreach', 'price': 6000, 'unit': 'per campaign',
+        'pages': 'turnkey client acquisition', 'revisions': 'managed',
+        'includes': ['targeted lead discovery', 'verified contact intelligence', 'tailored concept proposals',
+                     'multi-channel sequence setup', 'dedicated pipeline management'],
+        'blurb': 'Outreach $6,000 per campaign — full-cycle business discovery, concept generation, reviewed outreach workflows, and pipeline management.',
     },
 }
 
 TIMING = {
-    'preview': 'a live 3D preview in about 7 days from an agreed scope',
+    'preview': 'a live 3D preview or audit report from an agreed scope',
     'preview_days': 7,
-    'support': '7-day support',
+    'support': 'launch or ongoing support',
     'support_days': 7,
     'start': 'work starts once you approve the scope',
 }
@@ -212,7 +219,7 @@ PROCESS = [
     'You send an enquiry (name, email, what you need — optional budget and timeline).',
     'The studio replies with a tailored estimate.',
     'You approve the scope.',
-    'The concept preview and then the build happen.',
+    'The concept preview, audit, or build happens.',
     'Revisions, then launch.',
 ]
 
@@ -260,9 +267,9 @@ SECTORS = ['café', 'wellness studio', 'renovation and trades', 'clinic', 'law f
            'finance dashboard', 'invoice SaaS']
 
 PROMISES = [
-    'A live 3D preview in about 7 days from an agreed scope.',
-    'Revisions follow the tier: 1 for Starter, 3 for Growth, founder-led for Bespoke.',
-    'Every plan includes domain and hosting guidance plus 7-day support.',
+    'A live 3D preview or audit report from an agreed scope.',
+    'Revisions follow the tier: 1 for Audit, 3 for Build, continuous for Care, managed for Outreach.',
+    'Clear scope and transparent pricing before any commitment.',
     'The concept preview is prepared before any commitment.',
     'Nothing is charged until you approve the scope.',
 ]
@@ -302,12 +309,12 @@ FOCUS = {
 # Accessors
 # --------------------------------------------------------------------------- #
 def tier(name):
-    """One tier by id ('starter' | 'growth' | 'bespoke'). {} when unknown."""
+    """One tier by id ('audit' | 'build' | 'care' | 'outreach'). {} when unknown."""
     return dict(TIERS.get((name or '').lower(), {}))
 
 
 def tier_line(name):
-    """Short shelf label: 'Starter · $650' or 'Bespoke · estimate'."""
+    """Short shelf label: 'Audit · $497' or 'Build · $3,500'."""
     row = TIERS.get((name or '').lower())
     if not row:
         return ''
@@ -318,7 +325,7 @@ def tier_line(name):
 
 def price_mention():
     """The only price shorthand any agent may use unprompted."""
-    return f"Sites from ${TIERS['starter']['price']} {TIERS['starter']['unit']}"
+    return f"Services from ${TIERS['audit']['price']} {TIERS['audit']['unit']}"
 
 
 def opt_out(channel='email'):
@@ -346,7 +353,7 @@ def brief():
     """The whole brand on one page — prepended to any model phrasing prompt."""
     lines = [f"{STUDIO['name']} — {STUDIO['tagline']}", '',
                'Tiers (published, fixed wording):']
-    for key in ('starter', 'growth', 'bespoke'):
+    for key in ('audit', 'build', 'care', 'outreach'):
         row = TIERS[key]
         lines.append(f"- {row['blurb']}")
     lines += ['', f"Timing: {TIMING['preview']}; {TIMING['support']}.",

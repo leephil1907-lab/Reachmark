@@ -9,6 +9,26 @@ from flask import Flask, g, request, jsonify, render_template, Response, abort, 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['MAX_CONTENT_LENGTH'] = 3 * 1024 * 1024
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _load_dotenv():
+    env_path = os.path.join(ROOT, '.env')
+    if os.path.isfile(env_path):
+        with open(env_path, encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#') or '=' not in line:
+                    continue
+                k, v = line.split('=', 1)
+                k = k.strip()
+                if not (v.strip().startswith('"') or v.strip().startswith("'")):
+                    v = v.split('#')[0]
+                v = v.strip().strip("'\"")
+                if k and k not in os.environ:
+                    os.environ[k] = v
+
+
+_load_dotenv()
 DB = os.getenv('DATABASE_PATH', os.path.join(ROOT, 'prospect.sqlite3'))
 lock = threading.Lock()
 last_discovery = 0

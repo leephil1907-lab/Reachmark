@@ -67,9 +67,10 @@ class ReceptionistPageTests(unittest.TestCase):
 
     def test_pricing_quotes_only_published_tiers(self):
         html = self.page()
-        self.assertIn('Starter · $650', html)
-        self.assertIn('Growth · $1,250', html)
-        self.assertIn('Bespoke', html)
+        self.assertIn('Audit · $497', html)
+        self.assertIn('Build · $3,500', html)
+        self.assertIn('Care · $1,800', html)
+        self.assertIn('Outreach · $6,000', html)
 
     def test_no_competitor_brand_or_invented_proof(self):
         html = self.page()

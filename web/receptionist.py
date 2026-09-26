@@ -329,9 +329,10 @@ def register_receptionist(app, db, now, log, settings):
         brand = brand_public()
         tiers = {row['id']: row for row in brand['tiers']}
         loc = g.get('locale', 'en')
-        tier_notes = {'starter': _t('rx.tn_starter', loc),
-                      'growth': _t('rx.tn_growth', loc),
-                      'bespoke': _t('rx.tn_bespoke', loc)}
+        tier_notes = {'audit': _t('rx.tn_audit', loc),
+                      'build': _t('rx.tn_build', loc),
+                      'care': _t('rx.tn_care', loc),
+                      'outreach': _t('rx.tn_outreach', loc)}
         return render_template('receptionist-page.html', seo=seo, google_verification=gsv,
                                structured=structured, ga_id=ga_id, gt_id=gt_id, gtm_id=gtm_id,
                                faqs=faqs, brand=brand, tiers=tiers, tier_notes=tier_notes)

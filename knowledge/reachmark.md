@@ -15,20 +15,20 @@ A: Discovery of businesses with available public contact details, live website c
 ## topic: pricing
 tags: price, cost, how much, budget, quote, fee, rate, cheaper, cheap, affordable, low cost
 Q: how much does a website cost
-A: Published tiers: Starter $650 per launch — one striking page, your content with a Figma template, mobile + SEO + contact form, live 3D preview before build, 1 revision. Growth $1,250 — up to 5 pages plus blog, CMS for updates, booking or e-commerce ready, SEO + analytics, 3 revisions, priority support. Bespoke is custom/estimate — custom Figma from scratch, API/payment/map integrations, performance 95+ target, founder-led build.
+A: Published tiers: Audit $497 one-time — full technical and design presence audit, gap analysis and actionable roadmap. Build $3,500 — complete custom website with CMS, mobile responsive, SEO ready, interactive 3D preview, 3 revisions and launch support. Care $1,800 per year — ongoing hosting, security, performance monitoring, monthly updates and priority support. Outreach $6,000 per campaign — full-cycle business discovery, concept generation, reviewed outreach workflows and pipeline management.
 Q: is there a cheaper option
-A: Starter is the published entry tier at $650 per launch — one striking page with mobile, SEO basics, a contact form, a live 3D preview and 1 revision. If budget is tight, say so in the enquiry and the studio answers with a tailored estimate rather than a discount.
+A: Audit is the published entry tier at $497 one-time — full presence review, technical gap analysis and an actionable roadmap. If budget is tight, say so in the enquiry and the studio answers with a tailored estimate rather than a discount.
 Q: is the price fixed
-A: Starter and Growth are published figures. Bespoke work and anything outside those tiers is quoted after scope is agreed — nothing is charged until you approve scope.
+A: Audit ($497), Build ($3,500), Care ($1,800/yr), and Outreach ($6,000/campaign) are published figures. Custom scopes outside those tiers are quoted after scope is agreed — nothing is charged until you approve scope.
 
 ## topic: process and timing
 tags: how long, timeline, delivery, when, days, process, steps, start
 Q: how long does it take
-A: The published promise is a live 3D preview in about 7 days from an agreed scope. Revisions follow the tier (1 for Starter, 3 for Growth, founder-led for Bespoke). Every plan includes domain and hosting guidance plus 7-day support.
+A: The published promise is a live 3D preview or audit report from an agreed scope. Revisions follow the tier (1 for Audit, 3 for Build, continuous for Care, managed for Outreach). Every build includes launch guidance and support.
 Q: when can you start
-A: Work starts once you approve the scope, and the published promise is a live 3D preview about 7 days after that. Send the enquiry with any deadline you have and the studio replies with a tailored estimate — nothing is charged before you approve scope.
+A: Work starts once you approve the scope, and the published promise is a live 3D preview or report from an agreed scope. Send the enquiry with any deadline you have and the studio replies with a tailored estimate — nothing is charged before you approve scope.
 Q: what are the steps
-A: 1) You send an enquiry (name, email, what you need — optional budget and timeline). 2) The studio replies with a tailored estimate. 3) You approve the scope. 4) The concept preview and then the build happen. 5) Revisions, then launch.
+A: 1) You send an enquiry (name, email, what you need — optional budget and timeline). 2) The studio replies with a tailored estimate. 3) You approve the scope. 4) The concept preview, audit, or build happens. 5) Revisions, then launch.
 Q: do i have to pay before i see anything
 A: No. The concept preview is prepared before any commitment, and there is no purchase until you approve the scope.
 
@@ -42,22 +42,22 @@ A: Yes. The samples are Figma-inspired directions, and Bespoke work includes cus
 ## topic: work included
 tags: includes, pages, seo, hosting, domain, cms, booking, ecommerce, analytics, speed
 Q: what is included
-A: Starter: single-page premium site, mobile responsive, SEO basics, contact form, live 3D preview, 1 revision. Growth: up to 5 pages plus blog, CMS updates, booking or e-commerce ready, SEO + analytics, 3 revisions, priority support. All plans: live 3D preview, domain and hosting guidance, 7-day support.
+A: Audit: full presence review, measured gap analysis, roadmap, 1 review session. Build: complete custom website, CMS, mobile responsive, SEO ready, interactive 3D preview, 3 revisions, launch support. Care: managed hosting, security, performance tuning, monthly updates, priority support. Outreach: lead discovery, verified contact intelligence, concept proposals, pipeline management.
 Q: do you handle hosting and domains
-A: Every plan includes domain and hosting guidance. The work in this workspace is website design and build; hosting is set up with guidance rather than bundled as an opaque fee.
+A: Managed hosting and security are included under the Care tier ($1,800/yr). For Build clients, hosting and domain setup are provided with full guidance rather than bundled as an opaque fee.
 
 ## topic: building it
 tags: revisions, changes, edits, build, ecommerce, shop, store, booking, payments, seo, analytics, sectors, industries, bespoke, custom
 Q: do you build online shops or booking
-A: Growth is published as booking or e-commerce ready, with a CMS so you can update pages yourself. Payments and integrations beyond that are quoted under Bespoke — nothing is charged until you approve scope.
+A: Build is published with CMS updates and booking or e-commerce ready setups. Additional integrations beyond that are quoted after scope is agreed — nothing is charged until you approve scope.
 Q: can you build a booking system
-A: Growth is published as booking or e-commerce ready, with a CMS for your own updates. Anything beyond that — payments, APIs, maps — is Bespoke, quoted after scope is agreed.
+A: Build includes booking-ready or e-commerce integrations with a CMS for your own updates. Custom integrations can also be scoped.
 Q: how many revisions do i get
-A: One revision on Starter, three on Growth, and founder-led revision rounds on Bespoke. Revisions follow the tier you choose.
+A: One revision on Audit, three revisions on Build, continuous updates on Care, and managed oversight on Outreach.
 Q: do you do seo and analytics
-A: Starter includes SEO basics; Growth includes SEO plus analytics; speed and performance targets are part of the Bespoke tier. No rankings or traffic figures are promised — none are published.
+A: Audit evaluates SEO and performance gaps; Build includes on-page SEO and analytics setup; Care provides continuous monitoring and performance tuning. No rankings or traffic figures are promised — none are published.
 Q: what does bespoke mean
-A: Bespoke is the custom tier: a Figma design made from scratch, API, payment or map integrations, a performance target of 95+ and a founder-led build. It is quoted after scope is agreed, and nothing is charged before you approve scope.
+A: Bespoke means every Build is designed from scratch in Figma with tailored interactions, clean code, and zero cookie-cutter templates. Nothing is charged before you approve scope.
 Q: do you work with dentists
 A: The published samples cover a café, a wellness studio, renovation and trades, a clinic, a law firm, retail, a finance dashboard and an invoice SaaS. If your sector is not among them, ask — the studio answers with a tailored estimate rather than a list of exclusions.
 Q: how do i pay
@@ -95,7 +95,7 @@ tags: guarantee, limits, uptime, accuracy, claims, google, ranking, rankings, tr
 Q: do you guarantee results
 A: No guarantees are published, and none should be assumed: public map coverage is uneven, website checks are observations at a point in time, and replies depend on the businesses contacted.
 Q: will you get me to the top of google
-A: No guarantee is published, and none should be assumed. Growth includes SEO plus analytics and Bespoke targets performance 95+, but no ranking, traffic or revenue outcome is promised anywhere on this site.
+A: No guarantee is published, and none should be assumed. Build includes SEO plus analytics and Audit identifies technical gaps, but no ranking, traffic or revenue outcome is promised anywhere on this site.
 Q: is my data secure
 A: The workspace is single-owner, dashboard routes are private and noindex, emails need the owner's own SMTP credentials, and opt-out records persist after a lead is deleted. It is a focused studio workspace, not a multi-tenant SaaS.
 
@@ -106,4 +106,4 @@ A: I am an assistant. I answer only from facts published on this site — the ti
 Q: do you offer refunds or discounts
 A: There is no published refund or discount policy. Ask for a human and the studio owner will answer directly.
 Q: what is the cheapest option
-A: The published entry tier is Starter at $650 per launch. If budget is tight, say so in the enquiry — the studio answers with a tailored estimate.
+A: The published entry tier is Audit at $497 one-time. If budget is tight, say so in the enquiry — the studio answers with a tailored estimate.

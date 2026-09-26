@@ -18,7 +18,7 @@ class ProspectTests(unittest.TestCase):
         from web.services import geocode
         geocode.cache_clear()
         self.client=module.app.test_client()
-        self.env=patch.dict(os.environ,{'SMTP_HOST':'smtp.example.test','SMTP_FROM':'studio@example.test','SMTP_PORT':'587','DASHBOARD_PASSWORD':''});self.env.start()
+        self.env=patch.dict(os.environ,{'SMTP_HOST':'smtp.example.test','SMTP_FROM':'studio@example.test','SMTP_PORT':'587','DASHBOARD_PASSWORD':'','CREW_LLM_PROVIDER':'none'});self.env.start()
     def tearDown(self):
         self.env.stop();module.DB=self.old;self.tmp.cleanup()
     def create(self):

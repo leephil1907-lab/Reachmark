@@ -1,6 +1,6 @@
 FROM python:3.13-slim
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends restic nodejs npm && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends gosu restic nodejs npm && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY package.json package-lock.json ./
@@ -22,7 +22,9 @@ RUN groupadd --system reachmark && useradd --system --gid reachmark --home-dir /
     && chown -R reachmark:reachmark /app /data /backups
 ARG RELEASE_SHA=local
 ENV RELEASE_SHA=$RELEASE_SHA DATABASE_PATH=/data/reachmark.sqlite3 PORT=8000 PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
-USER reachmark
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s CMD python -c "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:'+os.getenv('PORT','8000')+'/healthz',timeout=4)"
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 1 --threads 4 --timeout 120 --access-logfile - --error-logfile - web.app:app"]

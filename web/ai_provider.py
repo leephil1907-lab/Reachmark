@@ -40,6 +40,27 @@ PHONE_RE = re.compile(r'(?<!\d)(?:\+?\d[\d\s().-]{7,}\d)(?!\d)')
 USAGE = {'calls': 0, 'prompt_tokens': 0, 'completion_tokens': 0, 'failures': 0}
 
 
+def _load_env_file():
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    env_file = os.path.join(root, '.env')
+    if os.path.isfile(env_file):
+        with open(env_file, encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#') or '=' not in line:
+                    continue
+                k, v = line.split('=', 1)
+                k = k.strip()
+                if not (v.strip().startswith('"') or v.strip().startswith("'")):
+                    v = v.split('#')[0]
+                v = v.strip().strip("'\"")
+                if k and k not in os.environ:
+                    os.environ[k] = v
+
+
+_load_env_file()
+
+
 class ProviderUnavailable(RuntimeError):
     """Raised when no provider is configured, or the provider refused the call."""
 

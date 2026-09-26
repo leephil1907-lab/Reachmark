@@ -34,6 +34,7 @@ def main():
     os.environ['DATABASE_PATH'] = os.path.join(tmp.name, 'crew-smoke.sqlite3')
     os.environ['SMTP_HOST'] = ''
     os.environ['SMTP_FROM'] = ''
+    os.environ['CREW_LLM_PROVIDER'] = 'none'
     os.environ.pop('DASHBOARD_PASSWORD', None)
     os.environ['ALLOW_CREW_DEMO'] = '1'  # smoke proves the loop on fixtures, never the network
     os.chdir(ROOT)
@@ -124,8 +125,8 @@ def main():
     check('answer landed in the enquiry inbox', enquiry[0] == 1)
 
     print(f'\n{BOLD}5. The receptionist{RESET}')
-    for question, expect in (('how much does a website cost?', '1,250'),
-                             ('how long does it take?', '7 days'),
+    for question, expect in (('how much does a website cost?', '3,500'),
+                             ('how long does it take?', 'preview'),
                              ('can I talk to a real person?', 'studio owner')):
         reply = client.post('/api/receptionist/message', json={'message': question}).get_json()
         check(f'answers "{question}" from the knowledge base', expect.lower() in reply['reply'].lower(),

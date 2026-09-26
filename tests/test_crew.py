@@ -42,7 +42,7 @@ class CrewBase(unittest.TestCase):
                 c.execute(sql)
         self.client = module.app.test_client()
         self.env = patch.dict(os.environ, {'DASHBOARD_PASSWORD': '', 'SMTP_HOST': '', 'SMTP_FROM': '',
-                                           'ALLOW_CREW_DEMO': '1'})
+                                           'ALLOW_CREW_DEMO': '1', 'CREW_LLM_PROVIDER': 'none'})
         self.env.start()
         self.crew = module.app.extensions['reachmark_crew']
 
@@ -313,8 +313,8 @@ class ReceptionistTests(CrewBase):
     def test_knowledge_base_is_grounded_in_published_facts(self):
         result = answer(module.db, module.now, 'how much does a website cost?', settings=lambda: {})
         self.assertEqual(result['intent'], 'pricing')
-        self.assertIn('1,250', result['reply'])
-        self.assertIn('650', result['reply'])
+        self.assertIn('3,500', result['reply'])
+        self.assertIn('497', result['reply'])
 
     def test_unknown_question_hands_off_instead_of_inventing(self):
         result = answer(module.db, module.now, 'do you offer a refund if i am unhappy with the llama?', settings=lambda: {})
@@ -442,7 +442,7 @@ class LocalModelTests(CrewBase):
     def test_crew_still_runs_when_the_local_model_is_down(self):
         """Losing the model must never lose the run — deterministic mode takes over."""
         self.profile()
-        with patch.dict(os.environ, {'CREW_LLM_PROVIDER': 'ollama'}, clear=False):
+        with patch.dict(os.environ, {'CREW_LLM_PROVIDER': 'ollama', 'OLLAMA_HOST': 'http://127.0.0.1:9'}, clear=False):
             self.client.post('/api/crew/run', json={'mode': 'campaign', 'fixtures': True, 'limit': 2})
             run = wait_for(self.client)
         self.assertIn(run['status'], ('awaiting_approval', 'completed'))

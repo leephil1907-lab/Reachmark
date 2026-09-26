@@ -32,19 +32,21 @@ class BrainFactsTests(unittest.TestCase):
         self.assertRegex(business.BRAIN_VERSION, r'^\d+\.\d+\.\d+$')
 
     def test_tiers_match_the_published_offer(self):
-        self.assertEqual(set(business.TIERS), {'starter', 'growth', 'bespoke'})
-        self.assertEqual(business.TIERS['starter']['price'], 650)
-        self.assertEqual(business.TIERS['growth']['price'], 1250)
-        self.assertIsNone(business.TIERS['bespoke']['price'])
+        self.assertEqual(set(business.TIERS), {'audit', 'build', 'care', 'outreach'})
+        self.assertEqual(business.TIERS['audit']['price'], 497)
+        self.assertEqual(business.TIERS['build']['price'], 3500)
+        self.assertEqual(business.TIERS['care']['price'], 1800)
+        self.assertEqual(business.TIERS['outreach']['price'], 6000)
 
     def test_tier_lines_use_fixed_wording(self):
-        self.assertEqual(business.tier_line('starter'), 'Starter · $650')
-        self.assertEqual(business.tier_line('growth'), 'Growth · $1,250')
-        self.assertEqual(business.tier_line('bespoke'), 'Bespoke · estimate')
+        self.assertEqual(business.tier_line('audit'), 'Audit · $497')
+        self.assertEqual(business.tier_line('build'), 'Build · $3,500')
+        self.assertEqual(business.tier_line('care'), 'Care · $1,800')
+        self.assertEqual(business.tier_line('outreach'), 'Outreach · $6,000')
         self.assertEqual(business.tier_line('nope'), '')
 
     def test_price_mention_and_contacts(self):
-        self.assertIn('$650', business.price_mention())
+        self.assertIn('$497', business.price_mention())
         self.assertEqual(business.CONTACT['enquiry_path'], '/enquire')
         self.assertEqual(business.CONTACT['receptionist_path'], '/receptionist')
 
@@ -59,15 +61,15 @@ class BrainFactsTests(unittest.TestCase):
 
     def test_brief_is_self_contained(self):
         brief = business.brief()
-        for needle in ('Reachmark', business.TAGLINE, '$650', '$1,250',
+        for needle in ('Reachmark', business.TAGLINE, '$497', '$3,500',
                        business.ETHICS['opt_out_email'], business.VOICE['signoff']):
             self.assertIn(needle, brief)
 
     def test_public_is_template_safe_json(self):
         payload = json.loads(json.dumps(business.public()))
         self.assertEqual(payload['studio'], 'Reachmark')
-        self.assertEqual([row['id'] for row in payload['tiers']], ['starter', 'growth', 'bespoke'])
-        self.assertEqual(payload['tiers'][0]['line'], 'Starter · $650')
+        self.assertEqual([row['id'] for row in payload['tiers']], ['audit', 'build', 'care', 'outreach'])
+        self.assertEqual(payload['tiers'][0]['line'], 'Audit · $497')
 
     def test_lifecycle_covers_start_to_review(self):
         stages = business.lifecycle()
@@ -97,7 +99,7 @@ class EngineMovedTests(unittest.TestCase):
         topic, _question, answer, score = business.match_answer('how much does a website cost')
         self.assertIn('pricing', topic)
         self.assertGreater(score, 0)
-        self.assertIn('$650', answer)
+        self.assertIn('$497', answer)
 
 
 class InfusionTests(unittest.TestCase):
@@ -137,8 +139,8 @@ class ApiBrainTests(unittest.TestCase):
     def test_crew_state_reports_the_brain(self):
         brain = self.client.get('/api/crew').get_json()['brain']
         self.assertEqual(brain['version'], business.BRAIN_VERSION)
-        self.assertEqual(brain['tiers']['starter']['price'], 650)
-        self.assertEqual(brain['tiers']['growth']['price'], 1250)
+        self.assertEqual(brain['tiers']['audit']['price'], 497)
+        self.assertEqual(brain['tiers']['build']['price'], 3500)
         self.assertEqual(len(brain['lifecycle']), 8)
 
     def test_frontdesk_status_is_live(self):
@@ -155,7 +157,7 @@ class NoHardcodedFactsTests(unittest.TestCase):
     COPIES = [business.ETHICS[key] for key in (
         'opt_out_email', 'opt_out_sms', 'opt_out_share', 'opt_out_chat', 'opt_out_sms_note',
         'chat_no_charge', 'concept_intro', 'concept_disclaimer', 'contact_basis', 'suppression')]
-    COPIES += ['Starter · $650', 'Growth · $1,250', '$650', '$1,250']
+    COPIES += ['Audit · $497', 'Build · $3,500', '$497', '$3,500']
 
     def test_no_agent_pastes_brain_copy(self):
         bodies = [source('agents', name) for name in AGENT_FILES]
@@ -169,9 +171,9 @@ class NoHardcodedFactsTests(unittest.TestCase):
 
     def test_template_renders_prices_from_the_brain(self):
         template = source('templates', 'receptionist-page.html')
-        self.assertNotIn('$650', template)
-        self.assertNotIn('$1,250', template)
-        self.assertIn('tiers.growth', template)
+        self.assertNotIn('$497', template)
+        self.assertNotIn('$3,500', template)
+        self.assertIn('tiers.build', template)
         self.assertIn('brand.tiers', template)
 
 
