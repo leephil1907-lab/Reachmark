@@ -58,7 +58,7 @@ footer.site{background:#0f1a0a;color:#eaf3de;margin-top:36px}
 .pipe-grid{position:relative;max-width:560px;margin:0 auto}
 .pipe-note{font:600 11.5px 'Manrope',sans-serif;color:#8a9976;text-align:center;margin:14px 0 0}
 .pipe-note a{color:#0f1a0a}
-.proof-points{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:34px 0 6px}.proof-point{background:#fff;border:1px solid #e2e7d6;border-radius:16px;padding:22px;display:flex;gap:14px;align-items:flex-start}.proof-mark{width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border-radius:10px;background:#eef5df;color:#5c7a2e;font:800 16px 'Manrope',sans-serif}.proof-point b{display:block;font:750 14px/1.35 'Manrope',sans-serif;color:#0f1a0a}.proof-point p{font:400 12px/1.6 'Manrope',sans-serif;color:#4c5a41;margin:6px 0 0}.proof-point{transition:transform .25s,box-shadow .25s}.proof-point:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(32,45,22,.08)}@media(max-width:900px){.proof-points{grid-template-columns:1fr}}
+.proof-points{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:8px 0 6px}.strip,.grid3,.pipeline,.steps{scroll-margin-top:92px}.proof-point{background:#fff;border:1px solid #e2e7d6;border-radius:16px;padding:22px;display:flex;gap:14px;align-items:flex-start}.proof-mark{width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border-radius:10px;background:#eef5df;color:#5c7a2e;font:800 16px 'Manrope',sans-serif}.proof-point b{display:block;font:750 14px/1.35 'Manrope',sans-serif;color:#0f1a0a}.proof-point p{font:400 12px/1.6 'Manrope',sans-serif;color:#4c5a41;margin:6px 0 0}.proof-point{transition:transform .25s,box-shadow .25s}.proof-point:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(32,45,22,.08)}@media(max-width:900px){.proof-points{grid-template-columns:1fr}}
 .stats div{background:#fff;border:1px solid #e2e7d6;border-radius:16px;padding:22px 12px}
 .stats b{display:block;font:800 34px 'Manrope',sans-serif;letter-spacing:-1px;color:#0f1a0a}
 .stats span{font:600 11.5px 'Manrope',sans-serif;color:#5c7a2e}
@@ -80,12 +80,25 @@ footer.site{background:#0f1a0a;color:#eaf3de;margin-top:36px}
     <div class="note" data-motion="fade" data-delay="350">{{ t('home.note') }}</div>
   </section>
   {% include 'adsense-banner.html' %}
-  <section class="grid3" aria-label="{{ t('home.grid_aria') }}">
+  <section class="proof-points" data-motion="fade-up" aria-label="Customer-facing proof points">
+    <div class="proof-point"><span class="proof-mark" aria-hidden="true">↗</span><div><b>Preview before you commit</b><p>Explore a live website direction before a build begins.</p></div></div>
+    <div class="proof-point"><span class="proof-mark" aria-hidden="true">✓</span><div><b>Evidence before outreach</b><p>Website opportunities are checked before they are presented.</p></div></div>
+    <div class="proof-point"><span class="proof-mark" aria-hidden="true">▣</span><div><b>Everything stays clear</b><p>Proposals, invoices and project updates stay together in one client portal.</p></div></div>
+  </section>
+  <section id="work" class="strip" data-motion="fade-up" aria-label="{{ t('home.strip_aria') }}">
+    <div class="strip-head"><h2>{{ t('home.strip_h') }}</h2><a href="/showcase">{{ t('home.strip_a') }}</a></div>
+    <div class="shots">
+      <a href="/showcase"><img src="/static/samples/ember-coffee-preview.jpg" alt="{{ t('home.alt1') }}" loading="lazy"><span>{{ t('home.shot1') }}</span></a>
+      <a href="/showcase"><img src="/static/samples/fintech-pulse-preview.jpg" alt="{{ t('home.alt2') }}" loading="lazy"><span>{{ t('home.shot2') }}</span></a>
+      <a href="/showcase"><img src="/static/samples/stillwell-studio-preview.jpg" alt="{{ t('home.alt3') }}" loading="lazy"><span>{{ t('home.shot3') }}</span></a>
+    </div>
+  </section>
+  <section id="services" class="grid3" aria-label="{{ t('home.grid_aria') }}">
     <div class="card" data-motion="fade-up"><div class="k">{{ t('home.card1k') }}</div><h2>{{ t('home.card1h') }}</h2><p>{{ t('home.card1p') }}</p><a class="more" href="/showcase">{{ t('home.card1a') }}</a></div>
     <div class="card" data-motion="fade-up" data-delay="120"><div class="k">{{ t('home.card2k') }}</div><h2>{{ t('home.card2h') }}</h2><p>{{ t('home.card2p') }}</p><a class="more" href="/reviews">{{ t('home.card2a') }}</a></div>
     <div class="card" data-motion="fade-up" data-delay="240"><div class="k">{{ t('home.card3k') }}</div><h2>{{ t('home.card3h') }}</h2><p>{{ t('home.card3p') }}</p><a class="more" href="/enquire">{{ t('home.card3a') }}</a></div>
   </section>
-  <section class="pipeline" data-pipeline data-motion="fade-up" aria-label="{{ t('home.pipe_h') }}">
+  <section id="process" class="pipeline" data-pipeline data-motion="fade-up" aria-label="{{ t('home.pipe_h') }}">
     <div class="pipe-head"><div class="eyebrow">{{ t('home.pipe_eyebrow') }}</div><h2>{{ t('home.pipe_h') }}</h2><p>{{ t('home.pipe_sub') }}</p></div>
     <div class="pipe-grid"><ol>
       <li><span class="dot">1</span><div><b>{{ t('home.pipe1l') }}</b><span>{{ t('home.pipe1p') }}</span></div></li>
@@ -97,14 +110,6 @@ footer.site{background:#0f1a0a;color:#eaf3de;margin-top:36px}
     <div class="pipeline-dots" role="group" aria-label="{{ t('home.pipe_h') }}"><button type="button" aria-label="{{ t('home.pipe1l') }}"></button><button type="button" aria-label="{{ t('home.pipe2l') }}"></button><button type="button" aria-label="{{ t('home.pipe3l') }}"></button><button type="button" aria-label="{{ t('home.pipe4l') }}"></button><button type="button" aria-label="{{ t('home.pipe5l') }}"></button></div>
     <p class="pipe-note">{{ t('home.pipe_note') }} <a href="/about">{{ t('home.pipe_cta') }}</a></p>
   </section>
-  <section class="strip" data-motion="fade-up" aria-label="{{ t('home.strip_aria') }}">
-    <div class="strip-head"><h2>{{ t('home.strip_h') }}</h2><a href="/showcase">{{ t('home.strip_a') }}</a></div>
-    <div class="shots">
-      <a href="/showcase"><img src="/static/samples/ember-coffee-preview.jpg" alt="{{ t('home.alt1') }}" loading="lazy"><span>{{ t('home.shot1') }}</span></a>
-      <a href="/showcase"><img src="/static/samples/fintech-pulse-preview.jpg" alt="{{ t('home.alt2') }}" loading="lazy"><span>{{ t('home.shot2') }}</span></a>
-      <a href="/showcase"><img src="/static/samples/stillwell-studio-preview.jpg" alt="{{ t('home.alt3') }}" loading="lazy"><span>{{ t('home.shot3') }}</span></a>
-    </div>
-  </section>
   <section class="steps" data-motion="fade-up" aria-label="{{ t('home.steps_aria') }}">
     <h2>{{ t('home.steps_h') }}</h2>
     <ol>
@@ -113,12 +118,7 @@ footer.site{background:#0f1a0a;color:#eaf3de;margin-top:36px}
       <li data-motion="fade-up" data-delay="240"><b>{{ t('home.s3b') }}</b><strong>{{ t('home.s3h') }}</strong><p>{{ t('home.s3p') }}</p><a href="/about">{{ t('home.s3a') }}</a></li>
     </ol>
   </section>
-  <section class="proof-points" data-motion="fade-up" aria-label="Customer-facing proof points">
-    <div class="proof-point"><span class="proof-mark" aria-hidden="true">↗</span><div><b>Preview before you commit</b><p>Explore a live website direction before a build begins.</p></div></div>
-    <div class="proof-point"><span class="proof-mark" aria-hidden="true">✓</span><div><b>Evidence before outreach</b><p>Website opportunities are checked before they are presented.</p></div></div>
-    <div class="proof-point"><span class="proof-mark" aria-hidden="true">▣</span><div><b>Everything stays clear</b><p>Proposals, invoices and project updates stay together in one client portal.</p></div></div>
-  </section>
-  <section class="band" data-motion="zoom">
+  <section class="band" id="start-project" data-motion="zoom">
     <h2>{{ t('home.band_h1') }} <span>{{ t('home.band_h2') }}</span></h2>
     <p>{{ t('home.band_p') }}</p>
     <a class="btn primary" data-magnet href="/enquire">{{ t('home.band_a') }}</a>
