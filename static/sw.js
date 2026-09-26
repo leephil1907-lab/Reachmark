@@ -45,7 +45,7 @@ var DENY = [
   /^\/workspace/, /^\/dashboard/, /^\/login/, /^\/signin/, /^\/signup/, /^\/forgot/, /^\/reset/,
   /^\/verify/, /^\/preview\//, /^\/unsubscribe\//, /^\/r\//, /^\/api\/auth/, /^\/api\/crew/,
   /^\/api\/state/, /^\/api\/leads/, /^\/api\/settings/, /^\/api\/outbox/, /^\/api\/snapshots/,
-  /^\/api\/enquiries/, /^\/api\/contracts/, /^\/api\/projects/, /^\/api\/mcp/, /^\/api\/jobs/,
+  /^\/api\/enquiries/, /^\/api\/contracts/, /^\/api\/projects/, /^\/api\/invoices/, /^\/api\/mcp/, /^\/api\/jobs/,
   /^\/api\/map\//, /^\/api\/analytics/, /^\/api\/deploy-check/, /^\/api\/verify-config/,
   /^\/api\/operations/, /^\/api\/receptionist\/threads/, /^\/api\/review-links/
 ];
