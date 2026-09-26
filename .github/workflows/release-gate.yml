@@ -1,0 +1,107 @@
+name: Reachmark Release Gate
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Public deployment URL for live browser smoke"
+        required: false
+        default: "https://www.sitegapreveal-production.up.railway.app"
+
+jobs:
+  build-and-production-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      APP_ENV: production
+      PUBLIC_BASE_URL: https://release-gate.invalid
+      DATABASE_PATH: /data/reachmark.sqlite3
+      SECRET_KEY: release-gate-secret-key-0123456789-abcdefghijklmnopqrstuvwxyz
+      OWNER_PASSWORD_HASH: pbkdf2:sha256:1000$rm-ci-salt-2026$b3ba9a2a8bd242b41cfb66ed75038347c1125d00a38d3b4b780532d9869f27cf
+      CI_OWNER_PASSWORD: Reachmark-CI-only-2026!
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      - name: Run backend regression suite
+        run: python -m unittest discover -s tests -p "test*.py" -v
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Build frontend assets
+        run: npm ci && npm run build
+      - name: Build production Docker image
+        run: docker build --build-arg RELEASE_SHA="$GITHUB_SHA" -t reachmark:release-gate .
+      - name: Boot production image and verify healthz
+        run: |
+          mkdir -p "$RUNNER_TEMP/reachmark-data"
+          docker run -d --name reachmark-release-gate \
+            -e APP_ENV \
+            -e PUBLIC_BASE_URL \
+            -e DATABASE_PATH \
+            -e SECRET_KEY \
+            -e OWNER_PASSWORD_HASH \
+            -e RELEASE_SHA="$GITHUB_SHA" \
+            -v "$RUNNER_TEMP/reachmark-data:/data" \
+            -p 18000:8000 \
+            reachmark:release-gate
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:18000/healthz >/tmp/healthz.json; then
+              cat /tmp/healthz.json
+              break
+            fi
+            sleep 2
+          done
+          test -s /tmp/healthz.json
+          grep -q '"status":"ok"' /tmp/healthz.json
+          test "$(stat -c %U "$RUNNER_TEMP/reachmark-data")" = "reachmark"
+          docker exec reachmark-release-gate sh -c "test -w /data && test -w /backups"
+      - name: Install Playwright
+        run: |
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Run local production Playwright flow
+        env:
+          BASE_URL: http://127.0.0.1:18000
+        run: node tests/production-smoke.mjs
+      - name: Run independent map browser flow
+        env:
+          BASE_URL: http://127.0.0.1:18000
+        run: node tests/map-browser-smoke.mjs
+      - name: Container logs on failure
+        if: failure()
+        run: docker logs reachmark-release-gate || true
+      - name: Stop container
+        if: always()
+        run: docker rm -f reachmark-release-gate || true
+
+  live-browser-smoke:
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.REACHMARK_LIVE_SMOKE == '1' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_URL: ${{ github.event.inputs.base_url || 'https://www.sitegapreveal-production.up.railway.app' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright
+        run: |
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Run live public production flow
+        run: node tests/production-smoke.mjs
+      - name: Run live map browser flow
+        run: node tests/map-browser-smoke.mjs
