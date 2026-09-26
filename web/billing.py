@@ -70,7 +70,6 @@ RULES = [
     (r'^/api/(import|export|discover|jobs|map)(/|$)', 'starter'),
     (r'^/api/(outbox|mail-templates|crew|review-links)(/|$)', 'pro'),
     (r'^/api/analytics', 'free'),
-    (r'^/api/operations/readiness', 'free'),
     (r'^/api/quality', 'starter'),  # raw directory rows: paying members only
     (r'^/api/auth/(me|logout|export|close|request-verification)', 'free'),
     (r'^/api/(invoices|projects)(/|$)', 'free'),
