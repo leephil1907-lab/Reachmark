@@ -204,4 +204,36 @@ class ProspectTests(unittest.TestCase):
             r=self.client.get('/dashboard')
             self.assertEqual(r.status_code,302)
             self.assertEqual(r.headers['Location'],'/signin')
+    def test_operational_endpoints_are_not_public_when_owner_credentials_are_configured(self):
+        from werkzeug.security import generate_password_hash
+        hashed=generate_password_hash('owner-only',method='pbkdf2:sha256:1000')
+        with patch.dict(os.environ,{'OWNER_PASSWORD_HASH':hashed}):
+            self.assertEqual(self.client.get('/api/deploy-check').status_code,401)
+            self.assertEqual(self.client.get('/api/operations/readiness').status_code,401)
+            self.assertEqual(self.client.get('/api/mcp').status_code,401)
+
+    def test_review_response_handled_requires_client_ownership(self):
+        from werkzeug.security import generate_password_hash
+        from datetime import datetime, timezone, timedelta
+        owner_id='client-owner'
+        other_id='client-other'
+        future=(datetime.now(timezone.utc)+timedelta(days=30)).isoformat()
+        with module.db() as db:
+            db.execute("INSERT INTO users(id,email,name,password_hash,role,created,updated,is_active,email_verified,tier,tier_expires) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                       (owner_id,'owner@example.test','Owner',generate_password_hash('pw'),'client',module.now(),module.now(),1,1,'pro',future))
+            db.execute("INSERT INTO users(id,email,name,password_hash,role,created,updated,is_active,email_verified,tier,tier_expires) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                       (other_id,'other@example.test','Other',generate_password_hash('pw'),'client',module.now(),module.now(),1,1,'pro',future))
+            db.execute("INSERT INTO leads(id,source_key,name,owner_user_id,created,updated) VALUES(?,?,?,?,?,?)",
+                       ('foreign-lead','foreign-key','Foreign Business',other_id,module.now(),module.now()))
+            db.execute("INSERT INTO review_links(id,token,lead_id,status,created,updated) VALUES(?,?,?,?,?,?)",
+                       ('foreign-link','foreign-token','foreign-lead','ready',module.now(),module.now()))
+            db.execute("INSERT INTO review_responses(id,link_id,lead_id,choice,created) VALUES(?,?,?,?,?)",
+                       ('foreign-response','foreign-link','foreign-lead','later',module.now()))
+        with self.client.session_transaction() as sess:
+            sess['client_id']=owner_id
+            sess['role']='client'
+            sess['csrf']='test-csrf'
+        response=self.client.post('/api/review-links/foreign-response/handled',headers={'X-CSRF-Token':'test-csrf'})
+        self.assertEqual(response.status_code,404)
+
 if __name__=='__main__':unittest.main(verbosity=2)
