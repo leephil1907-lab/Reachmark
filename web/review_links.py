@@ -364,7 +364,22 @@ def register_review_links(app, db, now, log, settings):
 
     @app.post('/api/review-links/<link_id>/handled')
     def review_mark_handled(link_id):
+        from flask import session
+        client_id = session.get('client_id') if session.get('role') == 'client' and not session.get('owner') else None
         with db() as c:
+            if client_id:
+                owned = c.execute(
+                    'SELECT rr.id FROM review_responses rr '
+                    'JOIN review_links rl ON rl.id=rr.link_id '
+                    'JOIN leads l ON l.id=rl.lead_id '
+                    'WHERE rr.id=? AND l.owner_user_id=?',
+                    (link_id, client_id)
+                ).fetchone()
+                if not owned:
+                    return jsonify(error=_t('er_106', locale_now())), 404
+            exists = c.execute('SELECT 1 FROM review_responses WHERE id=?', (link_id,)).fetchone()
+            if not exists:
+                return jsonify(error=_t('er_106', locale_now())), 404
             c.execute('UPDATE review_responses SET handled=1 WHERE id=?', (link_id,))
         return jsonify(ok=True)
 
