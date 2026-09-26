@@ -58,7 +58,7 @@ footer.site{background:#0f1a0a;color:#eaf3de;margin-top:36px}
 .pipe-grid{position:relative;max-width:560px;margin:0 auto}
 .pipe-note{font:600 11.5px 'Manrope',sans-serif;color:#8a9976;text-align:center;margin:14px 0 0}
 .pipe-note a{color:#0f1a0a}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:34px 0 6px;text-align:center}
+.proof-points{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:34px 0 6px}.proof-point{background:#fff;border:1px solid #e2e7d6;border-radius:16px;padding:22px;display:flex;gap:14px;align-items:flex-start}.proof-mark{width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border-radius:10px;background:#eef5df;color:#5c7a2e;font:800 16px 'Manrope',sans-serif}.proof-point b{display:block;font:750 14px/1.35 'Manrope',sans-serif;color:#0f1a0a}.proof-point p{font:400 12px/1.6 'Manrope',sans-serif;color:#4c5a41;margin:6px 0 0}.proof-point{transition:transform .25s,box-shadow .25s}.proof-point:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(32,45,22,.08)}@media(max-width:900px){.proof-points{grid-template-columns:1fr}}
 .stats div{background:#fff;border:1px solid #e2e7d6;border-radius:16px;padding:22px 12px}
 .stats b{display:block;font:800 34px 'Manrope',sans-serif;letter-spacing:-1px;color:#0f1a0a}
 .stats span{font:600 11.5px 'Manrope',sans-serif;color:#5c7a2e}
@@ -113,10 +113,10 @@ footer.site{background:#0f1a0a;color:#eaf3de;margin-top:36px}
       <li data-motion="fade-up" data-delay="240"><b>{{ t('home.s3b') }}</b><strong>{{ t('home.s3h') }}</strong><p>{{ t('home.s3p') }}</p><a href="/about">{{ t('home.s3a') }}</a></li>
     </ol>
   </section>
-  <section class="stats" data-motion="fade-up">
-    <div><b data-count="10">10</b><span>{{ t('home.stat1l') }}</span></div>
-    <div><b data-count="8">8</b><span>{{ t('home.stat2l') }}</span></div>
-    <div><b data-count="6">6</b><span>{{ t('home.stat3l') }}</span></div>
+  <section class="proof-points" data-motion="fade-up" aria-label="Customer-facing proof points">
+    <div class="proof-point"><span class="proof-mark" aria-hidden="true">↗</span><div><b>Preview before you commit</b><p>Explore a live website direction before a build begins.</p></div></div>
+    <div class="proof-point"><span class="proof-mark" aria-hidden="true">✓</span><div><b>Evidence before outreach</b><p>Website opportunities are checked before they are presented.</p></div></div>
+    <div class="proof-point"><span class="proof-mark" aria-hidden="true">▣</span><div><b>Everything stays clear</b><p>Proposals, invoices and project updates stay together in one client portal.</p></div></div>
   </section>
   <section class="band" data-motion="zoom">
     <h2>{{ t('home.band_h1') }} <span>{{ t('home.band_h2') }}</span></h2>
