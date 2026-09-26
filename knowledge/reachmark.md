@@ -84,7 +84,7 @@ A: Yes. Every outreach message carries an unsubscribe link, blocked addresses ar
 ## topic: review links and the concept preview
 tags: preview, review link, concept, mockup, design idea, sample page, see the design
 Q: how long until i see a preview
-A: You can already see the concept preview — it is prepared before any commitment. The published promise for a live 3D preview of the real site is about 7 days from an agreed scope, and nothing is charged until you approve scope.
+A: You can already see the concept preview — it is prepared before any commitment. The published promise is a live 3D preview or audit report from an agreed scope, and nothing is charged until you approve scope.
 Q: what is a review link
 A: When the studio prepares a concept for a business, it can send a private review link showing an independent website concept built from that business's saved details, with three simple answers: yes build it, not right now, or we already have one. A response goes straight back to the studio inbox.
 Q: is the concept page the real website
