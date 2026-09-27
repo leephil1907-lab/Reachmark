@@ -45,7 +45,7 @@ class MigrationTests(unittest.TestCase):
             self.assertEqual(
                 c.execute("SELECT source_seen_at FROM leads WHERE id='lead-1'").fetchone()[0],
                 '2026-01-01T00:00:00+00:00')
-            self.assertEqual(c.execute('SELECT count(*) FROM schema_migrations').fetchone()[0], 1)
+            self.assertEqual(c.execute('SELECT count(*) FROM schema_migrations').fetchone()[0], 3)
             c.close()
 
 

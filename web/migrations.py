@@ -116,7 +116,7 @@ def run_migrations(db):
             )
 
         # Keep this restart recovery in the centralized database lifecycle.
-        if 'jobs' in _tables(c):
+        if 'jobs' in _tables(c) and 'state' in _columns(c, 'jobs'):
             c.execute(
                 "UPDATE jobs SET state='interrupted', "
                 "message='Server restarted; start a new search to continue.' "
