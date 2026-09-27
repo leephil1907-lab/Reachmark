@@ -17,5 +17,17 @@ function setLocale(code) {
     document.cookie = 'rm_locale=' + code + ';max-age=31536000;path=/;SameSite=Lax';
     localStorage.setItem('rm_locale', code);
   } catch (e) {}
+  if ('caches' in window) {
+    try {
+      caches.keys().then(function (names) {
+        return Promise.all(names.map(function (n) { return caches.delete(n); }));
+      }).then(function () {
+        location.reload();
+      }).catch(function () {
+        location.reload();
+      });
+      return;
+    } catch (e) {}
+  }
   location.reload();
 }

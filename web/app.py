@@ -104,9 +104,17 @@ def inject_branding():
 def set_locale():
     try:
         from web.i18n import resolve_locale
-        g.locale = resolve_locale(request.cookies.get('rm_locale'), request.headers.get('Accept-Language', ''))
+        query_loc = request.args.get('locale') or request.args.get('lang')
+        g.locale = resolve_locale(request.cookies.get('rm_locale'), request.headers.get('Accept-Language', ''), query_loc)
     except Exception:
         g.locale = 'en'
+
+@app.after_request
+def persist_locale_cookie(response):
+    query_loc = request.args.get('locale') or request.args.get('lang')
+    if query_loc and query_loc in ('en', 'es', 'fr', 'de', 'pt', 'zh'):
+        response.set_cookie('rm_locale', query_loc, max_age=31536000, path='/', samesite='Lax')
+    return response
 
 @app.context_processor
 def inject_i18n():

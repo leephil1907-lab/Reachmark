@@ -1,4 +1,4 @@
-<select id="locale-select" class="locale-select" data-native aria-label="{{ t('common.language') }}" onchange="setLocale(this.value)">{% for code in locales %}<option value="{{ code }}"{% if code == locale %} selected{% endif %}>{{ locale_names[code] }}</option>{% endfor %}</select>
+<select id="locale-select" class="locale-select" data-native autocomplete="off" aria-label="{{ t('common.language') }}" onchange="setLocale(this.value)">{% for code in locales %}<option value="{{ code }}"{% if code == locale %} selected{% endif %}>{{ locale_names[code] }}</option>{% endfor %}</select>
 <style>
 .ls-wrap{position:relative;display:inline-block;vertical-align:middle;max-width:100%}
 .ls-btn{display:inline-flex;align-items:center;gap:8px;font:700 12px Manrope,Arial,sans-serif;padding:8px 12px;border-radius:10px;border:1px solid #e2e7d6;background:#fff;color:#0f1a0a;cursor:pointer;white-space:nowrap;max-width:100%}
@@ -15,19 +15,68 @@
 .ls-opt svg{border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.12);flex:none}
 .ls-opt .tick{margin-left:auto;color:#7aa53a;font-weight:800}
 </style>
-<script>(function(){var sel=document.getElementById('locale-select');if(!sel||sel.dataset.lsDone)return;sel.dataset.lsDone='1';
-var FLAGS={en:'<svg width="18" height="13" viewBox="0 0 18 13"><rect width="18" height="13" fill="#b31942"/><rect y="2" width="18" height="2" fill="#fff"/><rect y="6" width="18" height="2" fill="#fff"/><rect y="10" width="18" height="2" fill="#fff"/><rect width="8" height="7" fill="#0a3161"/><circle cx="2" cy="2" r=".8" fill="#fff"/><circle cx="5" cy="2" r=".8" fill="#fff"/><circle cx="3.5" cy="4" r=".8" fill="#fff"/><circle cx="2" cy="6" r=".8" fill="#fff"/><circle cx="5" cy="6" r=".8" fill="#fff"/></svg>',
-es:'<svg width="18" height="13" viewBox="0 0 18 13"><rect width="18" height="13" fill="#aa151b"/><rect y="3.2" width="18" height="6.6" fill="#f1bf00"/></svg>',
-fr:'<svg width="18" height="13" viewBox="0 0 18 13"><rect width="6" height="13" fill="#0055a4"/><rect x="6" width="6" height="13" fill="#fff"/><rect x="12" width="6" height="13" fill="#ef4135"/></svg>',
-de:'<svg width="18" height="13" viewBox="0 0 18 13"><rect width="18" height="4.4" fill="#151515"/><rect y="4.4" width="18" height="4.3" fill="#dd0000"/><rect y="8.7" width="18" height="4.3" fill="#ffce00"/></svg>',
+<script>(function(){
+var sel=document.getElementById('locale-select');
+if(!sel||sel.dataset.lsDone)return;
+sel.dataset.lsDone='1';
+var FLAGS={
+en:'<svg width="18" height="13" viewBox="0 0 18 13"><rect width="18" height="13" fill="#012169"/><path d="M0 0l18 13M18 0L0 13" stroke="#fff" stroke-width="2.6"/><path d="M0 0l18 13M18 0L0 13" stroke="#c8102e" stroke-width="1.2"/><path d="M9 0v13M0 6.5h18" stroke="#fff" stroke-width="4.4"/><path d="M9 0v13M0 6.5h18" stroke="#c8102e" stroke-width="2.6"/></svg>',
+es:'<svg width="18" height="13" viewBox="0 0 18 13"><rect width="18" height="13" fill="#aa151b"/><rect y="3.25" width="18" height="6.5" fill="#f1bf00"/></svg>',
+fr:'<svg width="18" height="13" viewBox="0 0 18 13"><rect width="6" height="13" fill="#002395"/><rect x="6" width="6" height="13" fill="#fff"/><rect x="12" width="6" height="13" fill="#ed2939"/></svg>',
+de:'<svg width="18" height="13" viewBox="0 0 18 13"><rect width="18" height="4.33" fill="#000"/><rect y="4.33" width="18" height="4.34" fill="#dd0000"/><rect y="8.67" width="18" height="4.33" fill="#ffce00"/></svg>',
 pt:'<svg width="18" height="13" viewBox="0 0 18 13"><rect width="18" height="13" fill="#009b3a"/><polygon points="9,1.5 16,6.5 9,11.5 2,6.5" fill="#fedf00"/><circle cx="9" cy="6.5" r="2.2" fill="#002776"/></svg>',
-zh:'<svg width="18" height="13" viewBox="0 0 18 13"><rect width="18" height="13" fill="#de2910"/><polygon points="3,1.5 3.7,3.4 5.7,3.4 4.1,4.6 4.7,6.6 3,5.4 1.3,6.6 1.9,4.6 .3,3.4 2.3,3.4" fill="#ffde00"/><circle cx="7" cy="2" r=".8" fill="#ffde00"/><circle cx="8.2" cy="3.6" r=".8" fill="#ffde00"/><circle cx="8.2" cy="5.8" r=".8" fill="#ffde00"/><circle cx="7" cy="7.4" r=".8" fill="#ffde00"/></svg>'};
-function go(code){if(typeof setLocale==='function')setLocale(code);else{try{document.cookie='rm_locale='+code+';max-age=31536000;path=/;SameSite=Lax';}catch(e){}location.reload();}}
+zh:'<svg width="18" height="13" viewBox="0 0 18 13"><rect width="18" height="13" fill="#de2910"/><polygon points="3,1.5 3.7,3.4 5.7,3.4 4.1,4.6 4.7,6.6 3,5.4 1.3,6.6 1.9,4.6 .3,3.4 2.3,3.4" fill="#ffde00"/><circle cx="7" cy="2" r=".8" fill="#ffde00"/><circle cx="8.2" cy="3.6" r=".8" fill="#ffde00"/><circle cx="8.2" cy="5.8" r=".8" fill="#ffde00"/><circle cx="7" cy="7.4" r=".8" fill="#ffde00"/></svg>'
+};
+function go(code){
+  try{
+    document.cookie='rm_locale='+code+';max-age=31536000;path=/;SameSite=Lax';
+    localStorage.setItem('rm_locale',code);
+  }catch(e){}
+  if('caches' in window){
+    try{
+      caches.keys().then(function(k){return Promise.all(k.map(function(n){return caches.delete(n);}));}).then(function(){
+        location.reload();
+      }).catch(function(){location.reload();});
+      return;
+    }catch(e){}
+  }
+  if(typeof setLocale==='function')setLocale(code);
+  else location.reload();
+}
 sel.style.display='none';
 var wrap=document.createElement('span');wrap.className='ls-wrap';sel.parentNode.insertBefore(wrap,sel.nextSibling);
-var cur=sel.value,curName='',btn=document.createElement('button');btn.type='button';btn.className='ls-btn';btn.setAttribute('aria-haspopup','listbox');btn.setAttribute('aria-expanded','false');
+var cur='{{ locale }}'||sel.value||'en';
+if(!FLAGS[cur])cur='en';
+sel.value=cur;
+var curName='',btn=document.createElement('button');btn.type='button';btn.className='ls-btn';btn.setAttribute('aria-haspopup','listbox');btn.setAttribute('aria-expanded','false');
 var menu=document.createElement('div');menu.className='ls-menu';menu.setAttribute('role','listbox');
-Array.prototype.forEach.call(sel.options,function(o){if(o.value===cur)curName=o.text;var b=document.createElement('button');b.type='button';b.className='ls-opt'+(o.value===cur?' on':'');b.setAttribute('role','option');b.setAttribute('aria-selected',o.value===cur?'true':'false');b.innerHTML=(FLAGS[o.value]||'')+'<span>'+o.text+'</span>'+(o.value===cur?'<span class="tick">✓</span>':'');b.onclick=function(){go(o.value);};menu.appendChild(b);});
+var optButtons=[];
+Array.prototype.forEach.call(sel.options,function(o){
+  if(o.value===cur)curName=o.text;
+  var b=document.createElement('button');b.type='button';b.className='ls-opt'+(o.value===cur?' on':'');b.setAttribute('role','option');b.setAttribute('aria-selected',o.value===cur?'true':'false');
+  b.dataset.code=o.value;
+  b.dataset.name=o.text;
+  b.innerHTML=(FLAGS[o.value]||'')+'<span>'+o.text+'</span>'+(o.value===cur?'<span class="tick">✓</span>':'');
+  b.onclick=function(e){
+    e.stopPropagation();
+    var code=o.value;
+    cur=code;
+    sel.value=code;
+    btn.innerHTML=(FLAGS[code]||'')+'<span>'+o.text+'</span><span class="chev">▼</span>';
+    wrap.classList.remove('open');
+    btn.setAttribute('aria-expanded','false');
+    optButtons.forEach(function(btnOpt){
+      var isCur=btnOpt.dataset.code===code;
+      btnOpt.className='ls-opt'+(isCur?' on':'');
+      btnOpt.setAttribute('aria-selected',isCur?'true':'false');
+      btnOpt.innerHTML=(FLAGS[btnOpt.dataset.code]||'')+'<span>'+btnOpt.dataset.name+'</span>'+(isCur?'<span class="tick">✓</span>':'');
+    });
+    go(code);
+  };
+  optButtons.push(b);
+  menu.appendChild(b);
+});
+if(!curName)curName=sel.options[0]?sel.options[0].text:'English';
 btn.innerHTML=(FLAGS[cur]||'')+'<span>'+curName+'</span><span class="chev">▼</span>';
 btn.onclick=function(e){e.stopPropagation();var open=wrap.classList.toggle('open');btn.setAttribute('aria-expanded',open?'true':'false');};
 document.addEventListener('click',function(){wrap.classList.remove('open');btn.setAttribute('aria-expanded','false');});

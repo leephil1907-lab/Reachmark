@@ -37,7 +37,9 @@ def t(key, locale='en', **vars):
     return s
 
 
-def resolve_locale(cookie_val, accept_language):
+def resolve_locale(cookie_val, accept_language, query_val=None):
+    if query_val in LOCALES:
+        return query_val
     if cookie_val in LOCALES:
         return cookie_val
     for part in (accept_language or '').split(','):
