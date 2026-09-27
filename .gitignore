@@ -1,5 +1,6 @@
 .env
 .venv/
+.npm/
 site-packages/
 .sudo_as_admin_successful
 __pycache__/

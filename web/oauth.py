@@ -95,12 +95,16 @@ def register_oauth(app, db, now, log):
         pending = session.get('oauth_pending') or {}
         slot = pending.pop(state, None)
         session['oauth_pending'] = pending
+        mode = slot.get('mode', 'signin') if slot else 'signin'
+        target_page = '/signup' if mode == 'signup' else '/signin'
         if not p or not slot or slot.get('provider') != provider or time.time() - slot.get('ts', 0) > 600:
             log('auth', f'OAuth callback rejected (bad state) provider={provider}')
-            return redirect('/signin?oauth=invalid', 302)
+            return redirect(f'{target_page}?oauth=invalid', 302)
         code = request.args.get('code', '')
         if not code:
-            return redirect('/signin?oauth=denied', 302)
+            err = request.args.get('error', '')
+            reason = 'denied' if err in ('access_denied', 'user_cancelled_login') else ('error' if err else 'denied')
+            return redirect(f'{target_page}?oauth={reason}', 302)
         try:
             tok = _http_json(p['token'], {
                 'client_id': os.environ[p['id_key']].strip(),
@@ -109,13 +113,13 @@ def register_oauth(app, db, now, log):
                 'redirect_uri': _redirect_uri(provider)})
             access = tok.get('access_token', '')
             me = _http_json(p['userinfo'], headers={'Authorization': 'Bearer ' + access})
-        except Exception:
-            log('auth', f'OAuth provider error provider={provider}')
-            return redirect('/signin?oauth=error', 302)
+        except Exception as e:
+            log('auth', f'OAuth provider error provider={provider} error={e}')
+            return redirect(f'{target_page}?oauth=error', 302)
         email = str(me.get('email') or (me.get('mail') or '')).strip().lower()
         name = str(me.get('name') or me.get('displayName') or '').strip()[:120]
         if '@' not in email:
-            return redirect('/signin?oauth=noemail', 302)
+            return redirect(f'{target_page}?oauth=noemail', 302)
         with db() as c:
             user = c.execute('SELECT * FROM users WHERE lower(email)=lower(?)', (email,)).fetchone()
             if user:
