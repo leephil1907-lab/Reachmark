@@ -87,7 +87,7 @@ button[type=submit]:disabled{opacity:.6;cursor:not-allowed;transform:none}
       </div>
       <div id="who-team-go" style="display:none;margin-top:10px;padding:12px 14px;border-radius:12px;background:#0f1a0a;color:#eaf3de;font:600 12px 'Manrope',sans-serif"><a href="/login" style="color:#d5f268;font-weight:700">{{ t('au.o_goto') }} →</a></div>
     </div>
-    <div id="oauth-wrap" style="display:none;margin-top:14px"><div style="display:flex;align-items:center;gap:10px;color:#8c9c77;font:600 11px 'Manrope',sans-serif"><span style="flex:1;height:1px;background:#e5ebd5"></span>{{ t('au.o_or') }}<span style="flex:1;height:1px;background:#e5ebd5"></span></div><div id="oauth-btns" style="display:grid;gap:8px;margin-top:10px"></div></div>
+    <div id="oauth-wrap" style="display:{% if google_oauth_configured %}block{% else %}none{% endif %};margin-top:14px"><div style="display:flex;align-items:center;gap:10px;color:#8c9c77;font:600 11px 'Manrope',sans-serif"><span style="flex:1;height:1px;background:#e5ebd5"></span>{{ t('au.o_or') }}<span style="flex:1;height:1px;background:#e5ebd5"></span></div><div id="oauth-btns" style="display:grid;gap:8px;margin-top:10px">{% if google_oauth_configured %}<a href="/api/auth/oauth/google?mode=signup" class="social-btn" aria-label="Sign up with Google"><span>Continue with Google</span></a>{% endif %}</div></div>
     <form id="signup-form" novalidate>
       <label for="name">{{ t('au.s_name') }}</label>
       <input id="name" name="name" maxlength="120" placeholder="Ada Lovelace" autocomplete="name">
