@@ -168,7 +168,7 @@ def register_accounts(app, db, log):
             return redirect('/dashboard')
         if session.get('owner'):
             return redirect('/workspace')
-        return render_template('signup.html')
+        return render_template('signup.html', google_oauth_configured=bool(os.getenv('GOOGLE_CLIENT_ID','').strip() and os.getenv('GOOGLE_CLIENT_SECRET','').strip()))
 
     @app.get('/signin')
     def signin_page():
@@ -176,7 +176,7 @@ def register_accounts(app, db, log):
             return redirect('/dashboard')
         if session.get('owner'):
             return redirect('/workspace')
-        return render_template('client_login.html')
+        return render_template('client_login.html', google_oauth_configured=bool(os.getenv('GOOGLE_CLIENT_ID','').strip() and os.getenv('GOOGLE_CLIENT_SECRET','').strip()))
 
     @app.get('/client-login')
     def client_login_alias():
