@@ -44,6 +44,10 @@ def configured(p):
 
 
 def _redirect_uri(provider):
+    # A fixed redirect URI is safer for deployed previews/proxies; keep the request-host fallback for local development.
+    override = os.environ.get('GOOGLE_OAUTH_REDIRECT_URI', '').strip()
+    if override:
+        return override.rstrip('/')
     root = request.url_root.rstrip('/')
     host = (urllib.parse.urlparse(root).hostname or '').lower()
     local = host in ('localhost', '127.0.0.1', '::1') or host.startswith(('10.', '192.168.')) or host.endswith('.localhost')
