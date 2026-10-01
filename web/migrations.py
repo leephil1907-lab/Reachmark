@@ -1,7 +1,7 @@
 """Single-source SQLite migrations for Reachmark."""
 from datetime import datetime, timezone
 
-MIGRATION_VERSION=4
+MIGRATION_VERSION=5
 
 def _tables(c):
     return {r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
@@ -49,11 +49,31 @@ def _apply_v4(c):
       CREATE INDEX IF NOT EXISTS idx_outreach_events_email ON outreach_events(email);""")
     c.execute("CREATE INDEX IF NOT EXISTS idx_outreach_enrollments_campaign ON outreach_enrollments(campaign_id)")
 
+def _apply_v5(c):
+    c.executescript("""CREATE TABLE IF NOT EXISTS google_accounts(
+      id TEXT PRIMARY KEY, owner_user_id TEXT NOT NULL, google_account_id TEXT NOT NULL,
+      email TEXT, access_token TEXT NOT NULL, refresh_token TEXT, expires_at REAL,
+      created TEXT NOT NULL, updated TEXT NOT NULL,
+      UNIQUE(owner_user_id,google_account_id));
+      CREATE TABLE IF NOT EXISTS google_locations(
+      id TEXT PRIMARY KEY, owner_user_id TEXT NOT NULL, google_account_id TEXT NOT NULL,
+      resource_name TEXT NOT NULL, title TEXT, store_code TEXT, phone_numbers TEXT,
+      website_uri TEXT, regular_hours TEXT, categories TEXT, latlng TEXT, metadata TEXT,
+      created TEXT NOT NULL, updated TEXT NOT NULL,
+      UNIQUE(owner_user_id,resource_name));
+      CREATE TABLE IF NOT EXISTS google_reviews(
+      id TEXT PRIMARY KEY, owner_user_id TEXT NOT NULL, google_location_id TEXT NOT NULL,
+      review_id TEXT NOT NULL, rating TEXT, comment TEXT, reviewer TEXT,
+      create_time TEXT, update_time TEXT, reply TEXT, payload TEXT NOT NULL,
+      UNIQUE(owner_user_id,review_id));
+      CREATE INDEX IF NOT EXISTS idx_google_locations_owner ON google_locations(owner_user_id);
+      CREATE INDEX IF NOT EXISTS idx_google_reviews_location ON google_reviews(google_location_id);""")
+
 def run_migrations(db):
     with db() as c:
         c.execute("CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY,applied_at TEXT NOT NULL)")
         applied={r[0] for r in c.execute("SELECT version FROM schema_migrations ORDER BY version")}
-        for version,migration in ((1,_apply_v1),(2,_apply_v2),(3,_apply_v3),(4,_apply_v4)):
+        for version,migration in ((1,_apply_v1),(2,_apply_v2),(3,_apply_v3),(4,_apply_v4),(5,_apply_v5)):
             if version not in applied:
                 migration(c)
                 c.execute("INSERT INTO schema_migrations(version,applied_at) VALUES(?,?)",(version,datetime.now(timezone.utc).isoformat()))
