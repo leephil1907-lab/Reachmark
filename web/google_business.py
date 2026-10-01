@@ -264,7 +264,7 @@ def register_google_business(app, db, now, log):
                     if existing:
                         c.execute(
                             "UPDATE google_locations SET google_account_id=?,title=?,store_code=?,phone_numbers=?,website_uri=?,regular_hours=?,categories=?,latlng=?,metadata=?,updated=? WHERE id=?",
-                            (account_id,) + row[2:] + (existing["id"],))
+                            (account_id, row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10], row[11], existing["id"]))
                     else:
                         c.execute(
                             "INSERT INTO google_locations(id,owner_user_id,google_account_id,resource_name,title,store_code,phone_numbers,website_uri,regular_hours,categories,latlng,metadata,created,updated) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
