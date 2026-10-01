@@ -63,6 +63,102 @@ def _actor():
         return str(session["client_id"])
     if session.get("owner"):
         return "owner"
+    @app.post("/api/google-business/reviews/reply")
+    def google_business_reply():
+        actor = _actor()
+        body = request.get_json(silent=True) or {}
+        location_id = str(body.get("location_id", "")).strip()
+        review_id = str(body.get("review_id", "")).strip()
+        comment = str(body.get("comment", "")).strip()
+        if not actor or not location_id or not review_id or not comment:
+            return jsonify(error="Authentication, location_id, review_id and comment are required"), 400
+        with db() as c:
+            loc = c.execute("SELECT * FROM google_locations WHERE id=? AND owner_user_id=?", (location_id, actor)).fetchone()
+            if not loc:
+                return jsonify(error="Location not found"), 404
+            account, access = _access(c, actor, loc["google_account_id"])
+            if not access:
+                return jsonify(error="Google authorization needs to be reconnected"), 401
+            resource = loc["resource_name"] + "/reviews/" + urllib.parse.quote(review_id, safe="")
+            data = _http_json("PUT", REVIEWS_API + "/" + resource + "/reply", access,
+                              {"comment": comment})
+            c.execute("UPDATE google_reviews SET reply=?,update_time=? WHERE owner_user_id=? AND google_location_id=? AND review_id=?",
+                      (json.dumps(data, ensure_ascii=False), now(), actor, location_id, review_id))
+            log("google-business", "Published an approved Google review reply")
+            return jsonify(review_reply=data)
+
+    @app.get("/api/google-business/performance")
+    def google_business_performance():
+        actor = _actor()
+        location_id = request.args.get("location_id", "").strip()
+        start = request.args.get("start", "").strip()
+        end = request.args.get("end", "").strip()
+        if not actor or not location_id or not start or not end:
+            return jsonify(error="Authentication, location_id, start and end are required"), 400
+        try:
+            sy, sm, sd = [int(x) for x in start.split("-")]
+            ey, em, ed = [int(x) for x in end.split("-")]
+        except Exception:
+            return jsonify(error="Dates must use YYYY-MM-DD"), 400
+        with db() as c:
+            loc = c.execute("SELECT * FROM google_locations WHERE id=? AND owner_user_id=?", (location_id, actor)).fetchone()
+            if not loc:
+                return jsonify(error="Location not found"), 404
+            account, access = _access(c, actor, loc["google_account_id"])
+            if not access:
+                return jsonify(error="Google authorization needs to be reconnected"), 401
+            resource = loc["resource_name"]
+            url = PERFORMANCE_API + "/" + resource + ":fetchMultiDailyMetricsTimeSeries"
+            data = _http_json("GET", url, access, params=[
+                ("dailyMetrics", "WEBSITE_CLICKS"),
+                ("dailyMetrics", "CALL_CLICKS"),
+                ("dailyMetrics", "BUSINESS_DIRECTION_REQUESTS"),
+                ("dailyMetrics", "BUSINESS_IMPRESSIONS_DESKTOP_MAPS"),
+                ("dailyMetrics", "BUSINESS_IMPRESSIONS_MOBILE_MAPS"),
+                ("dailyMetrics", "BUSINESS_IMPRESSIONS_DESKTOP_SEARCH"),
+                ("dailyMetrics", "BUSINESS_IMPRESSIONS_MOBILE_SEARCH"),
+                ("daily_range.start_date.year", sy),
+                ("daily_range.start_date.month", sm),
+                ("daily_range.start_date.day", sd),
+                ("daily_range.end_date.year", ey),
+                ("daily_range.end_date.month", em),
+                ("daily_range.end_date.day", ed),
+            ])
+            return jsonify(performance=data)
+
+    @app.post("/api/google-business/posts")
+    def google_business_create_post():
+        actor = _actor()
+        body = request.get_json(silent=True) or {}
+        location_id = str(body.get("location_id", "")).strip()
+        summary = str(body.get("summary", "")).strip()
+        topic = str(body.get("topic_type", "STANDARD")).strip().upper()
+        language = str(body.get("language_code", "en-US")).strip()
+        if not actor or not location_id or not summary:
+            return jsonify(error="Authentication, location_id and summary are required"), 400
+        if len(summary) > 1500:
+            return jsonify(error="summary is too long"), 400
+        allowed = {"STANDARD", "EVENT", "OFFER", "PRODUCT"}
+        if topic not in allowed:
+            return jsonify(error="Unsupported topic_type"), 400
+        with db() as c:
+            loc = c.execute("SELECT * FROM google_locations WHERE id=? AND owner_user_id=?", (location_id, actor)).fetchone()
+            if not loc:
+                return jsonify(error="Location not found"), 404
+            account, access = _access(c, actor, loc["google_account_id"])
+            if not access:
+                return jsonify(error="Google authorization needs to be reconnected"), 401
+            payload = {"languageCode": language, "summary": summary, "topicType": topic}
+            cta_url = str(body.get("cta_url", "")).strip()
+            cta_type = str(body.get("cta_type", "")).strip().upper()
+            if cta_url:
+                if cta_type not in {"BOOK", "ORDER", "SHOP", "LEARN_MORE", "SIGN_UP", "CALL"}:
+                    return jsonify(error="Unsupported cta_type"), 400
+                payload["callToAction"] = {"actionType": cta_type, "url": cta_url}
+            data = _http_json("POST", REVIEWS_API + "/" + loc["resource_name"] + "/localPosts", access, payload)
+            log("google-business", "Published a Google Business Profile post")
+            return jsonify(post=data)
+
     return None
 
 
