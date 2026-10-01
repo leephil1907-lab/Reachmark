@@ -49,6 +49,10 @@ def _open(value):
 
 
 def _redirect_uri():
+    # Business Profile uses a separate OAuth scope and callback even though it may reuse the same Google client ID/secret.
+    override = os.environ.get("GOOGLE_BUSINESS_REDIRECT_URI", "").strip()
+    if override:
+        return override.rstrip("/")
     root = request.url_root.rstrip("/")
     parsed = urllib.parse.urlparse(root)
     host = (parsed.hostname or "").lower()
