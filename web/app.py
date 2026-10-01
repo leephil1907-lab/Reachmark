@@ -698,6 +698,8 @@ from web.oauth import register_oauth
 register_oauth(app, db, now, log)
 from web.intelligence import register_intelligence
 register_intelligence(app, db, now)
+from web.outreach import register_outreach
+register_outreach(app, db, now, log)
 
 
 # Client reviews — leave a review for good job done
