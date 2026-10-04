@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Proposal{% if lead.name %} — {{ lead.name }}{% endif %} · Reachmark</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#fbfbfb">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/fonts.css">
+<link rel="stylesheet" href="/static/xdesign.css">
+<link rel="stylesheet" href="/static/opportunity.css">
+</head>
+<body class="oe-public">
+  <header class="oe-top">
+    <a href="/" class="oe-logo"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
+    <span>Draft proposal · not a contract</span>
+  </header>
+  <main class="oe-sheet">
+    <p class="oe-kicker">Lead → audit → opportunity → solution → proposal</p>
+    <h1>{{ lead.name or proposal.body.business.name or 'Proposal' }}</h1>
+    <p class="oe-lede">
+      {% if lead.category %}{{ lead.category }}{% endif %}
+      {% if lead.city %} · {{ lead.city }}{% endif %}
+      {% if lead.website %} · {{ lead.website }}{% endif %}
+    </p>
+    <p class="oe-note">{{ proposal.body.disclaimer }}</p>
+
+    <section class="oe-block">
+      <h2>Current problems</h2>
+      {% if proposal.body.problems %}
+      <ol class="oe-leaks">
+        {% for item in proposal.body.problems %}
+        <li>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.leak }}</p>
+          <small>{{ item.source }}</small>
+        </li>
+        {% endfor %}
+      </ol>
+      {% else %}
+      <p class="oe-empty">No observed problems were on the report. Do not sell a rebuild from this draft.</p>
+      {% endif %}
+    </section>
+
+    <section class="oe-block">
+      <h2>Recommended solution</h2>
+      <p><strong>{{ proposal.body.solution.name }}</strong></p>
+      <p>{{ proposal.body.solution.why }}</p>
+      <p class="oe-note">{{ proposal.body.solution.note }}</p>
+    </section>
+
+    <section class="oe-block">
+      <h2>Packages</h2>
+      <p class="oe-intro">Amounts appear only if a price book was set. Empty means not priced yet.</p>
+      <ol class="oe-leaks">
+        {% for pack in proposal.packages or proposal.body.packages %}
+        <li>
+          <h3>{{ pack.name }}</h3>
+          <p>{% if pack.amount is not none and pack.amount != '' %}{{ pack.amount }}{% else %}Price not set{% endif %}</p>
+          {% if pack.why %}<p>{{ pack.why }}</p>{% endif %}
+          {% if pack.includes %}<p class="oe-note">{{ pack.includes | join(' · ') }}</p>{% endif %}
+          {% if pack.caution %}<p class="oe-note">{{ pack.caution }}</p>{% endif %}
+        </li>
+        {% endfor %}
+      </ol>
+    </section>
+
+    <section class="oe-block">
+      <h2>Objectives &amp; timeline</h2>
+      {% for line in proposal.body.objectives %}
+      <p>{{ line }}</p>
+      {% endfor %}
+      <p class="oe-note">
+        {% for t in proposal.body.timeline %}{{ t.id }}: about {{ t.weeks }} weeks{% if not loop.last %} · {% endif %}{% endfor %}
+      </p>
+    </section>
+
+    {% if proposal.body.prototype and proposal.body.prototype.url %}
+    <section class="oe-block">
+      <h2>Prototype</h2>
+      <p><a class="x-btn dark" href="{{ proposal.body.prototype.url }}">Open the first-section concept</a></p>
+    </section>
+    {% endif %}
+
+    <section class="oe-block oe-cta">
+      <h2>Terms</h2>
+      <p>{{ proposal.body.terms }}</p>
+      <a class="x-btn lime" href="/enquire">Accept / discuss</a>
+    </section>
+  </main>
+  <footer class="oe-foot">Reachmark · Draft proposal · Views of this link are counted.</footer>
+</body>
+</html>

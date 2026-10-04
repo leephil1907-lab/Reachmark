@@ -1,0 +1,36 @@
+/* Platform layer — grids that do not overlap the Opportunity board. */
+#page-platform{padding-bottom:48px}
+.pf-head{align-items:flex-start}
+.pf-mode{display:flex;flex-wrap:wrap;gap:8px}
+.pf-mode button[aria-pressed="true"]{
+  background:#111;color:#fff;border-color:#111;
+}
+.pf-actions{margin:0 0 28px;display:flex;flex-wrap:wrap;gap:10px}
+.pf-split{margin-bottom:18px}
+.pf-row{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;
+  padding:12px 0;border-top:1px solid #eef1e6;
+}
+.pf-row:first-child{border-top:0}
+.pf-row strong{display:block;font-size:14px;line-height:1.4}
+.pf-row span{display:block;font-size:13px;line-height:1.5;color:#5c6658}
+.pf-prices{display:grid;gap:12px;margin-top:12px}
+.pf-pack{display:grid;gap:8px;padding:12px 0;border-top:1px solid #eef1e6}
+.pf-pack:first-child{border-top:0}
+.pf-pack input{width:100%;padding:8px 10px;border:1px solid #e4e8dc;border-radius:8px;font:14px Manrope,sans-serif}
+.pf-drawer{margin:16px 0;padding:16px;border:1px solid #e4e8dc;border-radius:14px;background:#f4f7fb}
+.pf-drawer h3{margin:0 0 8px;font-size:16px}
+.pf-drawer p,.pf-drawer label{margin:0 0 8px;font-size:14px;line-height:1.65;color:#3c4638}
+.pf-drawer textarea,.pf-drawer input,.pf-drawer select{
+  width:100%;padding:8px 10px;border:1px solid #e4e8dc;border-radius:8px;font:14px/1.4 Manrope,sans-serif;margin-bottom:8px;
+}
+.pf-factors{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
+.pf-factors li{display:grid;grid-template-columns:1fr auto;gap:8px;font-size:13px;line-height:1.5}
+.pf-factors small{color:#5c6658;grid-column:1/-1}
+.oe-sheet label{display:grid;gap:6px;font:650 13px/1.4 Manrope,sans-serif;color:#3c4638}
+.oe-sheet input,.oe-sheet textarea{
+  padding:10px 12px;border:1px solid #e4e8dc;border-radius:10px;font:16px/1.45 Manrope,sans-serif;
+}
+@media(max-width:900px){
+  .pf-head{display:grid}
+}

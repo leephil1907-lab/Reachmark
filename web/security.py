@@ -27,6 +27,10 @@ def install_security(app, db):
         if p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/','/verify/','/reset/','/forgot')): return True
         # Quick review links a business is invited to answer, and the public AI receptionist.
         if p.startswith(('/r/','/api/r/')): return True
+        if p.startswith('/o/'): return True
+        if p in ('/need',): return True
+        if p.startswith(('/proposal/','/brief/','/p/')): return True
+        if p=='/api/need' and request.method=='POST': return True
         # Network: public cards, booking pages, QR art, OAuth entry points.
         if p.startswith(('/c/','/book/','/api/book/','/api/qr','/api/auth/oauth')): return True
         if p.startswith('/api/bookings/') and p.endswith('.ics'): return True

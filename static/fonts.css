@@ -61,3 +61,20 @@
   font-display: swap;
   src: url(/static/font-8.woff2) format('truetype');
 }
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/static/fonts/InstrumentSerif-Regular.woff2) format('woff2'),
+       url(/static/fonts/InstrumentSerif-Regular.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/static/fonts/InstrumentSerif-Italic.woff2) format('woff2'),
+       url(/static/fonts/InstrumentSerif-Italic.ttf) format('truetype');
+}
+/* Display face is Instrument Serif. Haryas Text V is not licensed for this build. */

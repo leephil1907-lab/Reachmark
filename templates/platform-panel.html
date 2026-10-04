@@ -1,0 +1,84 @@
+<section class="page" id="page-platform" aria-label="Work first">
+  <div class="oe-board-head pf-head">
+    <div>
+      <div class="eyebrow">Replacement-resistant layer</div>
+      <h1>Who should I contact first, and why?</h1>
+      <p>Every rank is a sum of stored evidence. Unknown factors stay at zero. Autopilot prepares work — it never sends.</p>
+    </div>
+    <div class="pf-mode" role="group" aria-label="Operator mode">
+      <button type="button" class="secondary" data-mode="manual">Manual</button>
+      <button type="button" class="secondary" data-mode="assisted">Assisted</button>
+      <button type="button" class="secondary" data-mode="autopilot">Autopilot</button>
+    </div>
+  </div>
+  <p class="oe-disclaimer" id="pf-disclaimer">Counts are live SQL totals from this workspace.</p>
+  <ol class="oe-funnel pf-stats" id="pf-stats">
+    <li class="oe-funnel-skel">Loading…</li>
+  </ol>
+  <div class="button-group pf-actions">
+    <button class="primary" type="button" id="pf-refresh">Rescore from stored evidence</button>
+    <button class="secondary" type="button" id="pf-tick">Run autopilot tick</button>
+    <button class="secondary" type="button" onclick="navigate('leads')">Open a lead</button>
+  </div>
+
+  <div class="oe-split pf-split">
+    <article class="card">
+      <div class="section-top">
+        <div>
+          <div class="mini-eyebrow">Revenue intelligence</div>
+          <h3>Work on these first</h3>
+        </div>
+        <span class="tag" id="pf-queue-count">0</span>
+      </div>
+      <p class="small muted">Ranked queue. Unscored leads sit at the bottom until you rescore. Ability to pay is unknown unless you recorded it or this workspace closed similar work.</p>
+      <div id="pf-queue"><p class="small muted">No saved businesses yet.</p></div>
+    </article>
+    <article class="card">
+      <div class="mini-eyebrow">Reachmark memory</div>
+      <h3>Due follow-ups</h3>
+      <p class="small muted">Only dates you stored. “Not interested right now” should come back as a dated revisit, not a forgotten row.</p>
+      <div id="pf-due"><p class="small muted">Nothing due.</p></div>
+    </article>
+  </div>
+
+  <div class="oe-split pf-split">
+    <article class="card">
+      <div class="mini-eyebrow">Offer / price intelligence</div>
+      <h3>Price book</h3>
+      <p class="small muted">Empty amounts mean “not set”. Do not invent a $1,000 website. Closed jobs can inform a number; they are not this lead’s quote.</p>
+      <form id="pf-prices" class="pf-prices"></form>
+    </article>
+    <article class="card">
+      <div class="mini-eyebrow">Client delivery</div>
+      <h3>After the invoice</h3>
+      <p class="small muted">Watch items exist only for delivered projects. Next offer is an observed leak, or an explicit “do not upsell”.</p>
+      <button class="text-link" type="button" id="pf-delivery-refresh">Refresh watches</button>
+      <div id="pf-delivery"><p class="small muted">No delivered projects on record.</p></div>
+    </article>
+  </div>
+
+  <div class="oe-split pf-split">
+    <article class="card">
+      <div class="mini-eyebrow">Marketplace intake</div>
+      <h3>Businesses who asked</h3>
+      <p class="small muted">Public <a href="/need" target="_blank" rel="noopener">/need</a> produces a specification. Matching is a queue, not a fake network of agencies.</p>
+      <div id="pf-market"><p class="small muted">No briefs yet.</p></div>
+    </article>
+    <article class="card">
+      <div class="mini-eyebrow">How the ten layers connect</div>
+      <h3>Evidence in, artefacts out</h3>
+      <ul class="oe-crew">
+        <li><b>Queue</b><span>Dynamic score from listing, audit, stage, signals, fit</span></li>
+        <li><b>Competitors</b><span>Same city + category. Gaps only vs audited peers</span></li>
+        <li><b>Prototype</b><span>Independent first section — not their live site</span></li>
+        <li><b>Proposal</b><span>Problems → evidence → packages → terms</span></li>
+        <li><b>Prices</b><span>Your book + workspace history, never a guessed fee</span></li>
+        <li><b>Timing</b><span>Sourced signals only. No invented funding news</span></li>
+        <li><b>Waterfall</b><span>Google / OSM / site / CSV with confidence</span></li>
+        <li><b>Memory</b><span>Reason, potential, follow-up date</span></li>
+        <li><b>Mode</b><span>Manual · Assisted · Autopilot (no send)</span></li>
+        <li><b>Delivery</b><span>Project → watch → next observed offer</span></li>
+      </ul>
+    </article>
+  </div>
+</section>

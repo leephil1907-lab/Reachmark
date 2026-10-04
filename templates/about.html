@@ -108,8 +108,13 @@ small, .hero-note, .art-caption, .ribbon{ color:#2d4a0a !important; font-weight:
 [data-theme="dark"] .banner-viewport, [data-theme="dark"] .carousel-viewport, [data-theme="dark"] .carousel-3d-hero{background:#1e2e1a!important;border-color:#2a3a22!important}
 [data-theme="dark"] .public-main, [data-theme="dark"] main{background:transparent !important}
 </style>
-</head><body>
-{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}<nav><a href="/" aria-label="Reachmark home"><img class="logo" src="/static/logo-primary.svg" alt="Reachmark"></a><div class="nav-links" style="display:flex;align-items:center;gap:16px"><a href="#website-samples">Website samples</a><a href="#enquiry">Ask for an estimate</a><a href="/signup">Create account</a><a href="/signin">Client portal</a><button id="theme-toggle-public" aria-label="Toggle theme" title="Toggle theme" style="background:transparent;border:1px solid #e2e7d6;width:34px;height:34px;border-radius:8px;display:grid;place-items:center;cursor:pointer;font-size:16px">◐</button></div></nav><div class="public-mobile-links"><a href="#website-samples">Browse samples ↓</a><a href="#enquiry">Get estimate ↗</a></div><main>
+<link rel="stylesheet" href="/static/header.css">
+<link rel="stylesheet" href="/static/motion.css">
+<link rel="stylesheet" href="/static/xdesign.css">
+</head><body class="x-public">
+{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}
+{% include 'header-public.html' %}
+<main>
 <section class="banner-carousel premium-reveal" aria-label="Reachmark highlights — live banner ads" role="region">
   <div class="banner-viewport">
     <div class="banner-track">
@@ -525,4 +530,5 @@ small, .hero-note, .art-caption, .ribbon{ color:#2d4a0a !important; font-weight:
 </footer><script src="/static/enquiry.js" defer></script>{% include 'tawkto.html' %}
 <script src="/static/carousel.js" defer>
 <script src="/static/dropdown.js" defer></script></script>
+<script src="/static/motion.js" defer></script>
 <script src="/static/theme.js" defer></script></body></html>

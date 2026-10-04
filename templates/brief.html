@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Project brief — {{ brief.name }} · Reachmark</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/fonts.css">
+<link rel="stylesheet" href="/static/xdesign.css">
+<link rel="stylesheet" href="/static/opportunity.css">
+</head>
+<body class="oe-public">
+  <header class="oe-top">
+    <a href="/" class="oe-logo"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
+    <span>Marketplace brief · {{ brief.status }}</span>
+  </header>
+  <main class="oe-sheet">
+    <p class="oe-kicker">Specification</p>
+    <h1>{{ brief.name }}</h1>
+    <p class="oe-lede">{{ brief.category }} {% if brief.city %}· {{ brief.city }}{% endif %}</p>
+    <p>{{ brief.need }}</p>
+    <section class="oe-block">
+      <h2>Direction</h2>
+      <p>{{ brief.spec.direction }} — {{ brief.spec.goal }}</p>
+      <p class="oe-note">Pages: {{ (brief.spec.pages or []) | join(', ') }}</p>
+      <p class="oe-note">Modules: {{ (brief.spec.modules or []) | join(', ') }}</p>
+      <p class="oe-note">{{ brief.spec.note }}</p>
+    </section>
+    <section class="oe-block oe-cta">
+      <a class="x-btn dark" href="/enquire">Talk to Reachmark</a>
+    </section>
+  </main>
+</body>
+</html>

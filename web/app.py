@@ -698,6 +698,10 @@ from web.oauth import register_oauth
 register_oauth(app, db, now, log)
 from web.intelligence import register_intelligence
 register_intelligence(app, db, now)
+from web.opportunity import register_opportunity
+register_opportunity(app, db, now, log)
+from web.platform import register_platform
+register_platform(app, db, now, log)
 from web.outreach import register_outreach
 register_outreach(app, db, now, log)
 from web.google_business import register_google_business

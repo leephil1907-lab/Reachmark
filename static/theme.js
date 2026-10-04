@@ -20,7 +20,7 @@
       btn.addEventListener('click', window.toggleTheme);
     }
     // nav dynamic motion: sticky glass on scroll
-    const navEl=document.querySelector('nav, .public-nav');
+    const navEl=document.querySelector('.pub-head, nav, .public-nav');
     if(navEl){
       let tick=false;
       const onNavScroll=()=>{

@@ -1,0 +1,94 @@
+/* Opportunity Engine + readable public report. No overlapping layers. */
+.oe-board{position:relative;z-index:2;margin:0 0 48px;padding:0 0 28px;min-width:0;border-bottom:1px solid #e4e8dc}
+.oe-board-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:18px}
+.oe-board-head h1{
+  font-family:'Instrument Serif',Manrope,Georgia,serif;font-weight:400;
+  font-size:clamp(28px,3.4vw,40px);line-height:1.15;letter-spacing:-.03em;margin:8px 0 10px;max-width:34ch;
+}
+.oe-board-head p{margin:0;max-width:62ch;font-size:15px;line-height:1.7;color:#4e574c}
+.oe-disclaimer{font-size:13px;line-height:1.6;color:#5c6658;margin:0 0 16px}
+.oe-funnel{
+  list-style:none;margin:0 0 28px;padding:0;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;
+}
+.oe-funnel li{
+  min-width:0;background:#fff;border:1px solid #e4e8dc;border-radius:16px;padding:16px 14px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.oe-funnel li small{font:650 11px/1.3 Manrope,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#6a7464}
+.oe-funnel li strong{font:700 28px/1 Manrope,sans-serif;letter-spacing:-.04em;color:#1a2315}
+.oe-funnel li span{font:500 12px/1.5 Manrope,sans-serif;color:#5c6658}
+.oe-funnel-skel{padding:20px;color:#5c6658}
+.oe-split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);gap:16px;align-items:start}
+.oe-split .card{min-width:0}
+.oe-report-row{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;
+  padding:12px 0;border-top:1px solid #eef1e6;
+}
+.oe-report-row:first-child{border-top:0}
+.oe-report-row strong{display:block;font-size:14px;line-height:1.4}
+.oe-report-row span{display:block;font-size:13px;line-height:1.5;color:#5c6658}
+.oe-crew{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.oe-crew li{display:grid;grid-template-columns:110px 1fr;gap:10px;font-size:13px;line-height:1.5}
+.oe-crew b{font-size:13px}
+.oe-drawer{
+  margin:16px 0;padding:16px;border:1px solid #e4e8dc;border-radius:14px;background:#f7f9f1;
+}
+.oe-drawer h3{margin:0 0 8px;font-size:16px}
+.oe-drawer p{margin:0 0 10px;font-size:14px;line-height:1.65;color:#3c4638}
+
+/* Public report */
+.oe-public{margin:0;background:#fbfbfb;color:#161a16;font:16px/1.7 Manrope,'DM Sans',sans-serif}
+.oe-top{max-width:820px;margin:0 auto;padding:22px 24px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:13px;color:#5c6658}
+.oe-logo img{height:24px;display:block}
+.oe-sheet{max-width:820px;margin:0 auto;padding:28px 24px 64px}
+.oe-sheet h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(32px,5vw,48px);line-height:1.15;letter-spacing:-.03em;margin:8px 0 12px}
+.oe-sheet h2{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:28px;margin:0 0 12px}
+.oe-kicker{font:650 12px/1.4 Manrope,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#3a7a0a;margin:0}
+.oe-lede{font-size:16px;line-height:1.7;color:#3c4638;margin:0 0 10px}
+.oe-note{font-size:14px;line-height:1.65;color:#5c6658;max-width:68ch}
+.oe-score-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:28px 0}
+.oe-score-row article{background:#fff;border:1px solid #e4e8dc;border-radius:18px;padding:18px 16px;min-width:0}
+.oe-score-row small{display:block;font:650 11px/1.3 Manrope,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#6a7464;margin-bottom:8px}
+.oe-score-row strong{display:block;font:700 36px/1 Manrope,sans-serif;letter-spacing:-.04em}
+.oe-score-row strong span{font-size:18px;color:#6a7464}
+.oe-score-row b{display:block;font-size:16px;line-height:1.4}
+.oe-score-row p{margin:8px 0 0;font-size:14px;line-height:1.6;color:#4e574c}
+.oe-pri.high{color:#1a4d09}.oe-pri.medium{color:#6a5a16}.oe-pri.low{color:#4e574c}
+.oe-block{margin:32px 0;padding:24px 0 0;border-top:1px solid #e4e8dc}
+.oe-intro{max-width:68ch}
+.oe-leaks{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.oe-leaks li{background:#fff;border:1px solid #e4e8dc;border-radius:16px;padding:18px 18px 16px}
+.oe-leaks h3{margin:0 0 8px;font-size:18px;line-height:1.35}
+.oe-leaks p{margin:0 0 8px}
+.oe-fix{font-size:14px}
+.oe-fix span{display:inline-block;font:650 11px Manrope,sans-serif;letter-spacing:.08em;text-transform:uppercase;margin-right:8px;color:#3a7a0a}
+.oe-leaks small{color:#6a7464}
+.oe-empty,.oe-cta p{max-width:68ch}
+.oe-foot{max-width:820px;margin:0 auto;padding:0 24px 40px;font-size:13px;color:#6a7464}
+@media(max-width:900px){
+  .oe-board-head,.oe-split{grid-template-columns:1fr;display:grid}
+  .oe-board-head{align-items:start}
+  .oe-score-row{grid-template-columns:1fr}
+  .oe-crew li{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .oe-funnel{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .oe-sheet{padding:20px 18px 48px}
+}
+
+/* Kill the second chrome that sat on top of overview */
+#rm-modern-root{display:none!important}
+.rm-hero{display:none!important}
+
+/* Readable workspace type — no 7px captions sitting on top of each other */
+.page-heading p,.card p,.muted,.small,.notice,.stat-foot,.section-top p{
+  font-size:14px!important;line-height:1.65!important;max-width:70ch;
+}
+.page-heading h1,h1{line-height:1.2}
+.stats{gap:12px}
+.stat{min-width:0}
+.stat-value{font-size:28px;line-height:1.1}
+.analytics-stats,.feature-grid,.bottom-grid,.breakdown-grid,.analytics-top-grid{gap:16px}
+.analytics-heading,.rm-section-intro{margin-top:8px}
+.workflow-strip{flex-wrap:wrap}

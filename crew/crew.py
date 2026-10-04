@@ -144,6 +144,10 @@ PIPELINES = {
                'description': 'One business end-to-end, stopping before anything outbound.'},
     'launch': {'label': 'Launch kit', 'steps': ['brag'],
                'description': 'For a won project: plan, brief, share copy and a shareable card.'},
+    'opportunity': {'label': 'Opportunity engine', 'steps': ['scout', 'auditor', 'scribe'],
+                    'description': 'Discover, measure the public page, then draft outreach from stored evidence. The Opportunity Engine turns those observations into a diagnosis report before anything is sent.'},
+    'platform': {'label': 'Work-first engine', 'steps': ['scout', 'auditor', 'builder', 'scribe'],
+                 'description': 'Discover, measure, build a first-section concept, then draft evidence-based outreach. Scoring, competitor comparison and proposals sit on those artefacts — nothing outbound without approval.'},
 }
 
 LIMITS = {'max_steps': 14, 'max_seconds': 240, 'max_leads': 25, 'max_dispatches': 5,

@@ -27,7 +27,7 @@ def _apply_v3(c):
       'users':[('is_active','INTEGER DEFAULT 1'),('name','TEXT'),('email_verified','INTEGER DEFAULT 0'),
         ('verification_token','TEXT'),('verification_expires','TEXT'),('reset_token','TEXT'),('reset_expires','TEXT'),
         ('tier',"TEXT DEFAULT 'free'"),('tier_expires','TEXT'),('paystack_customer','TEXT'),('expiry_warned','TEXT')],
-      'payments':[('period',"TEXT DEFAULT 'monthly')]}
+      'payments':[('period',"TEXT DEFAULT 'monthly'")]}
     for table,cols in upgrades.items():
         for column,definition in cols: _add_column(c,table,column,definition)
     if 'users' in _tables(c) and 'tier' in _columns(c,'users'): c.execute("UPDATE users SET tier='free' WHERE tier IS NULL OR tier=''")

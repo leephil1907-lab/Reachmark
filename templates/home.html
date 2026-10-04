@@ -10,29 +10,187 @@
 <meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">
 {% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
 {% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}
-<meta name="theme-color" content="#0f1a0a"><meta name="application-name" content="Reachmark">
+<meta name="theme-color" content="#fbfbfb"><meta name="application-name" content="Reachmark">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Reachmark"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses, identify website opportunities, and turn qualified prospects into clear website projects.' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}">{% endif %}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses, identify website opportunities, and turn qualified prospects into clear website projects.' }}">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest">
-<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><script src="/static/i18n.js"></script>
+<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css">
+<script src="/static/i18n.js"></script>
 {% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}
-<style>
-:root{--ink:#10170d;--muted:#596650;--lime:#d5f268;--line:#e1e7d6;--surface:#fff;--canvas:#f5f7f0;--dark:#0f1a0a;--max:1160px}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--canvas);color:var(--ink);font-family:Manrope,Arial,sans-serif;-webkit-font-smoothing:antialiased}.wrap{width:min(var(--max),calc(100% - 40px));margin:auto}.hero{padding:88px 0 54px}.hero-grid{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(340px,.88fr);gap:56px;align-items:center}.eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;color:#5b7d2e;text-transform:uppercase}.hero h1{font-size:clamp(42px,6vw,76px);line-height:.98;letter-spacing:-3.5px;max-width:760px;margin:16px 0 20px}.hero h1 span{color:#5b7d2e}.hero-copy{font-size:17px;line-height:1.75;color:var(--muted);max-width:650px}.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:12px;text-decoration:none;font-weight:800;font-size:13px;border:1px solid transparent}.btn.primary{background:var(--lime);color:var(--dark);border-color:#c8e85b}.btn.dark{background:var(--dark);color:#eef6df}.btn.ghost{background:var(--surface);color:var(--dark);border-color:#cfd9c1}.hero-note{margin-top:16px;color:#7a8970;font-size:12px;font-weight:650}.hero-panel{background:var(--dark);border:1px solid #26371d;border-radius:26px;padding:26px;box-shadow:0 28px 70px rgba(15,26,10,.16)}.panel-top{display:flex;justify-content:space-between;align-items:center;color:#9db48f;font-size:11px}.live{display:inline-flex;align-items:center;gap:7px}.live i{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 5px rgba(213,242,104,.1)}.flow{display:grid;gap:10px;margin-top:24px}.flow-step{display:flex;gap:12px;align-items:center;padding:14px;border:1px solid #293b22;background:#14200f;border-radius:14px}.flow-icon{width:34px;height:34px;border-radius:10px;background:#eaf5d4;color:var(--dark);display:grid;place-items:center;font-weight:900}.flow-step strong{display:block;color:#f0f6e8;font-size:13px}.flow-step span{display:block;color:#8ea584;font-size:11px;margin-top:3px}.section{padding:38px 0}.section-head{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:18px}.section-head h2{font-size:32px;letter-spacing:-1.3px;margin:7px 0 0}.section-head p{max-width:540px;color:var(--muted);font-size:13px;line-height:1.7;margin:0}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;min-height:190px;transition:transform .22s ease,box-shadow .22s ease}.card:hover{transform:translateY(-3px);box-shadow:0 16px 38px rgba(32,45,22,.08)}.card-num{font-size:11px;font-weight:900;color:#6b8d39;letter-spacing:1.5px}.card h3{font-size:20px;letter-spacing:-.6px;margin:12px 0 8px}.card p{color:var(--muted);font-size:13px;line-height:1.7;margin:0}.card a{display:inline-block;margin-top:18px;color:var(--dark);font-weight:800;font-size:12px}.proof{margin:34px 0;background:var(--dark);color:#eef6df;border-radius:24px;padding:38px}.proof-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:34px;align-items:center}.proof h2{font-size:32px;line-height:1.05;letter-spacing:-1.3px;margin:8px 0 12px}.proof p{color:#a4b798;line-height:1.7;font-size:13px;max-width:560px}.proof-list{display:grid;gap:10px}.proof-item{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid #2a3b23;border-radius:14px;background:#14200f}.proof-item b{font-size:13px}.proof-item span{display:block;color:#91a987;font-size:11px;margin-top:3px;line-height:1.5}.check{width:28px;height:28px;border-radius:9px;background:var(--lime);color:var(--dark);display:grid;place-items:center;font-weight:900;flex:0 0 28px}.contact{padding:18px 0 72px}.contact-box{display:flex;justify-content:space-between;gap:28px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px}.contact-box h2{margin:0 0 7px;font-size:27px;letter-spacing:-1px}.contact-box p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}.contact-actions{display:flex;gap:10px;flex-wrap:wrap}.footer{background:var(--dark);color:#eef6df;padding:44px 0 24px}.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:30px}.footer img{height:28px}.footer p,.footer a{color:#9db48f;font-size:12px;line-height:1.7;text-decoration:none}.footer a:hover{color:#fff}.footer h4{color:var(--lime);font-size:10px;letter-spacing:1.5px;margin:0 0 10px}.footer-bottom{border-top:1px solid #26371d;margin-top:28px;padding-top:18px;color:#78906d;font-size:11px}
-@media(max-width:900px){.hero{padding:60px 0 35px}.hero-grid,.proof-grid{grid-template-columns:1fr}.hero-panel{max-width:720px}.cards{grid-template-columns:1fr}.section-head{display:block}.section-head p{margin-top:10px}.contact-box{display:block}.contact-actions{margin-top:20px}.footer-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.wrap{width:min(100% - 28px,var(--max))}.hero h1{letter-spacing:-2.2px}.hero-copy{font-size:15px}.hero-panel{padding:18px;border-radius:20px}.proof{padding:24px;border-radius:20px}.proof h2{font-size:27px}.footer-grid{grid-template-columns:1fr}.btn{width:100%}.cta{display:grid}.contact-actions{display:grid}.contact-actions .btn{width:100%}}
-[data-theme="dark"] body{background:#0b1208;color:#eef6df}[data-theme="dark"] .card,[data-theme="dark"] .contact-box{background:#141f10;border-color:#2a3a22;color:#eef6df}[data-theme="dark"] .card p,[data-theme="dark"] .section-head p,[data-theme="dark"] .hero-copy,[data-theme="dark"] .contact-box p{color:#9db48f}[data-theme="dark"] .btn.ghost{background:#141f10;color:#eef6df;border-color:#2a3a22}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
-</style>
 </head>
-<body>
+<body class="x-site">
+{% if gtm_id is defined and gtm_id %}<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>{% endif %}
 {% include 'header-public.html' %}
+<div class="x-aurora" aria-hidden="true"></div>
 <main>
-<section class="hero"><div class="wrap hero-grid"><div><div class="eyebrow" data-motion="fade">Reachmark · {{ t('home.eyebrow') }}</div><h1 data-split>{{ t('home.h1a') }} <span>{{ t('home.h1b') }}</span></h1><p class="hero-copy" data-motion="fade-up" data-delay="120">{{ t('home.sub') }}</p><div class="cta" data-motion="fade-up" data-delay="220"><a class="btn dark" href="/workspace">Open Reachmark</a><a class="btn primary" href="/enquire">Start a project</a></div><div class="hero-note">{{ t('home.note') }}</div></div><aside class="hero-panel" aria-label="Reachmark workflow"><div class="panel-top"><span>LIVE REACHMARK WORKFLOW</span><span class="live"><i></i> READY</span></div><div class="flow"><div class="flow-step"><div class="flow-icon">01</div><div><strong>Discover</strong><span>Find businesses by city and category.</span></div></div><div class="flow-step"><div class="flow-icon">02</div><div><strong>Verify</strong><span>Check listed websites and public signals.</span></div></div><div class="flow-step"><div class="flow-icon">03</div><div><strong>Qualify</strong><span>Separate strong opportunities from noise.</span></div></div><div class="flow-step"><div class="flow-icon">04</div><div><strong>Convert</strong><span>Move qualified work into proposals and projects.</span></div></div></div></aside></div></section>
-<section class="section"><div class="wrap"><div class="section-head"><div><div class="eyebrow">THE PLATFORM</div><h2>One workspace for the whole journey.</h2></div><p>Reachmark brings discovery, website verification, lead organization, outreach, proposals and client operations into one focused system.</p></div><div class="cards"><article class="card"><div class="card-num">01 · DISCOVERY</div><h3>Find real opportunities</h3><p>Search by location and category instead of relying on a single fixed source or a single result page.</p><a href="/workspace#global">Explore discovery ↗</a></article><article class="card"><div class="card-num">02 · WEBSITE FIT</div><h3>See who needs better web</h3><p>Turn website presence into useful tiers: no site, social-only, builder, broken, weak or fine.</p><a href="/workspace#leads">View lead workspace ↗</a></article><article class="card"><div class="card-num">03 · DELIVERY</div><h3>Turn leads into work</h3><p>Keep enquiries, projects, contracts, invoices and client follow-ups connected after the first conversation.</p><a href="/enquire">Talk to Reachmark ↗</a></article></div></div></section>
-<section class="wrap proof"><div class="proof-grid"><div><div class="eyebrow" style="color:#d5f268">BUILT FOR CLARITY</div><h2>Evidence first. Clean operations. Better decisions.</h2><p>Reachmark is designed to help you work from observable business information rather than fabricated claims or arbitrary lead lists.</p></div><div class="proof-list"><div class="proof-item"><div class="check">✓</div><div><b>Responsive by default</b><span>Comfortable on desktop, tablet and mobile screens.</span></div></div><div class="proof-item"><div class="check">✓</div><div><b>SEO-ready public pages</b><span>Semantic structure, metadata, canonical URLs and social previews are supported.</span></div></div><div class="proof-item"><div class="check">✓</div><div><b>Content stays manageable</b><span>Existing templates, localization and workspace settings remain part of the system.</span></div></div></div></div></section>
-<section class="contact"><div class="wrap contact-box"><div><div class="eyebrow">NEXT STEP</div><h2>Have a business website project?</h2><p>Use the Reachmark enquiry form to send the brief, requirements and contact details in one place.</p></div><div class="contact-actions"><a class="btn primary" href="/enquire">Open contact form</a><a class="btn ghost" href="/pricing">View plans</a></div></div></section>
+  <section class="x-hero">
+    <h1 data-split>{{ t('home.h1a') }} <em>{{ t('home.h1b') }}</em></h1>
+    <form class="x-search" id="x-search-form" action="/showcase" method="get" role="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.2-3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input id="x-q" name="q" type="search" autocomplete="off" placeholder="Search samples, cities, or categories…" aria-label="Search Reachmark">
+      <kbd id="x-kbd">⌘K</kbd>
+    </form>
+    <p class="x-lead">{{ t('home.sub') }}</p>
+  </section>
+
+  <div class="x-toolbar">
+    <div class="x-tabs" role="tablist" aria-label="Gallery filters">
+      <button type="button" class="on" data-filter="all">All</button>
+      <button type="button" data-filter="sample">Samples</button>
+      <button type="button" data-filter="hospitality">Hospitality</button>
+      <button type="button" data-filter="professional">Professional</button>
+      <button type="button" data-filter="digital">Digital</button>
+    </div>
+    <div class="x-count"><b id="x-shown">{{ samples|length if samples is defined else 10 }}</b> live concepts</div>
+  </div>
+
+  <section class="x-masonry" id="x-masonry" aria-label="{{ t('home.grid_aria') }}">
+    {% for sample in samples %}
+    <article class="x-card" data-name="{{ sample.name|lower }} {{ sample.category|lower }} {{ sample.style|lower }} {{ sample.slug }}" data-kind="sample {% if sample.slug in ['ember-coffee','stillwell-studio','bloom-market'] %}hospitality{% elif sample.slug in ['astra-clinic','novera-law','forma-homes'] %}professional{% else %}digital{% endif %}">
+      <a href="/showcase/{{ sample.slug }}">
+        <img class="shot" src="/static/samples/{{ sample.slug }}-preview.jpg" alt="{{ sample.name }} — {{ sample.category }}" loading="{{ 'eager' if loop.index < 4 else 'lazy' }}">
+        <div class="x-card-foot">
+          <img class="av" src="/static/icon.svg" alt="">
+          <div>
+            <strong>{{ sample.name }}</strong>
+            <span>{{ sample.category }} · {{ sample.style }}</span>
+          </div>
+        </div>
+      </a>
+    </article>
+    {% endfor %}
+  </section>
+
+  <section class="x-pipe">
+    <div>
+      <div class="kicker">Opportunity Engine</div>
+      <h2>Sell the diagnosis before the build.</h2>
+      <p>Reachmark already finds businesses. The missing layer is conversion intelligence: prove a measurable digital problem, say exactly what to sell, then contact the right person with evidence — not a generic hello.</p>
+    </div>
+    <div class="x-steps">
+      <div class="x-step"><i>01</i><div><b>Discover</b><span>Find businesses from public sources. Saved records only.</span></div></div>
+      <div class="x-step"><i>02</i><div><b>Audit</b><span>Read the listed page. Viewport, contact path, forms, speed — measured, not guessed.</span></div></div>
+      <div class="x-step"><i>03</i><div><b>Name the leak</b><span>“No booking CTA on mobile” is a reason to talk. “Do you need a website?” is not.</span></div></div>
+      <div class="x-step"><i>04</i><div><b>Report, then outreach</b><span>A Digital Opportunity Report is stored first. Outreach uses that evidence. Humans still approve the send.</span></div></div>
+    </div>
+  </section>
+
+  <section class="x-pipe" style="background:#20251f">
+    <div>
+      <div class="kicker">Harder to replace</div>
+      <h2>Not another AI lead tool.</h2>
+      <p>Reachmark ranks who to work first from stored evidence, compares audited peers, sends a first-section concept before a pitch, and remembers “not now” until the follow-up date. Autopilot prepares. Humans still send.</p>
+    </div>
+    <div class="x-steps">
+      <div class="x-step"><i>Q</i><div><b>Work-first queue</b><span>Score from listing, audit, stage, fit and sourced signals. Unknown stays zero.</span></div></div>
+      <div class="x-step"><i>P</i><div><b>Prove it, then ask</b><span>Diagnosis report, first-section concept, then a draft proposal with empty prices until you set them.</span></div></div>
+      <div class="x-step"><i>M</i><div><b>Memory &amp; delivery</b><span>Every “not interested” gets a reason and a date. Delivered work stays in the system for the next observed offer.</span></div></div>
+      <div class="x-step"><i>N</i><div><b>Two-sided intake</b><span>Businesses can arrive at /need. Reachmark writes the spec. Matching is a queue, not a fake agency network.</span></div></div>
+    </div>
+  </section>
+
+  <section class="x-cta">
+    <div>
+      <h2>{{ t('home.band_h1') }} {{ t('home.band_h2') }}</h2>
+      <p>{{ t('home.band_p') }}</p>
+    </div>
+    <div class="x-actions">
+      <a class="x-btn dark" href="/workspace">Open Reachmark</a>
+      <a class="x-btn lime" href="/enquire">{{ t('home.cta_project') }}</a>
+    </div>
+  </section>
 </main>
-<footer class="footer"><div class="wrap"><div class="footer-grid"><div><img src="/static/logo-primary.svg" alt="Reachmark"><p>A business discovery and website operations platform for finding potential, qualifying opportunities and making your mark.</p></div><div><h4>EXPLORE</h4><a href="/about">About</a><a href="/reviews">Reviews</a><a href="/pricing">Plans</a><a href="/enquire">Contact</a></div><div><h4>WORKSPACE</h4><a href="/workspace">Owner workspace</a><a href="/signin">Sign in</a><a href="/signup">Create account</a></div></div><div class="footer-bottom">© {{ now_year if now_year is defined else '2026' }} Reachmark. Built for clear, evidence-led business operations.</div></div></footer>
-<script src="/static/motion.js"></script><script src="/static/dropdown.js"></script>
-</body></html>
+
+<footer class="x-foot">
+  <div class="x-foot-in">
+    <div>
+      <img src="/static/logo-primary.svg" alt="Reachmark">
+      <p>A business discovery and website operations platform for finding potential, qualifying opportunities and making your mark.</p>
+    </div>
+    <div>
+      <h4>Explore</h4>
+      <nav>
+        <a href="/about">{{ t('nav.about') }}</a>
+        <a href="/reviews">{{ t('nav.reviews') }}</a>
+        <a href="/pricing">{{ t('nav.plans') }}</a>
+        <a href="/enquire">{{ t('nav.enquire') }}</a>
+      </nav>
+    </div>
+    <div>
+      <h4>Workspace</h4>
+      <nav>
+        <a href="/workspace">{{ t('nav.workspace') }}</a>
+        <a href="/signin">{{ t('nav.signin') }}</a>
+        <a href="/signup">{{ t('nav.signup') }}</a>
+      </nav>
+    </div>
+  </div>
+  <div class="x-foot-bottom">© {{ now_year if now_year is defined else '2026' }} Reachmark. Curated for clear, evidence-led operations.</div>
+</footer>
+
+<div class="x-cmd" id="x-cmd" hidden>
+  <div class="x-cmd-box" role="dialog" aria-modal="true" aria-label="Search Reachmark">
+    <input id="x-cmd-input" type="search" placeholder="Search samples, pages, or actions…">
+    <a href="/showcase" data-cmd>Website samples <span>Gallery</span></a>
+    <a href="/reviews" data-cmd>Client reviews <span>Social proof</span></a>
+    <a href="/enquire" data-cmd>Start a project <span>Enquire</span></a>
+    <a href="/pricing" data-cmd>Plans & billing <span>Pricing</span></a>
+    <a href="/workspace" data-cmd>Open workspace <span>App</span></a>
+    <a href="/signin" data-cmd>Sign in <span>Account</span></a>
+  </div>
+</div>
+
+<script src="/static/motion.js"></script>
+<script src="/static/dropdown.js"></script>
+<script src="/static/theme.js"></script>
+<script>
+(function(){
+  var q=document.getElementById('x-q');
+  var form=document.getElementById('x-search-form');
+  var cards=[].slice.call(document.querySelectorAll('.x-card'));
+  var shown=document.getElementById('x-shown');
+  var kbd=document.getElementById('x-kbd');
+  var cmd=document.getElementById('x-cmd');
+  var cmdIn=document.getElementById('x-cmd-input');
+  var filter='all';
+  if(kbd) kbd.textContent=/Mac|iPhone|iPad/.test(navigator.platform||'')?'⌘K':'Ctrl K';
+  function apply(){
+    var term=(q&&q.value||'').trim().toLowerCase();
+    var n=0;
+    cards.forEach(function(c){
+      var hay=c.getAttribute('data-name')||'';
+      var kind=c.getAttribute('data-kind')||'';
+      var ok=(!term||hay.indexOf(term)!==-1)&&(filter==='all'||kind.indexOf(filter)!==-1);
+      c.style.display=ok?'':'none';
+      if(ok) n++;
+    });
+    if(shown) shown.textContent=String(n);
+  }
+  if(q){q.addEventListener('input',apply);form.addEventListener('submit',function(e){if(q.value){e.preventDefault();apply();}});}
+  document.querySelectorAll('.x-tabs button').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.x-tabs button').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');filter=b.getAttribute('data-filter')||'all';apply();
+    });
+  });
+  function openCmd(){if(!cmd)return;cmd.hidden=false;cmd.classList.add('open');if(cmdIn){cmdIn.value=q?q.value:'';cmdIn.focus();}}
+  function closeCmd(){if(!cmd)return;cmd.classList.remove('open');cmd.hidden=true;}
+  document.addEventListener('keydown',function(e){
+    var meta=e.metaKey||e.ctrlKey;
+    if(meta&&(e.key==='k'||e.key==='K')){e.preventDefault();if(cmd&&cmd.classList.contains('open'))closeCmd();else openCmd();}
+    if(e.key==='Escape')closeCmd();
+    if(e.key==='/'&&document.activeElement&&document.activeElement.tagName!=='INPUT'){e.preventDefault();if(q)q.focus();}
+  });
+  if(cmd){cmd.addEventListener('click',function(e){if(e.target===cmd)closeCmd();});}
+  if(cmdIn){
+    cmdIn.addEventListener('input',function(){
+      var t=cmdIn.value.toLowerCase();
+      cmd.querySelectorAll('[data-cmd]').forEach(function(a){
+        a.style.display=a.textContent.toLowerCase().indexOf(t)===-1?'none':'';
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>

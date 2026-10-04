@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Digital Opportunity Report{% if lead.name %} — {{ lead.name }}{% endif %} · Reachmark</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#fbfbfb">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/fonts.css">
+<link rel="stylesheet" href="/static/xdesign.css">
+<link rel="stylesheet" href="/static/opportunity.css">
+</head>
+<body class="oe-public">
+  <header class="oe-top">
+    <a href="/" class="oe-logo"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
+    <span>Digital Opportunity Report</span>
+  </header>
+  <main class="oe-sheet">
+    <p class="oe-kicker">Diagnosis before development</p>
+    <h1>{{ lead.name or 'This business' }}</h1>
+    <p class="oe-lede">
+      {% if lead.category %}{{ lead.category }}{% endif %}{% if lead.city %} · {{ lead.city }}{% endif %}
+      {% if lead.website %} · {{ lead.website }}{% endif %}
+    </p>
+    <p class="oe-note">{{ report.evidence.disclaimer if report.evidence is mapping else 'Observed gaps only. Not a claim that the business wants a new website.' }}</p>
+
+    <section class="oe-score-row">
+      <article>
+        <small>Opportunity ranking</small>
+        <strong>{{ report.score }}<span>/100</span></strong>
+        <p>A ranking of observed gaps on this check — not a forecast of revenue.</p>
+      </article>
+      <article>
+        <small>Priority</small>
+        <strong class="oe-pri {{ report.priority|lower }}">{{ report.priority }}</strong>
+        <p>{{ report.leak_count }} issue{{ 's' if report.leak_count != 1 else '' }} recorded from the listing and any page we were able to read.</p>
+      </article>
+      <article>
+        <small>Recommended solution</small>
+        <b>{{ report.solution.name }}</b>
+        <p>{{ report.solution.why }}</p>
+      </article>
+    </section>
+
+    <section class="oe-block">
+      <h2>Money leaks we can point to</h2>
+      <p class="oe-intro">Each line is tied to a listing field or a measured on-page signal. If we could not fetch the site, that is stated.</p>
+      {% if report.leaks %}
+      <ol class="oe-leaks">
+        {% for leak in report.leaks %}
+        <li>
+          <h3>{{ leak.title }}</h3>
+          <p>{{ leak.leak }}</p>
+          <p class="oe-fix"><span>Fix</span> {{ leak.fix }}</p>
+          <small>{{ leak.source }}{% if leak.reason and leak.reason != leak.leak %} · {{ leak.reason }}{% endif %}</small>
+        </li>
+        {% endfor %}
+      </ol>
+      {% else %}
+      <p class="oe-empty">This check did not produce a commercial gap. That is itself a finding — do not pitch a rebuild on empty evidence.</p>
+      {% endif %}
+    </section>
+
+    <section class="oe-block">
+      <h2>What this suggests selling</h2>
+      <p>{{ report.solution.why }}</p>
+      {% if report.solution.addresses %}
+      <p class="oe-intro">{{ report.solution.addressed_count }} of the recorded issues can be addressed by the same implementation.</p>
+      {% endif %}
+      <p class="oe-note">{{ report.solution.note }}</p>
+    </section>
+
+    <section class="oe-block oe-cta">
+      <h2>If this is useful</h2>
+      <p>Reply if you want a walkthrough of the observation. There is no invented quote attached to this note.</p>
+      <a class="x-btn dark" href="/enquire">Talk to Reachmark</a>
+    </section>
+  </main>
+  <footer class="oe-foot">Reachmark Opportunity Engine · Evidence dated {{ report.created[:10] if report.created else '' }} · Views of this link are counted.</footer>
+</body>
+</html>

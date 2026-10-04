@@ -1,0 +1,46 @@
+<section class="oe-board" id="oe-board" aria-label="Opportunity Engine">
+  <div class="oe-board-head">
+    <div>
+      <div class="eyebrow">Opportunity Engine</div>
+      <h1>Find the leak. Prove it. Sell the diagnosis.</h1>
+      <p>Every figure below is a live count from this workspace. Empty stages stay at zero. Outreach comes after a stored report — not before.</p>
+    </div>
+    <div class="button-group">
+      <button class="secondary" type="button" onclick="loadOpportunityEngine()">Refresh counts</button>
+      <button class="primary" type="button" onclick="navigate('leads')">Open a lead and run a report</button>
+    </div>
+  </div>
+  <p class="oe-disclaimer" id="oe-disclaimer">Counts are live SQL totals from this workspace.</p>
+  <ol class="oe-funnel" id="oe-funnel" aria-label="Conversion funnel">
+    <li class="oe-funnel-skel">Loading funnel…</li>
+  </ol>
+  <div class="oe-split">
+    <article class="card">
+      <div class="section-top">
+        <div>
+          <div class="mini-eyebrow">High-opportunity reports</div>
+          <h3>Stored diagnoses</h3>
+        </div>
+        <span class="tag" id="oe-report-count">0</span>
+      </div>
+      <p class="small muted">Only reports that have been generated appear here. Nothing is pre-filled.</p>
+      <div id="oe-reports"><p class="small muted">No reports yet. Open a lead and run the Opportunity Engine.</p></div>
+    </article>
+    <article class="card">
+      <div class="mini-eyebrow">Crew that owns each stage</div>
+      <h3>Agents produce artifacts, not decoration</h3>
+      <ul class="oe-crew">
+        <li><b>Scout</b><span>Discover businesses</span></li>
+        <li><b>Verifier</b><span>Validate listing, contact and site data</span></li>
+        <li><b>Auditor</b><span>Measure the public page</span></li>
+        <li><b>Strategist</b><span>Turn gaps into money leaks and a score</span></li>
+        <li><b>Fit engine</b><span>Decide what Reachmark should sell</span></li>
+        <li><b>Architect</b><span>Shape the proposed solution</span></li>
+        <li><b>Scribe</b><span>Write evidence-based outreach</span></li>
+        <li><b>Closer</b><span>Hold send until a human approves</span></li>
+        <li><b>Builder</b><span>Produce the concept that was sold</span></li>
+        <li><b>Account</b><span>Keep the resulting client on record</span></li>
+      </ul>
+    </article>
+  </div>
+</section>
