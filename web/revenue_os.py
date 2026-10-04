@@ -1082,6 +1082,27 @@ def command_center(db):
             if _table(c, 'invoices') else 0
         unpaid = c.execute("SELECT count(*) FROM invoices WHERE status IN ('Draft','Sent','Overdue')").fetchone()[0] \
             if _table(c, 'invoices') else 0
+    if cid:
+        owned = {r[0] for r in c.execute(
+            'SELECT id FROM leads WHERE owner_user_id=?', (cid,)
+        ).fetchall()}
+        events = [r for r in events if r.get('lead_id') in owned]
+        waiting = [r for r in waiting if r.get('lead_id') in owned]
+        hottest = [r for r in hottest if r.get('lead_id') in owned]
+        approvals = [r for r in approvals if r.get('lead_id') in owned]
+        growth = [r for r in growth if r.get('lead_id') in owned]
+        if _table(c, 'invoices'):
+            paid_sum = c.execute(
+                '''SELECT ifnull(sum(x.total_minor),0) FROM invoices x
+                   JOIN leads l ON l.id=x.lead_id
+                   WHERE x.status='Paid' AND l.owner_user_id=?''', (cid,)
+            ).fetchone()[0]
+            unpaid = c.execute(
+                '''SELECT count(*) FROM invoices x
+                   JOIN leads l ON l.id=x.lead_id
+                   WHERE x.status IN ('Draft','Sent','Overdue') AND l.owner_user_id=?''', (cid,)
+            ).fetchone()[0]
+
     return {
         'funnel': funnel,
         'happened': events,
@@ -1106,10 +1127,16 @@ def outcome_metrics(db):
         def rows(sql, args=()):
             return [dict(r) for r in c.execute(sql, args)]
 
-        leads = c.execute('SELECT count(*) FROM leads').fetchone()[0]
-        won = c.execute("SELECT count(*) FROM leads WHERE stage='Won'").fetchone()[0]
-        replied = c.execute("SELECT count(*) FROM leads WHERE stage IN ('Replied','Won')").fetchone()[0]
-        contacted = c.execute("SELECT count(*) FROM leads WHERE stage IN ('Contacted','Replied','Won')").fetchone()[0]
+        cid = session.get('client_id') if session.get('role') == 'client' else None
+        lead_where = ' WHERE owner_user_id=?' if cid else ''
+        lead_args = (cid,) if cid else ()
+        leads = c.execute('SELECT count(*) FROM leads' + lead_where, lead_args).fetchone()[0]
+        won = c.execute("SELECT count(*) FROM leads" + lead_where + " AND stage='Won'" if cid else
+                        "SELECT count(*) FROM leads WHERE stage='Won'", lead_args).fetchone()[0]
+        replied = c.execute("SELECT count(*) FROM leads" + lead_where + " AND stage IN ('Replied','Won')" if cid else
+                            "SELECT count(*) FROM leads WHERE stage IN ('Replied','Won')", lead_args).fetchone()[0]
+        contacted = c.execute("SELECT count(*) FROM leads" + lead_where + " AND stage IN ('Contacted','Replied','Won')" if cid else
+                              "SELECT count(*) FROM leads WHERE stage IN ('Contacted','Replied','Won')", lead_args).fetchone()[0]
         by_source = rows(
             "SELECT ifnull(source,'unknown') k, count(*) n, "
             "sum(CASE WHEN stage='Won' THEN 1 ELSE 0 END) won FROM leads GROUP BY ifnull(source,'unknown') ORDER BY n DESC LIMIT 12"
@@ -1122,8 +1149,12 @@ def outcome_metrics(db):
             "SELECT ifnull(category,'unknown') k, count(*) n, "
             "sum(CASE WHEN stage='Won' THEN 1 ELSE 0 END) won FROM leads GROUP BY ifnull(category,'unknown') ORDER BY n DESC LIMIT 12"
         )
-        paid = rows("SELECT id, lead_id, total_minor, currency, updated, created FROM invoices WHERE status='Paid'") \
-            if _table(c, 'invoices') else []
+        paid = rows(
+            "SELECT x.id, x.lead_id, x.total_minor, x.currency, x.updated, x.created "
+            "FROM invoices x JOIN leads l ON l.id=x.lead_id "
+            "WHERE x.status='Paid'" + (" AND l.owner_user_id=?" if cid else ""),
+            (cid,) if cid else ()
+        ) if _table(c, 'invoices') else []
         avg_deal = None
         if paid:
             avg_deal = int(sum(p['total_minor'] or 0 for p in paid) / len(paid))
@@ -1216,10 +1247,12 @@ def register_revenue_os(app, db, now, log):
 
     @app.get('/api/os/growth')
     def os_growth():
+        where, args = _owner_clause('l')
         with db() as c:
             rows = [dict(r) for r in c.execute(
-                '''SELECT g.*, l.name AS lead_name FROM revenue_growth g
-                   LEFT JOIN leads l ON l.id=g.lead_id ORDER BY g.updated DESC LIMIT 40''')]
+                f'''SELECT g.*, l.name AS lead_name FROM revenue_growth g
+                    LEFT JOIN leads l ON l.id=g.lead_id
+                    WHERE {where} ORDER BY g.updated DESC LIMIT 40''', args)]
         return jsonify(items=rows, count=len(rows))
 
     @app.post('/api/os/growth/refresh')
