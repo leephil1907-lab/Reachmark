@@ -31,9 +31,11 @@ nav.main a[aria-current="page"]{background:#0f1a0a;color:#eaf3de}
 .pub-head.open .pub-menu{display:block}
 @media(max-width:900px){
   nav.main{display:none}
-  #pub-menu-btn{display:grid;place-items:center}
+  #pub-menu-btn{display:grid;place-items:center;flex-shrink:0}
   .head-cta .btn.ghost{display:none}
-  .head-cta{margin-left:auto}
+  .head-cta{margin-left:auto;flex-wrap:wrap;justify-content:flex-end;row-gap:8px}
+  .pub-head-in{flex-wrap:wrap;row-gap:10px}
+  .pub-logo{flex-shrink:0}
 }
 /* Dark mode — header plus the shared public-page surfaces, so the toggle
    never leaves a half-themed page. */
