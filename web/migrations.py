@@ -1,7 +1,7 @@
 """Single-source SQLite migrations for Reachmark."""
 from datetime import datetime, timezone
 
-MIGRATION_VERSION=5
+MIGRATION_VERSION=6
 
 def _tables(c):
     return {r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
@@ -69,11 +69,26 @@ def _apply_v5(c):
       CREATE INDEX IF NOT EXISTS idx_google_locations_owner ON google_locations(owner_user_id);
       CREATE INDEX IF NOT EXISTS idx_google_reviews_location ON google_reviews(google_location_id);""")
 
+
+def _apply_v6(c):
+    c.executescript("""CREATE TABLE IF NOT EXISTS discovery_cells(
+      id TEXT PRIMARY KEY, location_key TEXT NOT NULL, category TEXT NOT NULL,
+      provider TEXT NOT NULL, cell_lat REAL NOT NULL, cell_lon REAL NOT NULL,
+      radius_m INTEGER NOT NULL DEFAULT 3000, status TEXT NOT NULL DEFAULT 'scanned',
+      scanned_at TEXT NOT NULL, result_count INTEGER NOT NULL DEFAULT 0,
+      UNIQUE(location_key,category,provider,cell_lat,cell_lon));
+      CREATE INDEX IF NOT EXISTS idx_discovery_cells_lookup ON discovery_cells(location_key,category,provider);
+      CREATE TABLE IF NOT EXISTS global_suppression(
+      id TEXT PRIMARY KEY, channel TEXT NOT NULL, destination TEXT NOT NULL,
+      normalized_destination TEXT NOT NULL UNIQUE, reason TEXT NOT NULL DEFAULT 'manual',
+      created TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS idx_global_suppression_channel ON global_suppression(channel);""")
+
 def run_migrations(db):
     with db() as c:
         c.execute("CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY,applied_at TEXT NOT NULL)")
         applied={r[0] for r in c.execute("SELECT version FROM schema_migrations ORDER BY version")}
-        for version,migration in ((1,_apply_v1),(2,_apply_v2),(3,_apply_v3),(4,_apply_v4),(5,_apply_v5)):
+        for version,migration in ((1,_apply_v1),(2,_apply_v2),(3,_apply_v3),(4,_apply_v4),(5,_apply_v5),(6,_apply_v6)):
             if version not in applied:
                 migration(c)
                 c.execute("INSERT INTO schema_migrations(version,applied_at) VALUES(?,?)",(version,datetime.now(timezone.utc).isoformat()))
