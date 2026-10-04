@@ -28,6 +28,37 @@ def geocode(location):
     return places[0]
 
 def discover_location(location, tag, limit=80):
+    """Primary Reachmark discovery entrypoint.
+
+    The global waterfall owns provider ordering, grid scanning, dedupe, chain/review
+    qualification and opportunity ranking. The older single-cell OSM query remains
+    only as a bounded fallback if the new pipeline is unavailable.
+    """
+    try:
+        from web.global_discovery import discover
+        category = {
+            ('shop','car_repair'):'auto', ('shop','hairdresser'):'beauty',
+            ('amenity','restaurant'):'restaurant', ('amenity','cafe'):'restaurant',
+            ('amenity','pharmacy'):'pharmacy', ('shop','clothes'):'clothing',
+            ('shop','beauty'):'beauty', ('office','accountant'):'professional',
+            ('office','lawyer'):'professional', ('office','estate_agent'):'professional',
+            ('craft','plumber'):'home services', ('craft','electrician'):'home services',
+            ('craft','carpenter'):'home services', ('craft','roofer'):'home services',
+            ('craft','painter'):'home services', ('craft','hvac'):'home services',
+            ('shop','car_repair'):'auto', ('amenity','car_wash'):'auto',
+            ('amenity','dentist'):'health', ('amenity','clinic'):'health',
+            ('amenity','veterinary'):'health', ('healthcare','physiotherapist'):'health',
+        }.get(tuple(tag), location.split(',')[0] if isinstance(location,str) else 'business')
+        from web.app import db as reachmark_db
+        rows, meta = discover(location, category, limit=limit, ring=2, db=reachmark_db)
+        for row in rows:
+            row.setdefault('city', location)
+            row.setdefault('category', category)
+        return rows, place_name(location, meta.get('center'))
+    except Exception:
+        # Keep the established OSM-only path as a safety net when an optional provider
+        # or migration is not ready. The fallback is still public-data-only.
+        pass
     place=geocode(location)
     lat,lon=float(place['lat']),float(place['lon']); key,value=tag
     q=f'[out:json][timeout:40];nwr(around:15000,{lat},{lon})["{key}"="{value}"]["name"];out center tags {int(limit)};'
@@ -39,6 +70,9 @@ def discover_location(location, tag, limit=80):
         t=item.get('tags',{}); center=item.get('center',item)
         rows.append({'source_key':f"osm:{item['type']}:{item['id']}",'name':t['name'],'city':location,'address':', '.join(filter(None,[' '.join(filter(None,[t.get('addr:housenumber'),t.get('addr:street')])),t.get('addr:city'),t.get('addr:state'),t.get('addr:postcode'),t.get('addr:country')])),'phone':t.get('phone') or t.get('contact:phone',''),'email':t.get('email') or t.get('contact:email',''),'website':t.get('website') or t.get('contact:website',''),'source':'OpenStreetMap','source_url':f"https://www.openstreetmap.org/{item['type']}/{item['id']}",'latitude':center.get('lat'),'longitude':center.get('lon'),'opening_hours':t.get('opening_hours',''),'social_url':t.get('contact:facebook') or t.get('contact:instagram',''),'source_tags':t})
     return rows, place.get('display_name',location)
+
+def place_name(location, center=None):
+    return str(location)
 
 def audit_website(url):
     if classify(url)!='HAS_WEBSITE': return {'status':classify(url),'reason':'Source listing has no standalone website URL. Verify independently.','http_code':None}
