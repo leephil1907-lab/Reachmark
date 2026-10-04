@@ -381,6 +381,11 @@ def save_report(db, lead, payload, now):
         )
     payload = dict(payload)
     payload.update(id=rid, token=token, lead_id=lead['id'], created=stamp, views=0)
+    try:
+        from web.revenue_os import on_report_saved
+        on_report_saved(db, lead, payload, now)
+    except Exception:
+        pass
     return payload
 
 
@@ -395,49 +400,10 @@ def serialize_row(row):
 
 
 def funnel_counts(db):
-    """Every figure is a COUNT of stored rows. Empty workspaces return zeros."""
-    with db() as c:
-        where, args = _owner_clause()
-        def n(sql, extra=()):
-            return c.execute(sql, args + extra).fetchone()[0]
-
-        discovered = n(f'SELECT count(*) FROM leads WHERE {where}')
-        verified = n(
-            f"SELECT count(*) FROM leads WHERE {where} AND ("
-            f" (email IS NOT NULL AND email!='') OR (phone IS NOT NULL AND phone!='') "
-            f" OR (website IS NOT NULL AND website!='') OR audit_status IS NOT NULL)"
-        )
-        reports_table = c.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='opportunity_reports'").fetchone()
-        if reports_table:
-            reports = n(f'SELECT count(*) FROM opportunity_reports WHERE {where}')
-            qualified = n(f'SELECT count(*) FROM opportunity_reports WHERE {where} AND qualified=1')
-            high = n(f"SELECT count(*) FROM opportunity_reports WHERE {where} AND priority='High'")
-        else:
-            reports = qualified = high = 0
-        contacted = n(f"SELECT count(*) FROM leads WHERE {where} AND stage IN ('Contacted','Replied','Won')")
-        conversations = n(f"SELECT count(*) FROM leads WHERE {where} AND stage IN ('Replied','Won')")
-        proposals = 0
-        if c.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='projects'").fetchone():
-            proposals += c.execute('SELECT count(*) FROM projects').fetchone()[0]
-        if c.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='contracts'").fetchone():
-            proposals += c.execute('SELECT count(*) FROM contracts').fetchone()[0]
-        clients = n(f"SELECT count(*) FROM leads WHERE {where} AND stage='Won'")
-    steps = [
-        ('discovered', 'Discovered', discovered, 'Saved businesses in this workspace'),
-        ('verified', 'Verified', verified, 'Listing has a contact, website, or a recorded check'),
-        ('qualified', 'Qualified', qualified, 'Reports marked worth pursuing from observed gaps'),
-        ('high', 'High opportunity', high, 'Reports ranked High from observed gaps'),
-        ('reports', 'Reports generated', reports, 'Digital Opportunity Reports stored'),
-        ('contacted', 'Contacted', contacted, 'Lead stage Contacted, Replied or Won'),
-        ('conversations', 'Conversations', conversations, 'Lead stage Replied or Won'),
-        ('proposals', 'Proposals', proposals, 'Projects and contracts on record'),
-        ('clients', 'Clients', clients, 'Lead stage marked Won'),
-    ]
-    return {
-        'steps': [{'id': i, 'label': l, 'count': v, 'basis': b} for i, l, v, b in steps],
-        'counts': {i: v for i, l, v, b in steps},
-        'disclaimer': 'Counts are live SQL totals from this workspace. Empty stages stay at zero.',
-    }
+    """Canonical Revenue OS counts. A project or contract is never a proposal."""
+    from web.revenue_os import canonical_funnel, ensure_tables
+    ensure_tables(db)
+    return canonical_funnel(db)
 
 
 def register_opportunity(app, db, now, log):

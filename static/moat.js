@@ -161,6 +161,7 @@
     try { renderPrices(await get('/api/platform/prices')); } catch (e) { /* keep empty */ }
     try { renderDelivery(await get('/api/platform/delivery')); } catch (e) { /* keep empty */ }
     try { renderMarket(await get('/api/platform/market')); } catch (e) { /* keep empty */ }
+    if (typeof loadRevenueOs === 'function') loadRevenueOs();
   };
 
   function factorsHtml(ranking) {

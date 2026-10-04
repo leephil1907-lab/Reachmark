@@ -855,6 +855,11 @@ def register_platform(app, db, now, log):
                  'draft', 0, stamp, stamp, lead.get('owner_user_id')),
             )
         log('platform', f'Proposal drafted for {lead.get("name")}')
+        try:
+            from web.revenue_os import on_proposal_saved
+            on_proposal_saved(db, lead, now)
+        except Exception:
+            pass
         return jsonify(id=pid, token=token, url=f'/proposal/{token}', body=body)
 
     @app.post('/api/platform/lead/<lid>/memory')

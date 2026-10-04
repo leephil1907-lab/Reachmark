@@ -702,6 +702,8 @@ from web.opportunity import register_opportunity
 register_opportunity(app, db, now, log)
 from web.platform import register_platform
 register_platform(app, db, now, log)
+from web.revenue_os import register_revenue_os
+register_revenue_os(app, db, now, log)
 from web.outreach import register_outreach
 register_outreach(app, db, now, log)
 from web.google_business import register_google_business

@@ -128,6 +128,13 @@ def register_outreach(app,db,now,log):
             if inserted and email and event_type=="unsubscribed":c.execute("INSERT OR IGNORE INTO suppression(email,created) VALUES(?,?)",(email,now()))
             if inserted and email and event_type=="replied":
                 c.execute("UPDATE leads SET stage='Replied',updated=? WHERE lower(email)=lower(?)",(now(),email));c.execute("UPDATE outreach_enrollments SET status='replied',updated=? WHERE lead_id IN (SELECT id FROM leads WHERE lower(email)=lower(?))",(now(),email))
+        if inserted and email and event_type=="replied":
+            try:
+                from web.revenue_os import on_outreach_reply
+                reply_body=str(body.get("text") or body.get("reply") or body.get("message") or body.get("body") or "")
+                on_outreach_reply(db, email, now, reply_body)
+            except Exception:
+                pass
         return jsonify(ok=True,duplicate=not bool(inserted)),200
     def instantly_webhook():
         return webhook("instantly")
