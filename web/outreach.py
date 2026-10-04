@@ -129,6 +129,6 @@ def register_outreach(app,db,now,log):
             if inserted and email and event_type=="replied":
                 c.execute("UPDATE leads SET stage='Replied',updated=? WHERE lower(email)=lower(?)",(now(),email));c.execute("UPDATE outreach_enrollments SET status='replied',updated=? WHERE lead_id IN (SELECT id FROM leads WHERE lower(email)=lower(?))",(now(),email))
         return jsonify(ok=True,duplicate=not bool(inserted)),200
-    app.post("/api/webhooks/instantly")(lambda:webhook("instantly"));app.post("/api/webhooks/smartlead")(lambda:webhook("smartlead"))
+    app.post("/api/webhooks/instantly", endpoint="webhook_instantly")(lambda:webhook("instantly"));app.post("/api/webhooks/smartlead", endpoint="webhook_smartlead")(lambda:webhook("smartlead"))
     from web.revenue_ops import register_revenue_ops
     register_revenue_ops(app,db,now,log)
