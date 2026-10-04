@@ -1,6 +1,6 @@
 """Global, provider-waterfall discovery primitives used by Reachmark's Scout."""
 from __future__ import annotations
-import math, os, re, time, unicodedata
+import math, os, re, time, unicodedata, uuid
 from typing import Iterable
 import requests
 
@@ -139,15 +139,37 @@ def foursquare_search(query,lat,lon,limit=50,timeout=15):
         rows.append({"source_key":f"foursquare:{fsqid}","name":p.get("name",""),"address":loc.get("formatted_address") or loc.get("address",""),"phone":p.get("tel",""),"website":p.get("website",""),"source":"Foursquare","source_url":f"https://foursquare.com/v/{fsqid}" if fsqid else "","latitude":g.get("latitude"),"longitude":g.get("longitude"),"source_tags":{"provider":"foursquare","review_count":reviews,"rating":p.get("rating")}})
     return rows,""
 
-def discover(location,category,limit=20,ring=2):
+
+def _cell_key(lat,lon):
+    return round(float(lat),4),round(float(lon),4)
+
+def _cell_seen(db,location,category,provider,lat,lon):
+    if not db:return False
+    try:
+        with db() as c:
+            return c.execute("SELECT 1 FROM discovery_cells WHERE location_key=? AND category=? AND provider=? AND cell_lat=? AND cell_lon=? LIMIT 1",(location,category,provider,*_cell_key(lat,lon))).fetchone() is not None
+    except Exception:return False
+
+def _mark_cell(db,location,category,provider,lat,lon,count):
+    if not db:return
+    try:
+        with db() as c:
+            c.execute("INSERT OR REPLACE INTO discovery_cells(id,location_key,category,provider,cell_lat,cell_lon,radius_m,status,scanned_at,result_count) VALUES(?,?,?,?,?,?,?,?,datetime('now'),?)",(uuid.uuid4().hex,location,category,provider,*_cell_key(lat,lon),3000,"scanned",int(count)))
+    except Exception:
+        pass
+
+def discover(location,category,limit=20,ring=2,db=None):
     if not geocode:raise RuntimeError("Geocoder unavailable")
     place=geocode(location); lat,lon=float(place["lat"]),float(place["lon"])
     country=(place.get("address") or {}).get("country_code","").upper()
     providers=REGION_PRIORITY.get(country,["google","foursquare","osm"])
     variants=category_queries(category); candidates=[]
     for glat,glon in grid_points(lat,lon,ring):
-        for variant in variants:
-            for provider in providers:
+        for provider in providers:
+            if _cell_seen(db,location,category,provider,glat,glon):
+                continue
+            before=len(candidates)
+            for variant in variants:
                 if provider=="google":
                     rows,_=google_search(f"{variant} in {location}",glat,glon,20)
                 elif provider=="foursquare":
@@ -155,6 +177,7 @@ def discover(location,category,limit=20,ring=2):
                 else:
                     rows,_=osm_search(variant,glat,glon)
                 candidates.extend(rows)
+            _mark_cell(db,location,category,provider,glat,glon,len(candidates)-before)
         if len(candidates)>=max(limit*6,60):break
     candidates=dedupe(candidates)
     return candidates[:max(limit*6,60)],{"country":country,"providers":providers,"queries":variants,"center":{"lat":lat,"lon":lon}}
