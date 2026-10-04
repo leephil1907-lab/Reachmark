@@ -172,3 +172,33 @@ class RevenueOsJourney(unittest.TestCase):
         self.assertEqual(cmd['happened'], [])
         self.assertEqual(cmd['attention']['replies'], [])
         self.assertEqual(cmd['money']['paid_minor_sum'], 0)
+
+    def test_client_revenue_os_scopes_legacy_commercial_rows_by_lead_owner(self):
+        # Legacy contracts/projects/invoices do not have owner_user_id; the OS
+        # must scope them through their associated lead.
+        with module.db() as c:
+            c.execute(
+                "INSERT INTO leads(id,source_key,name,category,city,created,updated,owner_user_id) "
+                "VALUES(?,?,?,?,?,?,?,?)",
+                ('lead-a','a','Client A','Bakery','Lagos',module.now(),module.now(),'client-a'),
+            )
+            c.execute(
+                "INSERT INTO leads(id,source_key,name,category,city,created,updated,owner_user_id) "
+                "VALUES(?,?,?,?,?,?,?,?)",
+                ('lead-b','b','Client B','Bakery','Lagos',module.now(),module.now(),'client-b'),
+            )
+            c.execute(
+                "INSERT INTO projects(id,title,lead_id,stage,created,updated) VALUES(?,?,?,?,?,?)",
+                ('proj-a','A project','lead-a','Delivered',module.now(),module.now()),
+            )
+            c.execute(
+                "INSERT INTO projects(id,title,lead_id,stage,created,updated) VALUES(?,?,?,?,?,?)",
+                ('proj-b','B project','lead-b','Delivered',module.now(),module.now()),
+            )
+        with self.client.session_transaction() as sess:
+            sess['client_id'] = 'client-a'
+            sess['role'] = 'client'
+        funnel = self.client.get('/api/os/funnel').get_json()['counts']
+        self.assertEqual(funnel['project'], 1)
+        self.assertEqual(funnel['delivered'], 1)
+        self.assertEqual(self.client.get('/api/os/growth').get_json()['count'], 0)
