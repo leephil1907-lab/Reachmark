@@ -1,0 +1,13 @@
+(function(){'use strict';
+function init(){var drawer=document.getElementById('mobile-shell-drawer'),backdrop=document.getElementById('mobile-shell-backdrop'),openBtn=document.getElementById('mobile-shell-trigger'),closeBtn=document.getElementById('mobile-shell-close');if(!drawer||!backdrop||!openBtn)return;
+function setOpen(open){openBtn.setAttribute('aria-expanded',String(open));drawer.setAttribute('aria-hidden',String(!open));if(open){backdrop.hidden=false;requestAnimationFrame(function(){drawer.classList.add('is-open');backdrop.classList.add('is-open')});document.body.classList.add('mobile-shell-locked');closeBtn&&closeBtn.focus();}else{drawer.classList.remove('is-open');backdrop.classList.remove('is-open');document.body.classList.remove('mobile-shell-locked');setTimeout(function(){if(!drawer.classList.contains('is-open'))backdrop.hidden=true},220);openBtn.focus();}}
+openBtn.addEventListener('click',function(){setOpen(true)});closeBtn&&closeBtn.addEventListener('click',function(){setOpen(false)});backdrop.addEventListener('click',function(){setOpen(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!backdrop.hidden)setOpen(false)});
+drawer.querySelectorAll('.nav[data-page]').forEach(function(btn){btn.addEventListener('click',function(){if(typeof window.navigate==='function')window.navigate(btn.dataset.page);setOpen(false);});});
+document.querySelectorAll('.desktop-app-nav [data-shell-page]').forEach(function(btn){btn.addEventListener('click',function(){if(typeof window.navigate==='function')window.navigate(btn.dataset.shellPage);});});
+function animatePage(page){if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;var node=document.getElementById('page-'+page);if(!node)return;node.animate([{opacity:.72,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:260,easing:'cubic-bezier(.16,1,.3,1)'});}
+var oldNavigate=window.navigate; if(typeof oldNavigate==='function'&&!window.__reachmarkShellWrapped){window.__reachmarkShellWrapped=true;window.navigate=function(page){oldNavigate(page);animatePage(page);document.querySelectorAll('.desktop-app-nav [data-shell-page]').forEach(function(b){b.toggleAttribute('aria-current',b.dataset.shellPage===page);});};}
+var current=location.hash.slice(1)||'overview';document.querySelectorAll('.desktop-app-nav [data-shell-page]').forEach(function(b){b.toggleAttribute('aria-current',b.dataset.shellPage===current);});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
