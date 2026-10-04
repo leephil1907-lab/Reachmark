@@ -126,16 +126,20 @@ def google_search(query,lat=None,lon=None,limit=20,timeout=15):
 def foursquare_search(query,lat,lon,limit=50,timeout=15):
     key=_fsq_key()
     if not key:return [],"not configured"
-    try:r=requests.get("https://api.foursquare.com/v3/places/search",headers={"Authorization":key,"Accept":"application/json"},params={"query":query,"ll":f"{lat},{lon}","radius":5000,"limit":min(50,max(1,int(limit)))},timeout=timeout)
+    try:r=requests.get(
+        "https://places-api.foursquare.com/places/search",
+        headers={"Authorization":f"Bearer {key}","Accept":"application/json","X-Places-Api-Version":"2025-06-17"},
+        params={"query":query,"ll":f"{lat},{lon}","radius":5000,"limit":min(50,max(1,int(limit)))},
+        timeout=timeout)
     except requests.RequestException as exc:return [],f"request failed: {type(exc).__name__}"
     if r.status_code==429:return [],"rate limited"
     if r.status_code>=400:return [],f"HTTP {r.status_code}"
     rows=[]
     for p in (r.json().get("results") or []):
-        stats=p.get("stats") or {}; reviews=stats.get("total_ratings") or p.get("rating_count")
+        stats=p.get("stats") or {}; reviews=stats.get("total_ratings") or p.get("total_ratings") or p.get("rating_count")
         if reviews is not None and int(reviews)<5:continue
         g=(p.get("geocodes") or {}).get("main") or {}
-        loc=p.get("location") or {}; fsqid=p.get("fsq_id","")
+        loc=p.get("location") or {}; fsqid=p.get("fsq_place_id") or p.get("fsq_id","")
         rows.append({"source_key":f"foursquare:{fsqid}","name":p.get("name",""),"address":loc.get("formatted_address") or loc.get("address",""),"phone":p.get("tel",""),"website":p.get("website",""),"source":"Foursquare","source_url":f"https://foursquare.com/v/{fsqid}" if fsqid else "","latitude":g.get("latitude"),"longitude":g.get("longitude"),"source_tags":{"provider":"foursquare","review_count":reviews,"rating":p.get("rating")}})
     return rows,""
 
