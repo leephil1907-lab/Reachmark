@@ -188,6 +188,16 @@ def _owner_clause(alias=''):
     return '1=1', ()
 
 
+def _client_owns_lead(db, lead_id):
+    """Return True for owner sessions; client sessions must own the lead."""
+    cid = session.get('client_id') if session.get('role') == 'client' else None
+    if not cid:
+        return True
+    with db() as c:
+        row = c.execute('SELECT owner_user_id FROM leads WHERE id=?', (lead_id,)).fetchone()
+    return bool(row and row['owner_user_id'] == cid)
+
+
 def _json(value, fallback):
     if isinstance(value, (dict, list)):
         return value
@@ -307,15 +317,47 @@ def canonical_funnel(db):
         proposal = 0
         if exists('generated_proposals'):
             proposal = n(f'SELECT count(*) FROM generated_proposals WHERE {where}')
-        contract = n(f'SELECT count(*) FROM contracts') if exists('contracts') else 0
-        project = n(f'SELECT count(*) FROM projects') if exists('projects') else 0
-        invoice = n(f'SELECT count(*) FROM invoices') if exists('invoices') else 0
-        paid = n("SELECT count(*) FROM invoices WHERE status='Paid'") if exists('invoices') else 0
-        delivered = 0
+        # Legacy commercial tables do not carry owner_user_id. Scope them
+        # through their lead so client workspaces remain private.
+        cid = session.get('client_id') if session.get('role') == 'client' else None
+        scope = ' AND l.owner_user_id=?' if cid else ''
+        scope_args = (cid,) if cid else ()
+        contract = project = invoice = paid = delivered = result = retained = 0
+        if exists('contracts'):
+            try:
+                contract = c.execute(
+                    f'''SELECT count(*) FROM contracts x JOIN leads l ON l.id=x.lead_id
+                        WHERE 1=1{scope}''', scope_args).fetchone()[0]
+            except Exception:
+                contract = 0
         if exists('projects'):
-            delivered = n("SELECT count(*) FROM projects WHERE stage IN ('Delivered','Completed')")
-        result = n(f'SELECT count(*) FROM revenue_results') if exists('revenue_results') else 0
-        retained = n(f'SELECT count(*) FROM revenue_growth') if exists('revenue_growth') else 0
+            try:
+                project = c.execute(
+                    f'''SELECT count(*) FROM projects x JOIN leads l ON l.id=x.lead_id
+                        WHERE 1=1{scope}''', scope_args).fetchone()[0]
+                delivered = c.execute(
+                    f'''SELECT count(*) FROM projects x JOIN leads l ON l.id=x.lead_id
+                        WHERE x.stage IN ('Delivered','Completed'){scope}''', scope_args).fetchone()[0]
+            except Exception:
+                project = delivered = 0
+        if exists('invoices'):
+            try:
+                invoice = c.execute(
+                    f'''SELECT count(*) FROM invoices x JOIN leads l ON l.id=x.lead_id
+                        WHERE 1=1{scope}''', scope_args).fetchone()[0]
+                paid = c.execute(
+                    f'''SELECT count(*) FROM invoices x JOIN leads l ON l.id=x.lead_id
+                        WHERE x.status='Paid'{scope}''', scope_args).fetchone()[0]
+            except Exception:
+                invoice = paid = 0
+        if exists('revenue_results'):
+            result = c.execute(
+                f'''SELECT count(*) FROM revenue_results x JOIN leads l ON l.id=x.lead_id
+                    WHERE 1=1{scope}''', scope_args).fetchone()[0]
+        if exists('revenue_growth'):
+            retained = c.execute(
+                f'''SELECT count(*) FROM revenue_growth x JOIN leads l ON l.id=x.lead_id
+                    WHERE 1=1{scope}''', scope_args).fetchone()[0]
         counts = {
             'lead': lead, 'opportunity': opportunity, 'conversation': conversation,
             'proposal': proposal, 'contract': contract, 'project': project,
@@ -1232,6 +1274,10 @@ def register_revenue_os(app, db, now, log):
 
     @app.post('/api/os/invoice/<iid>/paid')
     def os_paid(iid):
+        with db() as c:
+            inv = c.execute('SELECT lead_id FROM invoices WHERE id=?', (iid,)).fetchone()
+        if not inv or not _client_owns_lead(db, inv['lead_id']):
+            return jsonify(error='Invoice not found.'), 404
         result, code = mark_invoice_paid(db, iid, now)
         if code != 200:
             return jsonify(result), code
@@ -1240,6 +1286,10 @@ def register_revenue_os(app, db, now, log):
 
     @app.post('/api/os/project/<pid>/delivered')
     def os_delivered(pid):
+        with db() as c:
+            proj = c.execute('SELECT lead_id FROM projects WHERE id=?', (pid,)).fetchone()
+        if not proj or not _client_owns_lead(db, proj['lead_id']):
+            return jsonify(error='Project not found.'), 404
         result, code = mark_delivered(db, pid, now)
         if code != 200:
             return jsonify(result), code
