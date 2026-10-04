@@ -232,7 +232,7 @@ def load_fixtures(limit=8):
 def discover_from_sources(location, category, limit, ctx):
     from web.global_discovery import discover, rank
     try:
-        rows, meta = discover(location, category, limit=limit, ring=int(ctx.params.get('grid_rings') or 2))
+        rows, meta = discover(location, category, limit=limit, ring=int(ctx.params.get('grid_rings') or 2), db=ctx.db)
         ctx.receipt('source', f"Global waterfall: {', '.join(meta['providers'])}; {len(meta['queries'])} category variants; {len(rows)} raw candidates.")
         if not rows:
             raise ValueError('waterfall returned no candidates')
