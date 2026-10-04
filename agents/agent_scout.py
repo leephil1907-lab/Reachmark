@@ -252,6 +252,13 @@ def discover_from_sources(location, category, limit, ctx):
     except Exception as exc:
         ctx.receipt('source', f"Global waterfall unavailable ({type(exc).__name__}); using legacy OSM fallback.")
     from web.services import discover_location
+    try:
+        from web.app import CATEGORIES
+        tag = CATEGORIES.get(category) or FALLBACK_OSM_TAG
+    except Exception:
+        tag = FALLBACK_OSM_TAG
+    rows, display_name = discover_location(location, tag, limit=limit)
+    return rows, display_name
 
 def _enrich(ctx, name, website, seed):
     """Read a business's own public pages; return the fields it published itself."""
