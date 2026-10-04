@@ -15,6 +15,13 @@ except Exception:
 
 CATEGORY_VARIANTS={
 "restaurant":["restaurant","cafe","fast food","food court","bistro"],
+"bakery":["bakery","pastry shop","bread shop"],
+"florist":["florist","flower shop"],
+"hotel":["hotel","guest house"],
+"gym":["gym","fitness centre","fitness center"],
+"laundry":["laundry","dry cleaning"],
+"convenience":["convenience store","convenience"],
+"supermarket":["supermarket","grocery store"],
 "pharmacy":["pharmacy","chemist","drugstore"],
 "clothing":["clothing","fashion","boutique","apparel"],
 "beauty":["beauty salon","hairdresser","barber","spa","nail salon"],
@@ -80,7 +87,7 @@ def grid_points(lat,lon,ring=2,cell_km=3):
 
 def osm_search(variant,lat,lon,radius=3000):
     if not query_overpass:return [],"unavailable"
-    mapping={"restaurant":("amenity","restaurant"),"cafe":("amenity","cafe"),"pharmacy":("amenity","pharmacy"),"clothing":("shop","clothes"),"fashion":("shop","clothes"),"beauty salon":("shop","beauty"),"hairdresser":("shop","hairdresser"),"barber":("shop","hairdresser"),"spa":("shop","beauty"),"nail salon":("shop","beauty"),"plumber":("craft","plumber"),"electrician":("craft","electrician"),"carpenter":("craft","carpenter"),"roofer":("craft","roofer"),"painter":("craft","painter"),"hvac":("craft","hvac"),"car repair":("shop","car_repair"),"auto repair":("shop","car_repair"),"mechanic":("shop","car_repair"),"car wash":("amenity","car_wash"),"dentist":("amenity","dentist"),"clinic":("amenity","clinic"),"veterinary":("amenity","veterinary"),"accountant":("office","accountant"),"lawyer":("office","lawyer"),"estate agent":("office","estate_agent")}
+    mapping={"restaurant":("amenity","restaurant"),"cafe":("amenity","cafe"),"pharmacy":("amenity","pharmacy"),"clothing":("shop","clothes"),"fashion":("shop","clothes"),"beauty salon":("shop","beauty"),"hairdresser":("shop","hairdresser"),"barber":("shop","hairdresser"),"spa":("shop","beauty"),"nail salon":("shop","beauty"),"plumber":("craft","plumber"),"electrician":("craft","electrician"),"carpenter":("craft","carpenter"),"roofer":("craft","roofer"),"painter":("craft","painter"),"hvac":("craft","hvac"),"car repair":("shop","car_repair"),"auto repair":("shop","car_repair"),"mechanic":("shop","car_repair"),"car wash":("amenity","car_wash"),"dentist":("amenity","dentist"),"clinic":("amenity","clinic"),"veterinary":("amenity","veterinary"),"accountant":("office","accountant"),"lawyer":("office","lawyer"),"estate agent":("office","estate_agent"),"bakery":("shop","bakery"),"pastry shop":("shop","bakery"),"bread shop":("shop","bakery"),"florist":("shop","florist"),"flower shop":("shop","florist"),"hotel":("tourism","hotel"),"guest house":("tourism","guest_house"),"gym":("leisure","fitness_centre"),"fitness centre":("leisure","fitness_centre"),"fitness center":("leisure","fitness_centre"),"laundry":("shop","laundry"),"dry cleaning":("shop","dry_cleaning"),"convenience store":("shop","convenience"),"convenience":("shop","convenience"),"supermarket":("shop","supermarket"),"grocery store":("shop","supermarket")}
     pair=mapping.get(norm_name(variant))
     if not pair:return [],"no OSM tag"
     q=f'[out:json][timeout:40];nwr(around:{int(radius)},{lat},{lon})["{pair[0]}"="{pair[1]}"]["name"];out center tags 80;'
