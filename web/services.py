@@ -1,12 +1,48 @@
-    only as a bounded fallback if the new pipeline is unavailable.
+"""Live public-data discovery and bounded, SSRF-resistant website checks."""
+import ipaddress, socket, re, threading, time
+from web.i18n import t as _t, locale_now
+from functools import lru_cache
+from urllib.parse import urlparse, urljoin
+import requests, urllib3
+
+SOCIAL = ('facebook.com','instagram.com','linktr.ee','linktree.com','fb.com','business.site')
+geo_lock=threading.Lock()
+last_geo=0.0
+HEADERS={'User-Agent':'Reachmark/1.0 (interactive public business directory research)'}
+def classify(url):
+    if not url.strip(): return 'NOT_LISTED'
+    try: host=(urlparse(url if '://' in url else 'https://'+url).hostname or '').lower()
+    except ValueError: return 'HAS_WEBSITE'
+    return 'SOCIAL_ONLY' if any(host==s or host.endswith('.'+s) for s in SOCIAL) else 'HAS_WEBSITE'
+
+@lru_cache(maxsize=128)
+def geocode(location):
+    global last_geo
+    with geo_lock:
+        delay=1.1-(time.monotonic()-last_geo)
+        if delay>0: time.sleep(delay)
+        last_geo=time.monotonic()
+        r=requests.get('https://nominatim.openstreetmap.org/search',params={'q':location,'format':'json','limit':1},headers=HEADERS,timeout=20)
+        r.raise_for_status(); places=r.json()
+    if not places: raise ValueError(_t('er_067', locale_now()))
+    return places[0]
+
+def discover_location(location, tag, limit=80):
+    """Primary Reachmark discovery entrypoint.
+
+    The global waterfall owns provider ordering, grid scanning, dedupe, chain/review
+    qualification and opportunity ranking. The older single-cell OSM query remains
+    only as a bounded fallback if the new pipeline is unavailable or returns no data.
     """
     try:
         from web.global_discovery import discover
         category = {
-            ('shop','car_repair'):'auto', ('shop','hairdresser'):'beauty', ('shop','bakery'):'bakery', ('shop','florist'):'florist',
-            ('tourism','hotel'):'hotel', ('tourism','guest_house'):'hotel', ('leisure','fitness_centre'):'gym',
-            ('shop','laundry'):'laundry', ('shop','dry_cleaning'):'laundry', ('shop','convenience'):'convenience',
-            ('shop','supermarket'):'supermarket',
+            ('shop','car_repair'):'auto', ('shop','hairdresser'):'beauty',
+            ('shop','bakery'):'bakery', ('shop','florist'):'florist',
+            ('tourism','hotel'):'hotel', ('tourism','guest_house'):'hotel',
+            ('leisure','fitness_centre'):'gym',
+            ('shop','laundry'):'laundry', ('shop','dry_cleaning'):'laundry',
+            ('shop','convenience'):'convenience', ('shop','supermarket'):'supermarket',
             ('amenity','restaurant'):'restaurant', ('amenity','cafe'):'restaurant',
             ('amenity','pharmacy'):'pharmacy', ('shop','clothes'):'clothing',
             ('shop','beauty'):'beauty', ('office','accountant'):'professional',
@@ -14,20 +50,20 @@
             ('craft','plumber'):'home services', ('craft','electrician'):'home services',
             ('craft','carpenter'):'home services', ('craft','roofer'):'home services',
             ('craft','painter'):'home services', ('craft','hvac'):'home services',
-            ('shop','car_repair'):'auto', ('amenity','car_wash'):'auto',
+            ('amenity','car_wash'):'auto',
             ('amenity','dentist'):'health', ('amenity','clinic'):'health',
             ('amenity','veterinary'):'health', ('healthcare','physiotherapist'):'health',
         }.get(tuple(tag), location.split(',')[0] if isinstance(location,str) else 'business')
         from web.app import db as reachmark_db
         rows, meta = discover(location, category, limit=limit, ring=2, db=reachmark_db)
-        for row in rows:
-            row.setdefault('city', location)
-            row.setdefault('category', category)
-        return rows, place_name(location, meta.get('center'))
+        if rows:
+            for row in rows:
+                row.setdefault('city', location)
+                row.setdefault('category', category)
+            return rows, str(location)
     except Exception:
-        # Keep the established OSM-only path as a safety net when an optional provider
-        # or migration is not ready. The fallback is still public-data-only.
         pass
+
     place=geocode(location)
     lat,lon=float(place['lat']),float(place['lon']); key,value=tag
     q=f'[out:json][timeout:40];nwr(around:15000,{lat},{lon})["{key}"="{value}"]["name"];out center tags {int(limit)};'
@@ -39,9 +75,6 @@
         t=item.get('tags',{}); center=item.get('center',item)
         rows.append({'source_key':f"osm:{item['type']}:{item['id']}",'name':t['name'],'city':location,'address':', '.join(filter(None,[' '.join(filter(None,[t.get('addr:housenumber'),t.get('addr:street')])),t.get('addr:city'),t.get('addr:state'),t.get('addr:postcode'),t.get('addr:country')])),'phone':t.get('phone') or t.get('contact:phone',''),'email':t.get('email') or t.get('contact:email',''),'website':t.get('website') or t.get('contact:website',''),'source':'OpenStreetMap','source_url':f"https://www.openstreetmap.org/{item['type']}/{item['id']}",'latitude':center.get('lat'),'longitude':center.get('lon'),'opening_hours':t.get('opening_hours',''),'social_url':t.get('contact:facebook') or t.get('contact:instagram',''),'source_tags':t})
     return rows, place.get('display_name',location)
-
-def place_name(location, center=None):
-    return str(location)
 
 def audit_website(url):
     if classify(url)!='HAS_WEBSITE': return {'status':classify(url),'reason':'Source listing has no standalone website URL. Verify independently.','http_code':None}
@@ -62,3 +95,25 @@ def audit_website(url):
             kwargs={'server_hostname':host,'assert_hostname':host,'cert_reqs':'CERT_REQUIRED'} if p.scheme=='https' else {}
             pool=cls(ips[0],port=port,timeout=urllib3.Timeout(connect=5,read=7),retries=False,**kwargs)
             response=None
+            try:
+                target=(p.path or '/')+('?' +p.query if p.query else '')
+                response=pool.urlopen('GET',target,headers={**HEADERS,'Host':host,'Accept':'text/html','Accept-Encoding':'identity'},redirect=False,preload_content=False)
+                code=response.status
+                if code in (301,302,303,307,308) and response.headers.get('Location'):
+                    current=urljoin(current,response.headers['Location']);continue
+                raw=response.read(65536,decode_content=False).decode('utf-8','replace').lower()
+                if code in (401,403,429): status,reason='BLOCKED','Access restricted or rate-limited; this is not evidence of a dead website.'
+                elif code>=500: status,reason='HTTP_ERROR',f'HTTP {code}: server error observed. Retry later before making a claim.'
+                elif code>=400: status,reason='HTTP_ERROR',f'HTTP {code}: listed page is unavailable. The business may use another URL.'
+                elif any(x in raw for x in ('this domain is for sale','buy this domain','domain has expired','website is parked')): status,reason='PARKED_SUSPECTED','Parking or domain-sale wording detected. Manual verification required.'
+                elif code<300: status,reason='LIVE','The URL responded successfully. This does not assess design quality, forms, or business ownership.'
+                else: status,reason='CHECK_FAILED',f'Unexpected HTTP {code}; review manually.'
+                return {'status':status,'reason':reason,'http_code':code,'final_url':current}
+            finally:
+                if response: response.close()
+                pool.close()
+        return {'status':'CHECK_FAILED','reason':'Redirect limit reached.','http_code':None}
+    except socket.gaierror:
+        return {'status':'DNS_UNRESOLVED','reason':'DNS did not resolve during this check. Possible dead domain or temporary DNS failure; verify again.','http_code':None}
+    except (urllib3.exceptions.HTTPError,TimeoutError,OSError,ValueError,UnicodeError):
+        return {'status':'UNREACHABLE','reason':'Connection, TLS, or timeout failure. Not proof the website is dead.','http_code':None}
