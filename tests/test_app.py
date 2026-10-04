@@ -67,6 +67,12 @@ class ProspectTests(unittest.TestCase):
         self.assertIn('Example Bakery',draft['body']);self.assertIn('/r/',draft['body']);self.assertNotIn('no website',draft['body'])
         self.assertTrue(draft.get('html'))
         self.assertEqual(self.client.get('/preview/'+l['token']).status_code,200)
+    def test_manual_review_endpoint(self):
+        l=self.create()
+        r=self.client.post('/api/leads/'+l['id']+'/review',json={'verification':'NO_SITE_FOUND','evidence_url':'https://example.test/research','note':'Manually searched the business name and checked the source listing.'})
+        self.assertEqual(r.status_code,200,r.data)
+        self.assertTrue(self.client.get('/api/quality').json['reviews'])
+
     def test_review_required(self):
         l=self.create();self.ready(l)
         self.assertEqual(self.client.post('/api/leads/'+l['id']+'/send',json={}).status_code,400)
