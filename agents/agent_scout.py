@@ -230,35 +230,35 @@ def load_fixtures(limit=8):
 
 
 def discover_from_sources(location, category, limit, ctx):
+    from web.global_discovery import discover, rank
+    try:
+        rows, meta = discover(location, category, limit=limit, ring=int(ctx.params.get('grid_rings') or 2), db=ctx.db)
+        ctx.receipt('source', f"Global waterfall: {', '.join(meta['providers'])}; {len(meta['queries'])} category variants; {len(rows)} raw candidates.")
+        if not rows:
+            raise ValueError('waterfall returned no candidates')
+        from web.site_quality import score_website
+        scored = {}
+        checks = min(int(ctx.params.get('site_checks') or os.getenv('REACHMARK_SITE_CHECKS','30')), 30)
+        for row in rows[:checks]:
+            if row.get('website'):
+                scored[row.get('source_key')] = score_website(row.get('website'))
+        rows = rank(rows, scored)
+        for row in rows:
+            row.setdefault('source_tags', {})['website_quality'] = scored.get(row.get('source_key'), {})
+            row['website_tier'] = scored.get(row.get('source_key'), {}).get('tier') or ('NO_SITE' if not row.get('website') else 'UNSCANNED')
+            row['category'] = category
+        ctx.receipt('source', f"Ranked {len(rows)} candidates; top opportunity: {rows[0].get('name') if rows else 'none'}.")
+        return rows[:max(limit,1)], location
+    except Exception as exc:
+        ctx.receipt('source', f"Global waterfall unavailable ({type(exc).__name__}); using legacy OSM fallback.")
     from web.services import discover_location
     try:
         from web.app import CATEGORIES
-        tag = CATEGORIES.get(category)
+        tag = CATEGORIES.get(category) or FALLBACK_OSM_TAG
     except Exception:
-        tag = None
-    if not tag:
         tag = FALLBACK_OSM_TAG
-    ctx.receipt('source', f'OpenStreetMap query: "{category}" within 15 km of "{location}".')
     rows, display_name = discover_location(location, tag, limit=limit)
-    ctx.receipt('source', f'Source returned {len(rows)} named listings for {display_name}.', url='https://www.openstreetmap.org/copyright')
-
-    # Google Maps is a second, key-gated source. It is only read when the owner
-    # has configured GOOGLE_PLACES_API_KEY; OpenStreetMap stays the default.
-    try:
-        from web import places_provider
-    except Exception:
-        places_provider = None
-    if places_provider and places_provider.available():
-        g_rows, reason = places_provider.discover_places(location, category, limit=min(limit, 20))
-        if g_rows:
-            ctx.receipt('source', f'Google Maps returned {len(g_rows)} business profile(s) for "{category}" in {location}.',
-                        url='https://maps.google.com')
-            rows = places_provider.merge_rows(rows, g_rows)
-            ctx.receipt('source', f'Merged sources: {len(rows)} unique business(es) after de-duplication.')
-        elif reason:
-            ctx.receipt('source', f'Google Maps contributed nothing this run: {reason}')
     return rows, display_name
-
 
 def _enrich(ctx, name, website, seed):
     """Read a business's own public pages; return the fields it published itself."""
@@ -367,7 +367,7 @@ def run(ctx):
         if added:
             saved.append({'name': name, 'id': found['id'] if found else ''})
             check = _qualification(row)
-            shortlist.append({'name': name, 'id': found['id'] if found else '', **check})
+            shortlist.append({'name': name, 'id': found['id'] if found else '', 'website_tier': row.get('website_tier','UNSCANNED'), 'opportunity_score': row.get('opportunity_score',0), **check})
             ctx.receipt('saved', f'{name} added to the lead directory.', url=row.get('source_url', ''))
         else:
             skipped += 1

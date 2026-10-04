@@ -28,6 +28,42 @@ def geocode(location):
     return places[0]
 
 def discover_location(location, tag, limit=80):
+    """Primary Reachmark discovery entrypoint.
+
+    The global waterfall owns provider ordering, grid scanning, dedupe, chain/review
+    qualification and opportunity ranking. The older single-cell OSM query remains
+    only as a bounded fallback if the new pipeline is unavailable or returns no data.
+    """
+    try:
+        from web.global_discovery import discover
+        category = {
+            ('shop','car_repair'):'auto', ('shop','hairdresser'):'beauty',
+            ('shop','bakery'):'bakery', ('shop','florist'):'florist',
+            ('tourism','hotel'):'hotel', ('tourism','guest_house'):'hotel',
+            ('leisure','fitness_centre'):'gym',
+            ('shop','laundry'):'laundry', ('shop','dry_cleaning'):'laundry',
+            ('shop','convenience'):'convenience', ('shop','supermarket'):'supermarket',
+            ('amenity','restaurant'):'restaurant', ('amenity','cafe'):'restaurant',
+            ('amenity','pharmacy'):'pharmacy', ('shop','clothes'):'clothing',
+            ('shop','beauty'):'beauty', ('office','accountant'):'professional',
+            ('office','lawyer'):'professional', ('office','estate_agent'):'professional',
+            ('craft','plumber'):'home services', ('craft','electrician'):'home services',
+            ('craft','carpenter'):'home services', ('craft','roofer'):'home services',
+            ('craft','painter'):'home services', ('craft','hvac'):'home services',
+            ('amenity','car_wash'):'auto',
+            ('amenity','dentist'):'health', ('amenity','clinic'):'health',
+            ('amenity','veterinary'):'health', ('healthcare','physiotherapist'):'health',
+        }.get(tuple(tag), location.split(',')[0] if isinstance(location,str) else 'business')
+        from web.app import db as reachmark_db
+        rows, meta = discover(location, category, limit=limit, ring=2, db=reachmark_db)
+        if rows:
+            for row in rows:
+                row.setdefault('city', location)
+                row.setdefault('category', category)
+            return rows, str(location)
+    except Exception:
+        pass
+
     place=geocode(location)
     lat,lon=float(place['lat']),float(place['lon']); key,value=tag
     q=f'[out:json][timeout:40];nwr(around:15000,{lat},{lon})["{key}"="{value}"]["name"];out center tags {int(limit)};'

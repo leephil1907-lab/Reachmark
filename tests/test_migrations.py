@@ -45,7 +45,9 @@ class MigrationTests(unittest.TestCase):
             self.assertEqual(
                 c.execute("SELECT source_seen_at FROM leads WHERE id='lead-1'").fetchone()[0],
                 '2026-01-01T00:00:00+00:00')
-            self.assertEqual(c.execute('SELECT count(*) FROM schema_migrations').fetchone()[0], 3)
+            self.assertEqual(c.execute('SELECT count(*) FROM schema_migrations').fetchone()[0], 6)
+            self.assertIn('discovery_cells', {r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")})
+            self.assertIn('global_suppression', {r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")})
             c.close()
 
 
