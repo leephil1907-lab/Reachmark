@@ -37,14 +37,16 @@ class RevenueOsJourney(unittest.TestCase):
         self.assertIn('contract', ids)
         self.assertIn('delivered', ids)
 
-        # A project on its own must not inflate proposals.
+        # A project on its own must not inflate proposals. Canonical project
+        # counts join through leads so tenant isolation holds; an orphan row
+        # is not a funnel project.
         with module.db() as c:
             c.execute(
                 "INSERT INTO projects(id,title,stage,created,updated) VALUES(?,?,?,?,?)",
                 ('proj1', 'Lone project', 'Draft', module.now(), module.now()),
             )
         data = self.client.get('/api/opportunity/funnel').get_json()
-        self.assertEqual(data['counts']['project'], 1)
+        self.assertEqual(data['counts']['project'], 0)
         self.assertEqual(data['counts']['proposal'], 0)
 
     def test_discover_to_reply_to_proposal(self):
@@ -172,11 +174,30 @@ class RevenueOsJourney(unittest.TestCase):
         self.assertEqual(cmd['happened'], [])
         self.assertEqual(cmd['attention']['replies'], [])
         self.assertEqual(cmd['money']['paid_minor_sum'], 0)
+        self.assertEqual(cmd['money']['paid_clients'], 0)
+        pipe = cmd['pipeline']
+        self.assertEqual(pipe['discovered'], 0)
+        self.assertEqual(pipe['verified_problems'], 0)
+        self.assertEqual(pipe['qualified'], 0)
+        self.assertEqual(pipe['outreach_sent'], 0)
+        self.assertEqual(pipe['replies'], 0)
+        self.assertEqual(pipe['proposals'], 0)
+        self.assertEqual(pipe['paid_clients'], 0)
+        self.assertEqual(pipe['revenue_minor'], 0)
+        self.assertEqual(pipe['repeat_upsell_minor'], 0)
+        self.assertIsNone(cmd['next_to_win'])
 
     def test_client_revenue_os_scopes_legacy_commercial_rows_by_lead_owner(self):
         # Legacy contracts/projects/invoices do not have owner_user_id; the OS
         # must scope them through their associated lead.
+        from datetime import datetime, timezone, timedelta
+        expires = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
         with module.db() as c:
+            c.execute(
+                "INSERT INTO users(id,email,name,password_hash,role,created,updated,is_active,tier,tier_expires) "
+                "VALUES(?,?,?,?,?,?,?,?,?,?)",
+                ('client-a','a@test','Client A','x','client',module.now(),module.now(),1,'starter',expires),
+            )
             c.execute(
                 "INSERT INTO leads(id,source_key,name,category,city,created,updated,owner_user_id) "
                 "VALUES(?,?,?,?,?,?,?,?)",
@@ -202,3 +223,97 @@ class RevenueOsJourney(unittest.TestCase):
         self.assertEqual(funnel['project'], 1)
         self.assertEqual(funnel['delivered'], 1)
         self.assertEqual(self.client.get('/api/os/growth').get_json()['count'], 0)
+        pipe = self.client.get('/api/os/command').get_json()['pipeline']
+        self.assertEqual(pipe['discovered'], 1)
+        self.assertEqual(pipe['paid_clients'], 0)
+
+
+class SalesAssetAndPipeline(unittest.TestCase):
+    def setUp(self):
+        _appmod.ProspectTests.setUp(self)
+
+    def tearDown(self):
+        _appmod.ProspectTests.tearDown(self)
+
+    def test_wedge_for_known_and_unknown(self):
+        from web.revenue_os import wedge_for
+        self.assertEqual(wedge_for('Clinic'), 'clinics')
+        self.assertEqual(wedge_for('Ikeja Dental Clinic'), 'clinics')
+        self.assertEqual(wedge_for('Boutique Hotel'), 'hotels')
+        self.assertEqual(wedge_for('Restaurant'), 'restaurants')
+        self.assertEqual(wedge_for('Hair salon'), 'beauty_wellness')
+        self.assertEqual(wedge_for('Barber shop'), 'beauty_wellness')
+        self.assertEqual(wedge_for(''), 'other')
+        self.assertEqual(wedge_for('Spaceship rental'), 'other')
+
+    def test_sales_asset_empty_amounts_and_no_invented_loss(self):
+        from web.opportunity import compose_sales_asset
+        lead = {'name': 'Sunrise Bakery', 'category': 'Bakery', 'city': 'Lagos', 'website': ''}
+        report = {
+            'leaks': [{
+                'id': 'no_website_listed', 'title': 'No owned website is listed',
+                'leak': 'There is no website URL in the public listing we used.',
+                'source': 'listing', 'commercial': True,
+            }],
+            'solution': {'name': 'Lead-generation website', 'why': 'No owned conversion page.', 'note': 'Confirm fit.'},
+            'evidence': {'disclaimer': 'Observed gaps only.'},
+        }
+        asset = compose_sales_asset(lead, report, book={'packages': [
+            {'id': 'growth', 'name': 'Growth implementation', 'amount': None, 'includes': ['Enquiry path']},
+        ]})
+        self.assertEqual(asset['business']['name'], 'Sunrise Bakery')
+        self.assertEqual(asset['problem']['id'], 'no_website_listed')
+        self.assertTrue(asset['evidence'])
+        self.assertIn('no website url', asset['customer_impact'].lower())
+        self.assertNotIn('losing $', (asset['customer_impact'] + asset['next_step']).lower())
+        self.assertIsNone(asset['prototype'])
+        self.assertIsNone(asset['scope']['packages'][0]['amount'])
+        self.assertIn('not a measured loss of revenue', asset['customer_impact_note'].lower())
+
+    def test_report_is_a_sales_asset_and_pipeline_moves(self):
+        self.client.post('/api/leads', json={
+            'name': 'Ikeja Clinic', 'city': 'Lagos', 'category': 'Clinic',
+            'email': 'hello@ikeja.test',
+        })
+        lid = self.client.get('/api/state').json['leads'][0]['id']
+        r = self.client.post(f'/api/opportunity/lead/{lid}/run', json={'live': False})
+        self.assertEqual(r.status_code, 200)
+        token = r.get_json()['report']['token']
+        html = self.client.get('/o/' + token).get_data(as_text=True)
+        self.assertIn('Problem detected', html)
+        self.assertIn('Customer impact', html)
+        self.assertIn('Estimated project scope', html)
+        self.assertIn('Clear next step', html)
+        self.assertIn('Price not set', html)
+        self.assertNotIn('$2,400', html)
+        self.assertNotIn('$900', html)
+
+        metrics = self.client.get('/api/os/metrics').get_json()
+        self.assertEqual(metrics['pipeline']['discovered'], 1)
+        self.assertGreaterEqual(metrics['pipeline']['verified_problems'], 1)
+        self.assertEqual(metrics['pipeline']['paid_clients'], 0)
+        self.assertEqual(metrics['pipeline']['revenue_minor'], 0)
+        self.assertIsNone(metrics['avg_deal_minor'])
+        wedges = {w['k']: w for w in metrics['by_wedge']}
+        self.assertIn('clinics', wedges)
+        self.assertEqual(wedges['clinics']['n'], 1)
+        self.assertEqual(wedges['clinics']['won'], 0)
+
+        dossier = self.client.get(f'/api/os/lead/{lid}').get_json()
+        ids = [s['id'] for s in dossier['loop']['steps']]
+        self.assertEqual(ids[0], 'discovered')
+        self.assertEqual(ids[-1], 'retained')
+        done = {s['id']: s['done'] for s in dossier['loop']['steps']}
+        self.assertTrue(done['discovered'])
+        self.assertTrue(done['opportunity'])
+        self.assertFalse(done['paid'])
+        self.assertFalse(done['contacted'])
+        self.assertTrue(dossier['sales_asset']['problem'])
+        self.assertTrue(dossier['blockers'])
+        self.assertEqual(dossier['loop']['wedge'], 'clinics')
+
+        cmd = self.client.get('/api/os/command').get_json()
+        self.assertEqual(cmd['next_to_win']['lead_id'], lid)
+        self.assertEqual(cmd['next_to_win']['wedge'], 'clinics')
+        self.assertTrue(cmd['next_to_win']['next'])
+        self.assertFalse(cmd['next_to_win']['next']['done'])

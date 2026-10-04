@@ -57,6 +57,41 @@ FUNNEL = (
     ('retained', 'Retention', 'Growth offers on delivered work'),
 )
 
+# Operator loop. Empty steps stay undone. Nothing is inferred.
+LOOP = (
+    ('discovered', 'Discover'),
+    ('audited', 'Audit'),
+    ('opportunity', 'Identify opportunity'),
+    ('proof', 'Generate proof'),
+    ('contacted', 'Contact'),
+    ('replied', 'Reply'),
+    ('proposed', 'Proposal'),
+    ('paid', 'Payment'),
+    ('delivered', 'Delivery'),
+    ('retained', 'Retention'),
+)
+
+# Narrow commercial wedge. Data decides the niche — these labels do not invent demand.
+WEDGES = (
+    ('restaurants', ('restaurant', 'cafe', 'café', 'bakery', 'diner', 'bistro', 'catering')),
+    ('hotels', ('hotel', 'lodging', 'guest house', 'guesthouse', 'motel', 'resort')),
+    ('clinics', ('clinic', 'dentist', 'doctor', 'hospital', 'pharmacy', 'medical', 'physio', 'veterinary')),
+    ('real_estate', ('real estate', 'realtor', 'estate agent', 'lettings')),
+    ('professional_services', ('lawyer', 'accountant', 'attorney', 'notary', 'insurance')),
+    ('local_retailers', ('retail', 'florist', 'grocery')),
+    ('beauty_wellness', ('salon', 'wellness', 'beauty', 'barber', 'yoga', 'fitness')),
+    ('home_contractors', ('plumber', 'electrician', 'contractor', 'builder', 'hvac', 'carpenter', 'roofer', 'painter', 'handyman')),
+)
+# Short tokens applied only when nothing specific matched. Word-bounded.
+WEDGE_FALLBACK = (
+    ('restaurants', ('bar', 'food')),
+    ('hotels', ('inn',)),
+    ('clinics', ('vet',)),
+    ('professional_services', ('law', 'agency')),
+    ('local_retailers', ('shop', 'store', 'market')),
+    ('beauty_wellness', ('spa', 'hair', 'gym')),
+)
+
 
 def ensure_tables(db):
     with db() as c:
@@ -205,6 +240,336 @@ def _json(value, fallback):
         return json.loads(value or ('[]' if fallback == [] else '{}'))
     except (TypeError, ValueError):
         return fallback
+
+
+def _wedge_hit(blob, groups):
+    hits = []
+    for wid, needles in groups:
+        for needle in needles:
+            if ' ' in needle:
+                matched = needle in blob
+            else:
+                matched = bool(re.search(r'(^|[^a-z0-9])' + re.escape(needle) + r'([^a-z0-9]|$)', blob))
+            if matched:
+                hits.append((len(needle), wid))
+    if not hits:
+        return None
+    hits.sort(reverse=True)
+    return hits[0][1]
+
+
+def wedge_for(category):
+    blob = (category or '').strip().lower()
+    if not blob:
+        return 'other'
+    return _wedge_hit(blob, WEDGES) or _wedge_hit(blob, WEDGE_FALLBACK) or 'other'
+
+
+def loop_status(db, lead):
+    """Which of Discover→…→Retention exist as stored objects. Missing stays missing."""
+    lid = lead['id']
+    stage = lead.get('stage') or ''
+    with db() as c:
+        def one(sql, args=()):
+            if not sql:
+                return None
+            try:
+                return c.execute(sql, args).fetchone()
+            except Exception:
+                return None
+
+        audit = one(
+            'SELECT id FROM site_audits WHERE lead_id=? ORDER BY created DESC LIMIT 1', (lid,)
+        ) if _table(c, 'site_audits') else None
+        report = one(
+            'SELECT id,token,leak_count FROM opportunity_reports WHERE lead_id=? ORDER BY created DESC LIMIT 1',
+            (lid,),
+        ) if _table(c, 'opportunity_reports') else None
+        proto = one(
+            'SELECT token FROM prototypes WHERE lead_id=? ORDER BY created DESC LIMIT 1', (lid,)
+        ) if _table(c, 'prototypes') else None
+        sent = one(
+            "SELECT id FROM sends WHERE lead_id=? AND state='sent' LIMIT 1", (lid,)
+        ) if _table(c, 'sends') else None
+        prop = one(
+            'SELECT token FROM generated_proposals WHERE lead_id=? ORDER BY created DESC LIMIT 1', (lid,)
+        ) if _table(c, 'generated_proposals') else None
+        paid = one(
+            "SELECT id FROM invoices WHERE lead_id=? AND status='Paid' LIMIT 1", (lid,)
+        ) if _table(c, 'invoices') else None
+        delivered = one(
+            "SELECT id FROM projects WHERE lead_id=? AND stage IN ('Delivered','Completed') LIMIT 1",
+            (lid,),
+        ) if _table(c, 'projects') else None
+        growth = one(
+            "SELECT id FROM revenue_growth WHERE lead_id=? AND state='open' LIMIT 1", (lid,)
+        ) if _table(c, 'revenue_growth') else None
+        conv = one(
+            'SELECT id FROM revenue_conversations WHERE lead_id=? LIMIT 1', (lid,)
+        ) if _table(c, 'revenue_conversations') else None
+
+    leak_count = int(report['leak_count']) if report and report['leak_count'] is not None else 0
+    done = {
+        'discovered': True,
+        'audited': bool(audit) or bool(report),
+        'opportunity': bool(report) and leak_count > 0,
+        'proof': bool(proto),
+        'contacted': bool(sent) or stage in ('Contacted', 'Replied', 'Won'),
+        'replied': bool(conv) or stage in ('Replied', 'Won'),
+        'proposed': bool(prop),
+        'paid': bool(paid),
+        'delivered': bool(delivered),
+        'retained': bool(growth),
+    }
+    refs = {
+        'discovered': lid,
+        'audited': (audit['id'] if audit else None) or (report['id'] if report else None),
+        'opportunity': f"/o/{report['token']}" if report and report['token'] else None,
+        'proof': f"/p/{proto['token']}" if proto else None,
+        'contacted': sent['id'] if sent else None,
+        'replied': conv['id'] if conv else None,
+        'proposed': f"/proposal/{prop['token']}" if prop else None,
+        'paid': paid['id'] if paid else None,
+        'delivered': delivered['id'] if delivered else None,
+        'retained': growth['id'] if growth else None,
+    }
+    steps = [{'id': i, 'label': l, 'done': bool(done[i]), 'ref': refs[i]} for i, l in LOOP]
+    nxt = next((s for s in steps if not s['done']), None)
+    return {
+        'steps': steps,
+        'next': nxt,
+        'complete': nxt is None,
+        'wedge': wedge_for(lead.get('category')),
+    }
+
+
+def blockers_for(db, lead, loop=None):
+    """First reasons this lead cannot become a paying client yet. No invented fixes."""
+    loop = loop or loop_status(db, lead)
+    reasons = []
+    email = (lead.get('email') or '').strip()
+    phone = (lead.get('phone') or '').strip()
+    if not email and not phone:
+        reasons.append({
+            'code': 'no_contact',
+            'text': 'No email or phone on the lead. Cannot contact.',
+        })
+    done = {s['id']: s['done'] for s in loop['steps']}
+    if not done.get('opportunity'):
+        reasons.append({
+            'code': 'no_opportunity',
+            'text': 'No stored report with a recorded leak. Generate the Digital Opportunity Report from saved evidence.',
+        })
+    elif not done.get('proof'):
+        reasons.append({
+            'code': 'no_proof',
+            'text': 'No prototype. One-click advance stores report → first-section concept → draft proposal. It never sends.',
+        })
+    elif not done.get('contacted'):
+        reasons.append({
+            'code': 'not_contacted',
+            'text': 'Nothing has been sent. Autopilot never sends. A human still approves the first message.',
+        })
+    elif not done.get('replied'):
+        reasons.append({
+            'code': 'no_reply',
+            'text': 'No reply on record. Wait, or record an inbound message so intent can be classified.',
+        })
+    elif not done.get('proposed'):
+        reasons.append({
+            'code': 'no_proposal',
+            'text': 'No draft proposal. Advance to store one from the report. Amounts stay empty until the price book has them.',
+        })
+    elif not done.get('paid'):
+        with db() as c:
+            inv = c.execute(
+                "SELECT id,status FROM invoices WHERE lead_id=? ORDER BY created DESC LIMIT 1",
+                (lead['id'],),
+            ).fetchone() if _table(c, 'invoices') else None
+            prop = c.execute(
+                'SELECT id FROM generated_proposals WHERE lead_id=? LIMIT 1', (lead['id'],)
+            ).fetchone() if _table(c, 'generated_proposals') else None
+        if prop and not inv:
+            reasons.append({
+                'code': 'no_invoice',
+                'text': 'Proposal exists but there is no invoice. Accept creates a contract and project; an invoice is created only if the price book has an amount.',
+            })
+        else:
+            reasons.append({
+                'code': 'unpaid',
+                'text': 'No Paid invoice for this lead. Paid clients count only when an invoice status is Paid.',
+            })
+    return reasons[:2]
+
+
+def pipeline_kpis(db):
+    """The prospect → customer numbers. Empty stages stay at zero. Ratios are not invented."""
+    cid = session.get('client_id') if session.get('role') == 'client' else None
+    own = ' AND l.owner_user_id=?' if cid else ''
+    own_args = (cid,) if cid else ()
+    with db() as c:
+        def n(sql, args=()):
+            try:
+                return c.execute(sql, args).fetchone()[0]
+            except Exception:
+                return 0
+
+        discovered = n(
+            'SELECT count(*) FROM leads' + (' WHERE owner_user_id=?' if cid else ''),
+            own_args,
+        ) if _table(c, 'leads') else 0
+        verified = n(
+            'SELECT count(DISTINCT r.lead_id) FROM opportunity_reports r JOIN leads l ON l.id=r.lead_id '
+            'WHERE r.leak_count>0' + own,
+            own_args,
+        ) if _table(c, 'opportunity_reports') else 0
+        qualified = n(
+            'SELECT count(DISTINCT r.lead_id) FROM opportunity_reports r JOIN leads l ON l.id=r.lead_id '
+            'WHERE r.qualified=1' + own,
+            own_args,
+        ) if _table(c, 'opportunity_reports') else 0
+        outreach_sent = 0
+        if _table(c, 'sends'):
+            outreach_sent += n(
+                "SELECT count(*) FROM sends s JOIN leads l ON l.id=s.lead_id WHERE s.state='sent'" + own,
+                own_args,
+            )
+        if _table(c, 'outreach_events'):
+            outreach_sent += n(
+                "SELECT count(*) FROM outreach_events e JOIN leads l ON lower(l.email)=lower(e.email) "
+                "WHERE e.event_type='sent'" + own,
+                own_args,
+            )
+        replies = n(
+            "SELECT count(*) FROM leads WHERE stage IN ('Replied','Won')"
+            + (' AND owner_user_id=?' if cid else ''),
+            own_args,
+        ) if _table(c, 'leads') else 0
+        proposals = n(
+            'SELECT count(*) FROM generated_proposals p JOIN leads l ON l.id=p.lead_id WHERE 1=1' + own,
+            own_args,
+        ) if _table(c, 'generated_proposals') else 0
+        paid_clients = n(
+            "SELECT count(DISTINCT CASE WHEN x.lead_id IS NULL OR x.lead_id='' THEN x.id ELSE x.lead_id END) "
+            "FROM invoices x JOIN leads l ON l.id=x.lead_id WHERE x.status='Paid'" + own,
+            own_args,
+        ) if _table(c, 'invoices') else 0
+        revenue_minor = n(
+            "SELECT ifnull(sum(x.total_minor),0) FROM invoices x JOIN leads l ON l.id=x.lead_id "
+            "WHERE x.status='Paid'" + own,
+            own_args,
+        ) if _table(c, 'invoices') else 0
+        repeat_count = 0
+        repeat_minor = 0
+        if _table(c, 'invoices'):
+            rows = c.execute(
+                "SELECT x.lead_id, x.total_minor FROM invoices x JOIN leads l ON l.id=x.lead_id "
+                "WHERE x.status='Paid' AND x.lead_id IS NOT NULL AND x.lead_id!=''" + own +
+                " ORDER BY x.lead_id, x.created",
+                own_args,
+            ).fetchall()
+            seen = set()
+            for row in rows:
+                lid = row['lead_id']
+                if lid in seen:
+                    repeat_count += 1
+                    repeat_minor += row['total_minor'] or 0
+                else:
+                    seen.add(lid)
+        growth_open = n(
+            "SELECT count(*) FROM revenue_growth g JOIN leads l ON l.id=g.lead_id WHERE g.state='open'" + own,
+            own_args,
+        ) if _table(c, 'revenue_growth') else 0
+
+        by_wedge = []
+        if _table(c, 'leads'):
+            tallies = {}
+            for row in c.execute(
+                'SELECT category, stage FROM leads' + (' WHERE owner_user_id=?' if cid else ''),
+                own_args,
+            ):
+                wid = wedge_for(row['category'])
+                slot = tallies.setdefault(wid, {'k': wid, 'n': 0, 'won': 0})
+                slot['n'] += 1
+                if row['stage'] == 'Won':
+                    slot['won'] += 1
+            by_wedge = sorted(tallies.values(), key=lambda x: (-x['n'], x['k']))
+
+    return {
+        'discovered': discovered,
+        'verified_problems': verified,
+        'qualified': qualified,
+        'outreach_sent': outreach_sent,
+        'replies': replies,
+        'proposals': proposals,
+        'paid_clients': paid_clients,
+        'revenue_minor': revenue_minor,
+        'repeat_upsell_count': repeat_count,
+        'repeat_upsell_minor': repeat_minor,
+        'growth_offers_open': growth_open,
+        'by_wedge': by_wedge,
+        'note': (
+            'Live SQL only. paid_clients and revenue_minor count invoices with status Paid. '
+            'repeat_upsell_minor is the sum of Paid invoices after the first, per lead. '
+            'outreach_sent is sends.state=sent plus provider events of type sent. '
+            'Empty stays zero.'
+        ),
+    }
+
+
+def next_to_win(db):
+    """Hottest unpaid lead and its next missing loop step. None if there is no lead."""
+    cid = session.get('client_id') if session.get('role') == 'client' else None
+    own = ' AND l.owner_user_id=?' if cid else ''
+    own_args = (cid,) if cid else ()
+    with db() as c:
+        if not _table(c, 'leads'):
+            return None
+        paid_ids = set()
+        if _table(c, 'invoices'):
+            paid_ids = {
+                r['lead_id'] for r in c.execute(
+                    "SELECT DISTINCT x.lead_id FROM invoices x JOIN leads l ON l.id=x.lead_id "
+                    "WHERE x.status='Paid' AND x.lead_id IS NOT NULL AND x.lead_id!=''" + own,
+                    own_args,
+                )
+            }
+        hottest = None
+        if _table(c, 'commercial_scores'):
+            hottest = c.execute(
+                '''SELECT s.lead_id, s.index_score, s.why, l.name AS lead_name, l.category, l.city, l.stage, l.email, l.phone
+                   FROM commercial_scores s JOIN leads l ON l.id=s.lead_id
+                   WHERE 1=1''' + own + '''
+                   ORDER BY CASE WHEN s.index_score IS NULL THEN 1 ELSE 0 END, s.index_score DESC, s.updated DESC''',
+                own_args,
+            ).fetchall()
+        if not hottest:
+            hottest = c.execute(
+                'SELECT id AS lead_id, name AS lead_name, category, city, stage, email, phone FROM leads l '
+                'WHERE 1=1' + own + ' ORDER BY updated DESC',
+                own_args,
+            ).fetchall()
+    for raw in hottest:
+        row = dict(raw)
+        lid = row['lead_id']
+        if lid in paid_ids:
+            continue
+        lead = {
+            'id': lid, 'name': row.get('lead_name'), 'category': row.get('category'),
+            'city': row.get('city') or '',
+            'stage': row.get('stage'), 'email': row.get('email'), 'phone': row.get('phone'),
+        }
+        loop = loop_status(db, lead)
+        return {
+            'lead_id': lid,
+            'lead_name': row.get('lead_name'),
+            'wedge': wedge_for(lead.get('category')),
+            'index_score': row.get('index_score'),
+            'why': row.get('why') or '',
+            'next': loop.get('next'),
+            'blockers': blockers_for(db, lead, loop),
+        }
+    return None
 
 
 def classify_reply(text):
@@ -606,6 +971,17 @@ def dossier(db, lead, now):
     next_action = (last or {}).get('suggested_action') or (
         'generate_report' if not report else ('generate_proposal' if not prop else 'review')
     )
+    loop = loop_status(db, lead)
+    proto_url = f"/p/{proto['token']}" if proto else None
+    prop_url = f"/proposal/{prop['token']}" if prop else None
+    stored_report = serialize_row(report) if report else {'leaks': leaks, 'solution': solution, 'evidence': packed}
+    try:
+        from web.opportunity import compose_sales_asset
+        asset = compose_sales_asset(
+            lead, stored_report, prototype_url=proto_url, proposal_url=prop_url, book=book,
+        )
+    except Exception:
+        asset = None
     return {
         'lead': {k: lead.get(k) for k in ('id', 'name', 'city', 'category', 'website', 'stage', 'status', 'email', 'phone')},
         'why': ranking.get('why'),
@@ -646,6 +1022,9 @@ def dossier(db, lead, now):
         'approvals': pending,
         'growth': growth,
         'next_action': next_action,
+        'loop': loop,
+        'blockers': blockers_for(db, lead, loop),
+        'sales_asset': asset,
         'thread': thread_for(db, lead['id']),
         'disclaimer': 'Suggested next action is derived from stored artefacts. Nothing is sent until a human approves.',
     }
@@ -1082,29 +1461,32 @@ def command_center(db):
             if _table(c, 'invoices') else 0
         unpaid = c.execute("SELECT count(*) FROM invoices WHERE status IN ('Draft','Sent','Overdue')").fetchone()[0] \
             if _table(c, 'invoices') else 0
-    if cid:
-        owned = {r[0] for r in c.execute(
-            'SELECT id FROM leads WHERE owner_user_id=?', (cid,)
-        ).fetchall()}
-        events = [r for r in events if r.get('lead_id') in owned]
-        waiting = [r for r in waiting if r.get('lead_id') in owned]
-        hottest = [r for r in hottest if r.get('lead_id') in owned]
-        approvals = [r for r in approvals if r.get('lead_id') in owned]
-        growth = [r for r in growth if r.get('lead_id') in owned]
-        if _table(c, 'invoices'):
-            paid_sum = c.execute(
-                '''SELECT ifnull(sum(x.total_minor),0) FROM invoices x
-                   JOIN leads l ON l.id=x.lead_id
-                   WHERE x.status='Paid' AND l.owner_user_id=?''', (cid,)
-            ).fetchone()[0]
-            unpaid = c.execute(
-                '''SELECT count(*) FROM invoices x
-                   JOIN leads l ON l.id=x.lead_id
-                   WHERE x.status IN ('Draft','Sent','Overdue') AND l.owner_user_id=?''', (cid,)
-            ).fetchone()[0]
-
+        cid = session.get('client_id') if session.get('role') == 'client' else None
+        if cid:
+            owned = {r[0] for r in c.execute(
+                'SELECT id FROM leads WHERE owner_user_id=?', (cid,)
+            ).fetchall()}
+            events = [r for r in events if r.get('lead_id') in owned]
+            waiting = [r for r in waiting if r.get('lead_id') in owned]
+            hottest = [r for r in hottest if r.get('lead_id') in owned]
+            approvals = [r for r in approvals if r.get('lead_id') in owned]
+            growth = [r for r in growth if r.get('lead_id') in owned]
+            if _table(c, 'invoices'):
+                paid_sum = c.execute(
+                    '''SELECT ifnull(sum(x.total_minor),0) FROM invoices x
+                       JOIN leads l ON l.id=x.lead_id
+                       WHERE x.status='Paid' AND l.owner_user_id=?''', (cid,)
+                ).fetchone()[0]
+                unpaid = c.execute(
+                    '''SELECT count(*) FROM invoices x
+                       JOIN leads l ON l.id=x.lead_id
+                       WHERE x.status IN ('Draft','Sent','Overdue') AND l.owner_user_id=?''', (cid,)
+                ).fetchone()[0]
+    pipe = pipeline_kpis(db)
     return {
         'funnel': funnel,
+        'pipeline': pipe,
+        'next_to_win': next_to_win(db),
         'happened': events,
         'attention': {
             'replies': waiting,
@@ -1114,10 +1496,11 @@ def command_center(db):
         'money': {
             'paid_minor_sum': paid_sum,
             'unpaid_invoices': unpaid,
+            'paid_clients': pipe['paid_clients'],
             'note': 'paid_minor_sum is SUM of invoices marked Paid. Zero means none paid, not a missing feed.',
         },
         'hottest': hottest,
-        'disclaimer': 'Every list is a live query. Empty lists stay empty.',
+        'disclaimer': 'Every list is a live query. Empty lists stay empty. Paid clients count only Paid invoices.',
     }
 
 
@@ -1177,6 +1560,7 @@ def outcome_metrics(db):
         def rate(num, den):
             return round(num / den, 4) if den else None
 
+    pipe = pipeline_kpis(db)
     return {
         'leads': leads,
         'contacted': contacted,
@@ -1190,7 +1574,9 @@ def outcome_metrics(db):
         'by_source': by_source,
         'by_city': by_city,
         'by_industry': by_industry,
-        'note': 'Rates are null when the denominator is 0. avg_deal_minor is the mean of Paid invoices only.',
+        'pipeline': pipe,
+        'by_wedge': pipe['by_wedge'],
+        'note': 'Rates are null when the denominator is 0. avg_deal_minor is the mean of Paid invoices only. pipeline numbers are live SQL, never forecasts.',
     }
 
 

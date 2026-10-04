@@ -76,6 +76,7 @@ RULES = [
     (r'^/api/documents/(invoice|brief|proposal)(/|$)', 'free'),
     (r'^/api/documents/audit', 'starter'),
     (r'^/api/state$', 'free'),
+    (r'^/api/(os|opportunity|platform)(/|$)', 'starter'),
     (r'^/api/cards(/|$)', 'free'),
     (r'^/api/qr', 'free'),
     (r'^/api/events(/|$)', 'starter'),

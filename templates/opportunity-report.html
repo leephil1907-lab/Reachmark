@@ -18,12 +18,12 @@
   </header>
   <main class="oe-sheet">
     <p class="oe-kicker">Diagnosis before development</p>
-    <h1>{{ lead.name or 'This business' }}</h1>
+    <h1>{{ lead.name or asset.business.name or 'This business' }}</h1>
     <p class="oe-lede">
       {% if lead.category %}{{ lead.category }}{% endif %}{% if lead.city %} · {{ lead.city }}{% endif %}
       {% if lead.website %} · {{ lead.website }}{% endif %}
     </p>
-    <p class="oe-note">{{ report.evidence.disclaimer if report.evidence is mapping else 'Observed gaps only. Not a claim that the business wants a new website.' }}</p>
+    <p class="oe-note">{{ asset.disclaimer if asset is defined and asset.disclaimer else (report.evidence.disclaimer if report.evidence is mapping else 'Observed gaps only. Not a claim that the business wants a new website.') }}</p>
 
     <section class="oe-score-row">
       <article>
@@ -43,39 +43,111 @@
       </article>
     </section>
 
-    <section class="oe-block">
-      <h2>Money leaks we can point to</h2>
-      <p class="oe-intro">Each line is tied to a listing field or a measured on-page signal. If we could not fetch the site, that is stated.</p>
-      {% if report.leaks %}
-      <ol class="oe-leaks">
-        {% for leak in report.leaks %}
-        <li>
-          <h3>{{ leak.title }}</h3>
-          <p>{{ leak.leak }}</p>
-          <p class="oe-fix"><span>Fix</span> {{ leak.fix }}</p>
-          <small>{{ leak.source }}{% if leak.reason and leak.reason != leak.leak %} · {{ leak.reason }}{% endif %}</small>
-        </li>
-        {% endfor %}
-      </ol>
-      {% else %}
-      <p class="oe-empty">This check did not produce a commercial gap. That is itself a finding — do not pitch a rebuild on empty evidence.</p>
-      {% endif %}
-    </section>
-
-    <section class="oe-block">
-      <h2>What this suggests selling</h2>
-      <p>{{ report.solution.why }}</p>
-      {% if report.solution.addresses %}
-      <p class="oe-intro">{{ report.solution.addressed_count }} of the recorded issues can be addressed by the same implementation.</p>
-      {% endif %}
-      <p class="oe-note">{{ report.solution.note }}</p>
-    </section>
-
-    <section class="oe-block oe-cta">
-      <h2>If this is useful</h2>
-      <p>Reply if you want a walkthrough of the observation. There is no invented quote attached to this note.</p>
-      <a class="x-btn dark" href="/enquire">Talk to Reachmark</a>
-    </section>
+    <ol class="oe-asset">
+      <li>
+        <span class="oe-n">01 · Your business</span>
+        <h2>{{ asset.business.name if asset is defined else (lead.name or 'This business') }}</h2>
+        <p>
+          {% if asset is defined and asset.business.category %}{{ asset.business.category }}{% elif lead.category %}{{ lead.category }}{% endif %}
+          {% if asset is defined and asset.business.city %} · {{ asset.business.city }}{% elif lead.city %} · {{ lead.city }}{% endif %}
+        </p>
+        {% if lead.website %}<p class="oe-note">Listed URL: {{ lead.website }}</p>{% endif %}
+      </li>
+      <li>
+        <span class="oe-n">02 · Problem detected</span>
+        {% if asset is defined and asset.problem %}
+        <h2>{{ asset.problem.title }}</h2>
+        <p>{{ asset.problem.detected }}</p>
+        <small>{{ asset.problem.source }}</small>
+        {% elif report.leaks %}
+        <h2>{{ report.leaks[0].title }}</h2>
+        <p>{{ report.leaks[0].leak }}</p>
+        {% else %}
+        <p class="oe-empty">This check did not produce a commercial gap. That is itself a finding — do not pitch a rebuild on empty evidence.</p>
+        {% endif %}
+      </li>
+      <li>
+        <span class="oe-n">03 · Evidence</span>
+        <h2>What we can point to</h2>
+        <p class="oe-intro">Each line is tied to a listing field or a measured on-page signal. If we could not fetch the site, that is stated. Observation is not proof the business wants work.</p>
+        {% if asset is defined and asset.evidence %}
+        <ol class="oe-leaks">
+          {% for item in asset.evidence %}
+          <li>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.claim }}</p>
+            <small>{{ item.source }}{% if item.url %} · {{ item.url }}{% endif %}</small>
+          </li>
+          {% endfor %}
+        </ol>
+        {% elif report.leaks %}
+        <ol class="oe-leaks">
+          {% for leak in report.leaks %}
+          <li>
+            <h3>{{ leak.title }}</h3>
+            <p>{{ leak.leak }}</p>
+            <small>{{ leak.source }}</small>
+          </li>
+          {% endfor %}
+        </ol>
+        {% else %}
+        <p class="oe-empty">No evidence rows. Nothing to sell from this check.</p>
+        {% endif %}
+      </li>
+      <li>
+        <span class="oe-n">04 · Customer impact</span>
+        <h2>What a visitor cannot do</h2>
+        <p>{{ asset.customer_impact if asset is defined else (report.leaks[0].leak if report.leaks else 'No commercial gap recorded.') }}</p>
+        <p class="oe-note">{{ asset.customer_impact_note if asset is defined else 'This is the visitor-facing consequence of the observation. It is not a measured loss of revenue.' }}</p>
+      </li>
+      <li>
+        <span class="oe-n">05 · Recommended solution</span>
+        <h2>{{ report.solution.name }}</h2>
+        <p>{{ report.solution.why }}</p>
+        {% if report.solution.addresses %}
+        <p class="oe-intro">{{ report.solution.addressed_count }} of the recorded issues can be addressed by the same implementation.</p>
+        {% endif %}
+        <p class="oe-note">{{ report.solution.note }}</p>
+      </li>
+      <li>
+        <span class="oe-n">06 · Example / prototype</span>
+        <h2>A first-section concept</h2>
+        {% if asset is defined and asset.prototype and asset.prototype.url %}
+        <p>An independent first section, not their live site and not a claim they asked for this work.</p>
+        <p><a class="x-btn dark" href="{{ asset.prototype.url }}">Open the concept</a></p>
+        {% else %}
+        <p class="oe-empty">No prototype has been stored for this business yet.</p>
+        {% endif %}
+      </li>
+      <li>
+        <span class="oe-n">07 · Estimated project scope</span>
+        <h2>What would be built</h2>
+        <p class="oe-intro">Amounts appear only if a price book was set. Empty means not priced — not a guessed fee.</p>
+        {% if asset is defined and asset.scope.packages %}
+        <ol class="oe-leaks">
+          {% for pack in asset.scope.packages %}
+          <li>
+            <h3>{{ pack.name }}</h3>
+            <p>{% if pack.amount is not none and pack.amount != '' %}{{ pack.amount }}{% if asset.scope.currency %} {{ asset.scope.currency }}{% endif %}{% else %}Price not set{% endif %}</p>
+            {% if pack.includes %}<p class="oe-note">{{ pack.includes | join(' · ') }}</p>{% endif %}
+          </li>
+          {% endfor %}
+        </ol>
+        <p class="oe-note">{{ asset.scope.note }}</p>
+        {% else %}
+        <p class="oe-empty">Price not set. Scope stays empty until the workspace price book has an amount.</p>
+        {% endif %}
+      </li>
+      <li>
+        <span class="oe-n">08 · Clear next step</span>
+        <h2>If this is useful</h2>
+        <p>{{ asset.next_step if asset is defined else 'Reply if you want a walkthrough of the observation. There is no invented quote attached to this note.' }}</p>
+        {% if asset is defined and asset.proposal and asset.proposal.url %}
+        <p><a class="x-btn dark" href="{{ asset.proposal.url }}">Open the draft proposal</a></p>
+        {% endif %}
+        <p><a class="x-btn lime" href="/enquire">Talk to Reachmark</a></p>
+      </li>
+    </ol>
   </main>
   <footer class="oe-foot">Reachmark Opportunity Engine · Evidence dated {{ report.created[:10] if report.created else '' }} · Views of this link are counted.</footer>
 </body>

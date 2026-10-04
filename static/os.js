@@ -59,7 +59,41 @@
         esc(it.offer || '') + ' · ' + esc(amt) + '</span></div></div>';
     }).join('');
   }
+  function renderPipeline(data) {
+    const el = document.getElementById('os-pipeline');
+    if (!el) return;
+    const p = data.pipeline || {};
+    const rows = [
+      ['Discovered', p.discovered, 'Saved businesses'],
+      ['Verified problems', p.verified_problems, 'Reports with a recorded leak'],
+      ['Qualified', p.qualified, 'Reports marked qualified'],
+      ['Outreach sent', p.outreach_sent, 'sends.state=sent + provider sent events'],
+      ['Replies', p.replies, 'Replied or Won stage'],
+      ['Proposals', p.proposals, 'generated_proposals only'],
+      ['Paid clients', p.paid_clients, 'Distinct leads with a Paid invoice'],
+      ['Revenue', p.revenue_minor, 'SUM of Paid invoices (minor units)'],
+      ['Repeat/upsell', p.repeat_upsell_minor, 'Paid invoices after the first, per lead'],
+    ];
+    el.innerHTML = rows.map(function (r) {
+      const v = r[1] == null ? 0 : r[1];
+      return '<li><small>' + esc(r[0]) + '</small><strong>' + esc(v) + '</strong><span>' + esc(r[2]) + '</span></li>';
+    }).join('');
+    const nxt = document.getElementById('os-next-win');
+    if (nxt) {
+      const w = data.next_to_win;
+      if (!w) {
+        nxt.textContent = 'No unpaid lead yet. Discover a real business to start the first-client loop.';
+      } else {
+        const step = (w.next && w.next.label) || 'review';
+        const block = (w.blockers && w.blockers[0] && w.blockers[0].text) || '';
+        nxt.textContent = 'Next to win: ' + (w.lead_name || 'Business') + ' · ' + step +
+          (w.wedge ? ' · ' + w.wedge.replace(/_/g, ' ') : '') +
+          (block ? ' — ' + block : '');
+      }
+    }
+  }
   function renderCommand(data) {
+    renderPipeline(data);
     const el = document.getElementById('os-command-body');
     if (!el) return;
     const att = data.attention || {};
@@ -89,7 +123,8 @@
         return '<div class="pf-row"><div><strong>' + esc(h.lead_name) + '</strong><span>' +
           esc(h.index_score ?? '—') + ' · ' + esc(h.why || '') + '</span></div></div>';
       }) +
-      '<p class="small muted">Paid invoice sum: ' + esc(money.paid_minor_sum || 0) +
+      '<p class="small muted">Paid clients: ' + esc(money.paid_clients || 0) +
+      ' · paid invoice sum: ' + esc(money.paid_minor_sum || 0) +
       ' · unpaid invoices: ' + esc(money.unpaid_invoices || 0) + '</p>' +
       list(upsells, 'No post-delivery upsells.', function (u) {
         return '<div class="pf-row"><div><strong>' + esc(u.lead_name) + '</strong><span>' +
@@ -118,15 +153,35 @@
     const built = data.built || {};
     const prop = data.proposal;
     const conv = data.conversation || {};
+    const loop = data.loop || {};
+    const steps = loop.steps || [];
+    const asset = data.sales_asset || {};
+    const blockers = data.blockers || [];
+    const loopHtml = steps.length
+      ? '<p>' + steps.map(function (s) {
+          return '<span>' + (s.done ? '✓' : '○') + ' ' + esc(s.label) + '</span>';
+        }).join(' · ') + '</p>'
+      : '';
+    const blockHtml = blockers.length
+      ? '<p><strong>Blocked</strong> ' + esc(blockers[0].text) + '</p>'
+      : '';
+    const impact = asset.customer_impact
+      ? '<p><strong>Impact</strong> ' + esc(asset.customer_impact) + '</p>'
+      : '';
     box.innerHTML =
       '<p><strong>Why</strong> ' + esc(data.why || 'Not ranked yet.') + '</p>' +
       '<p>Work-first ' + esc(r.work_score ?? '—') + ' · gap ' + esc(r.gap_score ?? '—') +
       ' · ' + esc(r.coverage ?? 0) + '/' + esc(r.coverage_of ?? 0) + ' factors known</p>' +
+      loopHtml +
       '<p><strong>Recommend</strong> ' + esc(rec.name || '') + ' — ' + esc(rec.why || '') + '</p>' +
+      impact +
       '<p>' + (built.prototype ? '<a class="text-link" href="' + esc(built.prototype) + '" target="_blank" rel="noopener">Prototype</a> ' : 'No prototype. ') +
-      (prop ? '<a class="text-link" href="' + esc(prop.url) + '" target="_blank" rel="noopener">Proposal</a>' : 'No proposal.') + '</p>' +
-      '<p><strong>Next</strong> ' + esc(data.next_action || 'review') +
+      (prop ? '<a class="text-link" href="' + esc(prop.url) + '" target="_blank" rel="noopener">Proposal</a>' : 'No proposal.') +
+      (data.report && data.report.token ? ' <a class="text-link" href="/o/' + esc(data.report.token) + '" target="_blank" rel="noopener">Sales asset</a>' : '') +
+      '</p>' +
+      '<p><strong>Next</strong> ' + esc((loop.next && loop.next.label) || data.next_action || 'review') +
       (conv.last_intent ? ' · last intent ' + esc(conv.last_intent) : '') + '</p>' +
+      blockHtml +
       ((data.thread && data.thread.commercial)
         ? '<p><strong>Commercial</strong> ' + esc(data.thread.commercial.index_score ?? '—') +
           ' · ' + esc(data.thread.commercial.why || '') + '</p>'

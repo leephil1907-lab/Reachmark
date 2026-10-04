@@ -8,7 +8,7 @@ owner — the receptionist never guesses a price, a date, a guarantee, or a clie
 ## topic: what reachmark does
 tags: about, who, what, services, offering, product, studio
 Q: what does reachmark do
-A: Reachmark is a website studio and workspace. It discovers businesses from public map data, checks the listed website for real signals (unreachable, unresolved domain, social-only, parked), prepares an independent website concept preview, and helps you make a personal first introduction. The studio then designs and builds the website.
+A: Reachmark finds businesses losing customers online, shows them exactly where the opportunity is, and helps turn that opportunity into a working solution. It is a website studio and workspace: it discovers businesses from public map data, checks the listed website for real signals (unreachable, unresolved domain, social-only, parked), prepares an independent website concept preview, and helps you make a personal first introduction. The studio then designs and builds the website. Observation of a gap is not proof the business wants work.
 Q: what do i get
 A: Discovery of businesses with available public contact details, live website checks with evidence and timestamps, editable outreach drafts, an independent concept preview page per business, a review link the business can answer, project enquiries, contracts, invoices, and a client portal.
 

@@ -1,6 +1,6 @@
 # Reachmark
 
-**Reachmark** is a business outreach and intelligence platform for discovering potential businesses, organizing leads, and creating thoughtful first impressions.
+**Reachmark** finds businesses losing customers online, shows them exactly where the opportunity is, and helps turn that opportunity into a working solution.
 
 ## Core Features
 

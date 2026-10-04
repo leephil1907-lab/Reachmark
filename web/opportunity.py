@@ -290,6 +290,99 @@ def recommend_solution(leaks, lead):
     }
 
 
+def compose_sales_asset(lead, report, prototype_url=None, proposal_url=None, book=None, next_step=None):
+    """Turn a stored report into the commercial artefact a prospect can read.
+
+    Your business → problem → evidence → visitor impact → solution → prototype
+    → scope → next step. Amounts come from the price book or stay empty.
+    Observation is not proof the business wants work.
+    """
+    lead = lead or {}
+    report = report or {}
+    leaks = report.get('leaks') if isinstance(report.get('leaks'), list) else []
+    commercial = [item for item in leaks if item.get('commercial')]
+    top = (commercial or leaks or [None])[0]
+    solution = report.get('solution') if isinstance(report.get('solution'), dict) else {}
+    evidence_meta = report.get('evidence') if isinstance(report.get('evidence'), dict) else {}
+    website = (lead.get('website') or evidence_meta.get('website') or '').strip()
+    rows = []
+    for item in (commercial or leaks)[:6]:
+        rows.append({
+            'claim': item.get('leak') or item.get('title') or '',
+            'title': item.get('title') or '',
+            'source': item.get('source') or 'observation',
+            'url': website,
+            'reason': item.get('reason') or '',
+        })
+    packs = []
+    for pack in ((book or {}).get('packages') or []):
+        amount = pack.get('amount')
+        if amount in ('',):
+            amount = None
+        packs.append({
+            'id': pack.get('id'),
+            'name': pack.get('name') or pack.get('id') or 'Package',
+            'amount': amount,
+            'includes': pack.get('includes') or [],
+        })
+    if top:
+        impact = top.get('leak') or top.get('title') or ''
+        impact_note = (
+            'Visitor-facing consequence of the observation. '
+            'It is not a measured loss of revenue and not proof the business wants work.'
+        )
+        problem = {
+            'id': top.get('id'),
+            'title': top.get('title') or 'Observed gap',
+            'detected': impact,
+            'source': top.get('source') or 'observation',
+        }
+    else:
+        impact = 'This check did not produce a commercial gap.'
+        impact_note = 'Do not pitch a rebuild on empty evidence.'
+        problem = None
+    if next_step:
+        step = next_step
+    elif prototype_url and proposal_url:
+        step = 'Open the concept and the draft proposal. Reply if you want it built. Nothing is a contract until you say so.'
+    elif prototype_url:
+        step = 'Open the first-section concept, then reply if you want a walkthrough. There is no invented quote.'
+    elif problem:
+        step = 'Reply if you want a walkthrough of this observation. There is no invented quote attached to this note.'
+    else:
+        step = 'No commercial gap was recorded. There is nothing to sell from this check.'
+    return {
+        'business': {
+            'name': lead.get('name') or 'This business',
+            'category': lead.get('category') or '',
+            'city': lead.get('city') or '',
+            'website': website,
+        },
+        'problem': problem,
+        'evidence': rows,
+        'customer_impact': impact,
+        'customer_impact_note': impact_note,
+        'solution': {
+            'name': solution.get('name') or '',
+            'why': solution.get('why') or '',
+            'note': solution.get('note') or '',
+        },
+        'prototype': {'url': prototype_url} if prototype_url else None,
+        'proposal': {'url': proposal_url} if proposal_url else None,
+        'scope': {
+            'packages': packs,
+            'currency': (book or {}).get('currency') or '',
+            'note': (book or {}).get('note') or (
+                'Amounts appear only from the workspace price book. Empty means not priced.'
+            ),
+        },
+        'next_step': step,
+        'disclaimer': evidence_meta.get('disclaimer') or (
+            'Observed gaps only. Not a claim that the business wants a new website. Not a revenue forecast.'
+        ),
+    }
+
+
 def draft_outreach(lead, leaks, solution, score):
     name = lead.get('name') or 'there'
     city = lead.get('city') or ''
@@ -445,8 +538,32 @@ def register_opportunity(app, db, now, log):
             ).fetchone()
         preview = build_report(db, lead, now, observe_live=False)
         stored = serialize_row(row) if row else None
+        proto_url = prop_url = None
+        book = {}
+        try:
+            from web.platform import price_book
+            book = price_book(db)
+        except Exception:
+            book = {}
+        with db() as c:
+            prow = c.execute(
+                'SELECT token FROM prototypes WHERE lead_id=? ORDER BY created DESC LIMIT 1', (lid,)
+            ).fetchone() if c.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='prototypes'"
+            ).fetchone() else None
+            gprow = c.execute(
+                'SELECT token FROM generated_proposals WHERE lead_id=? ORDER BY created DESC LIMIT 1', (lid,)
+            ).fetchone() if c.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='generated_proposals'"
+            ).fetchone() else None
+        if prow:
+            proto_url = f"/p/{prow['token']}"
+        if gprow:
+            prop_url = f"/proposal/{gprow['token']}"
+        source = stored or preview
+        asset = compose_sales_asset(lead, source, prototype_url=proto_url, proposal_url=prop_url, book=book)
         return jsonify(lead={k: lead.get(k) for k in ('id', 'name', 'city', 'category', 'website', 'stage', 'status', 'email')},
-                       preview=preview, report=stored)
+                       preview=preview, report=stored, sales_asset=asset)
 
     @app.post('/api/opportunity/lead/<lid>/run')
     def opportunity_run(lid):
@@ -469,4 +586,30 @@ def register_opportunity(app, db, now, log):
             lead = c.execute('SELECT * FROM leads WHERE id=?', (row['lead_id'],)).fetchone()
         report = serialize_row(row)
         lead = dict(lead) if lead else {}
-        return render_template('opportunity-report.html', report=report, lead=lead)
+        proto_url = prop_url = None
+        book = {}
+        try:
+            from web.platform import price_book
+            book = price_book(db)
+        except Exception:
+            book = {}
+        if lead.get('id'):
+            with db() as c:
+                prow = c.execute(
+                    'SELECT token FROM prototypes WHERE lead_id=? ORDER BY created DESC LIMIT 1',
+                    (lead['id'],),
+                ).fetchone() if c.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='prototypes'"
+                ).fetchone() else None
+                gprow = c.execute(
+                    'SELECT token FROM generated_proposals WHERE lead_id=? ORDER BY created DESC LIMIT 1',
+                    (lead['id'],),
+                ).fetchone() if c.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type='table' AND name='generated_proposals'"
+                ).fetchone() else None
+            if prow:
+                proto_url = f"/p/{prow['token']}"
+            if gprow:
+                prop_url = f"/proposal/{gprow['token']}"
+        asset = compose_sales_asset(lead, report, prototype_url=proto_url, proposal_url=prop_url, book=book)
+        return render_template('opportunity-report.html', report=report, lead=lead, asset=asset)

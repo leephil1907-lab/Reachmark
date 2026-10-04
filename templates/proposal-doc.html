@@ -83,9 +83,20 @@
     </section>
     {% endif %}
 
+    <section class="oe-block">
+      <h2>Customer impact</h2>
+      {% if proposal.body.problems %}
+      <p>{{ proposal.body.problems[0].leak }}</p>
+      <p class="oe-note">Visitor-facing consequence of the observation. Not a measured loss of revenue.</p>
+      {% else %}
+      <p class="oe-empty">No observed problem was on the report. Do not sell a rebuild from this draft.</p>
+      {% endif %}
+    </section>
+
     <section class="oe-block oe-cta">
-      <h2>Terms</h2>
+      <h2>Clear next step</h2>
       <p>{{ proposal.body.terms }}</p>
+      <p class="oe-note">This is a draft, not a contract. Amounts appear only from the price book.</p>
       <a class="x-btn lime" href="/enquire">Accept / discuss</a>
     </section>
   </main>
