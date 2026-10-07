@@ -286,13 +286,26 @@ def terms():
 def disclosure():
     from web.accounts import support_email
     return render_template('disclosure.html', support_email=support_email())
+@app.route('/app')
+def install_app():
+    """Browser + installable app hub. Same product either way."""
+    return render_template('app.html')
+
+
+@app.route('/sw.js')
+def service_worker_root():
+    from flask import send_from_directory
+    return send_from_directory(os.path.join(ROOT, 'static'), 'sw.js', mimetype='application/javascript')
+
+
 @app.after_request
 def pwa_headers(response):
     """Let the service worker control the whole site, and never cache the worker itself."""
-    if request.path == '/static/sw.js':
+    if request.path in ('/static/sw.js', '/sw.js'):
         response.headers['Service-Worker-Allowed'] = '/'
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    elif request.path == '/static/manifest.webmanifest':
+        response.headers['Content-Type'] = 'application/javascript'
+    elif request.path in ('/static/manifest.webmanifest', '/static/app.webmanifest'):
         response.headers['Content-Type'] = 'application/manifest+json'
         response.headers['Cache-Control'] = 'public, max-age=3600'
     return response

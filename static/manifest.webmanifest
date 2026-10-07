@@ -73,6 +73,20 @@
   ],
   "shortcuts": [
     {
+      "name": "Open workspace",
+      "short_name": "Workspace",
+      "description": "Open the Reachmark workspace in the browser or installed app.",
+      "url": "/workspace",
+      "icons": [{ "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Get the app",
+      "short_name": "Install",
+      "description": "Install Reachmark or open it in the browser.",
+      "url": "/app",
+      "icons": [{ "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
       "name": "Enquire about a website",
       "short_name": "Enquire",
       "description": "Send the studio the brief — name, email, what you need.",

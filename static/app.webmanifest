@@ -1,0 +1,60 @@
+{
+  "id": "/workspace",
+  "name": "Reachmark Workspace",
+  "short_name": "Reachmark",
+  "description": "Discover businesses worldwide, verify website opportunities, and start meaningful conversations.",
+  "start_url": "/workspace",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "launch_handler": {"client_mode": "focus-existing"},
+  "orientation": "any",
+  "background_color": "#20251f",
+  "theme_color": "#20251f",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "utilities"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Workspace",
+      "short_name": "Work",
+      "description": "Open the Reachmark workspace.",
+      "url": "/workspace",
+      "icons": [{ "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Enquire about a website",
+      "short_name": "Enquire",
+      "description": "Send the studio the brief — name, email, what you need.",
+      "url": "/enquire",
+      "icons": [{ "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

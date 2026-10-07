@@ -11,6 +11,7 @@
 {% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
 {% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}
 <meta name="theme-color" content="#fbfbfb"><meta name="application-name" content="Reachmark">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Reachmark"><meta name="mobile-web-app-capable" content="yes">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Reachmark"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Reachmark finds businesses losing customers online, shows them exactly where the opportunity is, and helps turn that opportunity into a working solution.' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}">{% endif %}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Reachmark finds businesses losing customers online, shows them exactly where the opportunity is, and helps turn that opportunity into a working solution.' }}">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest">
@@ -35,6 +36,7 @@
 
   <div class="x-toolbar">
     <div class="x-tabs" role="tablist" aria-label="Gallery filters">
+      <span class="x-tab-pill" aria-hidden="true"></span>
       <button type="button" class="on" data-filter="all">All</button>
       <button type="button" data-filter="sample">Samples</button>
       <button type="button" data-filter="hospitality">Hospitality</button>
@@ -97,6 +99,7 @@
     <div class="x-actions">
       <a class="x-btn dark" href="/workspace">Open Reachmark</a>
       <a class="x-btn lime" href="/enquire">{{ t('home.cta_project') }}</a>
+      <a class="x-btn dark" href="/app">Get the app</a>
     </div>
   </section>
 </main>
@@ -136,6 +139,7 @@
     <a href="/enquire" data-cmd>Start a project <span>Enquire</span></a>
     <a href="/pricing" data-cmd>Plans & billing <span>Pricing</span></a>
     <a href="/workspace" data-cmd>Open workspace <span>App</span></a>
+    <a href="/app" data-cmd>Get the app <span>Install</span></a>
     <a href="/signin" data-cmd>Sign in <span>Account</span></a>
   </div>
 </div>
@@ -167,10 +171,21 @@
     if(shown) shown.textContent=String(n);
   }
   if(q){q.addEventListener('input',apply);form.addEventListener('submit',function(e){if(q.value){e.preventDefault();apply();}});}
+  var tabs=document.querySelector('.x-tabs');
+  var pill=document.querySelector('.x-tab-pill');
+  function movePill(btn){
+    if(!tabs||!pill||!btn) return;
+    tabs.classList.add('has-pill');
+    var r=tabs.getBoundingClientRect();
+    var b=btn.getBoundingClientRect();
+    pill.style.width=b.width+'px';
+    pill.style.transform='translateX('+(b.left-r.left)+'px)';
+  }
+  if(tabs){movePill(tabs.querySelector('button.on')||tabs.querySelector('button'));window.addEventListener('resize',function(){movePill(tabs.querySelector('button.on'));},{passive:true});}
   document.querySelectorAll('.x-tabs button').forEach(function(b){
     b.addEventListener('click',function(){
       document.querySelectorAll('.x-tabs button').forEach(function(x){x.classList.remove('on');});
-      b.classList.add('on');filter=b.getAttribute('data-filter')||'all';apply();
+      b.classList.add('on');filter=b.getAttribute('data-filter')||'all';apply();movePill(b);
     });
   });
   function openCmd(){if(!cmd)return;cmd.hidden=false;cmd.classList.add('open');if(cmdIn){cmdIn.value=q?q.value:'';cmdIn.focus();}}
@@ -192,5 +207,6 @@
   }
 })();
 </script>
+<script src="/static/pwa.js" defer></script>
 </body>
 </html>

@@ -66,8 +66,17 @@ nav.main a[aria-current="page"]{background:#111;color:#fff}
   .head-cta{margin-left:auto}
   .pub-head-in{padding:12px 18px}
 }
-[data-theme="dark"] .pub-head{background:rgba(10,12,11,.55);border-bottom-color:transparent}
-[data-theme="dark"] .pub-head.scrolled{background:rgba(10,12,11,.86);border-bottom-color:rgba(255,255,255,.08);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+[data-theme="dark"] .pub-head{
+  background:rgba(10,12,11,.48);
+  border-bottom-color:transparent;
+  backdrop-filter:blur(22px) saturate(1.5);
+  -webkit-backdrop-filter:blur(22px) saturate(1.5);
+}
+[data-theme="dark"] .pub-head.scrolled{
+  background:rgba(10,12,11,.82);
+  border-bottom-color:rgba(213,242,104,.12);
+  box-shadow:0 12px 40px rgba(0,0,0,.4);
+}
 [data-theme="dark"] nav.main a{color:#e8ece6}
 [data-theme="dark"] nav.main a:hover{background:rgba(255,255,255,.08);color:#fff}
 [data-theme="dark"] nav.main a[aria-current="page"]{background:#d5f268;color:#111}

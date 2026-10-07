@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Get the Reachmark app</title>
+<meta name="description" content="Use Reachmark in the browser, or install it as an app on your phone or computer. Same workspace either way.">
+<meta name="theme-color" content="#20251f">
+<meta name="application-name" content="Reachmark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Reachmark">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/static/manifest.webmanifest">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180">
+<link rel="stylesheet" href="/static/fonts.css">
+<link rel="stylesheet" href="/static/header.css">
+<link rel="stylesheet" href="/static/xdesign.css">
+<style>
+  .app-hero{padding:72px 0 28px;max-width:40rem}
+  .app-hero h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(36px,5vw,56px);line-height:1.1;letter-spacing:-.03em;margin:8px 0 16px}
+  .app-hero p{font-size:17px;line-height:1.7;color:#3c4638;max-width:38ch}
+  .app-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;padding:8px 0 72px}
+  .app-card{background:#fff;border:1px solid #e4e8dc;border-radius:20px;padding:24px 22px}
+  .app-card h2{font-size:20px;margin:0 0 8px}
+  .app-card p{margin:0 0 16px;color:#4e574c;font-size:15px;line-height:1.65}
+  .app-card ol{margin:0 0 8px;padding-left:1.2em;color:#3c4638;font-size:14px;line-height:1.7}
+  .app-note{font-size:13px;color:#5c6658;max-width:62ch;padding-bottom:48px}
+  .app-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+  #install-how{display:none;margin-top:12px;padding:12px 14px;background:#f7f9f1;border-radius:12px;font-size:14px;line-height:1.6}
+  html[data-show-ios] #install-how{display:block}
+  @media(display-mode:standalone){
+    .app-browser-only{display:none}
+  }
+</style>
+</head>
+<body class="x-site">
+{% include 'header-public.html' %}
+<main class="x-wrap">
+  <section class="app-hero">
+    <p class="oe-kicker" style="font:650 12px/1.4 Manrope,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#3a7a0a">Browser and app</p>
+    <h1>One Reachmark. Use it in the browser, or install it.</h1>
+    <p>The website is the product. Installing it puts the same workspace on your phone or computer home screen — no App Store, no second codebase.</p>
+    <div class="app-actions">
+      <a class="x-btn dark" href="/workspace">Open in browser</a>
+      <button class="x-btn lime" type="button" data-install-app id="install-app-btn">Install Reachmark</button>
+    </div>
+    <div id="install-how">
+      On iPhone or iPad: tap the Share button, then <strong>Add to Home Screen</strong>.
+      On Safari for Mac: File → Add to Dock.
+      On Chrome or Edge: click the install icon in the address bar, or the menu → Install Reachmark.
+    </div>
+  </section>
+  <section class="app-grid">
+    <article class="app-card">
+      <h2>1. Browser</h2>
+      <p>Works in Chrome, Edge, Safari and Firefox. Sign in, run the loop, send nothing until you approve.</p>
+      <a class="text-link" href="/">Go to the site</a>
+    </article>
+    <article class="app-card">
+      <h2>2. Install as an app</h2>
+      <p>Chrome and Edge on Windows, Mac, Linux and Android will offer Install. The icon lands next to your other apps and opens in its own window.</p>
+      <ol>
+        <li>Chrome / Edge: Install Reachmark (button above), or the browser’s install icon in the address bar.</li>
+        <li>Android: Install app when prompted, or Chrome menu → Install app.</li>
+        <li>iPhone / iPad: Share → Add to Home Screen.</li>
+      </ol>
+    </article>
+    <article class="app-card">
+      <h2>3. Run on this computer</h2>
+      <p>If you have the source, this starts the same web app locally and opens it:</p>
+      <p class="app-note" style="padding:0;font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#f7f9f1;border-radius:10px;padding:10px 12px">python -m web.desktop</p>
+      <p>That is the downloadable application for operators who self-host. It is the browser version, running on your machine.</p>
+    </article>
+  </section>
+  <p class="app-note">HTTPS is required for the install button (Chrome will not install from http except on localhost). Private workspace data is never stored in the install cache.</p>
+</main>
+<script src="/static/i18n.js"></script>
+<script src="/static/theme.js"></script>
+<script src="/static/dropdown.js"></script>
+<script src="/static/pwa.js"></script>
+</body>
+</html>

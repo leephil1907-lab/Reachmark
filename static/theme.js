@@ -4,19 +4,25 @@
   const saved=localStorage.getItem('reachmark-theme');
   if(saved) root.setAttribute('data-theme', saved);
   else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) root.setAttribute('data-theme','dark');
+  function paintChrome(){
+    const dark=root.getAttribute('data-theme')==='dark';
+    const meta=document.querySelector('meta[name="theme-color"]');
+    if(meta) meta.setAttribute('content', dark?'#0a0c0b':'#fbfbfb');
+    const btn=document.getElementById('theme-toggle-public');
+    if(btn) btn.textContent=dark?'☾':'◐';
+  }
   window.toggleTheme=function(){
     const isDark=root.getAttribute('data-theme')==='dark';
     const next=isDark?'light':'dark';
     if(next==='light') root.removeAttribute('data-theme'); else root.setAttribute('data-theme','dark');
     localStorage.setItem('reachmark-theme', next);
-    const btn=document.getElementById('theme-toggle-public');
-    if(btn) btn.textContent=isDark?'◐':'☾';
+    paintChrome();
   };
+  paintChrome();
   document.addEventListener('DOMContentLoaded',()=>{
+    paintChrome();
     const btn=document.getElementById('theme-toggle-public');
     if(btn){
-      const isDark=root.getAttribute('data-theme')==='dark';
-      btn.textContent=isDark?'☾':'◐';
       btn.addEventListener('click', window.toggleTheme);
     }
     // nav dynamic motion: sticky glass on scroll

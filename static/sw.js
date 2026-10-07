@@ -31,6 +31,7 @@ var PRECACHE = [
   '/about',
   '/showcase',
   '/enquire',
+  '/app',
   '/receptionist',
   '/offline',
   '/static/manifest.webmanifest',

@@ -87,6 +87,21 @@ class PWAAndManifestTests(unittest.TestCase):
         self.assertTrue(all(c['ok'] for c in manifest_checks),
                         [c for c in manifest_checks if not c['ok']])
 
+    def test_browser_and_installable_app_share_one_product(self):
+        page = self.client.get('/app')
+        self.assertEqual(page.status_code, 200)
+        html = page.get_data(as_text=True)
+        self.assertIn('Open in browser', html)
+        self.assertIn('Install Reachmark', html)
+        self.assertIn('python -m web.desktop', html)
+        self.assertIn('data-install-app', html)
+        sw = self.client.get('/sw.js')
+        self.assertEqual(sw.status_code, 200)
+        self.assertEqual(sw.headers.get('Service-Worker-Allowed'), '/')
+        home = self.client.get('/').get_data(as_text=True)
+        self.assertIn('/app', home)
+        self.assertIn('pwa.js', home)
+
     def test_app_identity_is_unchanged(self):
         """The application name, description and icons belong to the owner — the crew never edits them."""
         manifest = self.manifest()
