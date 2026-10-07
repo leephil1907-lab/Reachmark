@@ -18,6 +18,9 @@
     <span>{{ t('doc.report_title') }}</span>
   </header>
   <main class="oe-sheet">
+    {% if sample %}
+    <p class="oe-sample-banner">Fictional example. This is the report format — not a live audit, not a revenue forecast, not proof anyone wants work.</p>
+    {% endif %}
     <p class="oe-kicker">{{ t('doc.diag') }}</p>
     <h1>{{ lead.name or asset.business.name or t('doc.this_biz') }}</h1>
     <p class="oe-lede">
@@ -147,6 +150,9 @@
         <p><a class="x-btn dark" href="{{ asset.proposal.url }}">{{ t('doc.open_prop') }}</a></p>
         {% endif %}
         <p><a class="x-btn lime" href="/enquire">{{ t('doc.talk') }}</a></p>
+        {% if sample %}
+        <p><a class="x-btn dark" href="/signup">Create an account to run this on a real business</a></p>
+        {% endif %}
       </li>
     </ol>
   </main>

@@ -44,7 +44,9 @@ def install_security(app, db):
         # Quick review links a business is invited to answer, and the public AI receptionist.
         if p.startswith(('/r/','/api/r/')): return True
         if p.startswith('/o/'): return True
-        if p in ('/need',): return True
+        if p in ('/need','/sourcing','/sending','/sample-report'): return True
+        if p in ('/api/client-reviews',): return True
+        if p == '/api/public/audit' and request.method == 'POST': return True
         if p.startswith(('/proposal/','/brief/','/p/')): return True
         if p=='/api/need' and request.method=='POST': return True
         # Network: public cards, booking pages, QR art, OAuth entry points.

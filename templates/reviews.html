@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{ seo.title if seo is defined and seo.title else 'Reviews · Reachmark' }}</title>
+<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Published reviews from people Reachmark has worked with. Empty means none yet — we do not invent testimonials.' }}">
+<meta name="robots" content="index,follow">
+{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
+<meta name="theme-color" content="#20251f">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/xdesign.css">
+<script src="/static/i18n.js"></script>
+<style>
+.rev-wrap{width:min(820px,calc(100% - 48px));margin:0 auto 72px;position:relative;z-index:1}
+.rev-list{display:grid;gap:14px;margin:24px 0 40px}
+.client-review-card{background:#fff;border:1px solid #e2e7d6;border-radius:16px;padding:20px}
+.client-review-card .stars{color:#3a7a0a;letter-spacing:2px;margin-bottom:8px}
+.client-review-card p{margin:0 0 10px;line-height:1.65}
+.client-review-card .meta{font-size:13px;color:#6b7a5a}
+.rev-empty{background:#eef6d1;border-radius:16px;padding:20px;line-height:1.6}
+.review-form{background:#fff;border:1px solid #e2e7d6;border-radius:16px;padding:24px;display:grid;gap:10px}
+.review-form input,.review-form textarea{padding:12px;border:1px solid #d8e0c8;border-radius:10px;font:15px Manrope,sans-serif}
+.review-form button.submit{background:#d5f268;border:0;border-radius:12px;padding:12px;font:700 14px Manrope,sans-serif;cursor:pointer}
+.star-input button{background:transparent;border:0;font-size:22px;cursor:pointer;color:#c5cdb8}
+.star-input button.active{color:#3a7a0a}
+.review-toast{display:none;padding:10px;border-radius:10px}
+</style>
+</head>
+<body class="x-site">
+{% include 'header-public.html' %}
+<main>
+  <section class="x-hero">
+    <p class="x-kicker">{{ t('rev.k') }}</p>
+    <h1>{{ t('rev.h1') }}</h1>
+    <p class="x-lead">{{ t('rev.sub') }}</p>
+  </section>
+  <div class="rev-wrap">
+    <div id="client-review-list" class="rev-list">
+      {% if client_reviews %}
+        {% for r in client_reviews %}
+        <article class="client-review-card">
+          <div class="stars">{{ '★' * (r.rating|int) }}{{ '☆' * (5 - (r.rating|int)) }}</div>
+          <p>{{ r.text }}</p>
+          <div class="meta"><strong>{{ r.name }}</strong>{% if r.business %} · {{ r.business }}{% endif %}{% if r.created %} · {{ r.created[:10] }}{% endif %}</div>
+        </article>
+        {% endfor %}
+      {% else %}
+        <p class="rev-empty" id="rev-empty">{{ t('rev.empty') }}</p>
+      {% endif %}
+    </div>
+    <form id="review-form" class="review-form" novalidate>
+      <h2>{{ t('rev.form_h') }}</h2>
+      <p>{{ t('rev.form_p') }}</p>
+      <label for="r-name">{{ t('about.rev_name') }}</label>
+      <input id="r-name" name="name" type="text" maxlength="80" required>
+      <label for="r-biz">{{ t('about.rev_biz') }}</label>
+      <input id="r-biz" name="business" type="text" maxlength="120">
+      <label>{{ t('about.rev_rating') }}</label>
+      <div class="star-input" role="radiogroup">
+        <button type="button" data-star="1">★</button>
+        <button type="button" data-star="2">★</button>
+        <button type="button" data-star="3">★</button>
+        <button type="button" data-star="4">★</button>
+        <button type="button" data-star="5">★</button>
+      </div>
+      <input type="hidden" name="rating" value="">
+      <label for="r-text">{{ t('about.rev_text') }}</label>
+      <textarea id="r-text" name="text" maxlength="800" required rows="5"></textarea>
+      <button class="submit" type="submit">{{ t('about.rev_submit') }}</button>
+      <div id="review-toast" class="review-toast" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</main>
+<footer class="x-foot">
+  <div class="x-foot-bottom">{{ t('home.foot_copy', year='2026') }}</div>
+</footer>
+<script src="/static/carousel.js" defer></script>
+</body>
+</html>

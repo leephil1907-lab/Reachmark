@@ -127,8 +127,8 @@ form.onsubmit=async e=>{
         let r=await fetch('/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({name,email,password:pw})});
     let j=await r.json();
     if(!r.ok) throw new Error(j.error||T_('au.js_nocreate','nocreate'));
-    if(j.needs_verification){document.getElementById('verify-hint').style.display='block'; msg.textContent=T_('au.js_vfirst','vfirst'); msg.style.display='block'; msg.style.background='#eef6d1'; msg.style.color='#2d4a0a'; msg.style.border='1px solid #d8e9b8'; setTimeout(()=>location.href='/dashboard',1400); return}
-    location.href='/dashboard';
+    if(j.needs_verification){document.getElementById('verify-hint').style.display='block'; msg.textContent=T_('au.js_vfirst','vfirst'); msg.style.display='block'; msg.style.background='#eef6d1'; msg.style.color='#2d4a0a'; msg.style.border='1px solid #d8e9b8'; setTimeout(()=>location.href=j.onboard||'/onboard',1400); return}
+    location.href=j.onboard||'/onboard';
   }catch(err){msg.textContent=err.message;msg.style.display='block';btn.disabled=false;btn.textContent=T_('au.s_create','create');}
 };
 function whoPick(w){const t=w==='team';document.getElementById('who-team').style.borderColor=t?'#7a9a3a':'#dfe8cc';document.getElementById('who-team').style.background=t?'#f4fae6':'#fcfcf8';document.getElementById('who-me').style.borderColor=t?'#dfe8cc':'#7a9a3a';document.getElementById('who-me').style.background=t?'#fcfcf8':'#f4fae6';document.getElementById('who-team-go').style.display=t?'block':'none';form.style.display=t?'none':'block';}

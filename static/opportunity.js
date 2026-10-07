@@ -49,13 +49,35 @@
       el.innerHTML = '<p class="small muted">No reports yet. Open a lead and run the Opportunity Engine.</p>';
       return;
     }
-    el.innerHTML = rows.slice(0, 12).map(function (r) {
+    el.innerHTML = rows.slice(0, 24).map(function (r) {
       const href = '/o/' + encodeURIComponent(r.token);
+      const contact = r.contactable ? ' · contactable' : '';
       return '<div class="oe-report-row"><div><strong>' + esc(r.lead_name || 'Business') + '</strong><span>' +
-        esc(r.priority) + ' · ' + esc(r.score) + '/100 · ' + esc(r.leak_count) + ' issues</span></div>' +
+        esc(r.priority) + ' · ' + esc(r.score) + '/100 · ' + esc(r.leak_count) + ' issues' + contact + '</span></div>' +
         '<div class="button-group"><a class="text-link" href="' + href + '" target="_blank" rel="noopener">Open report</a></div></div>';
     }).join('');
   }
+  window.runOpportunityQueue = async function () {
+    const note = document.getElementById('oe-queue-note');
+    const btn = document.getElementById('oe-run-queue');
+    if (btn) btn.disabled = true;
+    if (note) note.textContent = 'Diagnosing the next contactable businesses from stored evidence…';
+    try {
+      const r = await post('/api/opportunity/run-queue', {});
+      const ran = r.ran || 0;
+      if (note) {
+        note.textContent = ran
+          ? ('Stored ' + ran + ' diagnosis ' + (ran === 1 ? 'report' : 'reports') + '. ' + (r.note || ''))
+          : ('No businesses waiting for a new diagnosis. ' + (r.note || ''));
+      }
+      if (typeof loadOpportunityEngine === 'function') await loadOpportunityEngine();
+      if (typeof toast === 'function') toast(ran ? ('Stored ' + ran + ' report' + (ran === 1 ? '' : 's') + '.') : 'Queue is clear.');
+    } catch (e) {
+      if (note) note.textContent = e.message;
+      if (typeof toast === 'function') toast(e.message, true);
+    }
+    if (btn) btn.disabled = false;
+  };
   window.loadOpportunityEngine = async function () {
     try {
       const funnel = await get('/api/opportunity/funnel');

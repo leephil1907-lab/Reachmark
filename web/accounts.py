@@ -311,7 +311,12 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
         if 'csrf' not in session:
             session['csrf'] = secrets.token_urlsafe(32)
         log('account', f'Client account created: {email}')
-        return jsonify(ok=True, id=uid, needs_verification=True),201
+        try:
+            from web.funnel import record as funnel_record
+            funnel_record(db, lambda: stamp, 'signup', {'user_id': uid}, user_id=uid)
+        except Exception:
+            pass
+        return jsonify(ok=True, id=uid, needs_verification=True, onboard='/onboard'),201
 
     @app.post('/api/auth/login')
     def login():

@@ -19,12 +19,18 @@ class AdSenseTests(unittest.TestCase):
     tearDown = test_app.ProspectTests.tearDown
 
     def test_public_pages_carry_the_tags_exactly_once(self):
-        for path in ('/', '/about', '/showcase', '/showcase/ember-coffee', '/enquire',
+        for path in ('/about', '/showcase', '/showcase/ember-coffee', '/enquire',
                      '/receptionist', '/reviews', '/pricing', '/workspace'):
             body = self.client.get(path).get_data(as_text=True)
             self.assertIn(META, body, path)
             self.assertIn(LOADER, body, path)
             self.assertEqual(body.count('adsbygoogle.js'), 1, f'double injection on {path}')
+
+    def test_homepage_has_no_adsense(self):
+        body = self.client.get('/').get_data(as_text=True)
+        self.assertNotIn('adsbygoogle', body)
+        self.assertNotIn('google-adsense-account', body)
+        self.assertNotIn('adsense-homepage-banner', body)
 
     def test_private_pages_and_apis_are_excluded(self):
         for path in ('/login',):
@@ -54,12 +60,9 @@ class AdSenseTests(unittest.TestCase):
 
     def test_real_ad_units_render_in_place(self):
         home = self.client.get('/').get_data(as_text=True)
-        self.assertIn('adsense-homepage-banner', home)
-        self.assertIn('data-ad-slot="1905478104"', home)
-        self.assertIn('adsense-footer', home)
-        self.assertIn('data-ad-slot="6774661404"', home)
-        # Banner sits between the hero and the rest of the homepage.
-        self.assertLess(home.index('1905478104'), home.index('Fresh from the gallery'))
+        self.assertNotIn('adsense-homepage-banner', home)
+        self.assertNotIn('data-ad-slot="1905478104"', home)
+        self.assertNotIn('adsense-footer', home)
         for path in ('/showcase', '/enquire', '/pricing', '/receptionist'):
             body = self.client.get(path).get_data(as_text=True)
             self.assertIn('data-ad-slot="6774661404"', body, path)
@@ -72,8 +75,7 @@ class AdSenseTests(unittest.TestCase):
 
     def test_real_units_ignore_the_old_display_slot_env(self):
         with patch.dict(os.environ, {'ADSENSE_DISPLAY_SLOT': ''}):
-            body = self.client.get('/').get_data(as_text=True)
-            self.assertIn('data-ad-slot="1905478104"', body)
+            body = self.client.get('/showcase').get_data(as_text=True)
             self.assertIn('data-ad-slot="6774661404"', body)
 
     def test_about_template_file_is_untouched(self):

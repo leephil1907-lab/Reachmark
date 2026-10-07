@@ -171,7 +171,7 @@ def headers(r):
     return r
 
 ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-3894582071697384').strip()
-ADSENSE_PATHS = {'/', '/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/workspace'}
+ADSENSE_PATHS = {'/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/workspace'}
 ADSENSE_PREFIXES = ('/showcase/',)
 
 @app.after_request
@@ -211,9 +211,9 @@ def home():
     base=settings()['public_base_url'].rstrip('/')
     canonical = (base + '/') if base else None
     seo = {
-        'title': 'Reachmark — Find Potential. Make Your Mark. | World-class website designer',
-        'description': 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals. 8 premium Figma-inspired samples, live 3D previews, OpenStreetMap discovery — no Google API key needed.',
-        'keywords': 'website designer, Figma templates, 3D website previews, OpenStreetMap leads, business discovery, Reachmark',
+        'title': 'Reachmark: Find Businesses Losing Customers Online',
+        'description': 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.',
+        'keywords': 'website audit, local business websites, Digital Opportunity Report, Reachmark',
         'canonical': canonical,
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
@@ -236,6 +236,11 @@ def home():
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
     gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'  # second Google tag alongside GA4
     gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
+    try:
+        from web.funnel import record as funnel_record
+        funnel_record(db, now, 'visit', {'path': '/'})
+    except Exception:
+        pass
     return render_template('home.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
 @app.route('/workspace')
 def workspace():
@@ -246,7 +251,13 @@ def client_dashboard():
 @app.route('/healthz')
 def healthz():
     with db() as c: c.execute('SELECT id FROM leads LIMIT 1').fetchone()
-    return jsonify(status='ok',release=os.getenv('RELEASE_SHA','local'))
+    parent = os.path.dirname(os.path.abspath(DB))
+    return jsonify(
+        status='ok',
+        release=os.getenv('RELEASE_SHA','local'),
+        persist_path=parent,
+        persist_writable=os.access(parent, os.W_OK),
+    )
 
 @app.route('/ads.txt')
 def ads_txt():
@@ -258,7 +269,7 @@ def about():
     canonical = (base + '/about') if base else None
     seo = {
         'title': 'About Reachmark — World-class website designer | Global discovery & 3D previews',
-        'description': 'Reachmark is a world-class website designer — Figma-inspired, Framer-smooth. Global OpenStreetMap discovery, honest website health checks, live 3D previews. 8 templates, crystal green design.',
+        'description': 'Reachmark is a world-class website designer — Figma-inspired, Framer-smooth. Global OpenStreetMap discovery, honest website health checks, live 3D previews. 10 templates, crystal green design.',
         'keywords': 'about Reachmark, world-class website designer, OpenStreetMap, website health check, Figma to website',
         'canonical': canonical,
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
@@ -338,15 +349,15 @@ is not.</p>
 @app.route('/robots.txt')
 def robots():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
-    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /showcase\nAllow: /enquire\nAllow: /receptionist\nAllow: /reviews\nAllow: /pricing\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
+    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /showcase\nAllow: /enquire\nAllow: /receptionist\nAllow: /reviews\nAllow: /pricing\nAllow: /need\nAllow: /sourcing\nAllow: /sending\nAllow: /sample-report\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
 @app.route('/sitemap.xml')
 def sitemap():
     from xml.sax.saxutils import escape
     from datetime import datetime, timezone
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
     now = datetime.now(timezone.utc).date().isoformat()
-    # Core public pages + all 8 showcase samples — every indexable route for Google
-    paths = ['/','/about','/showcase','/enquire','/receptionist','/reviews','/pricing'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
+    # Core public pages + all 10 showcase samples — every indexable route for Google
+    paths = ['/','/about','/showcase','/enquire','/receptionist','/reviews','/pricing','/need','/sourcing','/sending','/sample-report'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
     urls = []
     for path in paths:
         loc = escape(base+path)
@@ -385,16 +396,8 @@ def state():
         paid_tools = tier_status(dict(urow) if urow else None)[0] in ('starter', 'pro')
     cid = client_owner() if is_client else None
     with db() as c:
-        if is_client and not paid_tools:
-            # Free clients keep global aggregates; record detail stays empty.
-            leads=[]
-            activity=[]
-            suppressed=[]
-            jobs=[]
-            sent=c.execute("SELECT count(*) FROM sends WHERE state='sent'").fetchone()[0]
-            enquiry_count=c.execute("SELECT count(*) FROM enquiries WHERE status='New'").fetchone()[0]
-        elif cid:
-            # Paid clients work in a private workspace: only their own records.
+        if is_client and cid:
+            # Clients — including free — see only the leads they own (onboarding, then paid tools).
             leads=[dict(r) for r in c.execute("SELECT l.*,r.verification,r.reviewed_at FROM leads l LEFT JOIN lead_reviews r ON r.lead_id=l.id WHERE l.owner_user_id=? ORDER BY l.created DESC",(cid,))]
             activity=[]
             sent=c.execute("SELECT count(*) FROM sends s JOIN leads l ON l.id=s.lead_id WHERE s.state='sent' AND l.owner_user_id=?",(cid,)).fetchone()[0]
@@ -409,6 +412,11 @@ def state():
             enquiry_count=c.execute("SELECT count(*) FROM enquiries WHERE status='New'").fetchone()[0]
             jobs=[dict(r) for r in c.execute('SELECT * FROM jobs ORDER BY created DESC LIMIT 15')]
     role='client' if is_client else 'owner' if session.get('owner') else 'none'
+    try:
+        from web.opportunity import attach_latest
+        attach_latest(db, leads)
+    except Exception:
+        pass
     return jsonify(leads=leads,enquiry_count=enquiry_count,jobs=jobs,activity=activity,sent=sent,settings=settings(),categories=list(CATEGORIES),smtp_ready=bool(os.getenv('SMTP_HOST') and os.getenv('SMTP_FROM')),suppressed=suppressed,role=role)
 @app.route('/api/settings',methods=['POST'])
 def save_settings():
@@ -554,7 +562,18 @@ def save_audit(lid):
 
 @app.route('/api/leads/<lid>/audit',methods=['POST'])
 def audit_lead(lid):
-    result=save_audit(lid);log('audit',f"Website checked for {lead(lid)['name']}: {result['status']}");return jsonify(result)
+    try:
+        from web.funnel import record as funnel_record
+        funnel_record(db, now, 'audit_started', {'lead_id': lid})
+    except Exception:
+        pass
+    result=save_audit(lid)
+    try:
+        from web.funnel import record as funnel_record
+        funnel_record(db, now, 'audit_completed', {'lead_id': lid, 'status': result.get('status')})
+    except Exception:
+        pass
+    log('audit',f"Website checked for {lead(lid)['name']}: {result['status']}");return jsonify(result)
 
 def compose(l, tone, include_preview):
     """Build the outreach message for a lead.
@@ -646,6 +665,18 @@ def send(lid):
         c.execute('BEGIN IMMEDIATE')
         if c.execute('SELECT 1 FROM suppression WHERE email=?',(recipient,)).fetchone(): return jsonify(error=_t('er_139', locale_now())),400
         if c.execute("SELECT 1 FROM sends WHERE lead_id=? AND state IN ('sending','sent','unknown')",(lid,)).fetchone(): return jsonify(error=_t('er_002', locale_now())),409
+        try:
+            cap=max(1,int(os.getenv('SEND_DAILY_CAP') or '40'))
+        except ValueError:
+            cap=40
+        day=now()[:10]
+        owner=l.get('owner_user_id')
+        if owner:
+            used=c.execute("SELECT count(*) FROM sends s JOIN leads x ON x.id=s.lead_id WHERE s.created>=? AND s.state IN ('sending','sent','unknown') AND x.owner_user_id=?",(day,owner)).fetchone()[0]
+        else:
+            used=c.execute("SELECT count(*) FROM sends WHERE created>=? AND state IN ('sending','sent','unknown')",(day,)).fetchone()[0]
+        if int(used)>=cap:
+            return jsonify(error='Daily send cap reached. Approval still required tomorrow.'),429
         sid=uuid.uuid4().hex
         c.execute('INSERT INTO sends VALUES(?,?,?,?,?,?)',(sid,lid,recipient,'sending','',now()))
         c.execute('INSERT OR IGNORE INTO optout_links VALUES(?,?)',(l['token'],recipient))
@@ -654,6 +685,12 @@ def send(lid):
         msg=EmailMessage(); msg['From']=os.environ['SMTP_FROM']; msg['To']=recipient; msg['Reply-To']=s['reply_email']; msg['Subject']=l['subject']; msg['Message-ID']=f'<{sid}@{os.environ["SMTP_FROM"].split("@")[-1]}>'
         body=l['body']
         html=(l.get('html') or '').strip()
+        unsub=(s.get('public_base_url') or '').rstrip('/')
+        if unsub:
+            unsub=f"{unsub}/unsubscribe/{l['token']}"
+            msg['List-Unsubscribe']=f'<{unsub}>'
+            if html and '/unsubscribe/' not in html:
+                html+=f'<p style="font-size:12px;color:#8a9976"><a href="{unsub}">Unsubscribe</a></p>'
         if not html:
             # Plain-text fallback: keep sender identification and opt-out instructions
             # even if the draft was edited.
@@ -673,6 +710,11 @@ def send(lid):
             smtp.send_message(msg)
         with db() as c:
             c.execute("UPDATE sends SET state='sent' WHERE id=?",(sid,)); c.execute("UPDATE leads SET stage='Contacted',updated=? WHERE id=?",(now(),lid))
+        try:
+            from web.funnel import record as funnel_record
+            funnel_record(db, now, 'first_send_approved', {'lead_id': lid})
+        except Exception:
+            pass
         log('sent',f'Mail server accepted email for {l["name"]}'); return jsonify(ok=True)
     except Exception as e:
         # Explicit rejection is retryable; dropped connections may leave acceptance uncertain.
@@ -721,6 +763,12 @@ from web.opportunity import register_opportunity
 register_opportunity(app, db, now, log)
 from web.platform import register_platform
 register_platform(app, db, now, log)
+from web.funnel import register_funnel
+register_funnel(app, db, now, log)
+from web.public_audit import register_public_audit
+register_public_audit(app, db, now, log)
+from web.onboard import register_onboard
+register_onboard(app, db, now, log, search_save, CATEGORIES)
 from web.revenue_os import register_revenue_os
 register_revenue_os(app, db, now, log)
 from web.outreach import register_outreach
@@ -761,7 +809,12 @@ def reviews_page():
     if base: structured['url']=base+'/reviews'
     with db() as c:
         revs=[dict(r) for r in c.execute('SELECT * FROM client_reviews WHERE approved=1 ORDER BY created DESC LIMIT 50')]
-    return render_template('about.html', base=base, structured=structured, samples=SAMPLES, client_reviews=revs)
+    seo = {
+        'title': 'Reviews · Reachmark',
+        'description': 'Published reviews from people Reachmark has worked with. Empty means none yet — we do not invent testimonials.',
+        'canonical': (base + '/reviews') if base else None,
+    }
+    return render_template('reviews.html', base=base, structured=structured, client_reviews=revs, seo=seo)
 
 
 # Apply all legacy SQLite column upgrades once every feature table exists.

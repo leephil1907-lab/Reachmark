@@ -7,10 +7,12 @@
     </div>
     <div class="button-group">
       <button class="secondary" type="button" onclick="loadOpportunityEngine()">Refresh counts</button>
-      <button class="primary" type="button" onclick="navigate('leads')">Open a lead and run a report</button>
+      <button class="primary" type="button" id="oe-run-queue" onclick="runOpportunityQueue()">{{ t('ws.oe_next') }}</button>
+      <button class="secondary" type="button" onclick="navigate('leads')">Open a lead and run a report</button>
     </div>
   </div>
   <p class="oe-disclaimer" id="oe-disclaimer">Counts are live SQL totals from this workspace.</p>
+  <p class="oe-disclaimer" id="oe-queue-note">{{ t('ws.oe_next_hint') }}</p>
   <ol class="oe-funnel" id="oe-funnel" aria-label="Conversion funnel">
     <li class="oe-funnel-skel">Loading funnel…</li>
   </ol>

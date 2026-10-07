@@ -108,6 +108,9 @@ def _text_body(lead, link, site, settings, audit, locale):
     for choice in CHOICES:
         lines.append(f'  \u2022 {_t("rv." + choice, locale)}: ' + answer_url(base, token, choice))
     lines += ['', _t('oe.optout', locale)]
+    lead_token = (lead or {}).get('token') or ''
+    if base and lead_token:
+        lines.append(_t('oc.opturl', locale, u=f'{base}/unsubscribe/{lead_token}'))
     lines += ['', w['sender'], w['studio']]
     reply = (settings or {}).get('reply_email')
     if reply:
@@ -163,7 +166,9 @@ def _html_body(lead, link, site, settings, audit, locale):
 {answers}
 </div>
 <div style="margin-top:22px;padding-top:16px;border-top:1px solid #eef1e4;font-size:12px;color:#8a9976;line-height:1.6">
-{html.escape(_t('oe.optout', locale))}<br>{html.escape(w['sender'])} &middot; {html.escape(w['studio'])}{(' &middot; ' + html.escape(reply)) if reply else ''}
+{html.escape(_t('oe.optout', locale))}<br>
+{('<a href=\"' + html.escape(base + '/unsubscribe/' + (lead.get('token') or '')) + '\" style=\"color:#6b7a5a\">Unsubscribe</a><br>') if base and lead.get('token') else ''}
+{html.escape(w['sender'])} &middot; {html.escape(w['studio'])}{(' &middot; ' + html.escape(reply)) if reply else ''}
 </div>
 </div>
 <div style="text-align:center;margin-top:14px;font-size:11px;color:#8a9976">Reachmark &middot; Global &middot; {html.escape(host)}</div>

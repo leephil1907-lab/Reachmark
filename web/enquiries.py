@@ -121,6 +121,11 @@ def register_enquiries(app, db, now, log):
                 return jsonify(error=_t('er_143', locale_now())),429
             c.execute('INSERT INTO enquiries(id,name,email,business,kind,budget,timeline,message,sample,fingerprint,created,updated) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)',(rid,data['name'],email,data['business'],data['kind'],data['budget'],data['timeline'],data['message'],data['sample'],fingerprint,stamp,stamp))
         log('enquiry','A new project enquiry was received')
+        try:
+            from web.funnel import record as funnel_record
+            funnel_record(db, now, 'enquiry', {'kind': data.get('kind')})
+        except Exception:
+            pass
         return jsonify(ok=True,reference=rid[:8].upper()),201
 
     @app.route('/api/enquiries',methods=['GET'])

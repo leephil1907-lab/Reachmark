@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{ seo.title if seo is defined and seo.title else 'Where listings come from · Reachmark' }}</title>
+<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Reachmark finds businesses from OpenStreetMap. Limits, measured facts, and what stays unknown.' }}">
+<meta name="robots" content="index,follow">
+{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
+<meta name="theme-color" content="#20251f">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/xdesign.css">
+<script src="/static/i18n.js"></script>
+</head>
+<body class="x-site">
+{% include 'header-public.html' %}
+<main>
+  <section class="x-hero">
+    <p class="x-kicker">{{ t('src.k') }}</p>
+    <h1>{{ t('src.h1') }}</h1>
+    <p class="x-lead">{{ t('src.sub') }}</p>
+  </section>
+  <section class="x-plain">
+    <article class="x-plain-card">
+      <h2>{{ t('src.osm_h') }}</h2>
+      <p>{{ t('src.osm_p') }}</p>
+      <ul class="x-plain-list">
+        <li>{{ t('src.osm_l1') }}</li>
+        <li>{{ t('src.osm_l2') }}</li>
+        <li>{{ t('src.osm_l3') }}</li>
+      </ul>
+    </article>
+    <article class="x-plain-card">
+      <h2>{{ t('src.meas_h') }}</h2>
+      <p>{{ t('src.meas_p') }}</p>
+      <ul class="x-plain-list">
+        <li>{{ t('src.meas_l1') }}</li>
+        <li>{{ t('src.meas_l2') }}</li>
+        <li>{{ t('src.meas_l3') }}</li>
+      </ul>
+    </article>
+    <article class="x-plain-card">
+      <h2>{{ t('src.unk_h') }}</h2>
+      <p>{{ t('src.unk_p') }}</p>
+    </article>
+  </section>
+  <p class="x-hero-actions" style="padding:0 6% 64px">
+    <a class="x-btn lime" href="/signup">{{ t('src.cta') }}</a>
+    <a class="x-btn ghost" href="/">{{ t('src.home') }}</a>
+  </p>
+</main>
+<footer class="x-foot">
+  <div class="x-foot-in">
+    <div>
+      <img class="logo-on-light" src="/static/logo-primary.svg" alt="Reachmark"><img class="logo-on-dark" src="/static/logo-inverse.svg" alt="">
+      <p>{{ t('home.foot_blurb') }}</p>
+    </div>
+    <div>
+      <h4>{{ t('home.foot_explore') }}</h4>
+      <nav>
+        <a href="/about">{{ t('nav.about') }}</a>
+        <a href="/reviews">{{ t('nav.reviews') }}</a>
+        <a href="/pricing">{{ t('nav.plans') }}</a>
+        <a href="/enquire">{{ t('nav.enquire') }}</a>
+      </nav>
+    </div>
+  </div>
+  <div class="x-foot-bottom">{{ t('home.foot_copy', year='2026') }}</div>
+</footer>
+</body>
+</html>

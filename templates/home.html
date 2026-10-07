@@ -5,15 +5,15 @@
 {% if ga_id is defined and ga_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}</title>
-<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Reachmark finds businesses losing customers online, shows them exactly where the opportunity is, and helps turn that opportunity into a working solution.' }}">
+<title>{{ seo.title if seo is defined and seo.title else 'Reachmark: Find Businesses Losing Customers Online' }}</title>
+<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">
 <meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">
 {% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
 {% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}
 <meta name="theme-color" content="#fbfbfb"><meta name="application-name" content="Reachmark">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Reachmark"><meta name="mobile-web-app-capable" content="yes">
-<meta property="og:type" content="website"><meta property="og:site_name" content="Reachmark"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Reachmark finds businesses losing customers online, shows them exactly where the opportunity is, and helps turn that opportunity into a working solution.' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}">{% endif %}
-<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Reachmark finds businesses losing customers online, shows them exactly where the opportunity is, and helps turn that opportunity into a working solution.' }}">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Reachmark"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark: Find Businesses Losing Customers Online' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}">{% endif %}
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark: Find Businesses Losing Customers Online' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest">
 <link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css">
 <script src="/static/i18n.js"></script>
@@ -25,42 +25,64 @@
 <div class="x-aurora" aria-hidden="true"></div>
 <main>
   <section class="x-hero">
-    <h1 data-split>{{ t('home.h1a') }} <em>{{ t('home.h1b') }}</em></h1>
-    <form class="x-search" id="x-search-form" action="/showcase" method="get" role="search">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.2-3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <input id="x-q" name="q" type="search" autocomplete="off" placeholder="{{ t('home.search_ph') }}" aria-label="{{ t('home.search_aria') }}">
-      <button type="submit" class="x-search-go">{{ t('home.search') }}</button>
-    </form>
+    <p class="x-kicker">{{ t('home.kicker') }}</p>
+    <h1 data-split>{{ t('home.hero_h1a') }} <em>{{ t('home.hero_h1b') }}</em></h1>
     <p class="x-lead">{{ t('home.sub') }}</p>
+    <p class="x-hero-actions">
+      <a class="x-btn lime" href="/sample-report">{{ t('home.cta_report') }}</a>
+    </p>
+    <p class="x-hero-alt"><a href="/need">{{ t('home.need_alt') }}</a></p>
   </section>
 
-  <div class="x-toolbar">
-    <div class="x-tabs" role="tablist" aria-label="{{ t('home.tabs_aria') }}">
-      <span class="x-tab-pill" aria-hidden="true"></span>
-      <button type="button" class="on" data-filter="all">{{ t('home.tab_all') }}</button>
-      <button type="button" data-filter="sample">{{ t('home.tab_samples') }}</button>
-      <button type="button" data-filter="hospitality">{{ t('home.tab_hosp') }}</button>
-      <button type="button" data-filter="professional">{{ t('home.tab_pro') }}</button>
-      <button type="button" data-filter="digital">{{ t('home.tab_digital') }}</button>
-    </div>
-    <div class="x-count"><b id="x-shown">{{ samples|length if samples is defined else 10 }}</b> {{ t('home.live_concepts') }}</div>
-  </div>
-
-  <section class="x-masonry" id="x-masonry" aria-label="{{ t('home.grid_aria') }}">
-    {% for sample in samples %}
-    <article class="x-card" data-name="{{ sample.name|lower }} {{ sample.category|lower }} {{ sample.style|lower }} {{ sample.slug }}" data-kind="sample {% if sample.slug in ['ember-coffee','stillwell-studio','bloom-market'] %}hospitality{% elif sample.slug in ['astra-clinic','novera-law','forma-homes'] %}professional{% else %}digital{% endif %}">
-      <a href="/showcase/{{ sample.slug }}">
-        <img class="shot" src="/static/samples/{{ sample.slug }}-preview.jpg" alt="{{ sample.name }} — {{ sample.category }}" loading="{{ 'eager' if loop.index < 4 else 'lazy' }}">
-        <div class="x-card-foot">
-          <img class="av" src="/static/icon.svg" alt="">
-          <div>
-            <strong>{{ sample.name }}</strong>
-            <span>{{ sample.category }} · {{ sample.style }}</span>
-          </div>
-        </div>
-      </a>
+  <section class="x-report" id="sample-report" aria-label="{{ t('home.report_title') }}">
+    <p class="x-report-kicker">{{ t('home.report_k') }}</p>
+    <h2>{{ t('home.report_title') }}</h2>
+    <p class="x-report-disc">{{ t('home.report_disc') }}</p>
+    <article class="x-report-sheet">
+      <header class="x-report-head">
+        <strong>{{ t('home.report_biz') }}</strong>
+        <span>{{ t('home.report_meta') }}</span>
+      </header>
+      <div class="x-report-stats">
+        <div><small>{{ t('home.report_rank_l') }}</small><b>{{ t('home.report_rank') }}</b></div>
+        <div><small>{{ t('home.report_iss_l') }}</small><b>{{ t('home.report_iss') }}</b></div>
+        <div><small>{{ t('home.report_rec_l') }}</small><b>{{ t('home.report_rec') }}</b></div>
+      </div>
+      <ol class="x-report-findings">
+        <li><b>{{ t('home.report_p1h') }}</b><span>{{ t('home.report_p1') }}</span></li>
+        <li><b>{{ t('home.report_p2h') }}</b><span>{{ t('home.report_p2') }}</span></li>
+        <li><b>{{ t('home.report_p3h') }}</b><span>{{ t('home.report_p3') }}</span></li>
+      </ol>
+      <p class="x-report-fix">{{ t('home.report_fix') }}</p>
+      <p class="x-hero-actions" style="margin-top:22px">
+        <a class="x-btn dark" href="/sample-report">{{ t('home.report_open') }}</a>
+      </p>
     </article>
-    {% endfor %}
+  </section>
+
+  <section class="x-shots" aria-label="{{ t('home.shots_h') }}">
+    <div class="x-shots-head">
+      <h2>{{ t('home.shots_h') }}</h2>
+      <p>{{ t('home.shots_p') }}</p>
+    </div>
+    <div class="x-shots-grid">
+      <figure>
+        <img src="/static/product/ws-leads.png" alt="{{ t('home.shot_leads') }}" width="1280" height="720" loading="lazy" decoding="async">
+        <figcaption>{{ t('home.shot_leads') }}</figcaption>
+      </figure>
+      <figure>
+        <img src="/static/product/ws-report.png" alt="{{ t('home.shot_report') }}" width="1280" height="720" loading="lazy" decoding="async">
+        <figcaption>{{ t('home.shot_report') }}</figcaption>
+      </figure>
+      <figure>
+        <img src="/static/product/ws-approve.png" alt="{{ t('home.shot_approve') }}" width="1280" height="720" loading="lazy" decoding="async">
+        <figcaption>{{ t('home.shot_approve') }}</figcaption>
+      </figure>
+      <figure>
+        <img src="/static/product/ws-queue.png" alt="{{ t('home.shot_queue') }}" width="1280" height="720" loading="lazy" decoding="async">
+        <figcaption>{{ t('home.shot_queue') }}</figcaption>
+      </figure>
+    </div>
   </section>
 
   <section class="x-pipe">
@@ -68,6 +90,7 @@
       <div class="kicker">{{ t('home.offer_k') }}</div>
       <h2>{{ t('home.offer_h') }}</h2>
       <p>{{ t('home.offer_p') }}</p>
+      <p class="x-approve">{{ t('home.approve') }}</p>
     </div>
     <div class="x-steps">
       <div class="x-step"><i>01</i><div><b>{{ t('home.d1h') }}</b><span>{{ t('home.d1p') }}</span></div></div>
@@ -77,18 +100,82 @@
     </div>
   </section>
 
-  <section class="x-pipe" style="background:#20251f">
-    <div>
-      <div class="kicker">{{ t('home.moat_k') }}</div>
-      <h2>{{ t('home.moat_h') }}</h2>
-      <p>{{ t('home.moat_p') }}</p>
+  <section class="x-try" id="try-url">
+    <h2>{{ t('home.try_h') }}</h2>
+    <p>{{ t('home.try_p') }}</p>
+    <form class="x-audit" id="x-audit-form">
+      <label class="sr-only" for="x-audit-url">{{ t('home.audit_label') }}</label>
+      <input id="x-audit-url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="{{ t('home.audit_ph') }}" required>
+      <button class="x-btn lime" type="submit">{{ t('home.audit_go') }}</button>
+    </form>
+    <div id="x-audit-out" class="x-audit-out" hidden></div>
+  </section>
+
+  <section class="x-plain" aria-label="{{ t('home.moat_h') }}">
+    <div class="x-plain-item"><b>{{ t('home.q_h') }}</b><span>{{ t('home.q_p') }}</span></div>
+    <div class="x-plain-item"><b>{{ t('home.p_h') }}</b><span>{{ t('home.p_p') }}</span></div>
+    <div class="x-plain-item"><b>{{ t('home.m_h') }}</b><span>{{ t('home.m_p') }}</span></div>
+    <div class="x-plain-item"><b>{{ t('home.n_h') }}</b><span>{{ t('home.n_p') }}</span></div>
+  </section>
+
+  <section class="x-plans" id="plans-preview" aria-label="{{ t('home.price_h') }}">
+    <div class="x-plans-head">
+      <h2>{{ t('home.price_h') }}</h2>
+      <p>{{ t('home.price_p') }}</p>
     </div>
-    <div class="x-steps">
-      <div class="x-step"><i>Q</i><div><b>{{ t('home.q_h') }}</b><span>{{ t('home.q_p') }}</span></div></div>
-      <div class="x-step"><i>P</i><div><b>{{ t('home.p_h') }}</b><span>{{ t('home.p_p') }}</span></div></div>
-      <div class="x-step"><i>M</i><div><b>{{ t('home.m_h') }}</b><span>{{ t('home.m_p') }}</span></div></div>
-      <div class="x-step"><i>N</i><div><b>{{ t('home.n_h') }}</b><span>{{ t('home.n_p') }}</span></div></div>
+    <div class="x-plans-grid">
+      <article><small>Free</small><b>$0</b><p>{{ t('home.price_free') }}</p><a href="/signup">{{ t('home.price_free_cta') }}</a></article>
+      <article><small>Starter</small><b>$19</b><p>{{ t('home.price_st') }}</p><a href="/pricing">{{ t('home.price_st_cta') }}</a></article>
+      <article class="on"><small>Pro</small><b>$59</b><p>{{ t('home.price_pro') }}</p><a href="/pricing">{{ t('home.price_pro_cta') }}</a></article>
     </div>
+    <p class="x-plans-note"><a href="/pricing">{{ t('home.price_all') }}</a></p>
+  </section>
+
+  <section class="x-trust" aria-label="{{ t('home.trust_h') }}">
+    <h2>{{ t('home.trust_h') }}</h2>
+    <div class="x-trust-grid">
+      <a href="/sourcing"><b>{{ t('home.trust_src') }}</b><span>{{ t('home.trust_src_p') }}</span></a>
+      <a href="/sending"><b>{{ t('home.trust_send') }}</b><span>{{ t('home.trust_send_p') }}</span></a>
+      <a href="/privacy"><b>{{ t('home.trust_priv') }}</b><span>{{ t('home.trust_priv_p') }}</span></a>
+    </div>
+  </section>
+
+  <section class="x-concepts" aria-labelledby="x-concepts-h">
+    <div class="x-concepts-head">
+      <h2 id="x-concepts-h">{{ t('home.concepts_h') }}</h2>
+      <p>{{ t('home.concepts_p') }}</p>
+    </div>
+    <div class="x-toolbar">
+      <div class="x-tabs" role="tablist" aria-label="{{ t('home.tabs_aria') }}">
+        <span class="x-tab-pill" aria-hidden="true"></span>
+        <button type="button" class="on" data-filter="all">{{ t('home.tab_all') }}</button>
+        <button type="button" data-filter="sample">{{ t('home.tab_samples') }}</button>
+        <button type="button" data-filter="hospitality">{{ t('home.tab_hosp') }}</button>
+        <button type="button" data-filter="professional">{{ t('home.tab_pro') }}</button>
+        <button type="button" data-filter="digital">{{ t('home.tab_digital') }}</button>
+      </div>
+      <form class="x-search x-search-inline" id="x-search-form" action="/showcase" method="get" role="search">
+        <input id="x-q" name="q" type="search" autocomplete="off" placeholder="{{ t('home.search_ph') }}" aria-label="{{ t('home.search_aria') }}">
+        <button type="submit" class="x-search-go">{{ t('home.search') }}</button>
+      </form>
+    </div>
+    <div class="x-count"><b id="x-shown">{{ samples|length if samples is defined else 10 }}</b> {{ t('home.live_concepts') }}</div>
+    <section class="x-masonry" id="x-masonry" aria-label="{{ t('home.grid_aria') }}">
+      {% for sample in samples %}
+      <article class="x-card" data-name="{{ sample.name|lower }} {{ sample.category|lower }} {{ sample.style|lower }} {{ sample.slug }}" data-kind="sample {% if sample.slug in ['ember-coffee','stillwell-studio','bloom-market'] %}hospitality{% elif sample.slug in ['astra-clinic','novera-law','forma-homes'] %}professional{% else %}digital{% endif %}">
+        <a href="/showcase/{{ sample.slug }}">
+          <img class="shot" src="/static/samples/{{ sample.slug }}-preview.jpg" alt="{{ sample.name }} — {{ sample.category }}" loading="{{ 'eager' if loop.index < 3 else 'lazy' }}" decoding="async">
+          <div class="x-card-foot">
+            <img class="av" src="/static/icon.svg" alt="">
+            <div>
+              <strong>{{ sample.name }}</strong>
+              <span>{{ sample.category }} · {{ sample.style }}</span>
+            </div>
+          </div>
+        </a>
+      </article>
+      {% endfor %}
+    </section>
   </section>
 
   <section class="x-cta">
@@ -97,9 +184,7 @@
       <p>{{ t('home.band_p') }}</p>
     </div>
     <div class="x-actions">
-      <a class="x-btn dark" href="/workspace">{{ t('home.open_ws') }}</a>
       <a class="x-btn lime" href="/enquire">{{ t('home.cta_project') }}</a>
-      <a class="x-btn dark" href="/app">{{ t('nav.app') }}</a>
     </div>
   </section>
 </main>
@@ -117,6 +202,8 @@
         <a href="/reviews">{{ t('nav.reviews') }}</a>
         <a href="/pricing">{{ t('nav.plans') }}</a>
         <a href="/enquire">{{ t('nav.enquire') }}</a>
+        <a href="/sourcing">{{ t('src.k') }}</a>
+        <a href="/sending">{{ t('send.k') }}</a>
         <a href="/privacy">{{ t('foot.privacy') }}</a>
         <a href="/terms">{{ t('foot.terms') }}</a>
         <a href="/disclosure">{{ t('foot.disclosure') }}</a>
@@ -137,12 +224,12 @@
 <div class="x-cmd" id="x-cmd" hidden>
   <div class="x-cmd-box" role="dialog" aria-modal="true" aria-label="{{ t('home.cmd_aria') }}">
     <input id="x-cmd-input" type="search" placeholder="{{ t('home.cmd_ph') }}">
+    <a href="/sample-report" data-cmd>{{ t('home.cta_report') }} <span>Report</span></a>
     <a href="/showcase" data-cmd>{{ t('home.cmd_samples') }} <span>{{ t('home.cmd_gallery') }}</span></a>
     <a href="/reviews" data-cmd>{{ t('home.cmd_reviews') }} <span>{{ t('home.cmd_social') }}</span></a>
     <a href="/enquire" data-cmd>{{ t('home.cmd_project') }} <span>{{ t('home.cmd_enquire') }}</span></a>
     <a href="/pricing" data-cmd>{{ t('home.cmd_plans') }} <span>{{ t('home.cmd_pricing') }}</span></a>
     <a href="/workspace" data-cmd>{{ t('home.cmd_ws') }} <span>{{ t('home.cmd_app') }}</span></a>
-    <a href="/app" data-cmd>{{ t('nav.app') }} <span>{{ t('home.cmd_install') }}</span></a>
     <a href="/signin" data-cmd>{{ t('nav.signin') }} <span>{{ t('home.cmd_account') }}</span></a>
   </div>
 </div>
@@ -206,6 +293,43 @@
       });
     });
   }
+})();
+</script>
+<script>
+(function(){
+  var form=document.getElementById('x-audit-form');
+  var out=document.getElementById('x-audit-out');
+  if(!form||!out) return;
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    var url=(document.getElementById('x-audit-url')||{}).value||'';
+    out.hidden=false;
+    out.innerHTML='<p class="x-audit-wait">Checking the public page…</p>';
+    try{
+      var r=await fetch('/api/public/audit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url})});
+      var j=await r.json();
+      if(r.status===429 || j.rate_limited){
+        out.innerHTML='<p class="x-audit-block">'+esc(j.error||'This check is limited. Try again later.')+'</p>';
+        return;
+      }
+      if(j.blocked){
+        out.innerHTML='<p class="x-audit-block">'+esc(j.error||j.reason||'This site blocked the check. That is inconclusive, not a fault.')+'</p>';
+        return;
+      }
+      if(!r.ok){
+        out.innerHTML='<p class="x-audit-block">'+esc(j.error||'This check could not finish.')+'</p>';
+        return;
+      }
+      var leaks=j.leaks||[];
+      var items=leaks.length?leaks.map(function(L){
+        return '<li><strong>'+esc(L.title||L.key)+'</strong><span>'+esc(L.leak||'')+'</span></li>';
+      }).join(''):'<li><strong>No commercial gap on this check</strong><span>Nothing in the labelled leak list was measured on this page. That is not a score of zero — it is an empty observation.</span></li>';
+      out.innerHTML='<p class="x-audit-label">'+esc(j.label||'Measured observations. Not a revenue forecast.')+'</p><ol class="x-audit-leaks">'+items+'</ol><p class="x-audit-gate">'+esc(j.gate||'Create an account for the full Digital Opportunity Report.')+' <a href="/signup">Create an account</a></p>';
+    }catch(err){
+      out.innerHTML='<p class="x-audit-block">This check could not reach the server.</p>';
+    }
+  });
+  function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);});}
 })();
 </script>
 <script src="/static/pwa.js" defer></script>

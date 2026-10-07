@@ -383,6 +383,61 @@ def compose_sales_asset(lead, report, prototype_url=None, proposal_url=None, boo
     }
 
 
+def fictional_sample_report():
+    """The public sample: real report template, labelled fictional, no invented prices."""
+    lead = {
+        'name': 'Harbour Street Bakery',
+        'category': 'Bakery',
+        'city': 'Sample city',
+        'website': '',
+        'email': '',
+        'id': 'sample',
+    }
+    leaks = [
+        {
+            'id': 'no_form_or_booking',
+            'title': 'No booking or enquiry path',
+            'leak': 'Example: the page we read had no form, booking link, or enquiry path.',
+            'fix': 'A single, visible enquiry or booking path above the fold on mobile.',
+            'weight': 3, 'source': 'Example observation', 'commercial': True,
+        },
+        {
+            'id': 'no_viewport',
+            'title': 'Hard to use on a phone',
+            'leak': 'Example: no viewport meta tag, so contact controls can be hard to tap.',
+            'fix': 'A mobile-first layout with a visible tap target for the next step.',
+            'weight': 2, 'source': 'Example observation', 'commercial': True,
+        },
+        {
+            'id': 'thin_page',
+            'title': 'Very little visible copy',
+            'leak': 'Example: services may not be explained well enough to convert.',
+            'fix': 'Clear service pages written from facts the business can confirm.',
+            'weight': 1, 'source': 'Example observation', 'commercial': True,
+        },
+    ]
+    report = {
+        'score': 64,
+        'priority': 'High',
+        'qualified': True,
+        'leak_count': 3,
+        'leaks': leaks,
+        'solution': {
+            'name': 'A visible enquiry path on a page you own',
+            'why': 'The example findings all point at one missing next step on mobile.',
+            'note': 'Example only. This is not a quote and not a live audit.',
+            'addresses': True,
+            'addressed_count': 3,
+        },
+        'evidence': {
+            'disclaimer': 'Fictional example. Format only. Not a live audit, not a revenue forecast, not proof anyone wants work.',
+        },
+        'created': '2026-10-07',
+    }
+    asset = compose_sales_asset(lead, report, prototype_url='/showcase/ember-coffee')
+    return lead, report, asset
+
+
 def draft_outreach(lead, leaks, solution, score):
     name = lead.get('name') or 'there'
     city = lead.get('city') or ''
@@ -482,6 +537,95 @@ def save_report(db, lead, payload, now):
     return payload
 
 
+QUEUE_LIMIT = 12
+
+
+def queue_leads(db, limit=QUEUE_LIMIT):
+    """Next businesses worth a diagnosis: contactable first, listing leaks first.
+
+    Skips Won / Not a fit. Skips a lead that already has a report unless a
+    newer stored audit exists. Does not fetch the live web.
+    """
+    try:
+        limit = int(limit)
+    except (TypeError, ValueError):
+        limit = QUEUE_LIMIT
+    limit = max(1, min(limit, 15))
+    where, args = _owner_clause('l')
+    with db() as c:
+        has_reports = bool(c.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='opportunity_reports'"
+        ).fetchone())
+        has_audits = bool(c.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='site_audits'"
+        ).fetchone())
+        if not has_reports:
+            rows = c.execute(
+                f'''SELECT l.* FROM leads l WHERE {where}
+                    AND ifnull(l.stage,'') NOT IN ('Not a fit','Won')
+                    ORDER BY CASE WHEN ifnull(l.email,'')!='' OR ifnull(l.phone,'')!='' THEN 0 ELSE 1 END,
+                             l.updated DESC LIMIT ?''',
+                (*args, limit),
+            ).fetchall()
+            return [dict(r) for r in rows]
+        audit_join = '''LEFT JOIN (
+                SELECT lead_id, MAX(created) AS last_audit FROM site_audits GROUP BY lead_id
+            ) a ON a.lead_id = l.id''' if has_audits else ''
+        audit_fresh = '(a.last_audit IS NOT NULL AND a.last_audit > r.last_report)' if has_audits else '0'
+        audit_rank = 'CASE WHEN a.last_audit IS NOT NULL THEN 0 ELSE 1 END,' if has_audits else ''
+        rows = c.execute(
+            f'''SELECT l.* FROM leads l
+                LEFT JOIN (
+                    SELECT lead_id, MAX(created) AS last_report
+                    FROM opportunity_reports GROUP BY lead_id
+                ) r ON r.lead_id = l.id
+                {audit_join}
+                WHERE {where}
+                  AND ifnull(l.stage,'') NOT IN ('Not a fit','Won')
+                  AND (r.last_report IS NULL OR {audit_fresh})
+                ORDER BY
+                  CASE WHEN ifnull(l.email,'')!='' OR ifnull(l.phone,'')!='' THEN 0 ELSE 1 END,
+                  CASE WHEN ifnull(l.website,'')='' OR l.status IN ('SOCIAL_ONLY','NOT_LISTED') THEN 0 ELSE 1 END,
+                  {audit_rank}
+                  l.updated DESC
+                LIMIT ?''',
+            (*args, limit),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def run_queue(db, now, log=None, limit=QUEUE_LIMIT):
+    """Store diagnoses for the next queued leads from saved evidence only."""
+    try:
+        limit = int(limit)
+    except (TypeError, ValueError):
+        limit = QUEUE_LIMIT
+    limit = max(1, min(limit, 15))
+    leads = queue_leads(db, limit)
+    saved = []
+    for lead in leads:
+        payload = build_report(db, lead, now, observe_live=False)
+        row = save_report(db, lead, payload, now)
+        saved.append({
+            'id': row.get('id'),
+            'token': row.get('token'),
+            'lead_id': lead.get('id'),
+            'lead_name': lead.get('name'),
+            'score': row.get('score'),
+            'priority': row.get('priority'),
+            'leak_count': row.get('leak_count'),
+            'contactable': bool((lead.get('email') or '').strip() or (lead.get('phone') or '').strip()),
+        })
+        if log:
+            log('opportunity', f"Queue report for {lead.get('name')}: {row.get('score')}/100")
+    return {
+        'ran': len(saved),
+        'limit': limit,
+        'reports': saved,
+        'note': 'Built from stored listings and audits only. Gap ranking is not revenue.',
+    }
+
+
 def serialize_row(row):
     data = dict(row)
     for key in ('leaks', 'solution', 'fit', 'evidence', 'outreach'):
@@ -490,6 +634,48 @@ def serialize_row(row):
         except (TypeError, ValueError):
             data[key] = {}
     return data
+
+
+def attach_latest(db, leads):
+    """Stamp each lead dict with the latest stored report score and first leak title."""
+    ids = [l.get('id') for l in (leads or []) if l.get('id')]
+    if not ids:
+        return leads
+    q = ','.join('?' * len(ids))
+    with db() as c:
+        if not c.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='opportunity_reports'").fetchone():
+            return leads
+        rows = c.execute(
+            f'''SELECT r.lead_id, r.score, r.priority, r.leaks
+                FROM opportunity_reports r
+                JOIN (
+                    SELECT lead_id, MAX(created) AS created
+                    FROM opportunity_reports WHERE lead_id IN ({q})
+                    GROUP BY lead_id
+                ) x ON r.lead_id=x.lead_id AND r.created=x.created''',
+            ids,
+        ).fetchall()
+    by = {}
+    for row in rows:
+        leaks = row['leaks']
+        if isinstance(leaks, str):
+            try:
+                leaks = json.loads(leaks)
+            except ValueError:
+                leaks = []
+        if not isinstance(leaks, list):
+            leaks = []
+        first = leaks[0] if leaks else {}
+        by[row['lead_id']] = {
+            'opp_score': row['score'],
+            'opp_priority': row['priority'],
+            'opp_leak': (first.get('title') or first.get('leak') or '') if isinstance(first, dict) else '',
+        }
+    for lead in leads:
+        extra = by.get(lead.get('id'))
+        if extra:
+            lead.update(extra)
+    return leads
 
 
 def funnel_counts(db):
@@ -512,17 +698,20 @@ def register_opportunity(app, db, now, log):
             where, args = _owner_clause('r')
             rows = c.execute(
                 f'''SELECT r.*, l.name AS lead_name, l.city AS lead_city, l.category AS lead_category,
-                           l.website AS lead_website, l.stage AS lead_stage
+                           l.website AS lead_website, l.stage AS lead_stage,
+                           l.email AS lead_email, l.phone AS lead_phone
                     FROM opportunity_reports r
                     JOIN leads l ON l.id=r.lead_id
                     WHERE {where}
-                    ORDER BY r.created DESC LIMIT 80''',
+                    ORDER BY CASE r.priority WHEN 'High' THEN 0 WHEN 'Medium' THEN 1 ELSE 2 END,
+                             r.score DESC, r.created DESC LIMIT 80''',
                 args,
             ).fetchall()
         out = []
         for row in rows:
             item = serialize_row(row)
             item['leaks'] = item['leaks'] if isinstance(item['leaks'], list) else []
+            item['contactable'] = bool((item.get('lead_email') or '').strip() or (item.get('lead_phone') or '').strip())
             out.append(item)
         return jsonify(reports=out, count=len(out))
 
@@ -576,6 +765,69 @@ def register_opportunity(app, db, now, log):
         log('opportunity', f"Opportunity report for {lead.get('name')}: {saved['score']}/100, {saved['priority']}")
         return jsonify(report=saved)
 
+    @app.get('/api/opportunity/work-first')
+    def opportunity_work_first():
+        queued = queue_leads(db, limit=8)
+        attach_latest(db, queued)
+        due = []
+        try:
+            from web.platform import due_memory
+            due = due_memory(db, now())
+        except Exception:
+            due = []
+        items = []
+        seen = set()
+        for row in due:
+            lid = row.get('lead_id')
+            if not lid or lid in seen:
+                continue
+            seen.add(lid)
+            items.append({
+                'id': lid,
+                'name': row.get('lead_name') or '',
+                'why': 'Follow-up is due',
+                'action': 'Follow up',
+                'follow_up_at': row.get('follow_up_at'),
+                'reason': row.get('reason') or '',
+            })
+        for row in queued:
+            lid = row.get('id')
+            if not lid or lid in seen:
+                continue
+            seen.add(lid)
+            items.append({
+                'id': lid,
+                'name': row.get('name') or '',
+                'why': (
+                    f"Stored score {row.get('opp_score')}/100"
+                    if row.get('opp_score') is not None else 'Queued from stored listing evidence'
+                ),
+                'action': 'Draft' if row.get('email') else 'Audit',
+                'score': row.get('opp_score'),
+                'priority': row.get('opp_priority'),
+            })
+        return jsonify(items=items[:8])
+
+    @app.post('/api/opportunity/run-queue')
+    def opportunity_run_queue():
+        body = request.get_json(silent=True) or {}
+        try:
+            limit = int(body.get('limit') or QUEUE_LIMIT)
+        except (TypeError, ValueError):
+            limit = QUEUE_LIMIT
+        result = run_queue(db, now, log=log, limit=limit)
+        return jsonify(result)
+
+    @app.get('/sample-report')
+    def sample_report_page():
+        lead, report, asset = fictional_sample_report()
+        try:
+            from web.funnel import record as funnel_record
+            funnel_record(db, now, 'sample_viewed')
+        except Exception:
+            pass
+        return render_template('opportunity-report.html', report=report, lead=lead, asset=asset, sample=True)
+
     @app.get('/o/<token>')
     def opportunity_public(token):
         with db() as c:
@@ -584,6 +836,11 @@ def register_opportunity(app, db, now, log):
                 abort(404)
             c.execute('UPDATE opportunity_reports SET views=views+1 WHERE token=?', (token,))
             lead = c.execute('SELECT * FROM leads WHERE id=?', (row['lead_id'],)).fetchone()
+        try:
+            from web.funnel import record as funnel_record
+            funnel_record(db, now, 'report_viewed', {'token': token})
+        except Exception:
+            pass
         report = serialize_row(row)
         lead = dict(lead) if lead else {}
         proto_url = prop_url = None

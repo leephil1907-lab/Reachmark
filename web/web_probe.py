@@ -18,6 +18,40 @@ import requests
 UA = 'ReachmarkCrew/1.0 (+on-page observation for the studio owner; respects robots.txt)'
 COPYRIGHT_RE = re.compile(r'(?:©|&copy;|copyright)[^0-9]{0,20}((?:19|20)\d{2})', re.I)
 YEAR_RE = re.compile(r'(?<!\d)((?:19|20)\d{2})(?!\d)')
+MAX_REDIRECTS = 4
+
+
+def _fetch_public(url, timeout, max_bytes):
+    """GET a public http(s) URL. Each hop is SSRF-checked. Caller must close the response."""
+    import urllib.parse
+    from agents.agent_scout import _public_host
+    current = url
+    for _ in range(MAX_REDIRECTS + 1):
+        allowed, why = _public_host(current)
+        if not allowed:
+            return None, f'Not observed: {why}.'
+        try:
+            response = requests.get(
+                current,
+                headers={'User-Agent': UA, 'Accept': 'text/html,application/xhtml+xml'},
+                timeout=timeout, allow_redirects=False, stream=True,
+            )
+        except requests.RequestException as exc:
+            return None, f'Connection failed at check time ({type(exc).__name__}). Not proof the site is dead.'
+        if response.is_redirect or response.status_code in (301, 302, 303, 307, 308):
+            loc = (response.headers.get('Location') or '').strip()
+            response.close()
+            if not loc:
+                return None, 'Redirect without a location header.'
+            current = urllib.parse.urljoin(current, loc)
+            continue
+        # Final URL must still be public (in case of weird Location handling).
+        allowed, why = _public_host(str(response.url) or current)
+        if not allowed:
+            response.close()
+            return None, f'Not observed: {why}.'
+        return response, None
+    return None, 'Too many redirects.'
 
 
 def observe(url, max_bytes=65536, timeout=12, respect_robots=True, verify_links=True):
@@ -48,22 +82,19 @@ def observe(url, max_bytes=65536, timeout=12, respect_robots=True, verify_links=
             return result
 
     started = time.monotonic()
-    try:
-        response = requests.get(target, headers={'User-Agent': UA, 'Accept': 'text/html,application/xhtml+xml'},
-                                timeout=timeout, allow_redirects=True, stream=True)
-    except requests.RequestException as exc:
-        result['ms'] = int((time.monotonic() - started) * 1000)
-        result['reason'] = f'Connection failed at check time ({type(exc).__name__}). Not proof the site is dead.'
+    response, fetch_reason = _fetch_public(target, timeout=timeout, max_bytes=max_bytes)
+    result['ms'] = int((time.monotonic() - started) * 1000)
+    if response is None:
+        result['reason'] = fetch_reason
         return result
     try:
-        result['ms'] = int((time.monotonic() - started) * 1000)
         result['status'] = response.status_code
         result['final_url'] = str(response.url)
         result['https'] = str(response.url).startswith('https://')
         result['headers'] = {k.lower(): v[:300] for k, v in response.headers.items()
                              if k.lower() in ('content-type', 'server', 'last-modified', 'cache-control', 'x-powered-by')}
         if response.status_code in (401, 403, 429):
-            result['reason'] = f'HTTP {response.status_code}: access restricted or rate-limited. Inconclusive, not a fault.'
+            result['reason'] = f'HTTP {response.status_code}: the site blocked this check. Inconclusive, not a fault.'
             return result
         if response.status_code >= 400:
             result['reason'] = f'HTTP {response.status_code}: the listed page did not respond successfully at this time.'
@@ -174,10 +205,10 @@ def check_links(html, base_url, limit=6, timeout=5):
         checked += 1
         try:
             response = requests.head(target, headers={'User-Agent': UA}, timeout=timeout,
-                                     allow_redirects=True)
+                                     allow_redirects=False)
             if response.status_code in (405, 501):
                 response = requests.get(target, headers={'User-Agent': UA}, timeout=timeout,
-                                        allow_redirects=True, stream=True)
+                                        allow_redirects=False, stream=True)
                 response.close()
             if response.status_code >= 400:
                 broken.append({'url': target[:300], 'status': response.status_code,

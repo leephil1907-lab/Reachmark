@@ -317,3 +317,46 @@ class SalesAssetAndPipeline(unittest.TestCase):
         self.assertEqual(cmd['next_to_win']['wedge'], 'clinics')
         self.assertTrue(cmd['next_to_win']['next'])
         self.assertFalse(cmd['next_to_win']['next']['done'])
+
+
+class OpportunityQueueTests(unittest.TestCase):
+    def setUp(self):
+        _appmod.ProspectTests.setUp(self)
+
+    def tearDown(self):
+        _appmod.ProspectTests.tearDown(self)
+
+    def test_queue_diagnoses_contactable_leads_once(self):
+        self.client.post('/api/leads', json={
+            'name': 'Harbour Cafe', 'city': 'Lagos', 'category': 'Cafe',
+            'email': 'hello@harbour.test',
+        })
+        self.client.post('/api/leads', json={
+            'name': 'Quiet Shop', 'city': 'Lagos', 'category': 'Retail',
+        })
+        self.client.post('/api/leads', json={
+            'name': 'Won Clinic', 'city': 'Lagos', 'category': 'Clinic',
+            'email': 'won@clinic.test',
+        })
+        leads = self.client.get('/api/state').json['leads']
+        won = next(l for l in leads if l['name'] == 'Won Clinic')
+        self.client.patch('/api/leads/' + won['id'], json={'stage': 'Won'})
+
+        first = self.client.post('/api/opportunity/run-queue', json={})
+        self.assertEqual(first.status_code, 200)
+        data = first.get_json()
+        self.assertGreaterEqual(data['ran'], 1)
+        names = [r['lead_name'] for r in data['reports']]
+        self.assertIn('Harbour Cafe', names)
+        self.assertNotIn('Won Clinic', names)
+        self.assertTrue(all('token' in r for r in data['reports']))
+        self.assertIn('not revenue', (data.get('note') or '').lower())
+
+        second = self.client.post('/api/opportunity/run-queue', json={}).get_json()
+        self.assertEqual(second['ran'], 0)
+
+        listed = self.client.get('/api/opportunity/reports').get_json()
+        self.assertGreaterEqual(listed['count'], 1)
+        top = listed['reports'][0]
+        self.assertIn(top['priority'], ('High', 'Medium', 'Low'))
+        self.assertIn('contactable', top)
