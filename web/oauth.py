@@ -1,11 +1,12 @@
 """Social sign-in (Google / Microsoft) for client accounts.
 
-Providers appear ONLY when their env credentials are configured:
+Providers need:
   GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET
   MICROSOFT_CLIENT_ID + MICROSOFT_CLIENT_SECRET
-With nothing configured, /api/auth/oauth reports all providers unconfigured
-and the auth pages render no social buttons at all.
-Owner workspace sign-in stays password-only by design.
+The client callback is always /api/auth/oauth/<provider>/callback under
+PUBLIC_BASE_URL (or the request host). GOOGLE_OAUTH_REDIRECT_URI is used
+only when it already contains that client path — never the Business Profile
+callback. Owner workspace sign-in stays password-only by design.
 """
 import json
 import os
@@ -44,17 +45,21 @@ def configured(p):
 
 
 def _redirect_uri(provider):
-    # A fixed redirect URI is safer for deployed previews/proxies; keep the request-host fallback for local development.
-    override = os.environ.get('GOOGLE_OAUTH_REDIRECT_URI', '').strip()
-    if override:
-        return override.rstrip('/')
-    root = request.url_root.rstrip('/')
+    suffix = f'/api/auth/oauth/{provider}/callback'
+    env_key = 'GOOGLE_OAUTH_REDIRECT_URI' if provider == 'google' else 'MICROSOFT_OAUTH_REDIRECT_URI'
+    override = os.environ.get(env_key, '').strip().rstrip('/')
+    # Ignore a Business Profile (or any other) callback pasted into this slot.
+    if override and suffix in override:
+        return override
+    root = (os.getenv('PUBLIC_BASE_URL') or '').strip().rstrip('/')
+    if not root:
+        root = request.url_root.rstrip('/')
     host = (urllib.parse.urlparse(root).hostname or '').lower()
     local = host in ('localhost', '127.0.0.1', '::1') or host.startswith(('10.', '192.168.')) or host.endswith('.localhost')
     if root.startswith('http://') and not local:
         # Some proxies swallow X-Forwarded-Proto; never hand Google an http URI for a public host.
         root = 'https://' + root[len('http://'):]
-    return root + f'/api/auth/oauth/{provider}/callback'
+    return root + suffix
 
 
 def _http_json(url, data=None, headers=None, timeout=8):
@@ -77,6 +82,10 @@ def register_oauth(app, db, now, log):
         if not p:
             return jsonify(error=_t('au.e_oauth_unknown', locale_now())), 404
         if not configured(p):
+            accept = (request.headers.get('Accept') or '')
+            if 'text/html' in accept:
+                page = '/signup' if request.args.get('mode') == 'signup' else '/signin'
+                return redirect(f'{page}?oauth=error', 302)
             return jsonify(error=_t('au.e_oauth_off', locale_now())), 400
         mode = request.args.get('mode', 'signin')
         if mode not in ('signin', 'signup'):
@@ -89,6 +98,7 @@ def register_oauth(app, db, now, log):
             'client_id': os.environ[p['id_key']].strip(),
             'redirect_uri': _redirect_uri(provider),
             'response_type': 'code', 'scope': p['scope'], 'state': state,
+            'prompt': 'select_account',
         })
         return redirect(p['auth'] + '?' + q, 302)
 

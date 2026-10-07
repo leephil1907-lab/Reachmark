@@ -65,7 +65,9 @@ Social buttons appear on **/signup** and **/signin** only when the matching
 variables below exist — with nothing set, the pages stay clean password-only and
 nothing breaks. Owner workspace sign-in (`/login`) stays password-only by design.
 
-Your redirect URIs (register **exactly** these, `https`, no trailing slash):
+Your redirect URIs (register **exactly** these, `https`, no trailing slash).
+`YOUR-DOMAIN` must match `PUBLIC_BASE_URL`. Do not reuse the Google Business
+Profile callback here.
 
 ```
 https://YOUR-DOMAIN/api/auth/oauth/google/callback

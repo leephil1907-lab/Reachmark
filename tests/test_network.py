@@ -297,22 +297,51 @@ class OAuthTests(NetworkBase):
 
     def test_redirect_uri_forces_https_for_public_hosts(self):
         from web.oauth import _redirect_uri
-        with module.app.test_request_context('/', base_url='http://example.com'):
-            uri = _redirect_uri('google')
+        with patch.dict(os.environ, {'PUBLIC_BASE_URL': '', 'GOOGLE_OAUTH_REDIRECT_URI': ''}):
+            with module.app.test_request_context('/', base_url='http://example.com'):
+                uri = _redirect_uri('google')
         self.assertEqual(uri, 'https://example.com/api/auth/oauth/google/callback')
 
     def test_redirect_uri_keeps_http_for_localhost(self):
         from web.oauth import _redirect_uri
-        with module.app.test_request_context('/', base_url='http://localhost:5000'):
-            uri = _redirect_uri('google')
+        with patch.dict(os.environ, {'PUBLIC_BASE_URL': '', 'GOOGLE_OAUTH_REDIRECT_URI': ''}):
+            with module.app.test_request_context('/', base_url='http://localhost:5000'):
+                uri = _redirect_uri('google')
         self.assertEqual(uri, 'http://localhost:5000/api/auth/oauth/google/callback')
+
+    def test_redirect_uri_prefers_public_base_url(self):
+        from web.oauth import _redirect_uri
+        with patch.dict(os.environ, {'PUBLIC_BASE_URL': 'https://reachmark-production.up.railway.app', 'GOOGLE_OAUTH_REDIRECT_URI': ''}):
+            with module.app.test_request_context('/', base_url='http://localhost:5000'):
+                uri = _redirect_uri('google')
+        self.assertEqual(uri, 'https://reachmark-production.up.railway.app/api/auth/oauth/google/callback')
+
+    def test_redirect_uri_ignores_business_profile_override(self):
+        from web.oauth import _redirect_uri
+        env = {
+            'PUBLIC_BASE_URL': 'https://reachmark-production.up.railway.app',
+            'GOOGLE_OAUTH_REDIRECT_URI': 'https://reachmark-production.up.railway.app/api/google-business/oauth/callback',
+        }
+        with patch.dict(os.environ, env):
+            with module.app.test_request_context('/', base_url='http://example.com'):
+                uri = _redirect_uri('google')
+        self.assertEqual(uri, 'https://reachmark-production.up.railway.app/api/auth/oauth/google/callback')
+
+    def test_redirect_uri_uses_client_override(self):
+        from web.oauth import _redirect_uri
+        env = {'GOOGLE_OAUTH_REDIRECT_URI': 'https://reachmark.co/api/auth/oauth/google/callback'}
+        with patch.dict(os.environ, env):
+            with module.app.test_request_context('/', base_url='http://example.com'):
+                uri = _redirect_uri('google')
+        self.assertEqual(uri, 'https://reachmark.co/api/auth/oauth/google/callback')
 
     def test_signup_page_has_chooser_and_oauth_mount(self):
         r = self.client.get('/signup')
         self.assertEqual(r.status_code, 200)
         body = r.data.decode()
         for marker in ('id="who-team"', 'id="who-me"', 'id="oauth-wrap"', 'whoPick(',
-                       'Who will be using Reachmark?'):
+                       'Who will be using Reachmark?', 'Continue with Google',
+                       '/api/auth/oauth/google?mode=signup'):
             self.assertIn(marker, body)
 
     def test_signin_page_has_oauth_mount_and_logic(self):

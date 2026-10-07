@@ -3,63 +3,63 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(/static/font-0.woff2) format('truetype');
+  src: url(/static/fonts/dm-sans-400.ttf) format('truetype');
 }
 @font-face {
   font-family: 'DM Sans';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url(/static/font-1.woff2) format('truetype');
+  src: url(/static/fonts/dm-sans-500.ttf) format('truetype');
 }
 @font-face {
   font-family: 'DM Sans';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url(/static/font-2.woff2) format('truetype');
+  src: url(/static/fonts/dm-sans-600.ttf) format('truetype');
 }
 @font-face {
   font-family: 'DM Sans';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(/static/font-3.woff2) format('truetype');
+  src: url(/static/fonts/dm-sans-700.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Manrope';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(/static/font-4.woff2) format('truetype');
+  src: url(/static/fonts/manrope-400.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Manrope';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url(/static/font-5.woff2) format('truetype');
+  src: url(/static/fonts/manrope-500.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Manrope';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url(/static/font-6.woff2) format('truetype');
+  src: url(/static/fonts/manrope-600.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Manrope';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(/static/font-7.woff2) format('truetype');
+  src: url(/static/fonts/manrope-700.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Manrope';
   font-style: normal;
   font-weight: 800;
   font-display: swap;
-  src: url(/static/font-8.woff2) format('truetype');
+  src: url(/static/fonts/manrope-800.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Instrument Serif';
@@ -78,3 +78,4 @@
        url(/static/fonts/InstrumentSerif-Italic.ttf) format('truetype');
 }
 /* Display face is Instrument Serif. Haryas Text V is not licensed for this build. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
