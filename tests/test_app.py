@@ -27,13 +27,20 @@ class ProspectTests(unittest.TestCase):
     def ready(self,l):
         self.client.post('/api/settings',json={'sender_name':'Alex','agency':'Test Studio','reply_email':'alex@example.test','postal_address':'Test address','public_base_url':'https://example.test','offer':'clear, mobile-friendly websites'})
         return self.client.post('/api/leads/'+l['id']+'/compose',json={'preview':True}).json
-    def test_missing_database_directory_fails_with_a_clear_message(self):
+    def test_missing_database_directory_is_created(self):
         module.DB = os.path.join(self.tmp.name, 'no-such-dir', 'x.sqlite3')
-        with self.assertRaises(RuntimeError) as ctx:
-            with module.db():
-                pass
-        self.assertIn('DATABASE_PATH', str(ctx.exception))
+        with module.db() as c:
+            c.execute('SELECT 1')
+        self.assertTrue(os.path.isdir(os.path.dirname(module.DB)))
         module.DB = os.path.join(self.tmp.name, 'test.sqlite3')
+
+    def test_railway_public_url_does_not_redirect_to_itself(self):
+        host = 'reachmark-production.up.railway.app'
+        with patch.dict(os.environ, {'PUBLIC_BASE_URL': 'https://' + host}):
+            page = self.client.get('/', headers={'Host': host})
+            self.assertNotEqual(page.status_code, 301)
+            self.assertEqual(page.status_code, 200)
+            self.assertFalse(page.location)
 
     def test_source_seen_at_schema_and_refresh(self):
         with module.db() as c:

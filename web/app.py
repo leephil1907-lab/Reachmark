@@ -134,20 +134,23 @@ def inject_adsense():
             'adsense_display_slot': os.getenv('ADSENSE_DISPLAY_SLOT','').strip()}
 @app.before_request
 def custom_domain_redirect():
-    # If a custom domain is set via PUBLIC_BASE_URL (e.g. https://reachmark.co), redirect the temporary Railway host to it for SEO/canonical
+    """Railway hostname → custom domain only. Never redirect a host to itself (that 301-loops the site)."""
     try:
+        if request.path.startswith(('/healthz','/static/')):
+            return None
         base = (os.getenv('PUBLIC_BASE_URL','').strip().rstrip('/') or settings().get('public_base_url','').strip().rstrip('/'))
-        if base and base.startswith('https://') and 'up.railway.app' in request.host:
-            # Only redirect if base is not the railway host itself
-            if 'reachmark.co' in base or 'sitegapreveal' not in base:
-                # Preserve path + query, avoid redirecting healthz via is_json etc? Keep simple: redirect all
-                if request.path.startswith(('/healthz','/static/')):
-                    return None
-                target = base + request.full_path if request.query_string else base + request.path
-                # Fix full_path includes ? already
-                if request.query_string and target.endswith('?'):
-                    target = base + request.path + '?' + request.query_string.decode()
-                return redirect(target, code=301)
+        if not base.startswith('https://'):
+            return None
+        dest_host = (urlparse(base).hostname or '').lower()
+        req_host = (request.host or '').split(':')[0].lower()
+        if not dest_host or dest_host == req_host:
+            return None
+        if 'up.railway.app' not in req_host or 'up.railway.app' in dest_host:
+            return None
+        path = request.path
+        if request.query_string:
+            path = request.path + '?' + request.query_string.decode()
+        return redirect('https://' + dest_host + path, code=301)
     except Exception:
         pass
 
