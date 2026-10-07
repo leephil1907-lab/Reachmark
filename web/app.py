@@ -244,6 +244,9 @@ def home():
     return render_template('home.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
 @app.route('/workspace')
 def workspace():
+    from flask import session
+    if not (session.get('owner') or (session.get('client_id') and session.get('role')=='client')):
+        return redirect('/signin')
     return render_template('index.html',samples=SAMPLES)
 @app.route('/dashboard')
 def client_dashboard():

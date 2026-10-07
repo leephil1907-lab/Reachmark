@@ -2871,5 +2871,8 @@
   "rev.sub": "Only reviews submitted here are shown. If this list is empty, we have none to publish — we do not invent testimonials.",
   "rev.empty": "No published reviews yet. If Reachmark built something for you, you can write one below. We will not fill this page with made-up quotes.",
   "rev.form_h": "Leave a review",
-  "rev.form_p": "Use this only if you actually worked with Reachmark. Empty praise is not helpful."
+  "rev.form_p": "Use this only if you actually worked with Reachmark. Empty praise is not helpful.",
+  "home.hero_signin": "Already have an account?",
+  "home.open_workspace": "Open workspace",
+  "home.foot_started": "Get started"
 }

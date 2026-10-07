@@ -42,11 +42,14 @@ def test_home_leads_with_the_report_not_designer_praise():
     assert "adsense" not in home.lower()
     assert 'href="/sample-report"' in home
     assert 'x-who-design' not in home
-    assert home.count('class="x-btn lime"') >= 1
     hero = home.split('<section class="x-hero">', 1)[1].split('</section>', 1)[0]
-    assert hero.count('x-btn') == 1
+    assert 'href="/signup"' in hero
+    assert 'href="/enquire"' in hero
+    assert 'href="/signin"' in hero
     assert 'Get the app' not in hero
     assert 'Open Reachmark' not in hero
+    assert 'hero-signin' in hero
+    assert home.find('home.foot_started') > 0 or 'Get started' in home or "home.foot_started" in home
     assert 'id="plans-preview"' in home
     assert 'ws-leads.png' in home
     assert home.find("sample-report") < home.find("x-pipe")

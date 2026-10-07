@@ -29,9 +29,17 @@
     <h1 data-split>{{ t('home.hero_h1a') }} <em>{{ t('home.hero_h1b') }}</em></h1>
     <p class="x-lead">{{ t('home.sub') }}</p>
     <p class="x-hero-actions">
-      <a class="x-btn lime" href="/sample-report">{{ t('home.cta_report') }}</a>
+      {% if client_logged_in or owner_logged_in %}
+      <a class="x-btn lime" href="/workspace">{{ t('home.open_workspace') }}</a>
+      <a class="x-btn ghost" href="/enquire">{{ t('home.cta_project') }}</a>
+      {% else %}
+      <a class="x-btn lime" href="/signup">{{ t('nav.signup') }}</a>
+      <a class="x-btn ghost" href="/enquire">{{ t('home.cta_project') }}</a>
+      {% endif %}
     </p>
-    <p class="x-hero-alt"><a href="/need">{{ t('home.need_alt') }}</a></p>
+    {% if not client_logged_in and not owner_logged_in %}
+    <p class="x-hero-alt hero-signin">{{ t('home.hero_signin') }} <a href="/signin">{{ t('nav.signin') }}</a></p>
+    {% endif %}
   </section>
 
   <section class="x-report" id="sample-report" aria-label="{{ t('home.report_title') }}">
@@ -202,6 +210,7 @@
         <a href="/reviews">{{ t('nav.reviews') }}</a>
         <a href="/pricing">{{ t('nav.plans') }}</a>
         <a href="/enquire">{{ t('nav.enquire') }}</a>
+        <a href="/app">{{ t('nav.app') }}</a>
         <a href="/sourcing">{{ t('src.k') }}</a>
         <a href="/sending">{{ t('send.k') }}</a>
         <a href="/privacy">{{ t('foot.privacy') }}</a>
@@ -210,11 +219,11 @@
       </nav>
     </div>
     <div>
-      <h4>{{ t('home.foot_ws') }}</h4>
+      <h4>{{ t('home.foot_started') }}</h4>
       <nav>
-        <a href="/workspace">{{ t('nav.workspace') }}</a>
-        <a href="/signin">{{ t('nav.signin') }}</a>
         <a href="/signup">{{ t('nav.signup') }}</a>
+        <a href="/signin">{{ t('nav.signin') }}</a>
+        <a href="/enquire">{{ t('home.cta_project') }}</a>
       </nav>
     </div>
   </div>
