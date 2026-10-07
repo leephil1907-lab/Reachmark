@@ -14,13 +14,17 @@
   --x-serif:'Instrument Serif',Georgia,'Times New Roman',serif;
   --x-sans:Manrope,'DM Sans',system-ui,sans-serif;
 }
-html{scroll-behavior:smooth;overflow-x:hidden}
+html{
+  overflow-x:hidden;
+  overflow-y:auto;
+  scroll-behavior:auto;
+}
 body.x-site,body.public-page,body.x-public{
   margin:0;background:var(--x-bg);color:var(--x-ink);
   font:16px/1.7 var(--x-sans);
   -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
   font-kerning:normal;font-feature-settings:"kern" 1,"liga" 1;
-  overflow-x:hidden;
+  overflow:visible;
 }
 .x-aurora{
   position:fixed;inset:0 auto auto 0;width:100%;height:min(78vh,720px);
@@ -252,8 +256,7 @@ body .btn-lime{background:var(--x-lime)!important}
   .x-search{width:min(100% - 24px,640px);padding:4px 4px 4px 14px}
   .x-search kbd{display:none}
   .x-toolbar{margin-top:24px;gap:10px}
-  .x-tabs{width:100%;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
-  .x-tabs button{flex:0 0 auto}
+  .x-tabs{width:100%;flex-wrap:wrap;overflow:visible}
   .x-pipe{padding:22px 18px}
   .x-cta h2{font-size:26px}
   .x-foot-in{grid-template-columns:1fr}
@@ -269,7 +272,7 @@ body .btn-lime{background:var(--x-lime)!important}
 .x-depth.live .x-orb{display:none}
 .x-orb{
   position:absolute;border-radius:50%;filter:blur(70px);
-  will-change:transform;opacity:.45;
+  opacity:.45;
   animation:x-drift 22s ease-in-out infinite;
 }
 .x-orb-a{width:42vw;height:42vw;left:-8vw;top:-12vh;background:radial-gradient(circle,#d5f26855,#20251f00 70%)}

@@ -117,6 +117,13 @@
       if (document.hidden) pause();
       else sync();
     });
+    var scrollTO = 0;
+    window.addEventListener('scroll', function () {
+      if (!isDark() || reduced) return;
+      pause();
+      clearTimeout(scrollTO);
+      scrollTO = setTimeout(function () { if (!document.hidden) sync(); }, 180);
+    }, { passive: true });
     new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     sync();
   }
