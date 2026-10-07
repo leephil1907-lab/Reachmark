@@ -235,14 +235,12 @@ small, .hero-note, .art-caption, .ribbon{ color:#2d4a0a !important; font-weight:
     <div class="carousel-arrows"><button class="carousel-prev" aria-label="{{ t('about.prev') }}">‹</button><button class="carousel-next" aria-label="{{ t('about.next') }}">›</button></div>
   </div>
 </section>
-<!-- Trustpilot strip — visible ASAP -->
+<!-- Reviews strip — honest, no invented score -->
 <div class="premium-reveal" style="max-width:1280px; margin:18px auto 0; padding:0 6%; display:flex; justify-content:center;">
   <div style="display:inline-flex; align-items:center; gap:12px; background:#fff; border:1px solid #e2e7d6; padding:10px 16px; border-radius:20px; box-shadow:0 4px 16px rgba(32,45,22,.06);">
-    <span style="font:800 12px 'Manrope',sans-serif; color:#00b67a;">★ Trustpilot</span>
-    <span style="font-size:10px; color:#00b67a; letter-spacing:1px;">★★★★★</span>
-    <span style="font:600 11px 'Manrope',sans-serif; color:#1e2e15;">{{ t('tp.rating') }}</span>
+    <span style="font:800 12px 'Manrope',sans-serif; color:#3a7a0a;">{{ t('tp.rating') }}</span>
     <span style="font-size:9px; color:#2d4a0a;">{{ t('tp.strip_note') }}</span>
-    <a href="#trustpilot" style="font-size:9px; color:#8ca650; text-decoration:underline; margin-left:4px;">{{ t('about.read_reviews') }}</a>
+    <a href="/reviews" style="font-size:9px; color:#8ca650; text-decoration:underline; margin-left:4px;">{{ t('about.read_reviews') }}</a>
   </div>
 </div>
 <div class="ribbon"><span><b>◎</b> {{ t('about.ribbon1') }}</span><span><b>⌁</b> {{ t('about.ribbon2') }}</span><span><b>↗</b> {{ t('about.ribbon3') }}</span><span><b>◫</b> {{ t('about.ribbon4') }}</span></div><section id="how-it-works"><div class="section-head"><div><div class="eyebrow">{{ t('about.how_k') }}</div><h2>{{ t('about.how_h1') }}<br>{{ t('about.how_h2') }}</h2></div><p>{{ t('about.how_p') }}</p></div><div class="features premium-stagger"><article class="card premium-reveal" style="position:relative; overflow:hidden;"><div class="hero-illustration" style="position:absolute; right:12px; top:12px; width:60px; height:60px; opacity:.07;"><svg viewBox="0 0 100 100" fill="none" stroke="#8ca650" stroke-width="1.5"><circle cx="50" cy="50" r="32"/><path d="M50 18v64M18 50h64"/><circle cx="50" cy="50" r="10" fill="#d5f268" stroke="none" opacity=".5"/></svg></div><span class="number">01</span><h3>{{ t('about.f1h') }}</h3><p>{{ t('about.f1p') }}</p><small>{{ t('about.f1s') }}</small></article><article class="card premium-reveal" style="position:relative; overflow:hidden;"><div class="hero-illustration" style="position:absolute; right:12px; top:12px; width:60px; height:60px; opacity:.07;"><svg viewBox="0 0 100 100" fill="none" stroke="#8ca650" stroke-width="1.5"><rect x="22" y="28" width="56" height="40" rx="6"/><circle cx="50" cy="48" r="12"/><path d="M36 68l12-12 10 10 14-14"/></svg></div><span class="number">02</span><h3>{{ t('about.f2h') }}</h3><p>{{ t('about.f2p') }}</p><small>{{ t('about.f2s') }}</small></article><article class="card premium-reveal" style="position:relative; overflow:hidden;"><div class="hero-illustration" style="position:absolute; right:12px; top:12px; width:60px; height:60px; opacity:.07;"><svg viewBox="0 0 100 100" fill="none" stroke="#8ca650" stroke-width="1.5"><path d="M22 30h56v40H22z"/><path d="M22 30l28 22 28-22"/><circle cx="78" cy="22" r="6" fill="#d5f268" stroke="none"/></svg></div><span class="number">03</span><h3>{{ t('about.f3h') }}</h3><p>{{ t('about.f3p') }}</p><small>{{ t('about.f3s') }}</small></article></div></section><section class="honest premium-reveal" id="our-approach"><div><div class="eyebrow">{{ t('about.ev_k') }}</div><h2>{{ t('about.ev_h1') }}<br>{{ t('about.ev_h2') }}</h2></div><div><p>{{ t('about.ev_p1') }}</p><p>{{ t('about.ev_p2') }}</p></div></section>
@@ -297,7 +295,7 @@ small, .hero-note, .art-caption, .ribbon{ color:#2d4a0a !important; font-weight:
 
 
 <section class="sample-section premium-reveal" id="website-samples"><div class="section-head"><div><div class="eyebrow">{{ t('about.samp_k') }}</div><h2>{{ t('about.samp_h') }}<br>{{ t('about.samp_h2') }}</h2></div><p>{{ t('about.samp_p') }}</p></div>{% include 'sample-cards.html' %}</section>{% include 'enquiry-form.html' %}
-<!-- Trustpilot Reviews — world-class social proof -->
+<!-- Reviews — only real client words -->
 <section id="trustpilot" class="trustpilot-section premium-reveal">
   <div class="trustpilot-head">
     <div>
@@ -306,10 +304,10 @@ small, .hero-note, .art-caption, .ribbon{ color:#2d4a0a !important; font-weight:
       <p style="font-size:11px; color:#2d4a0a; max-width:420px; margin:0;">{{ t('tp.sub') }}</p>
     </div>
     <div class="trustpilot-badge">
-      <div class="tp-logo">★ <span>Trustpilot</span></div>
+      <div class="tp-logo"><span>{{ t('nav.reviews') }}</span></div>
       <div>
-        <div class="tp-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
         <div style="font-size:9px; color:#1e2e15; margin-top:4px;"><strong style="color:#1e2e15; font-size:11px;">{{ t('tp.rating') }}</strong> {{ t('tp.count') }}</div>
+        <a href="/reviews" style="font-size:9px; color:#8ca650;">{{ t('about.read_reviews') }}</a>
       </div>
     </div>
   </div>
@@ -339,8 +337,7 @@ small, .hero-note, .art-caption, .ribbon{ color:#2d4a0a !important; font-weight:
       <p>{{ t('about.rev_p') }}</p>
     </div>
     <div style="display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #e2e7d6; padding:12px 16px; border-radius:12px; box-shadow:0 4px 16px rgba(32,45,22,.06);">
-      <span style="color:#00b67a; font-size:14px;">★★★★★</span>
-      <span style="font:600 12px 'Manrope',sans-serif; color:#1e2e15;">4.8/5</span>
+      <span style="font:600 12px 'Manrope',sans-serif; color:#1e2e15;">{{ t('tp.rating') }}</span>
       <span style="font-size:9px; color:#1e2e15;">{{ t('about.rev_avg') }}</span>
     </div>
   </div>

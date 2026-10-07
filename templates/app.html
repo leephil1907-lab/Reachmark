@@ -18,18 +18,30 @@
 <link rel="stylesheet" href="/static/header.css">
 <link rel="stylesheet" href="/static/xdesign.css">
 <style>
-  .app-hero{padding:72px 0 28px;max-width:40rem}
+  .app-hero{padding:72px 0 28px;max-width:42rem}
   .app-hero h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(36px,5vw,56px);line-height:1.1;letter-spacing:-.03em;margin:8px 0 16px}
-  .app-hero p{font-size:17px;line-height:1.7;color:#3c4638;max-width:38ch}
-  .app-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;padding:8px 0 72px}
+  .app-hero p{font-size:17px;line-height:1.7;color:#3c4638;max-width:42ch}
+  .app-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;padding:8px 0 48px}
   .app-card{background:#fff;border:1px solid #e4e8dc;border-radius:20px;padding:24px 22px}
   .app-card h2{font-size:20px;margin:0 0 8px}
   .app-card p{margin:0 0 16px;color:#4e574c;font-size:15px;line-height:1.65}
   .app-card ol{margin:0 0 8px;padding-left:1.2em;color:#3c4638;font-size:14px;line-height:1.7}
   .app-note{font-size:13px;color:#5c6658;max-width:62ch;padding-bottom:48px}
   .app-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
-  #install-how{display:none;margin-top:12px;padding:12px 14px;background:#f7f9f1;border-radius:12px;font-size:14px;line-height:1.6}
-  html[data-show-ios] #install-how{display:block}
+  .app-status{margin-top:14px;font-size:14px;line-height:1.6;color:#3a7a0a;max-width:52ch}
+  #install-how{margin-top:18px;padding:16px 16px 8px;background:#f7f9f1;border:1px solid #e4e8dc;border-radius:16px}
+  .how-panel{display:none}
+  html[data-platform="ios"] .how-ios,
+  html[data-platform="android"] .how-android,
+  html[data-platform="desktop"] .how-desktop,
+  html[data-platform="other"] .how-other,
+  html[data-platform="installed"] .how-installed{display:block}
+  html[data-show-how] .how-fallback{display:block}
+  html[data-installed] #install-app-btn,
+  html[data-installed] .app-browser-only{display:none}
+  .how-panel h3{margin:0 0 8px;font-size:16px}
+  .how-panel ol{margin:0 0 12px;padding-left:1.2em;font-size:14px;line-height:1.7;color:#3c4638}
+  .share-ico{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:#20251f;color:#d5f268;vertical-align:middle;margin:0 4px}
   @media(display-mode:standalone){
     .app-browser-only{display:none}
   }
@@ -42,11 +54,50 @@
     <p class="oe-kicker" style="font:650 12px/1.4 Manrope,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#3a7a0a">{{ t('app.kicker') }}</p>
     <h1>{{ t('app.h1') }}</h1>
     <p>{{ t('app.lede') }}</p>
+    <p class="app-note" style="padding:0;margin:0 0 8px;color:#3a7a0a;font-weight:650">{{ t('app.no_store') }}</p>
     <div class="app-actions">
-      <a class="x-btn dark" href="/workspace">{{ t('app.open') }}</a>
+      {% if client_logged_in or owner_logged_in %}
+      <a class="x-btn dark" href="/workspace">{{ t('home.open_workspace') }}</a>
+      {% else %}
+      <a class="x-btn dark" href="/">{{ t('app.open') }}</a>
+      {% endif %}
       <button class="x-btn lime" type="button" data-install-app id="install-app-btn">{{ t('app.install') }}</button>
     </div>
-    <div id="install-how">{{ t('app.how') }}</div>
+    <p class="app-status" id="install-status" role="status">{{ t('app.how') }}</p>
+    <div id="install-how">
+      <div class="how-panel how-ios">
+        <h3>{{ t('app.ios_h') }}</h3>
+        <ol>
+          <li>{{ t('app.c3p') }}</li>
+          <li>{{ t('app.c2l3') }}</li>
+          <li>{{ t('app.c3b') }}</li>
+        </ol>
+      </div>
+      <div class="how-panel how-android">
+        <h3>{{ t('app.android_h') }}</h3>
+        <ol>
+          <li>{{ t('app.c2l2') }}</li>
+          <li>{{ t('app.c2l1') }}</li>
+          <li>{{ t('app.note') }}</li>
+        </ol>
+      </div>
+      <div class="how-panel how-desktop">
+        <h3>{{ t('app.c2h') }}</h3>
+        <ol>
+          <li>{{ t('app.c2l1') }}</li>
+          <li>{{ t('app.c2p') }}</li>
+        </ol>
+      </div>
+      <div class="how-panel how-other">
+        <h3>{{ t('app.c1h') }}</h3>
+        <p>{{ t('app.c1p') }}</p>
+        <p>{{ t('app.how') }}</p>
+      </div>
+      <div class="how-panel how-installed">
+        <h3>{{ t('app.installed') }}</h3>
+        <p><a class="text-link" href="/workspace">{{ t('home.open_workspace') }}</a></p>
+      </div>
+    </div>
   </section>
   <section class="app-grid">
     <article class="app-card">
@@ -64,13 +115,12 @@
       </ol>
     </article>
     <article class="app-card">
-      <h2>{{ t('app.c3h') }}</h2>
+      <h2>{{ t('app.ios_h') }}</h2>
       <p>{{ t('app.c3p') }}</p>
-      <p class="app-note" style="padding:0;font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#f7f9f1;border-radius:10px;padding:10px 12px">python -m web.desktop</p>
       <p>{{ t('app.c3b') }}</p>
     </article>
   </section>
-  <p class="app-note">{{ t('app.note') }}</p>
+  <p class="app-note">{{ t('app.selfhost') }}</p>
 </main>
 <script src="/static/i18n.js"></script>
 <script src="/static/theme.js"></script>

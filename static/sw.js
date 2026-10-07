@@ -24,7 +24,7 @@
    ================================================================================ */
 'use strict';
 
-var CACHE = 'reachmark-v1';
+var CACHE = 'reachmark-v2';
 var OFFLINE_URL = '/offline';
 var PRECACHE = [
   '/',

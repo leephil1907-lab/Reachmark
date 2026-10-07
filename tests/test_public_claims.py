@@ -65,6 +65,17 @@ def test_reviews_page_does_not_invent_ratings():
     assert "rev.empty" in page
 
 
+def test_marketing_pages_do_not_invent_ratings():
+    forbidden = ("4.8/5", "127 reviews", "Sarah M.", "David K.", "Trustpilot")
+    for name in ("about.html", "enquire.html", "signup.html", "login.html", "app.html"):
+        page = (ROOT / "templates" / name).read_text(encoding="utf-8")
+        for phrase in forbidden:
+            assert phrase not in page, f"{name} still contains {phrase!r}"
+    en = (ROOT / "static" / "locales" / "en.json").read_text(encoding="utf-8")
+    for phrase in ("4.8/5", "127 reviews", "Sarah M.", "David K."):
+        assert phrase not in en, f"en.json still contains {phrase!r}"
+
+
 def test_sample_and_sending_pages_exist():
     assert (ROOT / "templates" / "sending.html").exists()
     opp = (ROOT / "web" / "opportunity.py").read_text(encoding="utf-8")

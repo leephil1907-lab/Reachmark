@@ -21,8 +21,8 @@ Python · Flask · React · SQLite · Leaflet · Playwright · Docker
 Reachmark is one product:
 
 - **Browser** — open the site and use `/workspace`.
-- **Installed app** — visit `/app` and install (Chrome/Edge/Android, or Add to Home Screen on iPhone). Same workspace, own window.
-- **This computer** — `python -m web.desktop` starts the local server and opens the workspace.
+- **Installed app** — visit `/app` and install (Chrome/Edge/Android, or Add to Home Screen on iPhone). Same workspace, own window. There is no App Store or Play Store listing — the site *is* the app.
+- **This computer** — `python -m web.desktop` starts the local server and opens the workspace. That is not a phone download.
 
 ## Preview on GitHub
 

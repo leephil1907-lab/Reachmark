@@ -1,6 +1,12 @@
 #!/bin/sh
 # Railway / Docker start — print a clear reason if production env is still a template.
 set -e
+if [ -z "$RELEASE_SHA" ] || [ "$RELEASE_SHA" = "local" ]; then
+  if [ -n "$RAILWAY_GIT_COMMIT_SHA" ]; then
+    RELEASE_SHA="$RAILWAY_GIT_COMMIT_SHA"
+  fi
+fi
+export RELEASE_SHA
 DBPATH="${DATABASE_PATH:-/data/reachmark.sqlite3}"
 mkdir -p "$(dirname "$DBPATH")" /backups 2>/dev/null || true
 python - <<'PY'

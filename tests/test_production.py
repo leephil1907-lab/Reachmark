@@ -93,14 +93,20 @@ class PWAAndManifestTests(unittest.TestCase):
         html = page.get_data(as_text=True)
         self.assertIn('Open in browser', html)
         self.assertIn('Install Reachmark', html)
-        self.assertIn('python -m web.desktop', html)
         self.assertIn('data-install-app', html)
+        self.assertIn('There is no App Store or Play Store app to download', html)
+        self.assertIn('Add to Home Screen', html)
+        self.assertIn('python -m web.desktop', html)
+        self.assertNotIn('That is the downloadable application', html)
         sw = self.client.get('/sw.js')
         self.assertEqual(sw.status_code, 200)
         self.assertEqual(sw.headers.get('Service-Worker-Allowed'), '/')
         home = self.client.get('/').get_data(as_text=True)
         self.assertIn('/app', home)
         self.assertIn('pwa.js', home)
+        pwa = (Path(__file__).parent.parent / 'static' / 'pwa.js').read_text(encoding='utf-8')
+        self.assertIn('hasInstallButton', pwa)
+        self.assertIn("if (!hasInstallButton) return", pwa)
 
     def test_app_identity_is_unchanged(self):
         """The application name, description and icons belong to the owner — the crew never edits them."""
@@ -109,7 +115,7 @@ class PWAAndManifestTests(unittest.TestCase):
         self.assertEqual(manifest['short_name'], 'Reachmark')
         self.assertIn('Discover businesses worldwide', manifest['description'])
         home = self.client.get('/').get_data(as_text=True)
-        self.assertIn('Reachmark \u2014 Find Potential. Make Your Mark.', home)
+        self.assertIn('Reachmark: Find Businesses Losing Customers Online', home)
 
 
 class ProductionTests(unittest.TestCase):
@@ -237,7 +243,7 @@ class PublicPathsWithAuthConfiguredTests(unittest.TestCase):
     tearDown=test_app.ProspectTests.tearDown
     def test_public_surface_needs_no_login(self):
         with patch.dict(os.environ,{'DASHBOARD_PASSWORD':'live-box-password'}):
-            for path in ('/','/about','/offline','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/api/frontdesk/status','/robots.txt','/sitemap.xml'):
+            for path in ('/','/about','/offline','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/api/frontdesk/status','/robots.txt','/sitemap.xml','/app','/api/deploy-check'):
                 self.assertEqual(self.client.get(path).status_code,200,path)
             self.assertEqual(self.client.get('/workspace').status_code,302)
             self.assertEqual(self.client.get('/api/state').status_code,401)
