@@ -4,7 +4,7 @@ from web.i18n import t as _t, locale_now
 import requests
 
 # Commercial/high-volume deployments should configure a contracted or self-hosted instance.
-ENDPOINTS = [x.strip() for x in os.getenv('OVERPASS_URLS', 'https://overpass.private.coffee/api/interpreter,https://maps.mail.ru/osm/tools/overpass/api/interpreter').split(',') if x.strip()][:2]
+ENDPOINTS = [x.strip() for x in os.getenv('OVERPASS_URLS', 'https://overpass-api.de/api/interpreter,https://overpass.private.coffee/api/interpreter,https://maps.mail.ru/osm/tools/overpass/api/interpreter').split(',') if x.strip()][:3]
 _lock = threading.Lock()
 _cooldown = {}
 _last = 0.0

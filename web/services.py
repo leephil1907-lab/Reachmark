@@ -27,18 +27,95 @@ def geocode(location):
     if not places: raise ValueError(_t('er_067', locale_now()))
     return places[0]
 
+def _row_from_osm_tags(location, osm_type, osm_id, tags, lat, lon):
+    tags = tags or {}
+    name = (tags.get('name') or '').strip()
+    if not name:
+        return None
+    return {
+        'source_key': f'osm:{osm_type}:{osm_id}',
+        'name': name,
+        'city': location,
+        'address': ', '.join(filter(None, [
+            ' '.join(filter(None, [tags.get('addr:housenumber'), tags.get('addr:street')])),
+            tags.get('addr:city'), tags.get('addr:state'), tags.get('addr:postcode'), tags.get('addr:country'),
+        ])),
+        'phone': tags.get('phone') or tags.get('contact:phone', ''),
+        'email': tags.get('email') or tags.get('contact:email', ''),
+        'website': tags.get('website') or tags.get('contact:website', ''),
+        'source': 'OpenStreetMap',
+        'source_url': f'https://www.openstreetmap.org/{osm_type}/{osm_id}',
+        'latitude': lat,
+        'longitude': lon,
+        'opening_hours': tags.get('opening_hours', ''),
+        'social_url': tags.get('contact:facebook') or tags.get('contact:instagram', ''),
+        'source_tags': tags,
+    }
+
+
+def _discover_nominatim(location, tag, limit=25):
+    """Same OpenStreetMap data via Nominatim when Overpass mirrors are down."""
+    _key, value = tag
+    q = f'{str(value).replace("_", " ")} in {location}'
+    global last_geo
+    with geo_lock:
+        delay = 1.1 - (time.monotonic() - last_geo)
+        if delay > 0:
+            time.sleep(delay)
+        last_geo = time.monotonic()
+        r = requests.get(
+            'https://nominatim.openstreetmap.org/search',
+            params={'q': q, 'format': 'json', 'limit': int(limit), 'addressdetails': 1, 'extratags': 1},
+            headers=HEADERS, timeout=20,
+        )
+        r.raise_for_status()
+        places = r.json()
+    if not isinstance(places, list) or not places:
+        raise ValueError(_t('er_096', locale_now()))
+    rows = []
+    for place in places:
+        if place.get('class') in ('place', 'boundary', 'highway'):
+            continue
+        osm_type = {'node': 'node', 'way': 'way', 'relation': 'relation'}.get(place.get('osm_type'))
+        osm_id = place.get('osm_id')
+        if not osm_type or not osm_id:
+            continue
+        extra = dict(place.get('extratags') or {})
+        addr = place.get('address') or {}
+        name = (place.get('name') or extra.get('name') or (place.get('display_name') or '').split(',')[0]).strip()
+        extra.setdefault('name', name)
+        if addr.get('city') and 'addr:city' not in extra:
+            extra['addr:city'] = addr.get('city') or addr.get('town') or addr.get('suburb') or ''
+        if addr.get('road') and 'addr:street' not in extra:
+            extra['addr:street'] = addr.get('road')
+        row = _row_from_osm_tags(location, osm_type, osm_id, extra, place.get('lat'), place.get('lon'))
+        if row:
+            rows.append(row)
+    if not rows:
+        raise ValueError(_t('er_096', locale_now()))
+    return rows, location
+
+
 def discover_location(location, tag, limit=80):
-    place=geocode(location)
-    lat,lon=float(place['lat']),float(place['lon']); key,value=tag
-    q=f'[out:json][timeout:40];nwr(around:15000,{lat},{lon})["{key}"="{value}"]["name"];out center tags {int(limit)};'
+    place = geocode(location)
+    lat, lon = float(place['lat']), float(place['lon'])
+    key, value = tag
+    q = f'[out:json][timeout:40];nwr(around:15000,{lat},{lon})["{key}"="{value}"]["name"];out center tags {int(limit)};'
     from web.map_provider import query_overpass
-    payload=query_overpass(q,HEADERS)
-    if payload.get('remark'): raise ValueError(_t('er_115', locale_now()))
-    rows=[]
-    for item in payload.get('elements',[]):
-        t=item.get('tags',{}); center=item.get('center',item)
-        rows.append({'source_key':f"osm:{item['type']}:{item['id']}",'name':t['name'],'city':location,'address':', '.join(filter(None,[' '.join(filter(None,[t.get('addr:housenumber'),t.get('addr:street')])),t.get('addr:city'),t.get('addr:state'),t.get('addr:postcode'),t.get('addr:country')])),'phone':t.get('phone') or t.get('contact:phone',''),'email':t.get('email') or t.get('contact:email',''),'website':t.get('website') or t.get('contact:website',''),'source':'OpenStreetMap','source_url':f"https://www.openstreetmap.org/{item['type']}/{item['id']}",'latitude':center.get('lat'),'longitude':center.get('lon'),'opening_hours':t.get('opening_hours',''),'social_url':t.get('contact:facebook') or t.get('contact:instagram',''),'source_tags':t})
-    return rows, place.get('display_name',location)
+    try:
+        payload = query_overpass(q, HEADERS)
+        if payload.get('remark'):
+            raise ValueError(_t('er_115', locale_now()))
+        rows = []
+        for item in payload.get('elements', []):
+            tags = item.get('tags', {})
+            center = item.get('center', item)
+            row = _row_from_osm_tags(location, item['type'], item['id'], tags, center.get('lat'), center.get('lon'))
+            if row:
+                rows.append(row)
+        return rows, place.get('display_name', location)
+    except (ValueError, requests.RequestException):
+        return _discover_nominatim(location, tag, min(int(limit), 25))
 
 def audit_website(url):
     if classify(url)!='HAS_WEBSITE': return {'status':classify(url),'reason':'Source listing has no standalone website URL. Verify independently.','http_code':None}

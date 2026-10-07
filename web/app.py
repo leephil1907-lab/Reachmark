@@ -502,7 +502,9 @@ def discover():
         result,_=search_save(city,category,owner=client_owner())
         log('discovery',f"{city} · {category}: {result['added']} new candidates from {result['scanned']} listings")
         return jsonify(result)
-    except (requests.RequestException,ValueError,KeyError): return jsonify(error=_t('er_096', locale_now())),502
+    except (requests.RequestException,ValueError,KeyError) as e:
+        detail=str(e).strip()
+        return jsonify(error=(detail[:400] if len(detail)>12 else _t('er_096', locale_now()))),502
 
 def run_job(jid,locations,category,check):
     added=checked=failures=0

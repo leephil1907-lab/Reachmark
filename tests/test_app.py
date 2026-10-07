@@ -101,6 +101,27 @@ class ProspectTests(unittest.TestCase):
         osm=MagicMock();osm.json.return_value={'elements':[{'type':'node','id':123,'tags':{'name':'Example','shop':'bakery'}}]}
         with patch('web.app.requests.get',return_value=geo),patch('web.map_provider.query_overpass',return_value=osm.json.return_value):
             r=self.client.post('/api/discover',json={'city':'Winnipeg','category':'Bakery'});self.assertEqual(r.json['added'],1)
+    def test_discovery_falls_back_to_nominatim_when_overpass_is_down(self):
+        from web.services import geocode
+        geocode.cache_clear()
+        module.last_discovery=0
+        geo=MagicMock();geo.json.return_value=[{'lat':'6.60','lon':'3.35','display_name':'Ikeja'}]
+        geo.raise_for_status=MagicMock()
+        nom=MagicMock();nom.raise_for_status=MagicMock()
+        nom.json.return_value=[{
+            'osm_type':'node','osm_id':99,'lat':'6.60','lon':'3.35','class':'shop',
+            'display_name':'Palm Bakery, Ikeja, Lagos',
+            'extratags':{'name':'Palm Bakery'},
+            'address':{'road':'Allen Avenue','city':'Ikeja'},
+        }]
+        def fake_get(url,*args,**kwargs):
+            if 'nominatim' in str(url) and kwargs.get('params',{}).get('limit')==1:
+                return geo
+            return nom
+        with patch('web.services.requests.get',side_effect=fake_get), patch('web.map_provider.query_overpass',side_effect=ValueError('Map data providers are temporarily unavailable.')):
+            r=self.client.post('/api/discover',json={'city':'Ikeja, Nigeria','category':'Bakery'})
+            self.assertEqual(r.status_code,200,r.json)
+            self.assertEqual(r.json['added'],1)
     def test_global_job_validation(self):
         self.assertEqual(self.client.post('/api/jobs',json={'locations':[],'category':'Bakery'}).status_code,400)
         self.assertEqual(self.client.post('/api/jobs',json={'locations':['Paris, France']*9,'category':'Bakery'}).status_code,400)
