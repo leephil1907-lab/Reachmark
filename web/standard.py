@@ -183,7 +183,7 @@ def register_standard(app, db, log, settings_fn=None):
                     if mode=='starttls':
                         smtp.starttls(context=ssl.create_default_context())
                     if os.getenv('SMTP_USER'):
-                        smtp.login(os.environ['SMTP_USER'], os.getenv('SMTP_PASSWORD',''))
+                        smtp.login(os.environ['SMTP_USER'], os.getenv('SMTP_PASSWORD','').replace(' ',''))
                     smtp.send_message(msg)
                 c.execute("UPDATE mail_outbox SET state='resent' WHERE id=?", (oid,))
                 log('mail', f'Outbox resent: {oid[:6]} → {r["to_email"]}')

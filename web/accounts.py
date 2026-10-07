@@ -89,7 +89,7 @@ def send_branded(to_email, subject, text_body, html_title=None, cta_url=None, ct
                 if mode=='starttls':
                     smtp.starttls(context=ssl.create_default_context())
                 if os.getenv('SMTP_USER'):
-                    smtp.login(os.environ['SMTP_USER'], os.getenv('SMTP_PASSWORD',''))
+                    smtp.login(os.environ['SMTP_USER'], os.getenv('SMTP_PASSWORD','').replace(' ',''))
                 smtp.send_message(msg)
             # Record as sent
             if db is not None:

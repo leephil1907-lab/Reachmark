@@ -7,11 +7,19 @@ from web.i18n import t as _t, locale_now
 from web.billing import check_client_path, tier_status
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+def _clean_secret(value):
+    value=(value or '').strip()
+    if len(value)>=2 and value[0]==value[-1] and value[0] in ('"', "'"):
+        value=value[1:-1]
+    if value.startswith('<') or value.startswith('&lt;'):
+        return ''
+    return value
+
 def install_security(app, db):
     production=os.getenv('APP_ENV')=='production'
-    key=os.getenv('SECRET_KEY',''); password_hash=os.getenv('OWNER_PASSWORD_HASH','')
+    key=_clean_secret(os.getenv('SECRET_KEY','')); password_hash=_clean_secret(os.getenv('OWNER_PASSWORD_HASH',''))
     if production:
-        if len(key)<32 or not password_hash.startswith(('scrypt:','pbkdf2:')): raise RuntimeError('Production requires SECRET_KEY (32+ characters) and OWNER_PASSWORD_HASH.')
+        if len(key)<32 or not password_hash.startswith(('scrypt:','pbkdf2:')): raise RuntimeError('Production requires SECRET_KEY (32+ characters) and OWNER_PASSWORD_HASH. Do not leave the example placeholders.')
         if not os.getenv('PUBLIC_BASE_URL','').startswith('https://'): raise RuntimeError('Production requires an HTTPS PUBLIC_BASE_URL.')
         if not os.path.isabs(os.getenv('DATABASE_PATH','')): raise RuntimeError('Production requires an absolute persistent DATABASE_PATH.')
         app.wsgi_app=ProxyFix(app.wsgi_app,x_for=1,x_proto=1,x_host=0)
@@ -78,9 +86,9 @@ def install_security(app, db):
                         return
             except Exception:
                 pass
-        configured=bool(os.getenv('OWNER_PASSWORD_HASH') or os.getenv('DASHBOARD_PASSWORD'))
+        configured=bool(_clean_secret(os.getenv('OWNER_PASSWORD_HASH')) or os.getenv('DASHBOARD_PASSWORD'))
         # Credential rotation invalidates existing sessions as well as future logins.
-        revision=hashlib.sha256((os.getenv('OWNER_PASSWORD_HASH') or os.getenv('DASHBOARD_PASSWORD','')).encode()).hexdigest()
+        revision=hashlib.sha256((_clean_secret(os.getenv('OWNER_PASSWORD_HASH')) or os.getenv('DASHBOARD_PASSWORD','')).encode()).hexdigest()
         authenticated=session.get('owner') and session.get('revision')==revision
         if configured and not authenticated:
             # If a client is logged in, don't force owner redirect for pages — they have a valid client session
@@ -112,7 +120,7 @@ def install_security(app, db):
                 if row and row['failures']>=5 and row['blocked_until']>time.time():return render_template('login.html',message=_t('au.e_lock', locale_now())),429
                 failures=(row['failures'] if row and row['blocked_until']>time.time() else 0)+1
                 c.execute('INSERT OR REPLACE INTO login_attempts VALUES(?,?,?)',(client,failures,time.time()+900))
-            value=request.form.get('password','')[:1024]; hashed=os.getenv('OWNER_PASSWORD_HASH'); legacy=os.getenv('DASHBOARD_PASSWORD','')
+            value=request.form.get('password','')[:1024]; hashed=_clean_secret(os.getenv('OWNER_PASSWORD_HASH')); legacy=os.getenv('DASHBOARD_PASSWORD','')
             valid=check_password_hash(hashed,value) if hashed else bool(legacy) and hmac.compare_digest(value,legacy)
             if valid:
                 with db() as c:c.execute('DELETE FROM login_attempts WHERE client=?',(client,))
@@ -129,14 +137,15 @@ def install_security(app, db):
         if production:response.headers['Strict-Transport-Security']='max-age=31536000'
         if request.path in ('/login','/logout'):response.headers['Cache-Control']='no-store';response.headers['X-Robots-Tag']='noindex, nofollow'
         return response
-    if os.getenv('SENTRY_DSN'):
+    sentry_dsn=_clean_secret(os.getenv('SENTRY_DSN',''))
+    if sentry_dsn.startswith(('http://','https://')):
         import sentry_sdk
         def scrub(event,hint):
             event.pop('request',None);event.pop('user',None);event.pop('breadcrumbs',None);event.pop('extra',None)
             # Retain exception types/frames, not values which might contain contacts or secrets.
             for value in event.get('exception',{}).get('values',[]):value['value']='Exception details redacted; inspect protected server logs.'
             return event
-        sentry_sdk.init(dsn=os.environ['SENTRY_DSN'],send_default_pii=False,include_local_variables=False,max_request_body_size='never',traces_sample_rate=0,before_send=scrub,release=os.getenv('RELEASE_SHA','local'))
+        sentry_sdk.init(dsn=sentry_dsn,send_default_pii=False,include_local_variables=False,max_request_body_size='never',traces_sample_rate=0,before_send=scrub,release=os.getenv('RELEASE_SHA','local'))
     @app.errorhandler(500)
     def server_error(error):
         reference=secrets.token_hex(6);app.logger.error('Request failed; reference=%s',reference)

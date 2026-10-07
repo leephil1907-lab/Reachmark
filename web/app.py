@@ -40,9 +40,12 @@ from contextlib import contextmanager
 @contextmanager
 def db():
     parent = os.path.dirname(os.path.abspath(DB))
-    if not os.path.isdir(parent):
-        raise RuntimeError('Database directory does not exist: %s. Create it or fix DATABASE_PATH '
-                           '(on Railway: attach a volume mounted at /data).' % parent)
+    if parent and not os.path.isdir(parent):
+        try:
+            os.makedirs(parent, exist_ok=True)
+        except OSError:
+            raise RuntimeError('Database directory does not exist: %s. Create it or fix DATABASE_PATH '
+                               '(on Railway: attach a volume mounted at /data).' % parent)
     c = sqlite3.connect(DB, timeout=20); c.row_factory=sqlite3.Row
     c.execute('PRAGMA busy_timeout=20000')
     try:
@@ -663,7 +666,7 @@ def send(lid):
         cls=smtplib.SMTP_SSL if mode=='ssl' else smtplib.SMTP
         with cls(host,port,timeout=25) as smtp:
             if mode=='starttls': smtp.starttls(context=ssl.create_default_context())
-            if os.getenv('SMTP_USER'): smtp.login(os.environ['SMTP_USER'],os.getenv('SMTP_PASSWORD',''))
+            if os.getenv('SMTP_USER'): smtp.login(os.environ['SMTP_USER'], os.getenv('SMTP_PASSWORD','').replace(' ',''))
             smtp.send_message(msg)
         with db() as c:
             c.execute("UPDATE sends SET state='sent' WHERE id=?",(sid,)); c.execute("UPDATE leads SET stage='Contacted',updated=? WHERE id=?",(now(),lid))

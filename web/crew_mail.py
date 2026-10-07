@@ -140,7 +140,7 @@ def send_email(db, now, log, lead, subject, body, settings, approval_id='', run_
             if mode == 'starttls':
                 server.starttls(context=ssl.create_default_context())
             if os.getenv('SMTP_USER'):
-                server.login(os.environ['SMTP_USER'], os.getenv('SMTP_PASSWORD', ''))
+                server.login(os.environ['SMTP_USER'], os.getenv('SMTP_PASSWORD', '').replace(' ', ''))
             server.send_message(message)
         with db() as c:
             c.execute("UPDATE crew_dispatch SET state='sent',detail=?,updated=? WHERE id=?", ('Accepted by the mail server.', now(), dispatch_id))
