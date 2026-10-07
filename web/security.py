@@ -19,9 +19,17 @@ def install_security(app, db):
     production=os.getenv('APP_ENV')=='production'
     key=_clean_secret(os.getenv('SECRET_KEY','')); password_hash=_clean_secret(os.getenv('OWNER_PASSWORD_HASH',''))
     if production:
-        if len(key)<32 or not password_hash.startswith(('scrypt:','pbkdf2:')): raise RuntimeError('Production requires SECRET_KEY (32+ characters) and OWNER_PASSWORD_HASH. Do not leave the example placeholders.')
-        if not os.getenv('PUBLIC_BASE_URL','').startswith('https://'): raise RuntimeError('Production requires an HTTPS PUBLIC_BASE_URL.')
-        if not os.path.isabs(os.getenv('DATABASE_PATH','')): raise RuntimeError('Production requires an absolute persistent DATABASE_PATH.')
+        missing=[]
+        if len(key)<32:
+            missing.append('SECRET_KEY must be at least 32 characters (got %d). Do not use the short example key, and avoid $ in the value.' % len(key))
+        if not password_hash.startswith(('scrypt:','pbkdf2:')):
+            missing.append('OWNER_PASSWORD_HASH must start with scrypt: or pbkdf2: — not the <placeholder> from the example file. Paste the hash with no quotes.')
+        if not os.getenv('PUBLIC_BASE_URL','').startswith('https://'):
+            missing.append('PUBLIC_BASE_URL must be an https:// URL.')
+        if not os.path.isabs(os.getenv('DATABASE_PATH','')):
+            missing.append('DATABASE_PATH must be absolute (use /data/reachmark.sqlite3) and a volume should be mounted at /data.')
+        if missing:
+            raise RuntimeError('Production requires a real boot config. ' + ' '.join(missing))
         app.wsgi_app=ProxyFix(app.wsgi_app,x_for=1,x_proto=1,x_host=0)
     app.secret_key=key or secrets.token_hex(32)
     # Lax: keep the session across top-level navigation from emails, Tawk.to and shared links
