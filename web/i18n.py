@@ -4,9 +4,8 @@ Single source of truth: ``static/locales/<code>.json`` (flat ``section.key`` str
 read by Python here and fetched by ``static/i18n.js`` in the browser. English is the
 fallback everywhere: a missing key renders the English string, never a raw key.
 
-Not translated, by standing rule: the PWA manifest (application title/description),
-icons, ``templates/about.html`` (byte-identical), page <title> tags and meta/OG
-descriptions. Owner notification e-mails stay English (the owner must be able to
+Not translated, by standing rule: the PWA manifest (application title/description)
+and icons. Owner notification e-mails stay English (the owner must be able to
 read them); client-facing e-mails use the recipient's stored locale.
 """
 import json

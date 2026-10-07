@@ -1,7 +1,6 @@
 """AdSense: the loader + account meta are served on marketing pages + workspace.
 
-The tags are injected at serve time, so templates — including about.html, which
-must stay byte-identical — are never touched.
+The tags are injected at serve time, so templates are never edited for ads.
 """
 import os
 import unittest

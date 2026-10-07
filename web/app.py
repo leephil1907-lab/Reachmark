@@ -178,8 +178,8 @@ ADSENSE_PREFIXES = ('/showcase/',)
 def adsense_tags(response):
     """Serve the AdSense loader + account meta on public marketing pages.
 
-    Injected at serve time so templates -- including about.html, which must stay
-    byte-identical -- are never touched. /workspace is included for the sidebar
+    Injected at serve time so templates are never edited for ads. /workspace is
+    included for the sidebar
     unit; sample detail pages match by prefix; APIs, review links and the ad
     recording stage stay excluded.
     """

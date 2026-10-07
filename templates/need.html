@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ locale }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>I need a website · Reachmark</title>
+<title>{{ t('need.title') }}</title>
 <meta name="robots" content="index,follow">
 <meta name="theme-color" content="#fbfbfb">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
@@ -11,24 +11,25 @@
 <link rel="stylesheet" href="/static/header.css">
 <link rel="stylesheet" href="/static/xdesign.css">
 <link rel="stylesheet" href="/static/opportunity.css">
+<script src="/static/i18n.js"></script>
 </head>
 <body class="x-site">
 {% include 'header-public.html' %}
 <main class="oe-sheet" style="padding-top:48px">
-  <p class="oe-kicker">Reachmark marketplace intake</p>
-  <h1>Tell us what you need. We write the spec.</h1>
-  <p class="oe-lede">This is not a quote. Reachmark turns your note into a project specification. A human still decides who builds it.</p>
+  <p class="oe-kicker">{{ t('need.kicker') }}</p>
+  <h1>{{ t('need.h1') }}</h1>
+  <p class="oe-lede">{{ t('need.lede') }}</p>
   <form id="need-form" class="card" style="padding:24px;margin-top:28px;display:grid;gap:14px;max-width:640px">
-    <label>Business name<input name="name" required maxlength="120"></label>
-    <label>Email<input name="email" type="email" maxlength="200"></label>
+    <label>{{ t('need.name') }}<input name="name" required maxlength="120"></label>
+    <label>{{ t('need.email') }}<input name="email" type="email" maxlength="200"></label>
     <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <label>City<input name="city" maxlength="120"></label>
-      <label>Category<input name="category" maxlength="80" placeholder="Bakery, clinic, law…"></label>
+      <label>{{ t('need.city') }}<input name="city" maxlength="120"></label>
+      <label>{{ t('need.cat') }}<input name="category" maxlength="80" placeholder="{{ t('need.cat_ph') }}"></label>
     </div>
-    <label>What do you need?
-      <textarea name="need" required minlength="20" maxlength="2000" rows="6" placeholder="A site people can use on a phone, with a way to book or enquire."></textarea>
+    <label>{{ t('need.what') }}
+      <textarea name="need" required minlength="20" maxlength="2000" rows="6" placeholder="{{ t('need.what_ph') }}"></textarea>
     </label>
-    <button class="x-btn dark" type="submit">Create the specification</button>
+    <button class="x-btn dark" type="submit">{{ t('need.submit') }}</button>
     <p class="oe-note" id="need-msg"></p>
   </form>
 </main>
@@ -38,11 +39,12 @@ document.getElementById('need-form').addEventListener('submit', async (e) => {
   const fd = new FormData(e.target);
   const body = Object.fromEntries(fd.entries());
   const msg = document.getElementById('need-msg');
-  msg.textContent = 'Saving…';
+  const T_ = window.T || function(k,f){return f;};
+  msg.textContent = T_('need.saving', {{ t('need.saving')|tojson }});
   try {
     const r = await fetch('/api/need', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
     const j = await r.json();
-    if (!r.ok) throw new Error(j.error || 'Could not save');
+    if (!r.ok) throw new Error(j.error || T_('need.err', {{ t('need.err')|tojson }}));
     location.href = j.url;
   } catch (err) {
     msg.textContent = err.message;

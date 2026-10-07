@@ -28,22 +28,22 @@
     <h1 data-split>{{ t('home.h1a') }} <em>{{ t('home.h1b') }}</em></h1>
     <form class="x-search" id="x-search-form" action="/showcase" method="get" role="search">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20l-3.2-3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <input id="x-q" name="q" type="search" autocomplete="off" placeholder="Search samples, cities, or categories…" aria-label="Search Reachmark">
+      <input id="x-q" name="q" type="search" autocomplete="off" placeholder="{{ t('home.search_ph') }}" aria-label="{{ t('home.search_aria') }}">
       <kbd id="x-kbd">⌘K</kbd>
     </form>
     <p class="x-lead">{{ t('home.sub') }}</p>
   </section>
 
   <div class="x-toolbar">
-    <div class="x-tabs" role="tablist" aria-label="Gallery filters">
+    <div class="x-tabs" role="tablist" aria-label="{{ t('home.tabs_aria') }}">
       <span class="x-tab-pill" aria-hidden="true"></span>
-      <button type="button" class="on" data-filter="all">All</button>
-      <button type="button" data-filter="sample">Samples</button>
-      <button type="button" data-filter="hospitality">Hospitality</button>
-      <button type="button" data-filter="professional">Professional</button>
-      <button type="button" data-filter="digital">Digital</button>
+      <button type="button" class="on" data-filter="all">{{ t('home.tab_all') }}</button>
+      <button type="button" data-filter="sample">{{ t('home.tab_samples') }}</button>
+      <button type="button" data-filter="hospitality">{{ t('home.tab_hosp') }}</button>
+      <button type="button" data-filter="professional">{{ t('home.tab_pro') }}</button>
+      <button type="button" data-filter="digital">{{ t('home.tab_digital') }}</button>
     </div>
-    <div class="x-count"><b id="x-shown">{{ samples|length if samples is defined else 10 }}</b> live concepts</div>
+    <div class="x-count"><b id="x-shown">{{ samples|length if samples is defined else 10 }}</b> {{ t('home.live_concepts') }}</div>
   </div>
 
   <section class="x-masonry" id="x-masonry" aria-label="{{ t('home.grid_aria') }}">
@@ -65,29 +65,29 @@
 
   <section class="x-pipe">
     <div>
-      <div class="kicker">The offer</div>
-      <h2>Find the leak. Show the proof. Build the fix.</h2>
-      <p>Reachmark finds businesses losing customers online, shows them exactly where the opportunity is, and helps turn that opportunity into a working solution. The technology stays underneath.</p>
+      <div class="kicker">{{ t('home.offer_k') }}</div>
+      <h2>{{ t('home.offer_h') }}</h2>
+      <p>{{ t('home.offer_p') }}</p>
     </div>
     <div class="x-steps">
-      <div class="x-step"><i>01</i><div><b>Discover</b><span>Find businesses from public sources. Saved records only.</span></div></div>
-      <div class="x-step"><i>02</i><div><b>Audit</b><span>Read the listed page. Viewport, contact path, forms, speed — measured, not guessed.</span></div></div>
-      <div class="x-step"><i>03</i><div><b>Name the leak</b><span>“No booking CTA on mobile” is a reason to talk. “Do you need a website?” is not.</span></div></div>
-      <div class="x-step"><i>04</i><div><b>Prove, then ask</b><span>A Digital Opportunity Report is the sales asset. Outreach uses that evidence. Humans still approve the send.</span></div></div>
+      <div class="x-step"><i>01</i><div><b>{{ t('home.d1h') }}</b><span>{{ t('home.d1p') }}</span></div></div>
+      <div class="x-step"><i>02</i><div><b>{{ t('home.d2h') }}</b><span>{{ t('home.d2p') }}</span></div></div>
+      <div class="x-step"><i>03</i><div><b>{{ t('home.d3h') }}</b><span>{{ t('home.d3p') }}</span></div></div>
+      <div class="x-step"><i>04</i><div><b>{{ t('home.d4h') }}</b><span>{{ t('home.d4p') }}</span></div></div>
     </div>
   </section>
 
   <section class="x-pipe" style="background:#20251f">
     <div>
-      <div class="kicker">Harder to replace</div>
-      <h2>Not another AI lead tool.</h2>
-      <p>Reachmark ranks who to work first from stored evidence, compares audited peers, sends a first-section concept before a pitch, and remembers “not now” until the follow-up date. Autopilot prepares. Humans still send.</p>
+      <div class="kicker">{{ t('home.moat_k') }}</div>
+      <h2>{{ t('home.moat_h') }}</h2>
+      <p>{{ t('home.moat_p') }}</p>
     </div>
     <div class="x-steps">
-      <div class="x-step"><i>Q</i><div><b>Work-first queue</b><span>Score from listing, audit, stage, fit and sourced signals. Unknown stays zero.</span></div></div>
-      <div class="x-step"><i>P</i><div><b>Prove it, then ask</b><span>Diagnosis report, first-section concept, then a draft proposal with empty prices until you set them.</span></div></div>
-      <div class="x-step"><i>M</i><div><b>Memory &amp; delivery</b><span>Every “not interested” gets a reason and a date. Delivered work stays in the system for the next observed offer.</span></div></div>
-      <div class="x-step"><i>N</i><div><b>Two-sided intake</b><span>Businesses can arrive at /need. Reachmark writes the spec. Matching is a queue, not a fake agency network.</span></div></div>
+      <div class="x-step"><i>Q</i><div><b>{{ t('home.q_h') }}</b><span>{{ t('home.q_p') }}</span></div></div>
+      <div class="x-step"><i>P</i><div><b>{{ t('home.p_h') }}</b><span>{{ t('home.p_p') }}</span></div></div>
+      <div class="x-step"><i>M</i><div><b>{{ t('home.m_h') }}</b><span>{{ t('home.m_p') }}</span></div></div>
+      <div class="x-step"><i>N</i><div><b>{{ t('home.n_h') }}</b><span>{{ t('home.n_p') }}</span></div></div>
     </div>
   </section>
 
@@ -97,9 +97,9 @@
       <p>{{ t('home.band_p') }}</p>
     </div>
     <div class="x-actions">
-      <a class="x-btn dark" href="/workspace">Open Reachmark</a>
+      <a class="x-btn dark" href="/workspace">{{ t('home.open_ws') }}</a>
       <a class="x-btn lime" href="/enquire">{{ t('home.cta_project') }}</a>
-      <a class="x-btn dark" href="/app">Get the app</a>
+      <a class="x-btn dark" href="/app">{{ t('nav.app') }}</a>
     </div>
   </section>
 </main>
@@ -108,19 +108,22 @@
   <div class="x-foot-in">
     <div>
       <img class="logo-on-light" src="/static/logo-primary.svg" alt="Reachmark"><img class="logo-on-dark" src="/static/logo-inverse.svg" alt="">
-      <p>Reachmark finds businesses losing customers online, shows them exactly where the opportunity is, and helps turn that opportunity into a working solution.</p>
+      <p>{{ t('home.foot_blurb') }}</p>
     </div>
     <div>
-      <h4>Explore</h4>
+      <h4>{{ t('home.foot_explore') }}</h4>
       <nav>
         <a href="/about">{{ t('nav.about') }}</a>
         <a href="/reviews">{{ t('nav.reviews') }}</a>
         <a href="/pricing">{{ t('nav.plans') }}</a>
         <a href="/enquire">{{ t('nav.enquire') }}</a>
+        <a href="/privacy">{{ t('foot.privacy') }}</a>
+        <a href="/terms">{{ t('foot.terms') }}</a>
+        <a href="/disclosure">{{ t('foot.disclosure') }}</a>
       </nav>
     </div>
     <div>
-      <h4>Workspace</h4>
+      <h4>{{ t('home.foot_ws') }}</h4>
       <nav>
         <a href="/workspace">{{ t('nav.workspace') }}</a>
         <a href="/signin">{{ t('nav.signin') }}</a>
@@ -128,19 +131,19 @@
       </nav>
     </div>
   </div>
-  <div class="x-foot-bottom">© {{ now_year if now_year is defined else '2026' }} Reachmark. Curated for clear, evidence-led operations.</div>
+  <div class="x-foot-bottom">{{ t('home.foot_copy', year='2026') }}</div>
 </footer>
 
 <div class="x-cmd" id="x-cmd" hidden>
-  <div class="x-cmd-box" role="dialog" aria-modal="true" aria-label="Search Reachmark">
-    <input id="x-cmd-input" type="search" placeholder="Search samples, pages, or actions…">
-    <a href="/showcase" data-cmd>Website samples <span>Gallery</span></a>
-    <a href="/reviews" data-cmd>Client reviews <span>Social proof</span></a>
-    <a href="/enquire" data-cmd>Start a project <span>Enquire</span></a>
-    <a href="/pricing" data-cmd>Plans & billing <span>Pricing</span></a>
-    <a href="/workspace" data-cmd>Open workspace <span>App</span></a>
-    <a href="/app" data-cmd>Get the app <span>Install</span></a>
-    <a href="/signin" data-cmd>Sign in <span>Account</span></a>
+  <div class="x-cmd-box" role="dialog" aria-modal="true" aria-label="{{ t('home.cmd_aria') }}">
+    <input id="x-cmd-input" type="search" placeholder="{{ t('home.cmd_ph') }}">
+    <a href="/showcase" data-cmd>{{ t('home.cmd_samples') }} <span>{{ t('home.cmd_gallery') }}</span></a>
+    <a href="/reviews" data-cmd>{{ t('home.cmd_reviews') }} <span>{{ t('home.cmd_social') }}</span></a>
+    <a href="/enquire" data-cmd>{{ t('home.cmd_project') }} <span>{{ t('home.cmd_enquire') }}</span></a>
+    <a href="/pricing" data-cmd>{{ t('home.cmd_plans') }} <span>{{ t('home.cmd_pricing') }}</span></a>
+    <a href="/workspace" data-cmd>{{ t('home.cmd_ws') }} <span>{{ t('home.cmd_app') }}</span></a>
+    <a href="/app" data-cmd>{{ t('nav.app') }} <span>{{ t('home.cmd_install') }}</span></a>
+    <a href="/signin" data-cmd>{{ t('nav.signin') }} <span>{{ t('home.cmd_account') }}</span></a>
   </div>
 </div>
 

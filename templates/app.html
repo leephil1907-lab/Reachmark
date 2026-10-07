@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ locale }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Get the Reachmark app</title>
-<meta name="description" content="Use Reachmark in the browser, or install it as an app on your phone or computer. Same workspace either way.">
+<title>{{ t('app.title') }}</title>
+<meta name="description" content="{{ t('app.meta') }}">
 <meta name="theme-color" content="#20251f">
 <meta name="application-name" content="Reachmark">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -39,42 +39,38 @@
 {% include 'header-public.html' %}
 <main class="x-wrap">
   <section class="app-hero">
-    <p class="oe-kicker" style="font:650 12px/1.4 Manrope,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#3a7a0a">Browser and app</p>
-    <h1>One Reachmark. Use it in the browser, or install it.</h1>
-    <p>The website is the product. Installing it puts the same workspace on your phone or computer home screen — no App Store, no second codebase.</p>
+    <p class="oe-kicker" style="font:650 12px/1.4 Manrope,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#3a7a0a">{{ t('app.kicker') }}</p>
+    <h1>{{ t('app.h1') }}</h1>
+    <p>{{ t('app.lede') }}</p>
     <div class="app-actions">
-      <a class="x-btn dark" href="/workspace">Open in browser</a>
-      <button class="x-btn lime" type="button" data-install-app id="install-app-btn">Install Reachmark</button>
+      <a class="x-btn dark" href="/workspace">{{ t('app.open') }}</a>
+      <button class="x-btn lime" type="button" data-install-app id="install-app-btn">{{ t('app.install') }}</button>
     </div>
-    <div id="install-how">
-      On iPhone or iPad: tap the Share button, then <strong>Add to Home Screen</strong>.
-      On Safari for Mac: File → Add to Dock.
-      On Chrome or Edge: click the install icon in the address bar, or the menu → Install Reachmark.
-    </div>
+    <div id="install-how">{{ t('app.how') }}</div>
   </section>
   <section class="app-grid">
     <article class="app-card">
-      <h2>1. Browser</h2>
-      <p>Works in Chrome, Edge, Safari and Firefox. Sign in, run the loop, send nothing until you approve.</p>
-      <a class="text-link" href="/">Go to the site</a>
+      <h2>{{ t('app.c1h') }}</h2>
+      <p>{{ t('app.c1p') }}</p>
+      <a class="text-link" href="/">{{ t('app.c1a') }}</a>
     </article>
     <article class="app-card">
-      <h2>2. Install as an app</h2>
-      <p>Chrome and Edge on Windows, Mac, Linux and Android will offer Install. The icon lands next to your other apps and opens in its own window.</p>
+      <h2>{{ t('app.c2h') }}</h2>
+      <p>{{ t('app.c2p') }}</p>
       <ol>
-        <li>Chrome / Edge: Install Reachmark (button above), or the browser’s install icon in the address bar.</li>
-        <li>Android: Install app when prompted, or Chrome menu → Install app.</li>
-        <li>iPhone / iPad: Share → Add to Home Screen.</li>
+        <li>{{ t('app.c2l1') }}</li>
+        <li>{{ t('app.c2l2') }}</li>
+        <li>{{ t('app.c2l3') }}</li>
       </ol>
     </article>
     <article class="app-card">
-      <h2>3. Run on this computer</h2>
-      <p>If you have the source, this starts the same web app locally and opens it:</p>
+      <h2>{{ t('app.c3h') }}</h2>
+      <p>{{ t('app.c3p') }}</p>
       <p class="app-note" style="padding:0;font-family:ui-monospace,Menlo,monospace;font-size:13px;background:#f7f9f1;border-radius:10px;padding:10px 12px">python -m web.desktop</p>
-      <p>That is the downloadable application for operators who self-host. It is the browser version, running on your machine.</p>
+      <p>{{ t('app.c3b') }}</p>
     </article>
   </section>
-  <p class="app-note">HTTPS is required for the install button (Chrome will not install from http except on localhost). Private workspace data is never stored in the install cache.</p>
+  <p class="app-note">{{ t('app.note') }}</p>
 </main>
 <script src="/static/i18n.js"></script>
 <script src="/static/theme.js"></script>

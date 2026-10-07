@@ -1,50 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ locale }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>First-section concept{% if lead.name %} — {{ lead.name }}{% endif %} · Reachmark</title>
+<title>{{ t('doc.proto_title') }}{% if lead.name %} — {{ lead.name }}{% endif %} · Reachmark</title>
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#fbfbfb">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/static/fonts.css">
 <link rel="stylesheet" href="/static/xdesign.css">
 <link rel="stylesheet" href="/static/opportunity.css">
+<script src="/static/i18n.js"></script>
 </head>
 <body class="oe-public">
   <header class="oe-top">
     <a href="/" class="oe-logo"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
-    <span>Independent concept · not their live website</span>
+    <span>{{ t('doc.proto_head') }}</span>
   </header>
   <main class="oe-sheet">
-    <p class="oe-kicker">Build before they buy</p>
-    <h1>{{ proto.concept.headline or (lead.name or 'A clearer first section') }}</h1>
-    <p class="oe-lede">{{ proto.concept.intro or 'Prepared from saved listing fields. Missing facts stay missing.' }}</p>
-    <p class="oe-note">{{ proto.concept.disclaimer or 'This is not the official website of the business named here.' }}</p>
+    <p class="oe-kicker">{{ t('doc.proto_k') }}</p>
+    <h1>{{ proto.concept.headline or (lead.name or t('doc.clearer')) }}</h1>
+    <p class="oe-lede">{{ proto.concept.intro or t('doc.prepared') }}</p>
+    <p class="oe-note">{{ proto.concept.disclaimer or t('doc.not_official') }}</p>
 
     {% if proto.concept.leaks %}
     <section class="oe-block">
-      <h2>What this first section would fix</h2>
-      <p class="oe-intro">Each line is from the listing or a measured page check. If we could not read the live site, that is stated on the report.</p>
+      <h2>{{ t('doc.fix') }}</h2>
+      <p class="oe-intro">{{ t('doc.fix_p') }}</p>
       <ol class="oe-leaks">
         {% for leak in proto.concept.leaks %}
         <li>
           <h3>{{ leak.title }}</h3>
           <p>{{ leak.leak }}</p>
-          <p class="oe-fix"><span>Instead</span> {{ leak.fix }}</p>
+          <p class="oe-fix"><span>{{ t('doc.instead') }}</span> {{ leak.fix }}</p>
         </li>
         {% endfor %}
       </ol>
     </section>
     {% else %}
     <section class="oe-block">
-      <p class="oe-empty">No commercial leak was on file when this concept was stored. Do not pitch a rebuild on empty evidence.</p>
+      <p class="oe-empty">{{ t('doc.no_leak') }}</p>
     </section>
     {% endif %}
 
     {% if proto.concept.sections %}
     <section class="oe-block">
-      <h2>The rest of the page, in outline</h2>
+      <h2>{{ t('doc.outline') }}</h2>
       <ol class="oe-leaks">
         {% for block in proto.concept.sections %}
         <li>
@@ -57,14 +58,14 @@
     {% endif %}
 
     <section class="oe-block oe-cta">
-      <h2>If this is useful</h2>
-      <p>Reply if you want this built. There is no invented quote on this page.</p>
+      <h2>{{ t('doc.if_useful') }}</h2>
+      <p>{{ t('doc.useful_p') }}</p>
       {% if proto.review_token %}
-      <a class="x-btn dark" href="/r/{{ proto.review_token }}">Open the full concept</a>
+      <a class="x-btn dark" href="/r/{{ proto.review_token }}">{{ t('doc.open_full') }}</a>
       {% endif %}
-      <a class="x-btn lime" href="/enquire">Talk to Reachmark</a>
+      <a class="x-btn lime" href="/enquire">{{ t('doc.talk') }}</a>
     </section>
   </main>
-  <footer class="oe-foot">Reachmark · First-section concept · Views of this link are counted.</footer>
+  <footer class="oe-foot">{{ t('doc.foot_proto') }}</footer>
 </body>
 </html>

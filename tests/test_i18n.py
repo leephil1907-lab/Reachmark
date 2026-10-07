@@ -95,6 +95,26 @@ class FallbackTests(unittest.TestCase):
 
 
 class TemplateRenderTests(unittest.TestCase):
+    def test_public_pages_switch_language(self):
+        markers = {
+            'es': 'Encuentra la fuga',
+            'fr': 'Trouver la fuite',
+            'de': 'Finde das Leck',
+            'pt': 'Encontre o vazamento',
+            'zh': '找到缺口',
+        }
+        for loc, needle in markers.items():
+            home = module.app.test_client().get(f'/?lang={loc}').get_data(as_text=True)
+            self.assertIn(f'<html lang="{loc}"', home, loc)
+            self.assertIn(needle, home, loc)
+            about = module.app.test_client().get(f'/about?lang={loc}').get_data(as_text=True)
+            self.assertIn(f'<html lang="{loc}"', about, loc)
+            self.assertNotIn('PERSONAL BRAND · WHY I BUILT REACHMARK', about, loc)
+            need = module.app.test_client().get(f'/need?lang={loc}').get_data(as_text=True)
+            self.assertIn(f'<html lang="{loc}"', need, loc)
+            app_page = module.app.test_client().get(f'/app?lang={loc}').get_data(as_text=True)
+            self.assertIn(f'<html lang="{loc}"', app_page, loc)
+
     def test_review_preview_ad_render_in_all_locales(self):
         from flask import g, render_template
         from agents.agent_video import build_script

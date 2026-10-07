@@ -1,34 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ locale }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Project brief — {{ brief.name }} · Reachmark</title>
+<title>{{ t('doc.brief_title', name=brief.name) }}</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/static/fonts.css">
 <link rel="stylesheet" href="/static/xdesign.css">
 <link rel="stylesheet" href="/static/opportunity.css">
+<script src="/static/i18n.js"></script>
 </head>
 <body class="oe-public">
   <header class="oe-top">
     <a href="/" class="oe-logo"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
-    <span>Marketplace brief · {{ brief.status }}</span>
+    <span>{{ t('doc.brief_head', status=brief.status) }}</span>
   </header>
   <main class="oe-sheet">
-    <p class="oe-kicker">Specification</p>
+    <p class="oe-kicker">{{ t('doc.spec') }}</p>
     <h1>{{ brief.name }}</h1>
     <p class="oe-lede">{{ brief.category }} {% if brief.city %}· {{ brief.city }}{% endif %}</p>
     <p>{{ brief.need }}</p>
     <section class="oe-block">
-      <h2>Direction</h2>
+      <h2>{{ t('doc.direction') }}</h2>
       <p>{{ brief.spec.direction }} — {{ brief.spec.goal }}</p>
-      <p class="oe-note">Pages: {{ (brief.spec.pages or []) | join(', ') }}</p>
-      <p class="oe-note">Modules: {{ (brief.spec.modules or []) | join(', ') }}</p>
+      <p class="oe-note">{{ t('doc.pages', pages=(brief.spec.pages or []) | join(', ')) }}</p>
+      <p class="oe-note">{{ t('doc.modules', modules=(brief.spec.modules or []) | join(', ')) }}</p>
       <p class="oe-note">{{ brief.spec.note }}</p>
     </section>
     <section class="oe-block oe-cta">
-      <a class="x-btn dark" href="/enquire">Talk to Reachmark</a>
+      <a class="x-btn dark" href="/enquire">{{ t('doc.talk') }}</a>
     </section>
   </main>
 </body>

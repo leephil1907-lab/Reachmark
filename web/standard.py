@@ -1,5 +1,5 @@
 """Reachmark-standard upgrades: snapshots/rollback, outbox, deploy-check, branded mail helpers.
-Keeps the premium site (about.html) untouched — only adds owner/client-standard APIs.
+Owner/client-standard APIs. Does not inject ads into templates.
 """
 import os, uuid, json, time, sqlite3
 from web.i18n import t as _t, locale_now
