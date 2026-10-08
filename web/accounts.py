@@ -21,26 +21,26 @@ def valid_email(e):
     return bool(EMAIL_RE.fullmatch(e.strip())) and len(e) <= 250
 
 def get_base_url():
-    # Public base from env, workspace Settings, or request — for emails.
-    base = os.getenv('PUBLIC_BASE_URL','').strip().rstrip('/')
-    if base:
-        return base
+    # Public base from env, workspace Settings, or the owned domain — for emails.
+    configured = ''
     try:
         from web.app import settings
-        s = settings()
-        if (s.get('public_base_url') or '').strip():
-            return s['public_base_url'].strip().rstrip('/')
+        configured = (settings().get('public_base_url') or '').strip()
     except Exception:
         pass
+    from web.public_url import resolve_public_base_url, BRAND_PUBLIC_URL
+    resolved = resolve_public_base_url(configured)
+    if resolved:
+        return resolved
     try:
-        # fallback to request host
         return request.host_url.rstrip('/')
     except Exception:
-        return 'http://localhost:8000'
+        return BRAND_PUBLIC_URL
 
 def branded_html(title, text_body, cta_url=None, cta_label=None, base_url=None):
     # Branded HTML mail matching the site: cream canvas, white card, lime CTA.
-    base = (base_url or 'https://reachmark.co').rstrip('/')
+    from web.public_url import BRAND_PUBLIC_URL
+    base = (base_url or BRAND_PUBLIC_URL).rstrip('/')
     host = base.replace('https://', '').replace('http://', '')
     safe = text_body.replace('\n', '<br>')
     foot = _t('au.m_foot', locale_now(), email=support_email())
@@ -61,7 +61,8 @@ def branded_html(title, text_body, cta_url=None, cta_label=None, base_url=None):
 def send_branded(to_email, subject, text_body, html_title=None, cta_url=None, cta_label=None, db=None):
     """Try SMTP; on missing config or failure, queue to mail_outbox for owner review. Returns (sent:bool, outbox_id)."""
     to_email = to_email.strip().lower()
-    base = get_base_url() if 'request' in globals() else 'https://reachmark.co'
+    from web.public_url import BRAND_PUBLIC_URL
+    base = get_base_url() if 'request' in globals() else BRAND_PUBLIC_URL
     # Build HTML if title given
     html_body = branded_html(html_title or subject, text_body, cta_url, cta_label, base_url=base) if html_title or cta_url else None
     outbox_id = uuid.uuid4().hex

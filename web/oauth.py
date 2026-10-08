@@ -51,8 +51,11 @@ def _redirect_uri(provider):
     # Ignore a Business Profile (or any other) callback pasted into this slot.
     if override and suffix in override:
         return override
+    from web.public_url import is_ephemeral_public_url, resolve_public_base_url
     root = (os.getenv('PUBLIC_BASE_URL') or '').strip().rstrip('/')
-    if not root:
+    if root and is_ephemeral_public_url(root):
+        root = resolve_public_base_url()
+    elif not root:
         root = request.url_root.rstrip('/')
     host = (urllib.parse.urlparse(root).hostname or '').lower()
     local = host in ('localhost', '127.0.0.1', '::1') or host.startswith(('10.', '192.168.')) or host.endswith('.localhost')

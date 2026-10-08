@@ -202,7 +202,7 @@ def register_standard(app, db, log, settings_fn=None):
             checks.append({'name': name, 'ok': bool(ok), 'detail': detail, 'required': required})
         # PUBLIC_BASE_URL
         base = (os.getenv('PUBLIC_BASE_URL','').strip() or (settings_fn().get('public_base_url','') if settings_fn else ''))
-        add('PUBLIC_BASE_URL', base.startswith('https://'), base or 'Set to https://reachmark.co for live', required=True)
+        add('PUBLIC_BASE_URL', base.startswith('https://'), base or 'Set to https://reachmarkdigital.xyz for live', required=True)
         # SECRET_KEY
         sk = os.getenv('SECRET_KEY','')
         add('SECRET_KEY', len(sk) >= 32, f'{len(sk)} chars' if sk else 'Set 32+ random chars', required=os.getenv('APP_ENV')=='production')

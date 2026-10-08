@@ -61,8 +61,8 @@ DEFAULTS={'sender_name':'','agency':'','reply_email':'','postal_address':'','pub
 def settings():
     with db() as c: r=c.execute('SELECT data FROM settings WHERE id=1').fetchone()
     base={**DEFAULTS,**(json.loads(r[0]) if r else {})}
-    # Env takes precedence for public URL (useful for container secrets)
-    if os.getenv('PUBLIC_BASE_URL'): base['public_base_url']=os.environ['PUBLIC_BASE_URL'].rstrip('/')
+    from web.public_url import resolve_public_base_url
+    base['public_base_url']=resolve_public_base_url(base.get('public_base_url',''))
     return base
 def log(kind, message):
     with db() as c: c.execute('INSERT INTO activity(kind,message,created) VALUES(?,?,?)',(kind,message,now()))
@@ -138,14 +138,14 @@ def custom_domain_redirect():
     try:
         if request.path.startswith(('/healthz','/static/')):
             return None
-        base = (os.getenv('PUBLIC_BASE_URL','').strip().rstrip('/') or settings().get('public_base_url','').strip().rstrip('/'))
+        base = settings().get('public_base_url','').strip().rstrip('/')
         if not base.startswith('https://'):
             return None
         dest_host = (urlparse(base).hostname or '').lower()
         req_host = (request.host or '').split(':')[0].lower()
         if not dest_host or dest_host == req_host:
             return None
-        if 'up.railway.app' not in req_host or 'up.railway.app' in dest_host:
+        if 'railway.app' not in req_host or 'railway.app' in dest_host:
             return None
         path = request.path
         if request.query_string:

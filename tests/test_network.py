@@ -314,7 +314,7 @@ class OAuthTests(NetworkBase):
         with patch.dict(os.environ, {'PUBLIC_BASE_URL': 'https://reachmark-production.up.railway.app', 'GOOGLE_OAUTH_REDIRECT_URI': ''}):
             with module.app.test_request_context('/', base_url='http://localhost:5000'):
                 uri = _redirect_uri('google')
-        self.assertEqual(uri, 'https://reachmark-production.up.railway.app/api/auth/oauth/google/callback')
+        self.assertEqual(uri, 'https://reachmarkdigital.xyz/api/auth/oauth/google/callback')
 
     def test_redirect_uri_ignores_business_profile_override(self):
         from web.oauth import _redirect_uri
@@ -325,7 +325,7 @@ class OAuthTests(NetworkBase):
         with patch.dict(os.environ, env):
             with module.app.test_request_context('/', base_url='http://example.com'):
                 uri = _redirect_uri('google')
-        self.assertEqual(uri, 'https://reachmark-production.up.railway.app/api/auth/oauth/google/callback')
+        self.assertEqual(uri, 'https://reachmarkdigital.xyz/api/auth/oauth/google/callback')
 
     def test_redirect_uri_uses_client_override(self):
         from web.oauth import _redirect_uri

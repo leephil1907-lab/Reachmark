@@ -11,7 +11,7 @@ def check_local_env():
     def add(name, ok, detail, required=False):
         checks.append((name, ok, detail, required))
     base = os.getenv('PUBLIC_BASE_URL','')
-    add('PUBLIC_BASE_URL', base.startswith('https://'), base or 'Set https://reachmark.co', True)
+    add('PUBLIC_BASE_URL', base.startswith('https://'), base or 'Set https://reachmarkdigital.xyz', True)
     sk = os.getenv('SECRET_KEY','')
     add('SECRET_KEY', len(sk)>=32, f'{len(sk)} chars', os.getenv('APP_ENV')=='production')
     oph = os.getenv('OWNER_PASSWORD_HASH','')

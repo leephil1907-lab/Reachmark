@@ -38,9 +38,20 @@ class ProspectTests(unittest.TestCase):
         host = 'reachmark-production.up.railway.app'
         with patch.dict(os.environ, {'PUBLIC_BASE_URL': 'https://' + host}):
             page = self.client.get('/', headers={'Host': host})
-            self.assertNotEqual(page.status_code, 301)
+            self.assertEqual(page.status_code, 301)
+            self.assertTrue(page.headers.get('Location','').startswith('https://reachmarkdigital.xyz'))
+
+    def test_owned_domain_is_canonical_when_env_is_railway(self):
+        with patch.dict(os.environ, {'PUBLIC_BASE_URL': 'https://reachmark-production.up.railway.app'}):
+            page = self.client.get('/', headers={'Host': 'reachmarkdigital.xyz'})
             self.assertEqual(page.status_code, 200)
-            self.assertFalse(page.location)
+            self.assertIn(b'https://reachmarkdigital.xyz', page.data)
+            self.assertNotIn(b'reachmark-production.up.railway.app', page.data)
+            sitemap = self.client.get('/sitemap.xml', headers={'Host': 'reachmarkdigital.xyz'})
+            self.assertIn(b'<loc>https://reachmarkdigital.xyz/</loc>', sitemap.data)
+            self.assertNotIn(b'railway.app', sitemap.data)
+            robots = self.client.get('/robots.txt')
+            self.assertIn(b'Sitemap: https://reachmarkdigital.xyz/sitemap.xml', robots.data)
 
     def test_source_seen_at_schema_and_refresh(self):
         with module.db() as c:
