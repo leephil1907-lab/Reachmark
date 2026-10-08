@@ -241,11 +241,15 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
     def test_public_pages_show_exactly_one_support_bubble(self):
         for path in ('/','/showcase','/enquire'):
             body=self.client.get(path).get_data(as_text=True)
-            self.assertIn('embed.tawk.to',body,path)
+            tawk='embed.tawk.to' in body
+            whatsapp='class="wa-float"' in body
+            self.assertTrue(tawk or whatsapp,path)
+            self.assertFalse(tawk and whatsapp,path)
             self.assertNotIn('rm-receptionist-launch',body,path)
         body=self.client.get('/receptionist').get_data(as_text=True)
         self.assertIn('rm-receptionist-launch',body)
         self.assertNotIn('embed.tawk.to',body)
+        self.assertNotIn('class="wa-float"',body)
 
 class PublicPathsWithAuthConfiguredTests(unittest.TestCase):
     """With a dashboard password set (like the live box), public pages stay public."""
