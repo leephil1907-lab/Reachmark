@@ -1,15 +1,53 @@
 /* Locally bundled Leaflet; external tiles are optional. Saved records are never invented. */
 var T_=window.T||function(k,f){return f;};
-let worldMap, worldTiles, worldMarkers, worldCoverage, worldScans=[], worldBusy=false, worldRequest=false;
+let worldMap, worldTiles, worldMarkers, worldCoverage, worldLocateMarker, worldScans=[], worldBusy=false, worldRequest=false, worldTileIndex=0;
+const TILE_URLS=[
+ 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+ 'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
+ 'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png'
+];
 const mapColors={checked:'#557831',partial:'#db9c40',failed:'#b85757',pending:'#838a94',running:'#387ba6'};
 function mapMessage(text){$('#map-message').textContent=text}
 function worldBounds(){const b=worldMap.getBounds(),wrap=n=>((n+180)%360+360)%360-180;return [Math.max(-90,b.getSouth()),wrap(b.getWest()),Math.min(90,b.getNorth()),wrap(b.getEast())]}
 function loadBasemap(){
+ if(!worldMap)return;
  if(worldTiles)worldMap.removeLayer(worldTiles);
- let errors=0,loaded=0;
- worldTiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,noWrap:false,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'});
- worldTiles.on('tileerror',()=>{if(++errors>=3)mapMessage(T_('wsj.mp_tiles','Some basemap tiles are unavailable. Saved markers, coordinates and scan areas still work. Use Reload basemap to try again.'))});
- worldTiles.on('tileload',()=>{loaded++});worldTiles.addTo(worldMap);
+ let errors=0;
+ const url=TILE_URLS[worldTileIndex%TILE_URLS.length];
+ worldTiles=L.tileLayer(url,{maxZoom:19,noWrap:false,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'});
+ worldTiles.on('tileerror',()=>{
+  errors++;
+  if(errors>=4 && worldTileIndex<TILE_URLS.length-1){
+   worldTileIndex++;
+   errors=0;
+   mapMessage(T_('wsj.mp_tiles','Some basemap tiles are unavailable. Trying another OpenStreetMap tile server…'));
+   loadBasemap();
+  }else if(errors>=6){
+   mapMessage(T_('wsj.mp_tiles','Some basemap tiles are unavailable. Saved markers, coordinates and scan areas still work. Use Reload basemap to try again.'));
+  }
+ });
+ worldTiles.addTo(worldMap);
+}
+function locateMe(){
+ if(!worldMap)return;
+ if(!navigator.geolocation){
+  mapMessage(T_('ws.mp_me_fail','This browser cannot share a location. Search a city instead, or allow location access.'));
+  return;
+ }
+ mapMessage(T_('ws.mp_me_wait','Asking this device for a location…'));
+ navigator.geolocation.getCurrentPosition(function(pos){
+  const lat=pos.coords.latitude,lng=pos.coords.longitude;
+  if(!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>85.05||Math.abs(lng)>180){
+   mapMessage(T_('ws.mp_me_fail','This browser cannot share a location. Search a city instead, or allow location access.'));
+   return;
+  }
+  worldMap.setView([lat,lng],15);
+  if(worldLocateMarker)worldMap.removeLayer(worldLocateMarker);
+  worldLocateMarker=L.circleMarker([lat,lng],{radius:8,color:'#20251F',weight:2,fillColor:'#D5F268',fillOpacity:1}).addTo(worldMap);
+  mapMessage(T_('ws.mp_me_ok','Centered on your device. Pan and zoom to look around. This is a business map, not driving directions.'));
+ },function(){
+  mapMessage(T_('ws.mp_me_fail','Location is blocked or unavailable. Allow location for this site, or search a city such as Ikeja, Nigeria.'));
+ },{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
 }
 function drawWorldLeads(){
  if(!worldMap)return;worldMarkers.clearLayers();
@@ -26,7 +64,7 @@ async function openWorldMap(){
   worldMarkers=L.markerClusterGroup({maxClusterRadius:45,showCoverageOnHover:false,iconCreateFunction:cluster=>L.divIcon({className:'world-cluster',html:`<span>${cluster.getChildCount()}</span>`,iconSize:[38,38]})}).addTo(worldMap);worldCoverage=L.layerGroup().addTo(worldMap);loadBasemap();
   worldMap.on('moveend',()=>{const p=worldMap.getCenter();$('#map-coordinates').textContent=T_('wsj.mp_coords','{lat}, {lng} · zoom {z}').replace('{lat}',p.lat.toFixed(5)).replace('{lng}',p.wrap().lng.toFixed(5)).replace('{z}',worldMap.getZoom());try{localStorage.setItem('reachmark-map-view',JSON.stringify({center:[p.lat,p.wrap().lng],zoom:worldMap.getZoom()}))}catch{}});
  }
- requestAnimationFrame(()=>worldMap.invalidateSize());
+ requestAnimationFrame(()=>{worldMap.invalidateSize();setTimeout(()=>worldMap.invalidateSize(),280)});
  const current=$('#map-category').value;$('#map-category').innerHTML=(state.categories||[]).map(c=>`<option>${esc(c)}</option>`).join('');if(current)$('#map-category').value=current;
  drawWorldLeads();await loadMapScans();
 }
@@ -45,8 +83,9 @@ function drawMapScans(){
 }
 $('#map-search-form').onsubmit=async e=>{e.preventDefault();const b=$('#map-search-btn');b.disabled=true;try{const query=$('#map-search').value.trim(),coordinates=query.match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);if(coordinates){const lat=Number(coordinates[1]),lng=Number(coordinates[2]);if(Math.abs(lat)>85.05||Math.abs(lng)>180)throw Error(T_('wsj.mp_lat','Map navigation supports latitude ±85.05 and longitude ±180.'));worldMap.setView([lat,lng],14);mapMessage(T_('wsj.mp_coordssel','Coordinates selected. Confirm the visible area before scanning.'));return}mapMessage(T_('wsj.mp_lookup','Looking up this place…'));const r=await api('/api/map/search','POST',{query});worldMap.setView([Number(r.place.lat),Number(r.place.lon)],14);$('#map-label').value=query.slice(0,150);mapMessage(T_('wsj.mp_matched','Matched: {p}{c}. Adjust the viewport before scanning.').replace('{p}',r.place.display_name||query).replace('{c}',r.cached?T_('wsj.mp_cached',' · saved lookup'):''))}catch(e){mapMessage(e.message)}finally{b.disabled=false}};
 $('#map-world').onclick=()=>worldMap?.setView([20,0],2);
+$('#map-locate').onclick=async()=>{if(!worldMap)await openWorldMap();locateMe()};
 $('#map-saved').onclick=()=>{const points=state.leads.filter(l=>typeof l.latitude==='number'&&typeof l.longitude==='number'&&Math.abs(l.latitude)<=85.05&&Math.abs(l.longitude)<=180).map(l=>[l.latitude,l.longitude]);if(points.length)worldMap.fitBounds(points,{padding:[30,30],maxZoom:15});else mapMessage(T_('wsj.mp_nopoints','No saved leads have displayable map coordinates yet.'))};
-$('#map-retry-tiles').onclick=()=>{if(worldMap){loadBasemap();mapMessage(T_('wsj.mp_reloading','Reloading visible basemap tiles.'))}};
+$('#map-retry-tiles').onclick=()=>{if(worldMap){worldTileIndex=(worldTileIndex+1)%TILE_URLS.length;loadBasemap();mapMessage(T_('wsj.mp_reloading','Reloading visible basemap tiles.'))}};
 $('#map-filter').onchange=drawWorldLeads;
 $('#map-scan-form').onsubmit=async e=>{e.preventDefault();if(worldBusy||!worldMap)return;const bounds=worldBounds(),raw=worldMap.getBounds();const height=(bounds[2]-bounds[0])*111.32,width=(raw.getEast()-raw.getWest())*111.32*Math.max(.01,Math.cos(worldMap.getCenter().lat*Math.PI/180));if(height>25||width>25||raw.getEast()-raw.getWest()>2){mapMessage(T_('wsj.mp_zoom','Zoom in before scanning: choose an area at most 25 km wide and high.'));return}if(!confirm(T_('wsj.mp_scanq','Scan the visible rectangle for {c}? Other categories and unmapped businesses are not included.').replace('{c}',$('#map-category').value)))return;worldBusy=true;$('#map-start').disabled=true;try{await api('/api/map/scans','POST',{bounds,category:$('#map-category').value,label:$('#map-label').value.trim()});await loadMapScans();mapMessage(T_('wsj.mp_started','Scan started. Progress is saved per cell; you can leave this page and return.'))}catch(e){mapMessage(e.message)}finally{worldBusy=false;$('#map-start').disabled=false}};
 setInterval(async()=>{if(!document.hidden&&$('#page-global').classList.contains('active')){await loadMapScans();drawWorldLeads()}},5000);

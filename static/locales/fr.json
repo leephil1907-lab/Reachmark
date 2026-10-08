@@ -2147,7 +2147,7 @@
   "ws.mp_find": "Chercher",
   "ws.mp_fit": "Cadrer les prospects",
   "ws.mp_h": "Mettez l’opportunité sur la carte.",
-  "ws.mp_hint": "Déplacez-vous. Zoomez pour choisir une zone.",
+  "ws.mp_hint": "Cherchez une ville, touchez Ma position, puis déplacez et zoomez. Fond OpenStreetMap — pas de guidage turn-by-turn.",
   "ws.mp_hist": "Zones scannées",
   "ws.mp_hist_s": "· 50 dernières",
   "ws.mp_k": "OPENSTREETMAP · EXPLORATEUR MONDIAL",
@@ -2885,5 +2885,9 @@
   "app.installed": "Reachmark est installé sur cet appareil. Ouvrez-le depuis l’écran d’accueil ou la liste d’apps.",
   "app.ios_h": "iPhone et iPad",
   "app.android_h": "Android",
-  "app.selfhost": "Auto-hébergement sur un portable ? Depuis le code, python -m web.desktop lance la même app en local. Ce n’est pas un téléchargement téléphone."
+  "app.selfhost": "Auto-hébergement sur un portable ? Depuis le code, python -m web.desktop lance la même app en local. Ce n’est pas un téléchargement téléphone.",
+  "ws.mp_me": "Ma position",
+  "ws.mp_me_wait": "Demande de position à cet appareil…",
+  "ws.mp_me_fail": "Position bloquée ou indisponible. Autorisez la localisation, ou cherchez une ville.",
+  "ws.mp_me_ok": "Centré sur votre appareil. Déplacez et zoomez. Carte d’affaires, pas un GPS de conduite."
 }

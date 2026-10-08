@@ -2147,7 +2147,7 @@
   "ws.mp_find": "Buscar",
   "ws.mp_fit": "Enquadrar salvos",
   "ws.mp_h": "Ponha a chance no mapa.",
-  "ws.mp_hint": "Navegue. Amplie para escolher a área.",
+  "ws.mp_hint": "Pesquise uma cidade, toque em A minha localização, depois deslize e zoom. Tiles OpenStreetMap — não é navegação passo a passo.",
   "ws.mp_hist": "Áreas varridas",
   "ws.mp_hist_s": "· últimas 50",
   "ws.mp_k": "OPENSTREETMAP · EXPLORADOR MUNDIAL",
@@ -2885,5 +2885,9 @@
   "app.installed": "O Reachmark está instalado neste dispositivo. Abra-o no ecrã inicial ou na lista de apps.",
   "app.ios_h": "iPhone e iPad",
   "app.android_h": "Android",
-  "app.selfhost": "Alojar num portátil? Na árvore do código, python -m web.desktop inicia a mesma app localmente. Isso não é um download para o telefone."
+  "app.selfhost": "Alojar num portátil? Na árvore do código, python -m web.desktop inicia a mesma app localmente. Isso não é um download para o telefone.",
+  "ws.mp_me": "A minha localização",
+  "ws.mp_me_wait": "A pedir a localização a este dispositivo…",
+  "ws.mp_me_fail": "Localização bloqueada ou indisponível. Permita a localização neste site, ou pesquise uma cidade.",
+  "ws.mp_me_ok": "Centrado no seu dispositivo. Deslize e faça zoom. Isto é um mapa de negócios, não indicações de condução."
 }

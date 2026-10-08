@@ -89,5 +89,14 @@ class MapTests(unittest.TestCase):
         with patch.object(map_provider,'ENDPOINTS',['https://a.test','https://b.test']),patch.object(map_provider,'_cooldown',{}),patch.object(map_provider,'_rate_until',0),patch('web.map_provider.time.sleep'),patch('web.map_provider.requests.post',return_value=response) as post:
             with self.assertRaises(ValueError):map_provider.query_overpass('query',{})
             self.assertEqual(post.call_count,1)
+    def test_map_panel_has_location_controls(self):
+        from pathlib import Path
+        html=(Path(__file__).resolve().parents[1]/'templates'/'map-panel.html').read_text(encoding='utf-8')
+        self.assertIn('id="world-map"',html)
+        self.assertIn('id="map-search"',html)
+        self.assertIn('id="map-locate"',html)
+        js=(Path(__file__).resolve().parents[1]/'static'/'world-map.js').read_text(encoding='utf-8')
+        self.assertIn('geolocation',js)
+        self.assertIn('tile.openstreetmap.org',js)
 
 if __name__=='__main__':unittest.main()

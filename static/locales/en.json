@@ -2147,7 +2147,7 @@
   "ws.mp_find": "Find place",
   "ws.mp_fit": "Fit saved leads",
   "ws.mp_h": "Put opportunity on the map.",
-  "ws.mp_hint": "Pan to any region. Zoom in to choose a bounded scan area.",
+  "ws.mp_hint": "Search a city, tap My location, then pan and zoom. Street tiles are OpenStreetMap — not turn-by-turn navigation.",
   "ws.mp_hist": "Saved scan areas",
   "ws.mp_hist_s": "· latest 50",
   "ws.mp_k": "OPENSTREETMAP · WORLD EXPLORER",
@@ -2885,5 +2885,9 @@
   "app.installed": "Reachmark is installed on this device. Open it from your home screen or app list.",
   "app.ios_h": "iPhone and iPad",
   "app.android_h": "Android",
-  "app.selfhost": "Self-hosting on a laptop? From the source tree, python -m web.desktop starts the same web app locally. That is not a phone download."
+  "app.selfhost": "Self-hosting on a laptop? From the source tree, python -m web.desktop starts the same web app locally. That is not a phone download.",
+  "ws.mp_me": "My location",
+  "ws.mp_me_wait": "Asking this device for a location…",
+  "ws.mp_me_fail": "Location is blocked or unavailable. Allow location for this site, or search a city such as Ikeja, Nigeria.",
+  "ws.mp_me_ok": "Centered on your device. Pan and zoom to look around. This is a business map, not driving directions."
 }

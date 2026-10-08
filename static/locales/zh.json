@@ -2147,7 +2147,7 @@
   "ws.mp_find": "找地方",
   "ws.mp_fit": "适配已存客户",
   "ws.mp_h": "把机会标在地图上。",
-  "ws.mp_hint": "平移到任意区域，放大以选择扫描范围。",
+  "ws.mp_hint": "搜索城市，点“我的位置”，然后拖动缩放。底图来自 OpenStreetMap，不是逐向导航。",
   "ws.mp_hist": "已扫区域",
   "ws.mp_hist_s": "· 最近 50 个",
   "ws.mp_k": "OPENSTREETMAP · 世界探索",
@@ -2885,5 +2885,9 @@
   "app.installed": "Reachmark 已装在这台设备上。从主屏幕或应用列表打开。",
   "app.ios_h": "iPhone 和 iPad",
   "app.android_h": "Android",
-  "app.selfhost": "在笔记本上自托管？在源码目录运行 python -m web.desktop 会在本地启动同一网站。那不是手机下载。"
+  "app.selfhost": "在笔记本上自托管？在源码目录运行 python -m web.desktop 会在本地启动同一网站。那不是手机下载。",
+  "ws.mp_me": "我的位置",
+  "ws.mp_me_wait": "正在向此设备请求位置…",
+  "ws.mp_me_fail": "位置被拒绝或不可用。请允许本站使用定位，或搜索城市。",
+  "ws.mp_me_ok": "已对准你的设备位置。可拖动和缩放。这是业务地图，不是驾车导航。"
 }

@@ -2147,7 +2147,7 @@
   "ws.mp_find": "Suchen",
   "ws.mp_fit": "Leads einpassen",
   "ws.mp_h": "Bring Chancen auf die Karte.",
-  "ws.mp_hint": "Schwenken. Zoomen für Scan-Gebiet.",
+  "ws.mp_hint": "Stadt suchen, Mein Standort tippen, dann schieben und zoomen. OpenStreetMap-Kacheln — keine Turn-by-Turn-Navigation.",
   "ws.mp_hist": "Gescannte Gebiete",
   "ws.mp_hist_s": "· letzte 50",
   "ws.mp_k": "OPENSTREETMAP · WELT-EXPLORER",
@@ -2885,5 +2885,9 @@
   "app.installed": "Reachmark ist auf diesem Gerät installiert. Öffnen Sie es vom Home-Bildschirm oder aus der App-Liste.",
   "app.ios_h": "iPhone und iPad",
   "app.android_h": "Android",
-  "app.selfhost": "Selbst hosten auf einem Laptop? Aus dem Quellbaum startet python -m web.desktop dieselbe Web-App lokal. Das ist kein Telefon-Download."
+  "app.selfhost": "Selbst hosten auf einem Laptop? Aus dem Quellbaum startet python -m web.desktop dieselbe Web-App lokal. Das ist kein Telefon-Download.",
+  "ws.mp_me": "Mein Standort",
+  "ws.mp_me_wait": "Dieses Gerät wird nach einem Standort gefragt…",
+  "ws.mp_me_fail": "Standort blockiert oder nicht verfügbar. Standort erlauben oder eine Stadt suchen.",
+  "ws.mp_me_ok": "Auf Ihr Gerät zentriert. Schieben und zoomen. Das ist eine Geschäftskarte, keine Navi-Route."
 }
