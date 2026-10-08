@@ -38,7 +38,7 @@ def _fetch_public(url, timeout, max_bytes):
             )
         except requests.RequestException as exc:
             return None, f'Connection failed at check time ({type(exc).__name__}). Not proof the site is dead.'
-        if response.is_redirect or response.status_code in (301, 302, 303, 307, 308):
+        if getattr(response, 'is_redirect', False) or response.status_code in (301, 302, 303, 307, 308):
             loc = (response.headers.get('Location') or '').strip()
             response.close()
             if not loc:
