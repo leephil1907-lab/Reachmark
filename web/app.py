@@ -120,6 +120,12 @@ def persist_locale_cookie(response):
     return response
 
 @app.context_processor
+def inject_google_verification():
+    from web.public_url import google_site_tokens
+    tokens = google_site_tokens()
+    return {'google_verifications': tokens, 'google_verification': tokens[0] if tokens else ''}
+
+@app.context_processor
 def inject_i18n():
     from web.i18n import LOCALES, LOCALE_NAMES, t as translate
     loc = getattr(g, 'locale', 'en')

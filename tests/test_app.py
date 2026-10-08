@@ -53,6 +53,12 @@ class ProspectTests(unittest.TestCase):
             robots = self.client.get('/robots.txt')
             self.assertIn(b'Sitemap: https://reachmarkdigital.xyz/sitemap.xml', robots.data)
 
+    def test_homepage_has_search_console_meta_for_owned_domain(self):
+        page = self.client.get('/', headers={'Host': 'reachmarkdigital.xyz'})
+        self.assertEqual(page.status_code, 200)
+        self.assertIn(b'name="google-site-verification"', page.data)
+        self.assertIn(b'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', page.data)
+
     def test_source_seen_at_schema_and_refresh(self):
         with module.db() as c:
             self.assertIn('source_seen_at', [r[1] for r in c.execute('PRAGMA table_info(leads)')])

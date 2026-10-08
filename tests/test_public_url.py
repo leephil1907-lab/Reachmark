@@ -3,12 +3,16 @@ import os
 import unittest
 from unittest.mock import patch
 
-from web.public_url import BRAND_PUBLIC_URL, is_ephemeral_public_url, resolve_public_base_url
+from web.public_url import BRAND_PUBLIC_URL, google_site_tokens, is_ephemeral_public_url, resolve_public_base_url
 
 
 class PublicUrlTests(unittest.TestCase):
     def test_brand_constant(self):
         self.assertEqual(BRAND_PUBLIC_URL, 'https://reachmarkdigital.xyz')
+
+    def test_search_console_token_for_owned_domain(self):
+        tokens = google_site_tokens()
+        self.assertIn('zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', tokens)
 
     def test_railway_is_ephemeral(self):
         self.assertTrue(is_ephemeral_public_url('https://reachmark-production.up.railway.app'))

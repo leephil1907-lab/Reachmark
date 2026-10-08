@@ -8,6 +8,11 @@ import os
 from urllib.parse import urlparse
 
 BRAND_PUBLIC_URL = 'https://reachmarkdigital.xyz'
+# Search Console HTML-tag tokens. First token is reachmarkdigital.xyz (2026-10-08).
+GOOGLE_SITE_TOKENS = (
+    'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c',
+    'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg',
+)
 
 
 def is_ephemeral_public_url(url):
@@ -33,3 +38,12 @@ def resolve_public_base_url(configured=''):
         if candidate.startswith('https://') and not is_ephemeral_public_url(candidate):
             return candidate
     return BRAND_PUBLIC_URL
+
+
+def google_site_tokens():
+    tokens = []
+    extra = os.getenv('GOOGLE_SITE_VERIFICATION', '').strip()
+    for token in ((extra,) if extra else ()) + GOOGLE_SITE_TOKENS:
+        if token and token not in tokens:
+            tokens.append(token)
+    return tokens
