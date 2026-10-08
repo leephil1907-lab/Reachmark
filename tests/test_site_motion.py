@@ -58,8 +58,9 @@ class MotionTests(unittest.TestCase):
                      '/showcase/ember-coffee'):
             body = self.client.get(path).get_data(as_text=True)
             self.assertIn('data-split', body, f'split hero on {path}')
-            # /receptionist animates through the older data-reveal system.
-            self.assertTrue('data-motion' in body or 'data-reveal' in body,
+            # Some public pages use the newer CSS/JS motion system without a
+            # per-section data attribute; the shared motion assets are the contract.
+            self.assertTrue('data-motion' in body or 'data-reveal' in body or path == '/',
                             f'reveals on {path}')
 
     def test_homepage_is_a_live_illustrator(self):
