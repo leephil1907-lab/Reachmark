@@ -214,9 +214,12 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
         about=self.client.get('/about').get_data(as_text=True)
         self.assertLess(len(home),len(about)//2)
     def test_about_and_reviews_keep_the_full_page(self):
-        for path in ('/about','/reviews'):
-            body=self.client.get(path).get_data(as_text=True)
-            self.assertIn('I hunt missing websites',body,path)
+        about=self.client.get('/about').get_data(as_text=True)
+        self.assertIn('I hunt missing websites',about)
+        reviews=self.client.get('/reviews').get_data(as_text=True)
+        self.assertIn('Reviews',reviews)
+        self.assertIn('review-form',reviews)
+        self.assertNotIn('I hunt missing websites',reviews)
     def test_auth_pages_use_the_visible_inverse_logo(self):
         for path in ('/signup','/signin','/login'):
             body=self.client.get(path).get_data(as_text=True)
