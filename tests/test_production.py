@@ -207,7 +207,7 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
         for path in ('/showcase','/receptionist','/reviews','/about','/enquire','/signin','/signup'):
             self.assertIn(f'href="{path}"',home,path)
         self.assertNotIn('I hunt missing websites',home)
-        self.assertIn('Three steps. No maze.',home)
+        self.assertIn('Find the leak. Show the proof. You send the email.',home)
         self.assertIn('© 2026 Reachmark',home)
         self.assertNotIn('Questions? Ask the front desk',home)
         self.assertIn('Clients, in their own words',home)
