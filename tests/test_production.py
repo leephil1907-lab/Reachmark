@@ -210,7 +210,7 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
         self.assertIn('Find the leak. Show the proof. You send the email.',home)
         self.assertIn('© 2026 Reachmark',home)
         self.assertNotIn('Questions? Ask the front desk',home)
-        self.assertIn('Clients, in their own words',home)
+        self.assertIn('Concepts we&#39;ve built',home)
         about=self.client.get('/about').get_data(as_text=True)
         self.assertLess(len(home),len(about)//2)
     def test_about_and_reviews_keep_the_full_page(self):
