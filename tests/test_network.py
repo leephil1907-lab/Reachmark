@@ -329,11 +329,22 @@ class OAuthTests(NetworkBase):
 
     def test_redirect_uri_uses_client_override(self):
         from web.oauth import _redirect_uri
-        env = {'GOOGLE_OAUTH_REDIRECT_URI': 'https://reachmark.co/api/auth/oauth/google/callback'}
+        env = {'GOOGLE_OAUTH_REDIRECT_URI': 'https://reachmarkdigital.xyz/api/auth/oauth/google/callback'}
         with patch.dict(os.environ, env):
             with module.app.test_request_context('/', base_url='http://example.com'):
                 uri = _redirect_uri('google')
-        self.assertEqual(uri, 'https://reachmark.co/api/auth/oauth/google/callback')
+        self.assertEqual(uri, 'https://reachmarkdigital.xyz/api/auth/oauth/google/callback')
+
+    def test_redirect_uri_ignores_railway_client_override(self):
+        from web.oauth import _redirect_uri
+        env = {
+            'PUBLIC_BASE_URL': 'https://reachmark-production.up.railway.app',
+            'GOOGLE_OAUTH_REDIRECT_URI': 'https://reachmark-production.up.railway.app/api/auth/oauth/google/callback',
+        }
+        with patch.dict(os.environ, env):
+            with module.app.test_request_context('/', base_url='http://example.com'):
+                uri = _redirect_uri('google')
+        self.assertEqual(uri, 'https://reachmarkdigital.xyz/api/auth/oauth/google/callback')
 
     def test_signup_page_has_chooser_and_oauth_mount(self):
         r = self.client.get('/signup')

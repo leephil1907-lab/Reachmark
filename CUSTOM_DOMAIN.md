@@ -50,9 +50,39 @@ no extra change.
 
 ## Email
 
-Outbound SMTP stays Gmail (`reachmarkofficial@gmail.com`). Pointing the website
-domain does not create `hello@reachmarkdigital.xyz`. Add that later with
-Cloudflare Email Routing if you want a domain inbox.
+Outbound SMTP is Gmail:
+
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURITY=starttls
+SMTP_USER=reachmarkofficial@gmail.com
+SMTP_FROM=reachmarkofficial@gmail.com
+SUPPORT_EMAIL=reachmarkofficial@gmail.com
+```
+
+Use a Gmail App Password for `SMTP_PASSWORD`. Do not put that value in Git.
+Pointing the website domain does not create `hello@reachmarkdigital.xyz`. Add
+that later with Cloudflare Email Routing if you want a domain inbox.
+
+## Google sign-up and sign-in
+
+In Google Cloud → APIs & Services → Credentials → the OAuth client, set:
+
+- Authorized JavaScript origins: `https://reachmarkdigital.xyz`
+- Authorized redirect URIs:
+  - `https://reachmarkdigital.xyz/api/auth/oauth/google/callback` (client sign-up / sign-in)
+  - `https://reachmarkdigital.xyz/api/google-business/oauth/callback` (Business Profile, separate)
+
+Railway variables (same values, no secrets here):
+
+```
+GOOGLE_OAUTH_REDIRECT_URI=https://reachmarkdigital.xyz/api/auth/oauth/google/callback
+GOOGLE_BUSINESS_REDIRECT_URI=https://reachmarkdigital.xyz/api/google-business/oauth/callback
+```
+
+Leave `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` as they already are. A Railway
+preview callback is ignored so Google is not sent back to `*.up.railway.app`.
 
 ## Checks
 

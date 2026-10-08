@@ -53,4 +53,4 @@ Your premium site is **untouched** — `templates/about.html` (Founder story + p
 ## Next (optional, not required now)
 - i18n 6 locales (if you want Global), separate admin process on `127.0.0.1:8787` loopback (currently same Flask but `noindex` + hidden via 5-click logo), Playwright capture of 6 real product screenshots.
 
-To go live: set `PUBLIC_BASE_URL=https://reachmark.co`, `SECRET_KEY`, `OWNER_PASSWORD_HASH`, `DATABASE_PATH=/data/prospect.sqlite3`, `SMTP_*` — then `python tools/deploy_check.py --url https://reachmark.co/api/deploy-check`.
+To go live: set `PUBLIC_BASE_URL=https://reachmarkdigital.xyz`, `SECRET_KEY`, `OWNER_PASSWORD_HASH`, `DATABASE_PATH=/data/reachmark.sqlite3`, `SMTP_*` — then `python tools/deploy_check.py --url https://reachmarkdigital.xyz/api/deploy-check`.

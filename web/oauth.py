@@ -48,10 +48,10 @@ def _redirect_uri(provider):
     suffix = f'/api/auth/oauth/{provider}/callback'
     env_key = 'GOOGLE_OAUTH_REDIRECT_URI' if provider == 'google' else 'MICROSOFT_OAUTH_REDIRECT_URI'
     override = os.environ.get(env_key, '').strip().rstrip('/')
-    # Ignore a Business Profile (or any other) callback pasted into this slot.
-    if override and suffix in override:
-        return override
     from web.public_url import is_ephemeral_public_url, resolve_public_base_url
+    # Ignore a Business Profile callback, a Railway preview host, or any other mismatch.
+    if override and suffix in override and not is_ephemeral_public_url(override):
+        return override
     root = (os.getenv('PUBLIC_BASE_URL') or '').strip().rstrip('/')
     if root and is_ephemeral_public_url(root):
         root = resolve_public_base_url()

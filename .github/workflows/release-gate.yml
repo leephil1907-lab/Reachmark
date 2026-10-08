@@ -8,7 +8,7 @@ on:
       base_url:
         description: "Public deployment URL for live browser smoke"
         required: false
-        default: "https://www.sitegapreveal-production.up.railway.app"
+        default: "https://reachmarkdigital.xyz"
 
 jobs:
   build-and-production-smoke:
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      BASE_URL: ${{ github.event.inputs.base_url || 'https://www.sitegapreveal-production.up.railway.app' }}
+      BASE_URL: ${{ github.event.inputs.base_url || 'https://reachmarkdigital.xyz' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -1,6 +1,7 @@
 # Launch acceptance — 2026-09-23 (remote walkthrough)
 
-Live host: `https://sitegapreveal-production.up.railway.app` · live code fingerprinted as `138468c`
+Public host as of 2026-10-08: `https://reachmarkdigital.xyz`.
+Snapshot below is 2026-09-23 on `https://sitegapreveal-production.up.railway.app` · live code then `138468c`.
 via the real AdSense slots (banner `1905478104`, footer `6774661404`, loader exactly once).
 `/api/deploy-check`: **31/32** — the only failure is `SMTP`, intentionally unset (box 10).
 

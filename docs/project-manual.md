@@ -229,12 +229,12 @@ OpenStreetMap data © OpenStreetMap contributors, ODbL: https://www.openstreetma
 
 ## GitHub publishing
 
-Repository: https://github.com/leephil1907-lab/sitegapreveal.git
+Repository: https://github.com/leephil1907-lab/Reachmark.git
 
 GitHub requires an authenticated account with write access. Authenticate through your trusted GitHub/CLI credential flow, not by committing a token. From this repository:
 
 ```bash
-git remote set-url origin https://github.com/leephil1907-lab/sitegapreveal.git
+git remote set-url origin https://github.com/leephil1907-lab/Reachmark.git
 git push -u origin main
 ```
 
@@ -252,7 +252,7 @@ Brand assets in `brand/`: primary/inverse SVG and transparent PNG wordmarks, SVG
 
 The redesigned dashboard retains the same persistent database and workflows. The globe is a decorative illustration; numbers shown in workspace metrics come only from saved activity. No new business data was inserted for the visual redesign.
 
-Name selection is a creative recommendation, not a trademark/domain availability clearance. Check the relevant registrations before commercial launch. The GitHub repository URL remains `leephil1907-lab/sitegapreveal`; the public product name is Reachmark.
+Name selection is a creative recommendation, not a trademark/domain availability clearance. Check the relevant registrations before commercial launch. The GitHub repository is `leephil1907-lab/Reachmark`; the public site is `https://reachmarkdigital.xyz`.
 
 ## Website samples and project enquiries
 
@@ -466,8 +466,8 @@ backups, monitoring, CI releases, crew operations and the publishing checklist.
 See **[PRODUCTION.md](PRODUCTION.md)** for owner login, Docker/HTTPS deployment,
 backup/restore, monitoring activation, CI release verification and the launch checklist
 (including the zero-budget path). Production hosting/domain/alerts are not yet provisioned.
-**[CUSTOM_DOMAIN.md](CUSTOM_DOMAIN.md)** covers pointing `reachmark.co` at the app;
+**[CUSTOM_DOMAIN.md](CUSTOM_DOMAIN.md)** covers pointing `reachmarkdigital.xyz` at the app;
 **[STANDARD_FEATURES.md](STANDARD_FEATURES.md)** records the auth/GDPR/snapshot/outbox upgrades.
 
-Repo: <https://github.com/leephil1907-lab/sitegapreveal.git> — pushing stores code only;
+Repo: <https://github.com/leephil1907-lab/Reachmark.git> — pushing stores code only;
 it never deploys the backend (GitHub Pages cannot run this Python app).

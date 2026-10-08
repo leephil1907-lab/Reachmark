@@ -2,7 +2,7 @@
 """
 Reachmark deploy check — preflight for live (Reachmark parity: tools/deploy-check.mjs)
 Calls /api/deploy-check and reports missing env.
-Run: python tools/deploy_check.py [--url https://reachmark.co]
+Run: python tools/deploy_check.py [--url https://reachmarkdigital.xyz]
 """
 import os, sys, json, urllib.request
 

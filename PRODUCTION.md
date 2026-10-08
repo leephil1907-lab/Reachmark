@@ -102,7 +102,7 @@ sudo apt install docker.io docker-compose-plugin git -y
 sudo usermod -aG docker ubuntu && newgrp docker
 # Optional swap (Oracle ARM is fast enough, skip if RAM >= 12GB)
 sudo mkdir -p /opt/reachmark && sudo chown ubuntu:ubuntu /opt/reachmark
-git clone https://github.com/leephil1907-lab/sitegapreveal.git /opt/reachmark
+git clone https://github.com/leephil1907-lab/Reachmark.git /opt/reachmark
 cd /opt/reachmark
 ```
 

@@ -50,16 +50,19 @@ def _open(value):
 
 def _redirect_uri():
     # Business Profile uses a separate OAuth scope and callback even though it may reuse the same Google client ID/secret.
+    from web.public_url import is_ephemeral_public_url, resolve_public_base_url
     override = os.environ.get("GOOGLE_BUSINESS_REDIRECT_URI", "").strip()
-    if override:
+    if override and not is_ephemeral_public_url(override):
         return override.rstrip("/")
     root = request.url_root.rstrip("/")
     parsed = urllib.parse.urlparse(root)
     host = (parsed.hostname or "").lower()
     local = host in ("localhost", "127.0.0.1", "::1") or host.endswith(".localhost")
-    if root.startswith("http://") and not local:
-        root = "https://" + root[len("http://"):]
-    return root + "/api/google-business/oauth/callback"
+    if local:
+        if root.startswith("http://"):
+            pass
+        return root + "/api/google-business/oauth/callback"
+    return resolve_public_base_url() + "/api/google-business/oauth/callback"
 
 
 def _actor():
