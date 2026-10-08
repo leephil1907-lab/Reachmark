@@ -69,6 +69,9 @@ class AdSenseTests(unittest.TestCase):
         sample = self.client.get('/showcase/ember-coffee').get_data(as_text=True)
         self.assertIn('adsense-footer', sample)
         self.assertIn('data-ad-slot="6774661404"', sample)
+        with self.client.session_transaction() as session:
+            session['owner'] = True
+            session['csrf'] = 'test-csrf'
         desk = self.client.get('/workspace').get_data(as_text=True)
         self.assertIn('adsense-sidebar', desk)
         self.assertIn('data-ad-slot="2566903210"', desk)
