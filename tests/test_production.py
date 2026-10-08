@@ -253,8 +253,9 @@ class PublicPathsWithAuthConfiguredTests(unittest.TestCase):
     tearDown=test_app.ProspectTests.tearDown
     def test_public_surface_needs_no_login(self):
         with patch.dict(os.environ,{'DASHBOARD_PASSWORD':'live-box-password'}):
-            for path in ('/','/about','/offline','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/api/frontdesk/status','/robots.txt','/sitemap.xml','/app','/api/deploy-check'):
+            for path in ('/','/about','/offline','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/api/frontdesk/status','/robots.txt','/sitemap.xml','/app'):
                 self.assertEqual(self.client.get(path).status_code,200,path)
+            self.assertEqual(self.client.get('/api/deploy-check').status_code,401)
             self.assertEqual(self.client.get('/workspace').status_code,302)
             self.assertEqual(self.client.get('/api/state').status_code,401)
     def test_marketing_pages_register_the_service_worker(self):
