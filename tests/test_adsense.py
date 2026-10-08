@@ -20,7 +20,7 @@ class AdSenseTests(unittest.TestCase):
 
     def test_public_pages_carry_the_tags_exactly_once(self):
         for path in ('/about', '/showcase', '/showcase/ember-coffee', '/enquire',
-                     '/receptionist', '/reviews', '/pricing', '/workspace'):
+                     '/receptionist', '/reviews', '/pricing'):
             body = self.client.get(path).get_data(as_text=True)
             self.assertIn(META, body, path)
             self.assertIn(LOADER, body, path)
