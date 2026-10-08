@@ -14,7 +14,7 @@ class MigrationTests(unittest.TestCase):
             c = sqlite3.connect(path)
             c.executescript('''
                 CREATE TABLE leads(id TEXT PRIMARY KEY, created TEXT);
-                CREATE TABLE jobs(id TEXT PRIMARY KEY);
+                CREATE TABLE jobs(id TEXT PRIMARY KEY,message TEXT);
                 CREATE TABLE projects(id TEXT PRIMARY KEY);
                 CREATE TABLE invoices(id TEXT PRIMARY KEY);
                 CREATE TABLE review_responses(id TEXT PRIMARY KEY);
