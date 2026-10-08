@@ -41,7 +41,7 @@ class RevenueMachineSourceTests(unittest.TestCase):
         self.assertIn('href="/signup"', home)
         self.assertNotIn('id="x-who-design"', home)
         header = (ROOT / 'templates' / 'header-public.html').read_text(encoding='utf-8')
-        self.assertIn("request.path != '/'", header)
+        self.assertIn("{% include 'locale-switcher.html' %}", header)
 
     def test_sample_count_is_ten_everywhere(self):
         portfolio = (ROOT / 'web' / 'portfolio.py').read_text(encoding='utf-8')
