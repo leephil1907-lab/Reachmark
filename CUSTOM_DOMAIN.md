@@ -59,7 +59,7 @@ SMTP_PORT=587
 SMTP_SECURITY=starttls
 SMTP_USER=reachmarkofficial@gmail.com
 SMTP_FROM=reachmarkofficial@gmail.com
-SUPPORT_EMAIL=reachmarkofficial@gmail.com
+SUPPORT_EMAIL=support@reachmarkdigital.xyz
 ```
 
 Use a Gmail App Password for `SMTP_PASSWORD`. Do not put that value in Git.

@@ -12,6 +12,7 @@ from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,KeepTogether,I
 from reportlab.lib.units import mm
 from web.operations import CURRENCIES
 from web.i18n import t as _t, locale_now
+from web.public_url import support_email as brand_support_email
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FONTDIR=os.path.join(ROOT,'static','pdf-fonts')
 pdfmetrics.registerFont(TTFont('Reachmark',os.path.join(FONTDIR,'DejaVuSans.ttf')))
@@ -43,7 +44,7 @@ def pdf(title,subtitle,sections,stamp,studio,loc='en'):
     for heading,value in sections:story.extend([Paragraph(text(heading),styles['RMHeading']),Paragraph(text(value),styles['RMBody'])])
     def page(canvas,doc):
         # Footer rule and branding
-        canvas.setStrokeColor(colors.HexColor('#cce57b'));canvas.setLineWidth(3);canvas.line(42,43,553,43);canvas.setFont('Reachmark',8);canvas.setFillColor(colors.HexColor('#56644a'));canvas.drawString(42,28,'REACHMARK · '+_t('pdf.foot',loc)+' · '+os.getenv('SUPPORT_EMAIL','reachmarkofficial@gmail.com'));canvas.drawRightString(553,28,_t('pdf.page',loc,n=doc.page))
+        canvas.setStrokeColor(colors.HexColor('#cce57b'));canvas.setLineWidth(3);canvas.line(42,43,553,43);canvas.setFont('Reachmark',8);canvas.setFillColor(colors.HexColor('#56644a'));canvas.drawString(42,28,'REACHMARK · '+_t('pdf.foot',loc)+' · '+brand_support_email());canvas.drawRightString(553,28,_t('pdf.page',loc,n=doc.page))
     doc=SimpleDocTemplate(buf,pagesize=(595,842),rightMargin=42,leftMargin=42,topMargin=42,bottomMargin=60,title=title,author=studio)
     doc.build(story,onFirstPage=page,onLaterPages=page);return buf.getvalue()
 def register_documents(app,db,now,settings):

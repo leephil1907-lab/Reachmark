@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash
 from web.i18n import t as _t, locale_now
 from web.billing import check_client_path, tier_status
 from werkzeug.middleware.proxy_fix import ProxyFix
+from web.public_url import support_email as brand_support_email
 
 def _clean_secret(value):
     value=(value or '').strip()
@@ -64,7 +65,7 @@ def install_security(app, db):
         if session.get('client_id') and session.get('role')=='client':
             return 'client'
         return 'none'
-    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),client_logged_in=bool(session.get('client_id')),current_role=current_role(),production_mode=production,support_email=os.getenv('SUPPORT_EMAIL','reachmarkofficial@gmail.com').strip() or 'reachmarkofficial@gmail.com'))
+    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),client_logged_in=bool(session.get('client_id')),current_role=current_role(),production_mode=production,support_email=brand_support_email()))
     @app.before_request
     def owner_guard():
         if public():return

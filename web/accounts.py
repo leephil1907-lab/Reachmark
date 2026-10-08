@@ -9,7 +9,8 @@ from email.message import EmailMessage
 EMAIL_RE = re.compile(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+')
 
 def support_email():
-    return os.getenv('SUPPORT_EMAIL', 'reachmarkofficial@gmail.com').strip() or 'reachmarkofficial@gmail.com'
+    from web.public_url import support_email as brand_support_email
+    return brand_support_email()
 
 def now_iso():
     return datetime.now(timezone.utc).isoformat()

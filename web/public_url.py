@@ -9,6 +9,7 @@ import re
 from urllib.parse import urlparse
 
 BRAND_PUBLIC_URL = 'https://reachmarkdigital.xyz'
+BRAND_SUPPORT_EMAIL = 'support@reachmarkdigital.xyz'
 # Search Console HTML-tag tokens. First token is reachmarkdigital.xyz (2026-10-08).
 GOOGLE_SITE_TOKENS = (
     'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c',
@@ -39,6 +40,42 @@ def resolve_public_base_url(configured=''):
         if candidate.startswith('https://') and not is_ephemeral_public_url(candidate):
             return candidate
     return BRAND_PUBLIC_URL
+
+
+def support_email():
+    return os.getenv('SUPPORT_EMAIL', BRAND_SUPPORT_EMAIL).strip() or BRAND_SUPPORT_EMAIL
+
+
+def organization_schema(base, description=''):
+    root = (base or BRAND_PUBLIC_URL).rstrip('/')
+    email = support_email()
+    org = {
+        '@context': 'https://schema.org',
+        '@type': 'ProfessionalService',
+        'name': 'Reachmark',
+        'url': root,
+        'email': email,
+        'logo': root + '/static/icon.svg',
+        'image': root + '/static/social-card.png',
+        'foundingDate': '2026',
+        'areaServed': 'Worldwide',
+        'slogan': 'Find potential. Make your mark.',
+        'description': description or (
+            'Find businesses with weak websites, audit them with evidence, '
+            'and send proposals backed by a Digital Opportunity Report.'
+        ),
+        'contactPoint': [{
+            '@type': 'ContactPoint',
+            'contactType': 'customer support',
+            'email': email,
+            'availableLanguage': ['English'],
+        }],
+    }
+    wa = whatsapp_url()
+    if wa:
+        org['contactPoint'][0]['url'] = wa
+        org['sameAs'] = [wa]
+    return org
 
 
 def google_maps_browser_key():

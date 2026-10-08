@@ -237,4 +237,4 @@ class SessionNavTests(SwitchedBase):
 
     def test_support_email_visible_on_public_pages(self):
         for path in ('/', '/pricing', '/showcase', '/enquire', '/receptionist'):
-            self.assertIn('reachmarkofficial@gmail.com', self.client.get(path).data.decode(), path)
+            self.assertIn('support@reachmarkdigital.xyz', self.client.get(path).data.decode(), path)

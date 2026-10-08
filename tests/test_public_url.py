@@ -14,6 +14,14 @@ class PublicUrlTests(unittest.TestCase):
         tokens = google_site_tokens()
         self.assertIn('zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', tokens)
 
+    def test_support_email_and_organization_schema(self):
+        from web.public_url import organization_schema, support_email
+        self.assertEqual(support_email(), 'support@reachmarkdigital.xyz')
+        org = organization_schema('https://reachmarkdigital.xyz')
+        self.assertEqual(org['@type'], 'ProfessionalService')
+        self.assertEqual(org['email'], 'support@reachmarkdigital.xyz')
+        self.assertEqual(org['contactPoint'][0]['email'], 'support@reachmarkdigital.xyz')
+
     def test_whatsapp_url_from_digits_or_link(self):
         from web.public_url import whatsapp_url
         with patch.dict(os.environ, {'WHATSAPP_URL': '2348012345678'}):

@@ -68,7 +68,7 @@ A: The published samples cover a café, a wellness studio, renovation and trades
 ## topic: how to get in touch
 tags: contact, email, call, book, talk, human, chat, form, whatsapp
 Q: how do i contact the studio
-A: Use the enquiry form at /enquire (name, email, what you need). If live chat is online you can also chat there. This assistant can take your details and pass them to the studio owner directly.
+A: Use the enquiry form at /enquire (name, email, what you need), email support@reachmarkdigital.xyz, or the WhatsApp icon on the site. If live chat is online you can also chat there. This assistant can take your details and pass them to the studio owner directly.
 Q: can i talk to a person
 A: Yes. Ask for a human here and your message is queued for the studio owner, or send the /enquire form and the studio replies with a tailored estimate.
 

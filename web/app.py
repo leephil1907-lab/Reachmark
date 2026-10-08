@@ -230,13 +230,11 @@ def home():
         'noindex': False,
     }
     gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
-    structured=[{
-        '@context':'https://schema.org','@type':'Organization','name':'Reachmark','url': base or request.url_root.rstrip('/'),
-        'logo': (base or request.url_root.rstrip('/')) + '/static/icon.svg',
-        'description': seo['description'], 'foundingDate':'2026', 'areaServed':'Worldwide'
-    },{
-        '@context':'https://schema.org','@type':'WebSite','name':'Reachmark','url': base or request.url_root.rstrip('/'),
-        'potentialAction': {'@type':'SearchAction','target': (base or request.url_root.rstrip('/')) + '/showcase?q={search_term_string}', 'query-input':'required name=search_term_string'}
+    from web.public_url import organization_schema
+    origin = base or request.url_root.rstrip('/')
+    structured=[organization_schema(origin, seo['description']),{
+        '@context':'https://schema.org','@type':'WebSite','name':'Reachmark','url': origin,
+        'potentialAction': {'@type':'SearchAction','target': origin + '/showcase?q={search_term_string}', 'query-input':'required name=search_term_string'}
     },{
         '@context':'https://schema.org','@type':'BreadcrumbList','itemListElement':[
             {'@type':'ListItem','position':1,'name':'Home','item': base or request.url_root.rstrip('/')},
@@ -290,12 +288,11 @@ def about():
         'noindex': False,
     }
     gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
-    structured=[{
-        '@context':'https://schema.org','@type':'Organization','name':'Reachmark','url': base or request.url_root.rstrip('/'),
-        'logo': (base or request.url_root.rstrip('/')) + '/static/icon.svg'
-    },{
-        '@context':'https://schema.org','@type':'WebSite','name':'Reachmark','url': base or request.url_root.rstrip('/'),
-        'potentialAction': {'@type':'SearchAction','target': (base or request.url_root.rstrip('/')) + '/showcase?q={search_term_string}', 'query-input':'required name=search_term_string'}
+    from web.public_url import organization_schema
+    origin = base or request.url_root.rstrip('/')
+    structured=[organization_schema(origin, seo['description']),{
+        '@context':'https://schema.org','@type':'WebSite','name':'Reachmark','url': origin,
+        'potentialAction': {'@type':'SearchAction','target': origin + '/showcase?q={search_term_string}', 'query-input':'required name=search_term_string'}
     }]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
     gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'  # second Google tag alongside GA4
