@@ -40,8 +40,9 @@ if you use Cloudflare.
 ## Search Console and sitemap
 
 1. Add property `https://reachmarkdigital.xyz`
-2. Search Console HTML tag for `https://reachmarkdigital.xyz` is on `/`:
-   `zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c`
+2. Search Console for `https://reachmarkdigital.xyz`:
+   - HTML tag on `/`: `zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c`
+   - HTML file at `/googled647aceebb4093df.html`
 3. Submit `https://reachmarkdigital.xyz/sitemap.xml` **after** `PUBLIC_BASE_URL` is
    the owned domain — not while the sitemap still lists `railway.app`
 

@@ -59,6 +59,12 @@ class ProspectTests(unittest.TestCase):
         self.assertIn(b'name="google-site-verification"', page.data)
         self.assertIn(b'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', page.data)
 
+    def test_search_console_html_file_is_served_at_root(self):
+        name = 'googled647aceebb4093df.html'
+        page = self.client.get('/' + name)
+        self.assertEqual(page.status_code, 200)
+        self.assertEqual(page.get_data(as_text=True).strip(), 'google-site-verification: ' + name)
+
     def test_source_seen_at_schema_and_refresh(self):
         with module.db() as c:
             self.assertIn('source_seen_at', [r[1] for r in c.execute('PRAGMA table_info(leads)')])
