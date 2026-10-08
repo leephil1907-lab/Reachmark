@@ -40,6 +40,11 @@ class NewFilesTests(unittest.TestCase):
 
 
 class WorkspaceHooksTests(CrewBase):
+    def setUp(self):
+        super().setUp()
+        with self.client.session_transaction() as sess:
+            sess['owner'] = True
+
     def test_overview_counters_heatmap_tour_and_skeletons(self):
         page = self.client.get('/workspace')
         self.assertEqual(page.status_code, 200)

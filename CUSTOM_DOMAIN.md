@@ -82,8 +82,18 @@ GOOGLE_OAUTH_REDIRECT_URI=https://reachmarkdigital.xyz/api/auth/oauth/google/cal
 GOOGLE_BUSINESS_REDIRECT_URI=https://reachmarkdigital.xyz/api/google-business/oauth/callback
 ```
 
-Leave `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` as they already are. A Railway
-preview callback is ignored so Google is not sent back to `*.up.railway.app`.
+Railway must also have both secrets (never commit them):
+
+```
+GOOGLE_CLIENT_ID=….apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-…
+```
+
+Until those two are set, `/api/auth/oauth` reports Google as `configured: false`
+and Continue with Google cannot complete. Same client ID/secret power client
+sign-up; Business Profile uses the separate redirect URI above.
+
+A Railway preview callback is ignored so Google is not sent back to `*.up.railway.app`.
 
 ## Checks
 

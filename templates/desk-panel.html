@@ -1,0 +1,21 @@
+<section class="desk-board" id="desk-board" aria-label="{{ t('ws.n_desk') }}">
+  <div class="desk-copy">
+    <div class="eyebrow">{{ t('ws.n_desk') }}</div>
+    <h2>{{ t('ws.desk_h') }}</h2>
+    <p>{{ t('ws.desk_p') }}</p>
+    <div class="desk-chips" id="desk-chips">
+      <button type="button" data-cmd="find cafes in Lagos">{{ t('ws.desk_chip1') }}</button>
+      <button type="button" data-cmd="what's next">{{ t('ws.desk_chip2') }}</button>
+      <button type="button" data-cmd="status">{{ t('ws.desk_chip3') }}</button>
+      <button type="button" data-cmd="help">{{ t('ws.desk_chip4') }}</button>
+    </div>
+  </div>
+  <div class="desk-chat">
+    <div id="desk-log" class="desk-log" role="log" aria-live="polite"></div>
+    <form id="desk-form" autocomplete="off">
+      <label class="sr-only" for="desk-input">{{ t('ws.desk_ph') }}</label>
+      <input id="desk-input" name="message" maxlength="2000" placeholder="{{ t('ws.desk_ph') }}" autocomplete="off"/>
+      <button class="primary" type="submit">{{ t('ws.desk_send') }}</button>
+    </form>
+  </div>
+</section>

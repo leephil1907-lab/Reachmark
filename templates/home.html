@@ -203,41 +203,7 @@
   </section>
 </main>
 
-<footer class="x-foot">
-  <div class="x-foot-in">
-    <div>
-      <img class="logo-on-light" src="/static/logo-primary.svg" alt="Reachmark"><img class="logo-on-dark" src="/static/logo-inverse.svg" alt="">
-      <p>{{ t('home.foot_blurb') }}</p>
-    </div>
-    <div>
-      <h4>{{ t('home.foot_explore') }}</h4>
-      <nav>
-        <a href="/about">{{ t('nav.about') }}</a>
-        <a href="/reviews">{{ t('nav.reviews') }}</a>
-        <a href="/showcase">{{ t('foot.samples') }}</a>
-        <a href="/receptionist">{{ t('foot.receptionist') }}</a>
-        <a href="/pricing">{{ t('nav.plans') }}</a>
-        <a href="/enquire">{{ t('nav.enquire') }}</a>
-        <a href="/app">{{ t('nav.app') }}</a>
-        <a href="/sourcing">{{ t('src.k') }}</a>
-        <a href="/sending">{{ t('send.k') }}</a>
-        <a href="/privacy">{{ t('foot.privacy') }}</a>
-        <a href="/terms">{{ t('foot.terms') }}</a>
-        <a href="/disclosure">{{ t('foot.disclosure') }}</a>
-      </nav>
-    </div>
-    <div>
-      <h4>{{ t('home.foot_started') }}</h4>
-      <nav>
-        <a href="/signup">{{ t('nav.signup') }}</a>
-        <a href="/signin">{{ t('nav.signin') }}</a>
-        <a href="/enquire">{{ t('home.cta_project') }}</a>
-        <a href="mailto:{{ support_email }}">{{ support_email }}</a>
-      </nav>
-    </div>
-  </div>
-  <div class="x-foot-bottom">{{ t('home.foot_copy', year='2026') }}</div>
-</footer>
+{% include 'footer-public.html' %}
 
 <div class="x-cmd" id="x-cmd" hidden>
   <div class="x-cmd-box" role="dialog" aria-modal="true" aria-label="{{ t('home.cmd_aria') }}">

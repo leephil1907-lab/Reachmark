@@ -53,65 +53,7 @@
 
 {% include 'sample-cards.html' %}<div class="sample-explainer premium-reveal">{{ t('show.explainer') }}</div>
 <!-- No fabricated testimonials, ratings, client counts, or outcome claims. The gallery above is concept work only. -->
-<section class="gallery-callout"><div><h2>{{ t('show.call_h') }}</h2><p>{{ t('show.call_p') }}</p></div><a data-magnet class="public-btn" href="/enquire">{{ t('show.ask') }} ↗</a></section>{% include 'adsense-footer.html' %}</main><footer class="world-footer">
-  <div class="world-footer-inner">
-    <div class="footer-top">
-      <div class="footer-brand">
-        <a href="/"><img class="footer-logo" src="/static/logo-primary.svg" alt="{{ t('show.foot_alt') }}"></a>
-        <p>{{ t('show.foot_p') }}</p>
-        
-        <div style="margin-top:16px; display:flex; gap:10px;">
-          <a href="https://instagram.com" aria-label="Instagram" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">◎</a>
-          <a href="https://x.com" aria-label="X" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">𝕏</a>
-          <a href="mailto:{{ support_email }}" aria-label="{{ t('soc.email') }}" style="width:34px; height:34px; border-radius:8px; background:#1a2315; border:1px solid #2a3a22; display:grid; place-items:center; color:#9aa38e; font-size:13px;">✉</a>
-          <span style="font-size:11px;color:#9aa38e;">{{ t('foot.support') }} <a href="mailto:{{ support_email }}" style="color:#d5f268;">{{ support_email }}</a></span>
-          <a href="/enquire" aria-label="{{ t('soc.contact') }}" style="width:34px; height:34px; border-radius:8px; background:#d5f268; border:1px solid #cbe85b; display:grid; place-items:center; color:#0f1510; font-size:13px;">↗</a>
-        </div>
-      </div>
-      <div class="footer-col">
-        <h4>{{ t('show.col_templates') }}</h4>
-        <a href="/showcase/ember-coffee">Ember & Oak — {{ t('show.tpl_cafe') }}</a>
-        <a href="/showcase/stillwell-studio">Stillwell — {{ t('show.tpl_wellness') }}</a>
-        <a href="/showcase/forma-homes">Forma House — {{ t('show.tpl_reno') }}</a>
-        <a href="/showcase/astra-clinic">Astra Clinic — {{ t('show.tpl_health') }}</a>
-        <a href="/showcase/novera-law">Novera Law — {{ t('show.tpl_legal') }}</a>
-        <a href="/showcase/bloom-market">Bloom Market — {{ t('show.tpl_boutique') }}</a>
-        <a href="/showcase/fintech-pulse">Fintech Pulse — {{ t('show.tpl_fin') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_4k') }}</span></a>
-        <a href="/showcase/nova-exchange">Nova Exchange — {{ t('show.tpl_crypto') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_new') }}</span></a>
-        <a href="/showcase/orbit-web3">Orbit Studio — {{ t('show.tpl_web3') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_new') }}</span></a>
-        <a href="/showcase/getpaid">Get Paid — {{ t('show.tpl_saas') }} <span style="background:#d5f268; color:#1e2e15; padding:2px 5px; border-radius:4px; font-size:7px; margin-left:6px;">{{ t('show.badge_upload') }}</span></a>
-      </div>
-      <div class="footer-col">
-        <h4>{{ t('show.col_discover') }}</h4>
-        <a href="/#how-it-works">{{ t('show.d1') }}</a>
-        <a href="/#website-samples">{{ t('show.d2') }}</a>
-        <a href="/showcase">{{ t('show.d3') }}</a>
-        <a href="/enquire">{{ t('show.d4') }}</a>
-        <a href="/enquire">{{ t('show.d5') }}</a>
-        <a href="/about">{{ t('foot.about') }}</a>
-      </div>
-      <div class="footer-col">
-        <h4>{{ t('show.col_touch') }}</h4>
-        <p style="font-size:10px; color:#9aa38e; line-height:1.7; margin:0 0 12px;">{{ t('show.touch_p') }}</p>
-        {% include 'newsletter-form.html' %}
-        <div style="font-size:10px; color:#9aa38e; line-height:1.8;">
-          <div><span style="color:#d5f268;">✉</span> {{ support_email }}</div>
-          <div><span style="color:#d5f268;">◉</span> {{ t('show.c_remote') }}</div>
-          <div><span style="color:#d5f268;">↗</span> {{ t('show.c_flow') }}</div>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>{{ t('show.copy1') }} <a href="https://www.openstreetmap.org/copyright" style="color:#8a9a7a;">OpenStreetMap</a> {{ t('show.copy2') }}</span>
-      <div class="legal">
-        <a href="/about">{{ t('show.privacy') }}</a>
-        <a href="/about">{{ t('show.terms') }}</a>
-        <a href="/sitemap.xml">{{ t('show.sitemap') }}</a>
-        <a href="/enquire">{{ t('show.chat') }}</a>
-      </div>
-    </div>
-  </div>
-</footer>{% include 'tawkto.html' %}
+<section class="gallery-callout"><div><h2>{{ t('show.call_h') }}</h2><p>{{ t('show.call_p') }}</p></div><a data-magnet class="public-btn" href="/enquire">{{ t('show.ask') }} ↗</a></section>{% include 'adsense-footer.html' %}</main>{% include 'footer-public.html' %}{% include 'tawkto.html' %}
 <script src="/static/carousel.js" defer></script><script src="/static/magnet.js" defer></script>
 <script src="/static/theme.js" defer></script>
 <script src="/static/motion.js" defer></script><script src="/static/pwa.js" defer></script>

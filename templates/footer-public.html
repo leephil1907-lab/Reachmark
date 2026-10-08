@@ -1,0 +1,37 @@
+<footer class="x-foot">
+  <div class="x-foot-in">
+    <div class="x-foot-brand">
+      <a href="/" aria-label="{{ t('common.home_aria') }}">
+        <img class="logo-on-light" src="/static/logo-primary.svg" alt="Reachmark">
+        <img class="logo-on-dark" src="/static/logo-inverse.svg" alt="">
+      </a>
+      <p>{{ t('home.foot_blurb') }}</p>
+    </div>
+    <div>
+      <h4>{{ t('home.foot_explore') }}</h4>
+      <nav>
+        <a href="/about">{{ t('nav.about') }}</a>
+        <a href="/reviews">{{ t('nav.reviews') }}</a>
+        <a href="/showcase">{{ t('foot.samples') }}</a>
+        <a href="/receptionist">{{ t('foot.receptionist') }}</a>
+      </nav>
+    </div>
+    <div>
+      <h4>{{ t('home.foot_started') }}</h4>
+      <nav>
+        <a href="/signup">{{ t('nav.signup') }}</a>
+        <a href="/signin">{{ t('nav.signin') }}</a>
+        <a href="/enquire">{{ t('home.cta_project') }}</a>
+        <a href="mailto:{{ support_email }}">{{ support_email }}</a>
+      </nav>
+    </div>
+  </div>
+  <div class="x-foot-bottom">
+    <span>{{ t('home.foot_copy', year='2026') }}</span>
+    <nav class="x-foot-legal">
+      <a href="/privacy">{{ t('foot.privacy') }}</a>
+      <a href="/terms">{{ t('foot.terms') }}</a>
+      <a href="/disclosure">{{ t('foot.disclosure') }}</a>
+    </nav>
+  </div>
+</footer>

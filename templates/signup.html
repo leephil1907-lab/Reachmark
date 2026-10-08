@@ -1,118 +1,63 @@
-<!doctype html><html lang="{{ locale }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create client account · Reachmark</title><meta name="csrf-token" content="{{ csrf_token() }}"><link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/xdesign.css"><style>
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;width:100%;max-width:100vw;overflow-x:hidden}
-body{font-family:'Manrope',Arial,sans-serif;background:#fbfbfb;color:#111314;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
-.auth-shell{width:100%;max-width:1060px;display:grid;grid-template-columns:1fr;background:#fff;border:1px solid #e2e7d6;border-radius:24px;overflow:hidden;box-shadow:0 24px 64px rgba(16,24,12,.12);min-width:0;margin:0 auto}
-.brand,.form{min-width:0;width:100%}
-.brand{position:relative;background:#0f1a0a;color:#eaf3de;padding:44px 40px;display:flex;flex-direction:column;overflow:hidden}
-.brand::before{content:'';position:absolute;inset:-40px;background:radial-gradient(ellipse at 28% 18%, #d5f268 0%, transparent 55%),radial-gradient(ellipse at 85% 82%, #1e3a0a 0%, transparent 52%);opacity:.35;pointer-events:none}
-.brand .logo{position:relative;display:inline-flex;align-items:center}
-.brand .logo img{height:34px}
-.eyebrow{position:relative;font:600 9px 'Manrope',sans-serif;letter-spacing:1.6px;color:#d5f268;display:flex;align-items:center;gap:8px;margin-top:34px}
-.eyebrow::before{content:'';width:18px;height:1px;background:#d5f268;opacity:.7}
-.brand h1{position:relative;font:700 32px/1.05 'Manrope',sans-serif;letter-spacing:-1.2px;margin:14px 0 12px;max-width:360px}
-.brand h1 span{color:#d5f268}
-.brand p{position:relative;font:400 12.5px/1.7 'Manrope',sans-serif;color:#9db48f;max-width:360px;margin:0}
-.points{position:relative;margin:22px 0 0;display:grid;gap:10px}
-.point{display:flex;align-items:center;gap:10px;font:600 11px 'Manrope',sans-serif;color:#cde0bc}
-.point span{width:26px;height:26px;border-radius:8px;background:rgba(213,242,104,.14);border:1px solid rgba(213,242,104,.22);display:grid;place-items:center;color:#d5f268;font-size:12px}
-.preview{position:relative;margin-top:22px;background:#ffffff;border:1px solid #e2e7d6;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;box-shadow:0 12px 28px rgba(0,0,0,.18);color:#1a2315}
-.preview img{width:56px;height:56px;border-radius:10px;object-fit:cover;border:1px solid #e2e7d6;background:#f7fbd9}
-.preview strong{font:700 11px 'Manrope',sans-serif;color:#0f1a0a}
-.preview small{font:500 10px 'Manrope',sans-serif;color:#6b7a5a}
-.trust{position:relative;margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px}
-.trust .stars{color:#d5f268;font-size:10px;letter-spacing:1px}
-.trust strong{font:700 11px 'Manrope',sans-serif;color:#eaf3de}
-.trust small{font:500 10px 'Manrope',sans-serif;color:#8aa07a}
-.form{padding:44px 42px;display:flex;flex-direction:column;justify-content:center;background:#fff}
-.form .top .eyebrow{color:#8c9c77;margin:0}
-.form .top .eyebrow::before{background:#a7b68e}
-.form h2{font:700 26px 'Manrope',sans-serif;letter-spacing:-1px;margin:10px 0 8px;color:#0f1a0a}
-.form p.lead{font:400 12px/1.6 'Manrope',sans-serif;color:#6b7a5a;margin:0}
-label{font:700 11px 'Manrope',sans-serif;color:#1a2315;margin:16px 0 7px;display:block}
-input{width:100%;padding:13px 16px;border:1px solid #dfe8cc;border-radius:12px;background:#fcfcf8;font:500 14px 'Manrope',sans-serif;color:#1a2315;outline:none;transition:border .2s, box-shadow .2s}
-input:focus{border-color:#cbe85b;box-shadow:0 0 0 4px rgba(213,242,104,.22);background:#fff}
+<!doctype html><html lang="{{ locale }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Create account · Reachmark</title><meta name="csrf-token" content="{{ csrf_token() }}"><link rel="stylesheet" href="/static/fonts.css"><style>
+*{box-sizing:border-box}html,body{margin:0;padding:0;width:100%;max-width:100vw;overflow-x:hidden}
+body{min-height:100vh;font-family:Manrope,Arial,sans-serif;background:#20251f;color:#f3f6f1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px;-webkit-font-smoothing:antialiased}
+#rm-progress{position:fixed;top:0;left:0;height:2px;width:0;background:#d5f268;z-index:200;pointer-events:none;transition:width .45s cubic-bezier(.22,1,.36,1),opacity .4s ease}
+#rm-progress.on{width:70%}#rm-progress.done{width:100%;opacity:0}
+.auth-logo{display:block;margin:0 auto 28px}.auth-logo img{height:32px}
+.auth-card{width:100%;max-width:420px;background:#fff;color:#20251f;border-radius:22px;padding:32px 28px 28px;box-shadow:0 28px 80px rgba(0,0,0,.35)}
+.auth-card h1{font:400 32px/1.15 'Instrument Serif',Georgia,serif;letter-spacing:-.03em;margin:0 0 8px}
+.auth-card .lead{margin:0 0 22px;font:500 14px/1.55 Manrope,sans-serif;color:#5c6358}
+label{display:block;font:700 11px Manrope,sans-serif;margin:14px 0 7px;color:#20251f}
+input{width:100%;padding:13px 14px;border:1px solid rgba(32,37,31,.12);border-radius:12px;background:#fbfcf8;font:500 14px Manrope,sans-serif;color:#20251f;outline:none;transition:border .2s,box-shadow .2s}
+input:focus{border-color:#cbe85b;box-shadow:0 0 0 4px rgba(213,242,104,.28);background:#fff}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-button[type=submit]{width:100%;margin-top:18px;padding:14px;background:#d5f268;border:1px solid #cbe85b;border-radius:12px;color:#0f1a0a;font:700 13px 'Manrope',sans-serif;cursor:pointer;transition:transform .15s, background .15s}
-button[type=submit]:hover{background:#c7e55b;transform:translateY(-1px)}
-button[type=submit]:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.auth-error{background:#f9e7e1;border:1px solid #e9c9bf;color:#8b3524;padding:12px;border-radius:10px;font:600 12px 'Manrope',sans-serif;display:none;margin-top:14px;line-height:1.5}
-.auth-ok{background:#eef6d1;border:1px solid #d8e9b8;color:#2d4a0a;padding:12px;border-radius:10px;font:600 12px 'Manrope',sans-serif;display:none;margin-top:14px}
-.auth-note{font:500 11px 'Manrope',sans-serif;color:#8a9976;margin-top:14px;text-align:center;line-height:1.6}
-.locale-select{font:700 12px Manrope,Arial,sans-serif;padding:8px 10px;border-radius:10px;border:1px solid #dfe8cc;background:#fff;color:#0f1a0a;cursor:pointer;margin-top:14px}
-.auth-note a{color:#1a3310;font-weight:700;text-decoration:underline;text-underline-offset:3px}
-.meta{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.meta span{font:600 9px 'Manrope',sans-serif;color:#6b7a5a;background:#f7f9f0;border:1px solid #eef1e4;padding:6px 8px;border-radius:20px}
-.social-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;box-sizing:border-box;padding:12px 16px;border:1px solid #747775;border-radius:12px;background:#ffffff;color:#1f1f1f;font:600 14px/1.2 'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;text-decoration:none;cursor:pointer;transition:background-color .15s,border-color .15s,box-shadow .15s;box-shadow:0 1px 2px rgba(0,0,0,.08)}
-.social-btn:hover{background:#f8fafd;border-color:#5e5e5e;box-shadow:0 1px 3px 1px rgba(60,64,67,.15)}
-.social-btn:active{background:#f1f3f4;box-shadow:none}
+button[type=submit]{width:100%;margin-top:18px;padding:14px;border:1px solid #cbe85b;border-radius:999px;background:#d5f268;color:#20251f;font:700 13px Manrope,sans-serif;cursor:pointer;transition:transform .15s,filter .15s}
+button[type=submit]:hover{filter:brightness(.97);transform:translateY(-1px)}
+button[type=submit]:disabled{opacity:.65;cursor:wait;transform:none}
+.auth-error{display:none;margin:0 0 14px;padding:12px;border-radius:12px;background:#f9e7e1;border:1px solid #e9c9bf;color:#8b3524;font:600 12px/1.5 Manrope,sans-serif}
+.auth-note{margin:16px 0 0;text-align:center;font:500 12px/1.6 Manrope,sans-serif;color:#5c6358}
+.auth-note a{color:#20251f;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:#8a918b;font:650 11px Manrope,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(32,37,31,.1)}
+.social-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:12px 16px;border:1px solid #747775;border-radius:999px;background:#fff;color:#1f1f1f;font:600 14px/1.2 Manrope,sans-serif;text-decoration:none;cursor:pointer;transition:background .15s,box-shadow .15s,transform .15s}
+.social-btn:hover{background:#f8fafd;box-shadow:0 1px 3px 1px rgba(60,64,67,.12);transform:translateY(-1px)}
 .social-btn svg{flex-shrink:0}
-@media(min-width:901px){.auth-shell{grid-template-columns:.95fr 1.05fr;min-height:620px}}
-@media(max-width:900px){
-  body{padding:12px 8px;align-items:flex-start}
-  .auth-shell{border-radius:18px;max-width:520px;box-shadow:0 8px 32px rgba(16,24,12,.08)}
-  .brand{padding:24px 20px 20px}
-  .brand .eyebrow{margin-top:14px}
-  .brand h1{font-size:24px;line-height:1.15;margin:8px 0}
-  .brand p{font-size:12px}
-  .points,.preview,.trust{display:none !important}
-  .form{padding:24px 18px}
-  .form h2{font-size:22px}
-  .field-row{grid-template-columns:1fr}
-  .who-grid{grid-template-columns:1fr !important}
-}
-</style><style>body{ -webkit-font-smoothing:antialiased; } .auth-note{ color:#1e2e15 !important; font-weight:500 !important; } p.lead{ color:#1e2e15 !important; } label{ color:#0f1a0a !important; } small{ color:#2d4a0a !important; }</style>
-</head><body>
-<div class="auth-shell">
-  <div class="brand">
-    <a href="/" class="logo" aria-label="Reachmark home"><img src="/static/logo-inverse.svg" alt="Reachmark"></a>
-    <div class="eyebrow">{{ t('au.s_eyebrow') }}</div>
-    <h1>{{ t('au.s_h1a') }}<br><span>{{ t('au.s_h1b') }}</span></h1>
-    <p>{{ t('au.s_p') }}</p>
-    <div class="points">
-      <div class="point"><span>✓</span> {{ t('au.s_pt1') }}</div>
-      <div class="point"><span>◎</span> {{ t('au.s_pt2') }}</div>
-      <div class="point"><span>↗</span> {{ t('au.s_pt3') }}</div>
+.locale-select{margin-top:18px;font:700 12px Manrope,sans-serif;padding:8px 10px;border-radius:999px;border:1px solid rgba(32,37,31,.12);background:#fff;color:#20251f;cursor:pointer}
+#verify-hint{display:none;margin:12px 0 0;padding:12px;border-radius:12px;background:#eef6d1;border:1px solid #d8e9b8;color:#2d4a0a;font:600 12px Manrope,sans-serif}
+#verify-hint button{background:none;border:0;padding:0;color:#1a3310;font:inherit;text-decoration:underline;cursor:pointer}
+@media(max-width:520px){.auth-card{padding:24px 18px}.field-row{grid-template-columns:1fr}.auth-card h1{font-size:26px}}
+</style></head><body>
+<div id="rm-progress" aria-hidden="true"></div>
+<a href="/" class="auth-logo" aria-label="Reachmark home"><img src="/static/logo-inverse.svg" alt="Reachmark"></a>
+<div class="auth-card">
+  <h1>{{ t('au.s_f_h') }}</h1>
+  <p class="lead">{{ t('au.s_lead') }}</p>
+  <div id="msg" role="alert" class="auth-error"></div>
+  <div id="oauth-wrap"><div id="oauth-btns">{% set oauth_mode = 'signup' %}{% include '_google_btn.html' %}</div></div>
+  <div class="divider">{{ t('au.o_or') }}</div>
+  <form id="signup-form" novalidate>
+    <label for="name">{{ t('au.s_name') }}</label>
+    <input id="name" name="name" maxlength="120" placeholder="Ada Lovelace" autocomplete="name">
+    <label for="email">{{ t('au.s_email') }}</label>
+    <input id="email" name="email" type="email" required maxlength="250" placeholder="you@company.com" autocomplete="email">
+    <div class="field-row">
+      <div><label for="password">{{ t('au.s_pw8') }}</label><input id="password" name="password" type="password" required minlength="8" maxlength="1024" autocomplete="new-password" placeholder="••••••••"></div>
+      <div><label for="confirm">{{ t('au.s_conf') }}</label><input id="confirm" type="password" required maxlength="1024" autocomplete="new-password" placeholder="••••••••"></div>
     </div>
-    <div class="preview"><img src="/static/samples/fintech-pulse-preview.jpg" alt=""><div><strong>Fintech Pulse · {{ t('au.s_live') }}</strong><br><small>{{ t('au.s_pv_s') }}</small></div><span style="margin-left:auto;background:#0f1a0a;color:#d5f268;font:700 9px 'Manrope',sans-serif;padding:6px 8px;border-radius:20px">{{ t('au.s_pv_tag') }}</span></div>
-    <div class="trust"><span class="stars">★★★★★</span><div><strong>{{ t('au.s_tr') }}</strong><br><small>{{ t('au.s_tr_s') }}</small></div><span style="margin-left:auto;background:#d5f268;color:#0f1a0a;font:700 9px 'Manrope',sans-serif;padding:6px 8px;border-radius:20px">{{ t('au.s_sec') }}</span></div>
-  </div>
-  <div class="form">
-    <div class="top"><div class="eyebrow">{{ t('au.s_f_eyebrow') }}</div><h2>{{ t('au.s_f_h') }}</h2><p class="lead">{{ t('au.s_lead') }}</p></div>{% include 'locale-switcher.html' %}
-    <div id="msg" role="alert" class="auth-error"></div>
-    <div id="verify-hint" style="display:none;background:#eef6d1;border:1px solid #d8e9b8;padding:12px;border-radius:10px;color:#2d4a0a;font:600 12px 'Manrope',sans-serif;margin-top:14px">{{ t('au.s_v1') }} <button type="button" onclick="requestVerify(event)" style="background:none;border:0;padding:0;color:#1a3310;font:inherit;text-decoration:underline;cursor:pointer">{{ t('au.s_resend') }}</button></div>
-    <div class="who" style="margin:16px 0 4px"><p style="font:700 12px 'Manrope',sans-serif;color:#0f1a0a;margin:0 0 8px">{{ t('au.o_who') }}</p>
-      <div class="who-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <button type="button" id="who-team" onclick="whoPick('team')" style="text-align:left;padding:12px 14px;border:2px solid #dfe8cc;border-radius:12px;background:#fcfcf8;cursor:pointer"><b style="font:700 13px 'Manrope',sans-serif;color:#0f1a0a">▦ {{ t('au.o_team') }}</b><br><small style="color:#6b7a5a">{{ t('au.o_team_d') }}</small></button>
-        <button type="button" id="who-me" onclick="whoPick('me')" style="text-align:left;padding:12px 14px;border:2px solid #7a9a3a;border-radius:12px;background:#f4fae6;cursor:pointer"><b style="font:700 13px 'Manrope',sans-serif;color:#0f1a0a">◍ {{ t('au.o_me') }}</b><br><small style="color:#6b7a5a">{{ t('au.o_me_d') }}</small></button>
-      </div>
-      <div id="who-team-go" style="display:none;margin-top:10px;padding:12px 14px;border-radius:12px;background:#0f1a0a;color:#eaf3de;font:600 12px 'Manrope',sans-serif"><a href="/login" style="color:#d5f268;font-weight:700">{{ t('au.o_goto') }} →</a></div>
-    </div>
-    <div id="oauth-wrap" style="display:block;margin-top:14px"><div style="display:flex;align-items:center;gap:10px;color:#8c9c77;font:600 11px 'Manrope',sans-serif"><span style="flex:1;height:1px;background:#e5ebd5"></span>{{ t('au.o_or') }}<span style="flex:1;height:1px;background:#e5ebd5"></span></div><div id="oauth-btns" style="display:grid;gap:8px;margin-top:10px">{% set oauth_mode = 'signup' %}{% include '_google_btn.html' %}</div></div>
-    <form id="signup-form" novalidate>
-      <label for="name">{{ t('au.s_name') }}</label>
-      <input id="name" name="name" maxlength="120" placeholder="Ada Lovelace" autocomplete="name">
-      <label for="email">{{ t('au.s_email') }}</label>
-      <input id="email" name="email" type="email" required maxlength="250" placeholder="you@company.com" autocomplete="email">
-      <div class="field-row">
-        <div><label for="password">{{ t('au.s_pw8') }}</label><input id="password" name="password" type="password" required minlength="8" maxlength="1024" autocomplete="new-password" placeholder="••••••••"></div>
-        <div><label for="confirm">{{ t('au.s_conf') }}</label><input id="confirm" type="password" required maxlength="1024" autocomplete="new-password" placeholder="••••••••"></div>
-      </div>
-      <button type="submit">{{ t('au.s_create') }}</button>
-    </form>
-    <p class="auth-note">{{ t('au.s_note1') }} <a href="/signin">{{ t('au.s_signin') }}</a> · <a href="/pricing">{{ t('au.s_plans') }}</a> · <a href="/">{{ t('foot.about') }}</a> · <a href="/terms">{{ t('foot.terms') }}</a> · <a href="/privacy">{{ t('foot.privacy') }}</a></p>
-    <p class="auth-note" style="font-size:10px">{{ t('au.s_priv') }}</p>
-    <div class="meta"><span>◎ {{ t('au.s_meta1') }}</span><span>⌁ {{ t('au.s_meta2') }}</span><span>↗ {{ t('au.s_meta3') }}</span><span>✓ {{ t('au.s_meta4') }}</span></div>
-  </div>
+    <button type="submit">{{ t('au.s_create') }}</button>
+  </form>
+  <div id="verify-hint">{{ t('au.s_v1') }} <button type="button" onclick="requestVerify(event)">{{ t('au.s_resend') }}</button></div>
+  <p class="auth-note">{{ t('au.s_note1') }} <a href="/signin">{{ t('au.s_signin') }}</a></p>
+  <p class="auth-note" style="font-size:11px">{{ t('au.s_priv') }} · <a href="/terms">{{ t('foot.terms') }}</a> · <a href="/privacy">{{ t('foot.privacy') }}</a></p>
+  {% include 'locale-switcher.html' %}
 </div>
 <script src="/static/i18n.js"></script>
 <script>
 var T_=window.T||function(k,f){return f;};
+(function(){var b=document.getElementById('rm-progress');if(!b)return;b.className='on';function d(){b.classList.add('done');setTimeout(function(){b.remove();},450);}if(document.readyState==='complete')d();else window.addEventListener('load',d);})();
 const form=document.getElementById('signup-form'),msg=document.getElementById('msg');
-async function requestVerify(e){e.preventDefault();const email=document.getElementById('email').value.trim();try{let r=await fetch('/api/auth/request-verification',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});let j=await r.json();alert(j.already_verified?T_('au.js_verified','verified'):T_('au.js_vsent','vsent'));}catch(err){alert(T_('au.js_noresend','noresend'))}}
-// Token comes from this page's own meta tag — never scrape another page,
-// whose Set-Cookie could race and overwrite the fresh client session (auto-logout bug).
 let csrfToken=document.querySelector('meta[name="csrf-token"]')?.content||'';
+async function requestVerify(e){e.preventDefault();const email=document.getElementById('email').value.trim();try{let r=await fetch('/api/auth/request-verification',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});let j=await r.json();alert(j.already_verified?T_('au.js_verified','verified'):T_('au.js_vsent','vsent'));}catch(err){alert(T_('au.js_noresend','noresend'))}}
 form.onsubmit=async e=>{
   e.preventDefault();
   const name=document.getElementById('name').value.trim();
@@ -124,14 +69,13 @@ form.onsubmit=async e=>{
   msg.style.display='none';
   const btn=form.querySelector('button');btn.disabled=true;btn.textContent=T_('au.js_creating','creating');
   try{
-        let r=await fetch('/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({name,email,password:pw})});
+    let r=await fetch('/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({name,email,password:pw})});
     let j=await r.json();
     if(!r.ok) throw new Error(j.error||T_('au.js_nocreate','nocreate'));
     if(j.needs_verification){document.getElementById('verify-hint').style.display='block'; msg.textContent=T_('au.js_vfirst','vfirst'); msg.style.display='block'; msg.style.background='#eef6d1'; msg.style.color='#2d4a0a'; msg.style.border='1px solid #d8e9b8'; setTimeout(()=>location.href=j.onboard||'/onboard',1400); return}
     location.href=j.onboard||'/onboard';
   }catch(err){msg.textContent=err.message;msg.style.display='block';btn.disabled=false;btn.textContent=T_('au.s_create','create');}
 };
-function whoPick(w){const t=w==='team';document.getElementById('who-team').style.borderColor=t?'#7a9a3a':'#dfe8cc';document.getElementById('who-team').style.background=t?'#f4fae6':'#fcfcf8';document.getElementById('who-me').style.borderColor=t?'#dfe8cc':'#7a9a3a';document.getElementById('who-me').style.background=t?'#fcfcf8':'#f4fae6';document.getElementById('who-team-go').style.display=t?'block':'none';form.style.display=t?'none':'block';}
 (function(){
   const q=new URLSearchParams(location.search).get('oauth');
   if(!q)return;
@@ -143,7 +87,7 @@ function whoPick(w){const t=w==='team';document.getElementById('who-team').style
   };
   msg.textContent=m[q]||T_('au.o_error','Google sign-up could not be completed. Please create your account below.');
   msg.style.display='block';
-  try{const u=window.location.pathname;window.history.replaceState({},document.title,u);}catch(e){}
+  try{window.history.replaceState({},document.title,window.location.pathname);}catch(e){}
 })();
 (async()=>{try{
   const r=await fetch('/api/auth/oauth');
@@ -151,7 +95,6 @@ function whoPick(w){const t=w==='team';document.getElementById('who-team').style
   const j=await r.json();
   const on=(j.providers||[]).filter(p=>p.configured);
   if(!on.length)return;
-  document.getElementById('oauth-wrap').style.display='block';
   document.getElementById('oauth-btns').innerHTML=on.map(p=>{
     if(p.id==='google'){
       return `<a href="/api/auth/oauth/google?mode=signup" class="social-btn" aria-label="Sign up with Google"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg><span>${T_('au.o_google','Continue with Google')}</span></a>`;

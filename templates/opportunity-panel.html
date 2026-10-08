@@ -1,14 +1,13 @@
 <section class="oe-board" id="oe-board" aria-label="Opportunity Engine">
   <div class="oe-board-head">
     <div>
-      <div class="eyebrow">Opportunity Engine</div>
-      <h1>Find the leak. Prove it. Sell the diagnosis.</h1>
-      <p>Discover → audit → opportunity → proof → contact → reply → proposal → payment → delivery → retention. A project is never counted as a proposal. Empty stages stay at zero. Paid clients count only Paid invoices.</p>
+      <div class="eyebrow">{{ t('ws.n_overview') }}</div>
+      <h1>{{ t('ws.pipe_h') }}</h1>
+      <p>{{ t('ws.pipe_p') }}</p>
     </div>
     <div class="button-group">
-      <button class="secondary" type="button" onclick="loadOpportunityEngine()">Refresh counts</button>
       <button class="primary" type="button" id="oe-run-queue" onclick="runOpportunityQueue()">{{ t('ws.oe_next') }}</button>
-      <button class="secondary" type="button" onclick="navigate('leads')">Open a lead and run a report</button>
+      <button class="secondary" type="button" onclick="loadOpportunityEngine()">{{ t('ws.an_ref') }}</button>
     </div>
   </div>
   <p class="oe-disclaimer" id="oe-disclaimer">Counts are live SQL totals from this workspace.</p>
@@ -28,9 +27,8 @@
       <p class="small muted">Only reports that have been generated appear here. Nothing is pre-filled.</p>
       <div id="oe-reports"><p class="small muted">No reports yet. Open a lead and run the Opportunity Engine.</p></div>
     </article>
-    <article class="card">
-      <div class="mini-eyebrow">Crew that owns each stage</div>
-      <h3>Agents produce artifacts, not decoration</h3>
+    <details class="oe-crew-fold">
+      <summary>Who produces each artefact</summary>
       <ul class="oe-crew">
         <li><b>Scout</b><span>Discover businesses</span></li>
         <li><b>Verifier</b><span>Validate listing, contact and site data</span></li>
@@ -43,6 +41,6 @@
         <li><b>Builder</b><span>Produce the concept that was sold</span></li>
         <li><b>Account</b><span>Keep the resulting client on record</span></li>
       </ul>
-    </article>
+    </details>
   </div>
 </section>

@@ -9,6 +9,20 @@
     else fn();
   }
   ready(function () {
+    /* Page load bar — lime hairline, then gone. */
+    var bar = document.getElementById('rm-progress');
+    if (bar) {
+      if (reduce) bar.remove();
+      else {
+        bar.classList.add('on');
+        var finish = function () {
+          bar.classList.add('done');
+          setTimeout(function () { if (bar.parentNode) bar.parentNode.removeChild(bar); }, 450);
+        };
+        if (document.readyState === 'complete') finish();
+        else window.addEventListener('load', finish);
+      }
+    }
     /* Mobile menu. */
     var btn = document.getElementById('pub-menu-btn'), head = document.getElementById('pub-head');
     if (btn && head) {

@@ -165,6 +165,8 @@ class ChiefRouteTests(CrewBase):
         self.assertIn('businesses saved', out['reply'])
 
     def test_workspace_shows_chat_console(self):
+        with self.client.session_transaction() as sess:
+            sess['owner'] = True
         body = self.client.get('/workspace').data.decode()
         for needle in ('chief-log', 'chief-form', 'crew-chat.js', 'Talk to Chief'):
             self.assertIn(needle, body)

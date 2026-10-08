@@ -49,23 +49,6 @@
     <a class="x-btn ghost" href="/">{{ t('src.home') }}</a>
   </p>
 </main>
-<footer class="x-foot">
-  <div class="x-foot-in">
-    <div>
-      <img class="logo-on-light" src="/static/logo-primary.svg" alt="Reachmark"><img class="logo-on-dark" src="/static/logo-inverse.svg" alt="">
-      <p>{{ t('home.foot_blurb') }}</p>
-    </div>
-    <div>
-      <h4>{{ t('home.foot_explore') }}</h4>
-      <nav>
-        <a href="/about">{{ t('nav.about') }}</a>
-        <a href="/reviews">{{ t('nav.reviews') }}</a>
-        <a href="/pricing">{{ t('nav.plans') }}</a>
-        <a href="/enquire">{{ t('nav.enquire') }}</a>
-      </nav>
-    </div>
-  </div>
-  <div class="x-foot-bottom">{{ t('home.foot_copy', year='2026') }}</div>
-</footer>
+{% include 'footer-public.html' %}
 </body>
 </html>

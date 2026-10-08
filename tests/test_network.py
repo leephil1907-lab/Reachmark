@@ -350,10 +350,12 @@ class OAuthTests(NetworkBase):
         r = self.client.get('/signup')
         self.assertEqual(r.status_code, 200)
         body = r.data.decode()
-        for marker in ('id="who-team"', 'id="who-me"', 'id="oauth-wrap"', 'whoPick(',
-                       'Who will be using Reachmark?', 'Continue with Google',
+        for marker in ('id="oauth-wrap"', 'Continue with Google',
                        '/api/auth/oauth/google?mode=signup'):
             self.assertIn(marker, body)
+        self.assertNotIn('Workspace plans', body)
+        self.assertNotIn('Who will be using Reachmark?', body)
+        self.assertNotIn('id="who-team"', body)
 
     def test_signin_page_has_oauth_mount_and_logic(self):
         r = self.client.get('/signin')
@@ -361,3 +363,5 @@ class OAuthTests(NetworkBase):
         body = r.data.decode()
         for marker in ('id="oauth-btns"', 'URLSearchParams', '/api/auth/oauth'):
             self.assertIn(marker, body)
+        self.assertNotIn('Workspace plans', body)
+        self.assertNotIn('Who will be using Reachmark?', body)
