@@ -65,10 +65,8 @@ class MotionTests(unittest.TestCase):
 
     def test_homepage_is_a_live_illustrator(self):
         body = self.client.get('/').get_data(as_text=True)
-        for needle in ('data-pipeline', 'Watch a stranger become a customer',
-                       'pipeline-dots', 'data-count="10"', 'data-count="8"',
-                       'data-count="6"', 'Illustrated demo of the real crew',
-                       'data-magnet'):
+        for needle in ('x-aurora', 'data-split', 'x-pipe',
+                       'x-audit-form', 'x-masonry', 'x-cmd'):
             self.assertIn(needle, body)
 
     def test_no_dead_header_css_left_on_pricing(self):
