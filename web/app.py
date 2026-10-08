@@ -221,27 +221,18 @@ def too_big(e): return jsonify(error=_t('er_051', locale_now())),413
 def home():
     base=settings()['public_base_url'].rstrip('/')
     canonical = (base + '/') if base else None
+    from web.public_url import SEO_HOME_DESCRIPTION, SEO_HOME_KEYWORDS, SEO_HOME_TITLE, faq_schema, organization_schema, website_schema
     seo = {
-        'title': 'Reachmark: Find Businesses Losing Customers Online',
-        'description': 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.',
-        'keywords': 'website audit, local business websites, Digital Opportunity Report, Reachmark',
+        'title': SEO_HOME_TITLE,
+        'description': SEO_HOME_DESCRIPTION,
+        'keywords': SEO_HOME_KEYWORDS,
         'canonical': canonical,
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
     }
     gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
-    from web.public_url import organization_schema
     origin = base or request.url_root.rstrip('/')
-    structured=[organization_schema(origin, seo['description']),{
-        '@context':'https://schema.org','@type':'WebSite','name':'Reachmark','url': origin,
-        'potentialAction': {'@type':'SearchAction','target': origin + '/showcase?q={search_term_string}', 'query-input':'required name=search_term_string'}
-    },{
-        '@context':'https://schema.org','@type':'BreadcrumbList','itemListElement':[
-            {'@type':'ListItem','position':1,'name':'Home','item': base or request.url_root.rstrip('/')},
-            {'@type':'ListItem','position':2,'name':'Website samples','item': (base or request.url_root.rstrip('/')) + '/showcase'},
-            {'@type':'ListItem','position':3,'name':'Enquire','item': (base or request.url_root.rstrip('/')) + '/enquire'}
-        ]
-    }]
+    structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description']), faq_schema()]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
     gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'  # second Google tag alongside GA4
     gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
@@ -280,20 +271,17 @@ def about():
     base=settings()['public_base_url'].rstrip('/')
     canonical = (base + '/about') if base else None
     seo = {
-        'title': 'About Reachmark — World-class website designer | Global discovery & 3D previews',
-        'description': 'Reachmark is a world-class website designer — Figma-inspired, Framer-smooth. Global OpenStreetMap discovery, honest website health checks, live 3D previews. 10 templates, crystal green design.',
-        'keywords': 'about Reachmark, world-class website designer, OpenStreetMap, website health check, Figma to website',
+        'title': 'About Reachmark — Find potential. Make your mark.',
+        'description': 'Reachmark is a website diagnosis studio at reachmarkdigital.xyz. We read public sites, write Digital Opportunity Reports of measured observations, and build or repair the pages that lose enquiries.',
+        'keywords': 'Reachmark, Reachmark Digital, website diagnosis, Digital Opportunity Report',
         'canonical': canonical,
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
     }
     gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
-    from web.public_url import organization_schema
+    from web.public_url import organization_schema, website_schema
     origin = base or request.url_root.rstrip('/')
-    structured=[organization_schema(origin, seo['description']),{
-        '@context':'https://schema.org','@type':'WebSite','name':'Reachmark','url': origin,
-        'potentialAction': {'@type':'SearchAction','target': origin + '/showcase?q={search_term_string}', 'query-input':'required name=search_term_string'}
-    }]
+    structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description'])]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
     gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'  # second Google tag alongside GA4
     gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification

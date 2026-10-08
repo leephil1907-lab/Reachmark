@@ -21,6 +21,11 @@
           head.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); btn.focus();
         }
       });
+      document.addEventListener('click', function (e) {
+        if (!head.classList.contains('open')) return;
+        if (head.contains(e.target)) return;
+        head.classList.remove('open'); btn.setAttribute('aria-expanded', 'false');
+      });
     }
     /* Scroll reveals (+ legacy premium hooks, harmless if already handled). */
     var revealEls = document.querySelectorAll('[data-motion], .premium-reveal:not(.in), .premium-stagger:not(.in)');

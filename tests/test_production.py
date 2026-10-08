@@ -111,11 +111,18 @@ class PWAAndManifestTests(unittest.TestCase):
     def test_app_identity_is_unchanged(self):
         """The application name, description and icons belong to the owner — the crew never edits them."""
         manifest = self.manifest()
-        self.assertEqual(manifest['name'], 'Reachmark \u2014 Discover Business Potential')
+        self.assertEqual(manifest['name'], 'Reachmark')
         self.assertEqual(manifest['short_name'], 'Reachmark')
-        self.assertIn('Discover businesses worldwide', manifest['description'])
+        self.assertIn('Digital Opportunity Report', manifest['description'])
         home = self.client.get('/').get_data(as_text=True)
-        self.assertIn('Reachmark: Find Businesses Losing Customers Online', home)
+        self.assertIn('Reachmark — Find potential. Make your mark.', home)
+        self.assertIn('apple-mobile-web-app-title', home)
+        self.assertIn('application-name', home)
+        self.assertIn('/static/apple-touch-icon-180.png', home)
+        self.assertIn('/static/manifest.webmanifest', home)
+        self.assertIn('FAQPage', home)
+        self.assertIn('ProfessionalService', home)
+        self.assertNotIn('SearchAction', home)
 
 
 class ProductionTests(unittest.TestCase):
@@ -196,7 +203,7 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
     tearDown=test_app.ProspectTests.tearDown
     def test_home_is_a_slim_multipage_hub(self):
         home=self.client.get('/').get_data(as_text=True)
-        self.assertIn('Reachmark \u2014 Find Potential. Make Your Mark.',home)
+        self.assertIn('Reachmark — Find potential. Make your mark.',home)
         for path in ('/showcase','/receptionist','/reviews','/about','/enquire','/signin','/signup'):
             self.assertIn(f'href="{path}"',home,path)
         self.assertNotIn('I hunt missing websites',home)

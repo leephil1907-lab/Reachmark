@@ -108,12 +108,18 @@ class PublicAuditLogicTests(unittest.TestCase):
         out = preview_leaks('https://example.com', observe_fn=fake_observe)
         self.assertTrue(out['measured'])
         self.assertFalse(out['full_report'])
-        self.assertNotIn('forecast', (out.get('label') or '').lower() + ' revenue')
+        self.assertIn('not a revenue forecast', (out.get('label') or '').lower())
         self.assertLessEqual(out['leak_count'], 3)
         self.assertTrue(out['leaks'])
         for leak in out['leaks']:
             self.assertIn('title', leak)
             self.assertIn('leak', leak)
+        story = out.get('narrative') or ''
+        self.assertIn('https://example.com', story)
+        self.assertIn('HTTP 200', story)
+        self.assertTrue(any(leak['title'] in story for leak in out['leaks']))
+        self.assertIn('not a revenue forecast', story.lower())
+        self.assertNotIn('will earn', story.lower())
 
 
 if __name__ == '__main__':

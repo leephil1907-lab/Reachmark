@@ -15,12 +15,23 @@ class PublicUrlTests(unittest.TestCase):
         self.assertIn('zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', tokens)
 
     def test_support_email_and_organization_schema(self):
-        from web.public_url import organization_schema, support_email
+        from web.public_url import faq_schema, organization_schema, support_email, website_schema
         self.assertEqual(support_email(), 'support@reachmarkdigital.xyz')
         org = organization_schema('https://reachmarkdigital.xyz')
         self.assertEqual(org['@type'], 'ProfessionalService')
         self.assertEqual(org['email'], 'support@reachmarkdigital.xyz')
         self.assertEqual(org['contactPoint'][0]['email'], 'support@reachmarkdigital.xyz')
+        self.assertIn('Reachmark Digital', org['alternateName'])
+        site = website_schema('https://reachmarkdigital.xyz')
+        self.assertEqual(site['@type'], 'WebSite')
+        self.assertNotIn('potentialAction', site)
+        faq = faq_schema()
+        self.assertEqual(faq['@type'], 'FAQPage')
+        blob = str(faq)
+        self.assertIn('support@reachmarkdigital.xyz', blob)
+        self.assertIn('$0', blob)
+        self.assertNotIn('4.8', blob)
+        self.assertNotIn('127 reviews', blob)
 
     def test_whatsapp_url_from_digits_or_link(self):
         from web.public_url import whatsapp_url

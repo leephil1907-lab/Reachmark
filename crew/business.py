@@ -226,9 +226,15 @@ PROCESS = [
 CONTACT = {
     'enquiry_path': '/enquire',
     'receptionist_path': '/receptionist',
-    'pricing_path': '/about#pricing',
+    'pricing_path': '/pricing',
     'showcase_path': '/showcase',
     'reviews_path': '/reviews',
+    'website': 'https://reachmarkdigital.xyz',
+    'support_email': 'support@reachmarkdigital.xyz',
+    'whatsapp': 'https://wa.me/14473227700',
+    'signup_path': '/signup',
+    'signin_path': '/signin',
+    'app_path': '/app',
 }
 
 VOICE = {

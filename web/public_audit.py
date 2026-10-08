@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 import uuid
 
 from flask import jsonify, render_template, request, session
@@ -77,6 +78,52 @@ def _normalize_url(raw):
     return url[:500]
 
 
+def _plain(text, limit=140):
+    text = re.sub(r'<[^>]+>', '', text or '')
+    text = re.sub(r'\s+', ' ', text).strip()
+    if len(text) > limit:
+        return text[:limit].rstrip() + '…'
+    return text
+
+
+def leak_narrative(url, observations, leaks):
+    """Plain-language account of what this fetch actually read. Not a forecast."""
+    target = _plain(url or '', 180)
+    if not observations.get('ok'):
+        reason = _plain(observations.get('reason') or 'The page did not respond.', 220)
+        return (
+            f'We could not finish a public read of {target}. {reason} '
+            'That is a measured miss, not a score and not a revenue forecast.'
+        )
+    signals = observations.get('signals') or {}
+    final = _plain(observations.get('final_url') or url or '', 180)
+    bits = [f'We fetched {final}.']
+    status = observations.get('status')
+    ms = observations.get('ms')
+    if status is not None:
+        if isinstance(ms, int):
+            bits.append(f'The server answered HTTP {status} in {ms} ms.')
+        else:
+            bits.append(f'The server answered HTTP {status}.')
+    title = _plain(signals.get('title') or '', 120)
+    if title:
+        bits.append(f'The page title we read was “{title}”.')
+    if observations.get('https') is False:
+        bits.append('The response was not over HTTPS.')
+    words = signals.get('word_count')
+    if isinstance(words, int) and words >= 0:
+        bits.append(f'The page read contained about {words} visible words.')
+    if leaks:
+        titles = ', '.join(_plain(item.get('title') or '', 80) for item in leaks if item.get('title'))
+        if titles:
+            bits.append(f'On this check we labelled these gaps: {titles}.')
+        bits.append('Each line below is what the fetch actually showed — not a guess at lost sales.')
+    else:
+        bits.append('None of the labelled leak checks fired on the page we read.')
+    bits.append('This is not a revenue forecast. The full Digital Opportunity Report stays behind an account.')
+    return ' '.join(bits)
+
+
 def preview_leaks(url, observe_fn=None):
     """Return the public payload for one URL. Pure enough to unit-test with a stub."""
     from web.services import classify
@@ -102,6 +149,7 @@ def preview_leaks(url, observe_fn=None):
             'key': key,
             'title': copy.get('title') or key,
             'leak': copy.get('leak') or gap.get('reason') or '',
+            'evidence': gap.get('reason') or '',
             'weight': int(gap.get('weight') or 0),
             'source': gap.get('source') or 'observation',
         })
@@ -120,6 +168,7 @@ def preview_leaks(url, observe_fn=None):
         'reason': reason if not observations.get('ok') else '',
         'leaks': top,
         'leak_count': len(top),
+        'narrative': leak_narrative(url, observations, top),
         'measured': True,
         'full_report': False,
         'label': 'Measured observations from this check. Not a revenue forecast.',

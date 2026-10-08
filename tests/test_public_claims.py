@@ -32,12 +32,15 @@ def test_sample_sites_are_described_as_concepts_not_client_work():
 def test_home_leads_with_the_report_not_designer_praise():
     home = (ROOT / "templates" / "home.html").read_text(encoding="utf-8")
     app = (ROOT / "web" / "app.py").read_text(encoding="utf-8")
+    seo = (ROOT / "web" / "public_url.py").read_text(encoding="utf-8")
     home_fn = app.split("def home():", 1)[1].split("def workspace():", 1)[0]
     assert "World-class website designer" not in home_fn
     assert "8 premium" not in home_fn
     assert "no Google API" not in home_fn
-    assert "Find Businesses Losing Customers Online" in home_fn
-    assert "Digital Opportunity Report" in home_fn
+    assert "SEO_HOME_TITLE" in home_fn
+    assert "Find potential. Make your mark." in seo
+    assert "Digital Opportunity Report" in seo
+    assert "Find businesses with weak websites" in seo
     assert 'id="sample-report"' in home
     assert "adsense" not in home.lower()
     assert 'href="/sample-report"' in home

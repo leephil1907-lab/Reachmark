@@ -17,7 +17,7 @@ tags: price, cost, how much, budget, quote, fee, rate, cheaper, cheap, affordabl
 Q: how much does a website cost
 A: Published tiers: Audit $497 one-time — full technical and design presence audit, gap analysis and actionable roadmap. Build $3,500 — complete custom website with CMS, mobile responsive, SEO ready, interactive 3D preview, 3 revisions and launch support. Care $1,800 per year — ongoing hosting, security, performance monitoring, monthly updates and priority support. Outreach $6,000 per campaign — full-cycle business discovery, concept generation, reviewed outreach workflows and pipeline management.
 Q: is there a cheaper option
-A: Audit is the published entry tier at $497 one-time — full presence review, technical gap analysis and an actionable roadmap. If budget is tight, say so in the enquiry and the studio answers with a tailored estimate rather than a discount.
+A: Two published entry points. The workspace Free plan is $0 — samples, enquiry, and your own documents. Studio work starts at Audit $497 one-time — full presence review, technical gap analysis and an actionable roadmap. If budget is tight, say so in the enquiry and the studio answers with a tailored estimate rather than a discount.
 Q: is the price fixed
 A: Audit ($497), Build ($3,500), Care ($1,800/yr), and Outreach ($6,000/campaign) are published figures. Custom scopes outside those tiers are quoted after scope is agreed — nothing is charged until you approve scope.
 
@@ -68,9 +68,17 @@ A: The published samples cover a café, a wellness studio, renovation and trades
 ## topic: how to get in touch
 tags: contact, email, call, book, talk, human, chat, form, whatsapp
 Q: how do i contact the studio
-A: Use the enquiry form at /enquire (name, email, what you need), email support@reachmarkdigital.xyz, or the WhatsApp icon on the site. If live chat is online you can also chat there. This assistant can take your details and pass them to the studio owner directly.
+A: Use the enquiry form at https://reachmarkdigital.xyz/enquire (name, email, what you need), email support@reachmarkdigital.xyz, or the WhatsApp icon which opens https://wa.me/14473227700. If live chat is online you can also chat there. This assistant can take your details and pass them to the studio owner directly. No phone number, street address, or opening hours are published.
 Q: can i talk to a person
 A: Yes. Ask for a human here and your message is queued for the studio owner, or send the /enquire form and the studio replies with a tailored estimate.
+Q: what is your email
+A: The published support mailbox is support@reachmarkdigital.xyz. Outgoing mail is sent from the studio Gmail once the owner has set it up — visitors write to support@reachmarkdigital.xyz.
+Q: what is your whatsapp
+A: The published WhatsApp link is https://wa.me/14473227700. The public site shows an icon only, with no text label. Autopilot never sends WhatsApp.
+Q: what is your phone number
+A: No phone number is published. Email support@reachmarkdigital.xyz, use WhatsApp at https://wa.me/14473227700, or send the enquiry form at /enquire.
+Q: where are you located
+A: No street address or opening hours are published. Reachmark is a website studio at https://reachmarkdigital.xyz and serves clients worldwide.
 
 ## topic: outreach ethics and data
 tags: data, privacy, gdpr, leads, scraping, osm, legal, consent, unsubscribe
@@ -106,4 +114,45 @@ A: I am an assistant. I answer only from facts published on this site — the ti
 Q: do you offer refunds or discounts
 A: There is no published refund or discount policy. Ask for a human and the studio owner will answer directly.
 Q: what is the cheapest option
-A: The published entry tier is Audit at $497 one-time. If budget is tight, say so in the enquiry — the studio answers with a tailored estimate.
+A: The workspace Free plan is $0 — samples, enquiry, and your own documents. Studio work starts at Audit $497 one-time. If budget is tight, say so in the enquiry — the studio answers with a tailored estimate rather than a discount.
+
+## topic: website and domain
+tags: website, domain, url, site, reachmarkdigital, reachmark, address of the site
+Q: what is your website
+A: The public site is https://reachmarkdigital.xyz. That is the brand URL. Create an account at /signup, sign in at /signin, and open the workspace at /workspace after you sign in.
+Q: what is reachmark digital
+A: Reachmark Digital is the public name of the studio whose site is https://reachmarkdigital.xyz. The product is website diagnosis: a Digital Opportunity Report of measured observations, then build or repair work you approve.
+
+## topic: workspace plans
+tags: workspace, starter, pro, free plan, monthly, subscription, $19, $59, sign up, account
+Q: what are the workspace plans
+A: Published workspace plans on /pricing: Free $0 — samples, enquiry, and your own documents. Starter $19 per month (₦30,000) — find businesses, run audits, export your list. Pro $59 per month (₦90,000) — draft outreach and send, with your approval every time. These are workspace subscriptions, separate from studio website work (Audit $497, Build $3,500, Care $1,800/year, Outreach $6,000/campaign).
+Q: is there a free plan
+A: Yes. Free is $0 and covers samples, enquiry, and your own documents. Create an account at https://reachmarkdigital.xyz/signup.
+Q: how do i create an account
+A: Open https://reachmarkdigital.xyz/signup. Existing accounts sign in at /signin. After you sign in, the workspace is at /workspace. Unsigned visits to /workspace are sent to /signin.
+Q: how much is starter
+A: Starter is $19 per month (₦30,000). It covers finding businesses, running audits, and exporting your list.
+Q: how much is pro
+A: Pro is $59 per month (₦90,000). It covers drafting outreach and sending, with your approval every time.
+
+## topic: digital opportunity report
+tags: leak, leaks, audit, opportunity report, diagnosis, forecast, check a website
+Q: what is a digital opportunity report
+A: A Digital Opportunity Report is a dated write-up of measured observations from a public page fetch — status, HTTPS, viewport, contact paths, and similar signals. Observation of a gap is not proof a business wants work, and it is not a revenue forecast.
+Q: what is the leak check
+A: The public home page can read a website URL and return up to three measured observations, labelled as not a revenue forecast. The full Digital Opportunity Report stays behind an account at /signup.
+Q: do you guarantee rankings or revenue
+A: No. No rankings, traffic, or revenue outcome is promised. Website checks are observations at a point in time.
+
+## topic: founder and google business
+tags: founder, ernest, micheal, google business, maps, hours, address
+Q: who is the founder
+A: Ernest Micheal is published as founder of Reachmark on the /about page.
+Q: do you have a google business profile
+A: A Google Business profile is in use for Reachmark. No Google Maps URL, street address, or opening hours are published on https://reachmarkdigital.xyz. Email support@reachmarkdigital.xyz or use WhatsApp.
+
+## topic: app
+tags: app, install, pwa, download, phone
+Q: is there an app
+A: Yes. Get the app from https://reachmarkdigital.xyz/app. It is the Reachmark workspace as an installable web app, with the Reachmark icon and the title Reachmark. There is no separate native store listing published here.

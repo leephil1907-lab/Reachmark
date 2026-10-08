@@ -316,6 +316,21 @@ class ReceptionistTests(CrewBase):
         self.assertIn('3,500', result['reply'])
         self.assertIn('497', result['reply'])
 
+    def test_receptionist_knows_the_live_site(self):
+        cases = [
+            ('what is your website', 'reachmarkdigital.xyz'),
+            ('what is your email', 'support@reachmarkdigital.xyz'),
+            ('what is your whatsapp', 'wa.me/14473227700'),
+            ('what are the workspace plans', '$19'),
+            ('is there a free plan', '$0'),
+            ('what is a digital opportunity report', 'measured observations'),
+            ('what is your phone number', 'No phone number is published'),
+        ]
+        for question, needle in cases:
+            result = answer(module.db, module.now, question, settings=lambda: {})
+            self.assertNotIn('will not guess', result['reply'], question)
+            self.assertIn(needle, result['reply'], question)
+
     def test_unknown_question_hands_off_instead_of_inventing(self):
         result = answer(module.db, module.now, 'do you offer a refund if i am unhappy with the llama?', settings=lambda: {})
         self.assertIn('handoff', result['actions'])
