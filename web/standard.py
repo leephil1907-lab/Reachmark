@@ -195,8 +195,10 @@ def register_standard(app, db, log, settings_fn=None):
     # --- Deploy check: preflight for live deployment (Reachmark tools/deploy-check.mjs parity) ---
     @app.get('/api/deploy-check')
     def deploy_check():
-        # Owner or CI with header? Allow owner or if no owner configured (local)
-        # Public but noindex
+        # Deployment/runtime configuration is sensitive. Keep this endpoint owner-only
+        # whenever real owner credentials are configured; local development stays readable.
+        if not is_owner() and (os.getenv('OWNER_PASSWORD_HASH') or os.getenv('DASHBOARD_PASSWORD')):
+            return jsonify(error=_t('er_083', locale_now())),401
         checks = []
         def add(name, ok, detail, required=False):
             checks.append({'name': name, 'ok': bool(ok), 'detail': detail, 'required': required})
