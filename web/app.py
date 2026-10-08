@@ -368,7 +368,7 @@ def sitemap():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
     now = datetime.now(timezone.utc).date().isoformat()
     # Core public pages + all 10 showcase samples — every indexable route for Google
-    paths = ['/','/about','/showcase','/enquire','/receptionist','/reviews','/pricing','/need','/sourcing','/sending','/sample-report','/app','/signup'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
+    paths = ['/','/about','/showcase','/enquire','/receptionist','/reviews','/pricing','/need','/sourcing','/sending','/sample-report','/privacy','/terms','/disclosure'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
     urls = []
     for path in paths:
         loc = escape(base+path)
