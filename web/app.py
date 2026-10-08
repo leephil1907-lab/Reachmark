@@ -121,9 +121,14 @@ def persist_locale_cookie(response):
 
 @app.context_processor
 def inject_google_verification():
-    from web.public_url import google_site_tokens
+    from web.public_url import google_maps_browser_key, google_site_tokens, whatsapp_url
     tokens = google_site_tokens()
-    return {'google_verifications': tokens, 'google_verification': tokens[0] if tokens else ''}
+    return {
+        'google_verifications': tokens,
+        'google_verification': tokens[0] if tokens else '',
+        'google_maps_key': google_maps_browser_key(),
+        'whatsapp_url': whatsapp_url(),
+    }
 
 @app.context_processor
 def inject_i18n():

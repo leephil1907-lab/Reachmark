@@ -59,6 +59,16 @@ class ProspectTests(unittest.TestCase):
         self.assertIn(b'name="google-site-verification"', page.data)
         self.assertIn(b'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', page.data)
 
+    def test_whatsapp_icon_only_when_configured(self):
+        with patch.dict(os.environ, {'WHATSAPP_URL': ''}):
+            home = self.client.get('/').data.decode()
+            self.assertNotIn('wa-float', home)
+        with patch.dict(os.environ, {'WHATSAPP_URL': '2348012345678'}):
+            home = self.client.get('/').data.decode()
+            self.assertIn('class="wa-float"', home)
+            self.assertIn('https://wa.me/2348012345678', home)
+            self.assertNotIn('Chat on WhatsApp', home)
+
     def test_search_console_html_file_is_served_at_root(self):
         name = 'googled647aceebb4093df.html'
         page = self.client.get('/' + name)

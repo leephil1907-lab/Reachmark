@@ -90,3 +90,26 @@ $('#map-filter').onchange=drawWorldLeads;
 $('#map-scan-form').onsubmit=async e=>{e.preventDefault();if(worldBusy||!worldMap)return;const bounds=worldBounds(),raw=worldMap.getBounds();const height=(bounds[2]-bounds[0])*111.32,width=(raw.getEast()-raw.getWest())*111.32*Math.max(.01,Math.cos(worldMap.getCenter().lat*Math.PI/180));if(height>25||width>25||raw.getEast()-raw.getWest()>2){mapMessage(T_('wsj.mp_zoom','Zoom in before scanning: choose an area at most 25 km wide and high.'));return}if(!confirm(T_('wsj.mp_scanq','Scan the visible rectangle for {c}? Other categories and unmapped businesses are not included.').replace('{c}',$('#map-category').value)))return;worldBusy=true;$('#map-start').disabled=true;try{await api('/api/map/scans','POST',{bounds,category:$('#map-category').value,label:$('#map-label').value.trim()});await loadMapScans();mapMessage(T_('wsj.mp_started','Scan started. Progress is saved per cell; you can leave this page and return.'))}catch(e){mapMessage(e.message)}finally{worldBusy=false;$('#map-start').disabled=false}};
 setInterval(async()=>{if(!document.hidden&&$('#page-global').classList.contains('active')){await loadMapScans();drawWorldLeads()}},5000);
 if(location.hash==='#global')openWorldMap();
+(function bootGooglePlaces(){
+ const key=window.RM_GOOGLE_MAPS_KEY;
+ const input=document.getElementById('map-search');
+ if(!key||!input)return;
+ const s=document.createElement('script');
+ s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(key)+'&libraries=places';
+ s.async=true;
+ s.onload=function(){
+  if(!window.google||!google.maps||!google.maps.places)return;
+  const ac=new google.maps.places.Autocomplete(input,{fields:['geometry','name','formatted_address'],types:['geocode']});
+  ac.addListener('place_changed',function(){
+   const place=ac.getPlace();
+   if(!place||!place.geometry||!place.geometry.location)return;
+   const lat=place.geometry.location.lat(),lng=place.geometry.location.lng();
+   if(!worldMap)return;
+   worldMap.setView([lat,lng],14);
+   const label=place.formatted_address||place.name||'';
+   if($('#map-label'))$('#map-label').value=String(label).slice(0,150);
+   mapMessage(T_('wsj.mp_matched','Matched: {p}{c}. Adjust the viewport before scanning.').replace('{p}',label).replace('{c}',''));
+  });
+ };
+ document.head.appendChild(s);
+})();

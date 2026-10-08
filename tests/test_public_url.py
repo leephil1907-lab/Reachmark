@@ -14,6 +14,15 @@ class PublicUrlTests(unittest.TestCase):
         tokens = google_site_tokens()
         self.assertIn('zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', tokens)
 
+    def test_whatsapp_url_from_digits_or_link(self):
+        from web.public_url import whatsapp_url
+        with patch.dict(os.environ, {'WHATSAPP_URL': '2348012345678'}):
+            self.assertEqual(whatsapp_url(), 'https://wa.me/2348012345678')
+        with patch.dict(os.environ, {'WHATSAPP_URL': 'https://wa.me/2348012345678'}):
+            self.assertEqual(whatsapp_url(), 'https://wa.me/2348012345678')
+        with patch.dict(os.environ, {'WHATSAPP_URL': ''}):
+            self.assertEqual(whatsapp_url(), '')
+
     def test_railway_is_ephemeral(self):
         self.assertTrue(is_ephemeral_public_url('https://reachmark-production.up.railway.app'))
         self.assertTrue(is_ephemeral_public_url('https://localhost:8000'))

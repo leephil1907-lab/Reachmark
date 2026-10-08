@@ -5,6 +5,7 @@ When PUBLIC_BASE_URL is missing or still points at Railway, use the owned
 domain. An explicit https:// URL on any other host still wins.
 """
 import os
+import re
 from urllib.parse import urlparse
 
 BRAND_PUBLIC_URL = 'https://reachmarkdigital.xyz'
@@ -38,6 +39,22 @@ def resolve_public_base_url(configured=''):
         if candidate.startswith('https://') and not is_ephemeral_public_url(candidate):
             return candidate
     return BRAND_PUBLIC_URL
+
+
+def google_maps_browser_key():
+    return os.getenv('GOOGLE_MAPS_API_KEY', '').strip()
+
+
+def whatsapp_url():
+    raw = os.getenv('WHATSAPP_URL', '').strip()
+    if not raw:
+        return ''
+    if raw.startswith(('https://wa.me/', 'https://api.whatsapp.com/send')):
+        return raw.split()[0][:200]
+    digits = re.sub(r'\D', '', raw)
+    if 8 <= len(digits) <= 15:
+        return 'https://wa.me/' + digits
+    return ''
 
 
 def google_site_tokens():
