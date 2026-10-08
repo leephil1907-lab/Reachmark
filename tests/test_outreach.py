@@ -6,7 +6,7 @@ class OutreachSchemaTests(unittest.TestCase):
         fd,path=tempfile.mkstemp(suffix=".sqlite3"); os.close(fd)
         try:
             conn=sqlite3.connect(path)
-            conn.executescript("""CREATE TABLE leads(id TEXT PRIMARY KEY,source_key TEXT UNIQUE,name TEXT NOT NULL,category TEXT,city TEXT,address TEXT,phone TEXT,email TEXT,website TEXT,status TEXT,stage TEXT,source TEXT,source_url TEXT,note TEXT,subject TEXT,body TEXT,token TEXT,created TEXT,updated TEXT); CREATE TABLE jobs(id TEXT PRIMARY KEY,state TEXT);""")
+            conn.executescript("""CREATE TABLE leads(id TEXT PRIMARY KEY,source_key TEXT UNIQUE,name TEXT NOT NULL,category TEXT,city TEXT,address TEXT,phone TEXT,email TEXT,website TEXT,status TEXT,stage TEXT,source TEXT,source_url TEXT,note TEXT,subject TEXT,body TEXT,token TEXT,created TEXT,updated TEXT); CREATE TABLE jobs(id TEXT PRIMARY KEY,state TEXT,message TEXT);""")
             class Ctx:
                 def __enter__(self): return conn
                 def __exit__(self,*args): conn.commit()
