@@ -47,8 +47,10 @@ def google_maps_browser_key():
 
 def whatsapp_url():
     raw = os.getenv('WHATSAPP_URL', '').strip()
-    if not raw:
+    if raw.lower() in ('0', 'off', 'none', 'false'):
         return ''
+    if not raw:
+        raw = 'https://wa.me/14473227700'
     if raw.startswith(('https://wa.me/', 'https://api.whatsapp.com/send')):
         return raw.split()[0][:200]
     digits = re.sub(r'\D', '', raw)

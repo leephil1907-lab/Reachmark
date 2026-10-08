@@ -60,13 +60,14 @@ class ProspectTests(unittest.TestCase):
         self.assertIn(b'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', page.data)
 
     def test_whatsapp_icon_only_when_configured(self):
-        with patch.dict(os.environ, {'WHATSAPP_URL': ''}):
+        with patch.dict(os.environ, {'WHATSAPP_URL': 'off'}):
             home = self.client.get('/').data.decode()
             self.assertNotIn('wa-float', home)
-        with patch.dict(os.environ, {'WHATSAPP_URL': '2348012345678'}):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop('WHATSAPP_URL', None)
             home = self.client.get('/').data.decode()
             self.assertIn('class="wa-float"', home)
-            self.assertIn('https://wa.me/2348012345678', home)
+            self.assertIn('https://wa.me/14473227700', home)
             self.assertNotIn('Chat on WhatsApp', home)
 
     def test_search_console_html_file_is_served_at_root(self):

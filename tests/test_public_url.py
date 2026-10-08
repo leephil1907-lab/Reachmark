@@ -20,8 +20,11 @@ class PublicUrlTests(unittest.TestCase):
             self.assertEqual(whatsapp_url(), 'https://wa.me/2348012345678')
         with patch.dict(os.environ, {'WHATSAPP_URL': 'https://wa.me/2348012345678'}):
             self.assertEqual(whatsapp_url(), 'https://wa.me/2348012345678')
-        with patch.dict(os.environ, {'WHATSAPP_URL': ''}):
+        with patch.dict(os.environ, {'WHATSAPP_URL': 'off'}):
             self.assertEqual(whatsapp_url(), '')
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop('WHATSAPP_URL', None)
+            self.assertEqual(whatsapp_url(), 'https://wa.me/14473227700')
 
     def test_railway_is_ephemeral(self):
         self.assertTrue(is_ephemeral_public_url('https://reachmark-production.up.railway.app'))
