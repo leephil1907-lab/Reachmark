@@ -181,7 +181,7 @@ def headers(r):
     r.headers['X-Content-Type-Options']='nosniff'; r.headers['Referrer-Policy']='strict-origin-when-cross-origin'
     return r
 
-ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-5678865896620902').strip()
+ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', '').strip()
 ADSENSE_PATHS = {'/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/workspace'}
 ADSENSE_PREFIXES = ('/showcase/',)
 
@@ -230,7 +230,7 @@ def home():
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
     }
-    gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
+    gsv = os.getenv('GOOGLE_SITE_VERIFICATION', '').strip()
     origin = base or request.url_root.rstrip('/')
     structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description']), faq_schema()]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
@@ -278,7 +278,7 @@ def about():
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
     }
-    gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
+    gsv = os.getenv('GOOGLE_SITE_VERIFICATION', '').strip()
     from web.public_url import organization_schema, website_schema
     origin = base or request.url_root.rstrip('/')
     structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description'])]
