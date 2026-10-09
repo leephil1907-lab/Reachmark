@@ -38,6 +38,14 @@
     panel.hidden = true;
     launch.setAttribute('aria-expanded', 'false');
   }
+  var quickPrompts = log.querySelector('.rm-quick-prompts');
+  if (quickPrompts) quickPrompts.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-rm-prompt]');
+    if (!button || send.disabled) return;
+    input.value = button.getAttribute('data-rm-prompt') || '';
+    if (typeof form.requestSubmit === 'function') form.requestSubmit();
+    else form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  });
   launch.addEventListener('click', function () { panel.hidden ? open() : shut(); });
   close.addEventListener('click', shut);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) shut(); });
