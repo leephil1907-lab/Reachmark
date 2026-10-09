@@ -37,9 +37,9 @@ class AdSenseTests(unittest.TestCase):
         self.assertEqual(response.get_data(as_text=True).strip(), SELLER)
 
     def test_no_manual_ad_unit_renders_without_a_configured_slot(self):
-        for path in ('/', '/about', '/showcase', '/enquire', '/pricing',
-                     '/receptionist', '/workspace'):
-            body = self.client.get(path, environ_overrides={'REMOTE_ADDR': '192.0.2.41'}).get_data(as_text=True)
+        for i, path in enumerate(('/', '/about', '/showcase', '/enquire', '/pricing',
+                                  '/receptionist', '/workspace'), start=41):
+            body = self.client.get(path, environ_overrides={'REMOTE_ADDR': f'192.0.2.{i}'}).get_data(as_text=True)
             self.assertNotIn('data-ad-slot=', body, path)
 
     def test_content_security_policy_allows_the_ad_loader(self):
