@@ -97,14 +97,16 @@
   if (!output || !window.MutationObserver) return;
   function renderRankedOpportunities() {
     var old = output.querySelector('.ph-ranked-opportunities');
-    if (old) old.remove();
     var list = output.querySelector('.x-audit-leaks');
+    if (old && list && old.dataset.sourceList === list.innerHTML) return;
+    if (old) old.remove();
     if (!list || !list.children.length) return;
     var rows = Array.prototype.slice.call(list.querySelectorAll('li')).slice(0, 3);
     if (!rows.length) return;
 
     var section = document.createElement('section');
     section.className = 'ph-ranked-opportunities';
+    section.dataset.sourceList = list.innerHTML;
     var heading = document.createElement('div');
     heading.className = 'ph-ranked-head';
     var title = document.createElement('h3');
