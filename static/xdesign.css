@@ -596,3 +596,147 @@ body .btn-lime{background:var(--x-lime)!important}
 [data-theme="dark"] .x-contact-email .x-contact-icon{background:rgba(66,133,244,.12)}
 [data-theme="dark"] .x-contact-card strong{color:#f3f6f1}
 [data-theme="dark"] .x-contact-card small{color:#aeb8a6}
+
+
+/* Theme stability + legible dark mode: shared tokens and smooth, non-flashing transitions. */
+:root{
+  color-scheme:light;
+  --rm-page-bg:#fbfbf8;--rm-page-ink:#20251f;--rm-page-muted:#596354;
+  --rm-panel:#fff;--rm-panel-2:#f4f6ef;--rm-border:#e2e7d6;
+  --rm-link:#344d21;--rm-soft-shadow:0 16px 44px rgba(25,32,22,.06);
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --rm-page-bg:#0a0c0b;--rm-page-ink:#eef3ea;--rm-page-muted:#b7c0b2;
+  --rm-panel:#121812;--rm-panel-2:#171e15;--rm-border:rgba(213,242,104,.18);
+  --rm-link:#d5f268;--rm-soft-shadow:0 18px 48px rgba(0,0,0,.28);
+}
+html,body{background-color:var(--rm-page-bg)}
+body.x-site,body.public-page,body.x-public{
+  color:var(--rm-page-ink);
+  transition:background-color .42s cubic-bezier(.2,.7,.2,1),color .42s cubic-bezier(.2,.7,.2,1);
+}
+html.theme-switching body,
+html.theme-switching body.x-site,
+html.theme-switching .pub-head,
+html.theme-switching .x-foot,
+html.theme-switching .x-card,
+html.theme-switching .x-report-sheet,
+html.theme-switching .x-plans-grid article,
+html.theme-switching .x-trust-grid a,
+html.theme-switching .x-shots-grid figure,
+html.theme-switching .x-plain-card,
+html.theme-switching .x-audit-out,
+html.theme-switching .x-contact-card,
+html.theme-switching .x-pipe,
+html.theme-switching .x-cta,
+html.theme-switching .pub-menu{
+  transition-property:background-color,color,border-color,box-shadow,background-image;
+  transition-duration:.42s;
+  transition-timing-function:cubic-bezier(.2,.7,.2,1);
+}
+/* Do not animate every descendant: that causes text flashes and expensive repaints. */
+[data-theme="dark"] body.x-site,
+[data-theme="dark"] body.public-page,
+[data-theme="dark"] body.x-public{
+  background-color:#0a0c0b;
+  color:#eef3ea;
+}
+[data-theme="dark"] .x-site main,
+[data-theme="dark"] .x-site main p,
+[data-theme="dark"] .x-site main li,
+[data-theme="dark"] .x-site main label,
+[data-theme="dark"] .x-site main figcaption,
+[data-theme="dark"] .x-site main small,
+[data-theme="dark"] .x-site main .x-hero-alt,
+[data-theme="dark"] .x-site main .x-try p,
+[data-theme="dark"] .x-site main .x-shots-head p,
+[data-theme="dark"] .x-site main .x-plans-head p,
+[data-theme="dark"] .x-site main .x-trust-grid span,
+[data-theme="dark"] .x-site main .x-steps span,
+[data-theme="dark"] .x-site main .x-approve,
+[data-theme="dark"] .x-site main .x-count,
+[data-theme="dark"] .x-site main .x-report-disc,
+[data-theme="dark"] .x-site main .x-report-findings span,
+[data-theme="dark"] .x-site main .x-report-stats small,
+[data-theme="dark"] .x-site main .x-audit-hint,
+[data-theme="dark"] .x-site main .x-plain-list{
+  color:#c3cdbd;
+}
+[data-theme="dark"] .x-site main h1,
+[data-theme="dark"] .x-site main h2,
+[data-theme="dark"] .x-site main h3,
+[data-theme="dark"] .x-site main h4,
+[data-theme="dark"] .x-site main strong,
+[data-theme="dark"] .x-site main b,
+[data-theme="dark"] .x-site main .x-report-head,
+[data-theme="dark"] .x-site main .x-report-findings b,
+[data-theme="dark"] .x-site main .x-step b,
+[data-theme="dark"] .x-site main .x-trust-grid b{
+  color:#f3f7ef;
+}
+[data-theme="dark"] .x-site main a:not(.x-btn):not(.x-contact-card),
+[data-theme="dark"] .x-site main .x-hero-alt a,
+[data-theme="dark"] .x-site main .x-audit-gate a{
+  color:#d5f268;
+}
+[data-theme="dark"] .x-site main .x-report-sheet,
+[data-theme="dark"] .x-site main .x-plain-card,
+[data-theme="dark"] .x-site main .x-audit-out,
+[data-theme="dark"] .x-site main .x-shots-grid figure,
+[data-theme="dark"] .x-site main .x-trust-grid a,
+[data-theme="dark"] .x-site main .x-plain-item,
+[data-theme="dark"] .x-site main .x-plans-grid article,
+[data-theme="dark"] .x-site main .x-audit input{
+  background-color:rgba(18,24,18,.94);
+  border-color:rgba(213,242,104,.17);
+  color:#eef3ea;
+  box-shadow:var(--rm-soft-shadow);
+}
+[data-theme="dark"] .x-site main .x-plans-grid article p,
+[data-theme="dark"] .x-site main .x-plain-list,
+[data-theme="dark"] .x-site main .x-audit-leaks span{
+  color:#c3cdbd;
+}
+[data-theme="dark"] .x-site main .x-pipe,
+[data-theme="dark"] .x-site main .x-cta{
+  color:#eef3ea;
+  background-color:rgba(15,20,14,.94);
+  border-color:rgba(213,242,104,.18);
+}
+[data-theme="dark"] .x-site main .x-report-stats div,
+[data-theme="dark"] .x-site main .x-audience button,
+[data-theme="dark"] .x-site main .x-step{
+  border-color:rgba(213,242,104,.17);
+}
+[data-theme="dark"] .x-site main .x-audience button{color:#e9eee5}
+[data-theme="dark"] .x-site main .x-audience button.on{background:#d5f268;color:#111}
+[data-theme="dark"] .x-site main input,
+[data-theme="dark"] .x-site main textarea,
+[data-theme="dark"] .x-site main select{
+  color:#f3f7ef;background:#111711;border-color:rgba(213,242,104,.2);
+}
+[data-theme="dark"] .x-site main input::placeholder,
+[data-theme="dark"] .x-site main textarea::placeholder{color:#a4afa0;opacity:1}
+[data-theme="dark"] .x-site main .x-shots-grid figcaption{background:#121812;color:#c3cdbd}
+[data-theme="dark"] .x-site main .x-audit-block{background:#1b2515;color:#eef3ea}
+[data-theme="dark"] .x-site main .oe-sample-banner{background:#1c2614;color:#eef3ea}
+[data-theme="dark"] .x-site main .x-plans-grid article.on{background:#1a2116;border-color:#d5f268}
+[data-theme="dark"] .x-site main .x-plans-grid article.on b,
+[data-theme="dark"] .x-site main .x-plans-grid article.on p{color:#eef3ea}
+[data-theme="dark"] .x-foot{color:#eef3ea;border-color:rgba(213,242,104,.14)}
+[data-theme="dark"] .x-foot .x-foot-brand p,
+[data-theme="dark"] .x-foot .x-foot-bottom,
+[data-theme="dark"] .x-foot .x-foot-legal a{color:#aeb8a6}
+[data-theme="dark"] .x-foot h4,
+[data-theme="dark"] .x-foot .x-foot-brand strong{color:#f3f7ef}
+/* Smooth hover movement; keep motion restrained and avoid transform-induced layout flicker. */
+.x-btn,.x-card,.x-plans-grid article,.x-trust-grid a,.x-shots-grid figure,.x-contact-card,
+.pub-menu a,#theme-toggle-public{
+  transition:transform .24s cubic-bezier(.2,.7,.2,1),background-color .28s ease,color .28s ease,border-color .28s ease,box-shadow .28s ease;
+}
+.x-card:hover,.x-trust-grid a:hover,.x-shots-grid figure:hover{transform:translateY(-3px)}
+@media(prefers-reduced-motion:reduce){
+  html.theme-switching *,html.theme-switching *::before,html.theme-switching *::after{transition:none!important}
+  .x-card:hover,.x-trust-grid a:hover,.x-shots-grid figure:hover{transform:none}
+}
