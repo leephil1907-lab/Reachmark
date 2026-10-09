@@ -25,3 +25,5 @@
 .ph-ranked-card .ph-ranked-next{margin-top:9px;padding-top:8px;border-top:1px solid #edf0e8;color:#586642}
 @media(max-width:650px){.ph-ranked-grid{grid-template-columns:1fr}.ph-ranked-card{padding:13px}.ph-example-top{display:block}.ph-example-disclaimer{max-width:none;text-align:left;margin-top:8px}.ph-example-row{grid-template-columns:1fr;gap:4px}.ph-example-switcher{padding:14px}.ph-example-tabs{display:grid;grid-template-columns:1fr}.ph-example-tabs button{text-align:left}}
 @media(prefers-reduced-motion:reduce){.ph-example-tabs button{transition:none}}
+
+.ph-audit-out .x-audit-fix{display:block;margin-top:5px;padding-top:5px;border-top:1px solid #e9eedf;color:#425a2b;font-weight:650}
