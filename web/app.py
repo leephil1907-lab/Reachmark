@@ -234,7 +234,7 @@ def home():
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
     }
-    gsv = os.getenv('GOOGLE_SITE_VERIFICATION', '').strip()
+    gsv = ','.join(__import__('web.public_url', fromlist=['google_site_tokens']).google_site_tokens())
     origin = base or request.url_root.rstrip('/')
     structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description']), faq_schema()]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
