@@ -1,5 +1,5 @@
 """Complete owner/review/project/PDF workflow on disposable data only."""
-import os,tempfile,threading
+import os,tempfile,threading,json
 from pathlib import Path
 from werkzeug.security import generate_password_hash
 from werkzeug.serving import make_server,WSGIRequestHandler
@@ -15,7 +15,26 @@ with tempfile.TemporaryDirectory() as tmp:
     try:
         with sync_playwright() as p:
             b=p.chromium.launch();page=b.new_page(viewport={'width':1440,'height':1000});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.on('dialog',lambda d:d.accept())
-            page.goto(base);expect(page.locator('body')).to_be_visible();page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();
+            page.goto(base);expect(page.locator('body')).to_be_visible()
+            expect(page.locator('.ph-workbench')).to_be_visible()
+            page.locator('.ph-example-tabs button').nth(1).click()
+            expect(page.locator('.ph-example-panel h4')).to_contain_text('Show the page identity')
+            page.route('**/api/public/audit', lambda route: route.fulfill(status=200, content_type='application/json', body=json.dumps({
+                'ok': True, 'blocked': False, 'observed': True,
+                'narrative': 'Test-only fixture: public page fetch completed.',
+                'leaks': [
+                    {'key': 'contact_path', 'title': 'Contact path unclear', 'leak': 'No visible contact link was found in the fixture.', 'evidence': 'Fixture evidence: no matching contact link.'},
+                    {'key': 'page_title', 'title': 'Page title generic', 'leak': 'The title did not identify the service in the fixture.', 'evidence': "Fixture evidence: title was 'Home'."}
+                ],
+                'label': 'Measured observations from this check. Not a revenue forecast.',
+                'gate': 'Create an account to run the full report.'
+            })))
+            page.locator('#x-audit-url').fill('https://example.test')
+            page.locator('#x-audit-form button[type=submit]').click()
+            expect(page.locator('#x-audit-out .x-audit-leaks li')).to_have_count(2)
+            expect(page.locator('#x-audit-out .ph-ranked-card')).to_have_count(2)
+            expect(page.locator('#x-audit-out .ph-ranked-opportunities')).to_have_count(1)
+            page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();
             try:page.wait_for_url('**/workspace**',timeout=8000)
             except Exception:page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();page.wait_for_url('**/workspace**',timeout=15000)
             expect(page.locator('#stat-total')).to_have_text('2')
