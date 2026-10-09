@@ -16,7 +16,7 @@
 <meta property="og:type" content="website"><meta property="og:site_name" content="Reachmark"><meta property="og:locale" content="en_US"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}"><meta property="og:image:alt" content="Reachmark"><meta name="twitter:image" content="{{ seo.og_image }}">{% endif %}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest">
-<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css"><link rel="stylesheet" href="/static/product-home.css">
+<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css"><link rel="stylesheet" href="/static/product-home.css"><link rel="stylesheet" href="/static/product-workbench.css">
 <script src="/static/i18n.js"></script>
 {% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}
 </head>
@@ -323,6 +323,7 @@
   function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);});}
 })();
 </script>
+<script src="/static/product-workbench.js" defer></script>
 <script src="/static/pwa.js" defer></script>
 </body>
 </html>
