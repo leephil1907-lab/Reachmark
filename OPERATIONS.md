@@ -15,7 +15,7 @@ chat, source or the browser (MCP connectors store only a *variable name* like
 |---|---|
 | `SMTP_HOST/PORT/SECURITY/USER/PASSWORD/FROM` | Your mail provider (TLS only: 587+starttls or 465+ssl). Until set, approved mail queues in the outbox — never *sent*. |
 | `DASHBOARD_PASSWORD` | Dev/compat gate for the dashboard. Production uses the owner login below. |
-| `DATABASE_PATH` | Absolute SQLite path (default: project dir; Docker: `/data/sitegap.sqlite3`; Railway: `/data/prospect.sqlite3` on an attached volume — without a volume, redeploys wipe the database). |
+| `DATABASE_PATH` | Absolute SQLite path (default: project dir; Docker: `/data/reachmark.sqlite3`; Railway: `/data/prospect.sqlite3` on an attached volume — without a volume, redeploys wipe the database). |
 | `PORT` | Default `8000`. |
 | `OVERPASS_URLS` | Map endpoints, ≤2 comma-separated. Default: two shared public mirrors. Dedicated capacity (required before sustained commercial volume): self-host Overpass (`docker run -p 8080:80 --ulimit nofile=65536:65536 wiktorn/overpass-api`) or a contracted endpoint, then set `OVERPASS_URLS=https://your-overpass/api/interpreter`. The app load-sheds across the list in order. |
 | `CREW_LLM_PROVIDER/MODEL/API_KEY/BASE_URL/TIMEOUT/BUDGET/SEND_CONTACTS` | Optional model for phrasing only (`auto\|ollama\|openai\|anthropic\|none`). Contacts are masked by default. |
