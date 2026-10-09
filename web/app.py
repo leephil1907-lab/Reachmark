@@ -181,7 +181,7 @@ def headers(r):
     r.headers['X-Content-Type-Options']='nosniff'; r.headers['Referrer-Policy']='strict-origin-when-cross-origin'
     return r
 
-ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-5678865896620902').strip() or 'ca-pub-5678865896620902'
+ADSENSE_CLIENT = 'ca-pub-5678865896620902'  # publisher ID supplied for the current AdSense account
 ADSENSE_EXCLUDED_PREFIXES = (
     '/api/', '/preview/', '/unsubscribe/', '/workspace', '/dashboard',
     '/signin', '/signup', '/account', '/settings', '/admin', '/offline',
