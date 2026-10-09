@@ -13,7 +13,8 @@ jobs:
         with: {node-version: '22', cache: npm}
       - run: pip install -r requirements.txt
       - run: npm ci && npm run build
-      - run: python -m unittest tests.test_app.ProspectTests.test_adsense_account_meta_and_loader_are_on_public_homepage tests.test_app.ProspectTests.test_ads_txt_has_configured_ad_seller_record tests.test_app.ProspectTests.test_homepage_has_no_search_console_token_until_new_one_is_configured tests.test_public_url tests.test_adsense tests.test_operations tests.test_maps.MapTests tests.test_video tests.test_receptionist_page tests.test_brain tests.test_authorization tests.test_intelligence tests.test_schema tests.test_product_first_home -q
+      - run: python -m unittest tests.test_app.ProspectTests.test_adsense_account_meta_and_loader_are_on_public_homepage tests.test_app.ProspectTests.test_ads_txt_has_configured_ad_seller_record tests.test_app.ProspectTests.test_homepage_has_no_search_console_token_until_new_one_is_configured tests.test_public_url tests.test_adsense -q
+      - run: python -m unittest tests.test_operations tests.test_maps.MapTests tests.test_video tests.test_receptionist_page tests.test_brain tests.test_authorization tests.test_intelligence tests.test_schema tests.test_product_first_home -q
       - run: PYTHONPATH=. python tests/test_schema.py
       - run: PYTHONPATH=. python tests/mobile_pwa_audit.py
       - run: for f in static/*.js; do node --check "$f"; done
