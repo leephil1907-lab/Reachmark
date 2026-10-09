@@ -772,6 +772,8 @@ from web.outreach import register_outreach
 register_outreach(app, db, now, log)
 from web.google_business import register_google_business
 register_google_business(app, db, now, log)
+from web.website_studio import register_website_studio
+register_website_studio(app, db, now, log)
 
 
 # Client reviews — leave a review for good job done
