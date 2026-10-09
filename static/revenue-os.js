@@ -61,10 +61,10 @@
       const links=[];
       if(result.prototype_url)links.push('<a class="secondary" href="'+esc(result.prototype_url)+'" target="_blank" rel="noopener">Open concept</a>');
       if(result.proposal_url)links.push('<a href="'+esc(result.proposal_url)+'" target="_blank" rel="noopener">Review draft proposal</a>');
+      await load(true);
       const actions=$('ros-next-actions');
       actions.innerHTML=links.join('');
       status('Prepared/reused: '+(result.steps||[]).join(', ')+'. Outbound messages: not sent. Review the proposal and set real prices before sharing.','success');
-      await load(true);
     }catch(error){status(error.message,'error');}
     finally{busy=false;button.disabled=false;button.textContent='Prepare report + proposal';}
   }
