@@ -1,59 +1,70 @@
 // Reachmark public theme + motion — light/dark + page transitions (not static)
 (function(){
   const root=document.documentElement;
-  const saved=localStorage.getItem('reachmark-theme');
-  if(saved) root.setAttribute('data-theme', saved);
-  else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) root.setAttribute('data-theme','dark');
+  let motionTimer=null;
+  function readSavedTheme(){
+    try{return localStorage.getItem('reachmark-theme');}catch(e){return null;}
+  }
+  function saveTheme(value){
+    try{localStorage.setItem('reachmark-theme',value);}catch(e){}
+  }
+  const saved=readSavedTheme();
+  if(saved==='dark'||saved==='light') {
+    if(saved==='dark') root.setAttribute('data-theme','dark');
+    else root.removeAttribute('data-theme');
+  } else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    root.setAttribute('data-theme','dark');
+  }
+  function isDark(){return root.getAttribute('data-theme')==='dark';}
   function paintChrome(){
-    const dark=root.getAttribute('data-theme')==='dark';
+    const dark=isDark();
     const meta=document.querySelector('meta[name="theme-color"]');
-    if(meta) meta.setAttribute('content', dark?'#0a0c0b':'#fbfbfb');
+    if(meta) meta.setAttribute('content',dark?'#0a0c0b':'#fbfbf8');
     const btn=document.getElementById('theme-toggle-public');
-    if(btn) btn.textContent=dark?'☾':'◐';
+    if(btn){
+      btn.textContent=dark?'☾':'◐';
+      btn.setAttribute('aria-pressed',dark?'true':'false');
+      btn.setAttribute('title',dark?'Switch to light theme':'Switch to dark theme');
+    }
   }
   window.toggleTheme=function(){
-    const isDark=root.getAttribute('data-theme')==='dark';
-    const next=isDark?'light':'dark';
-    if(next==='light') root.removeAttribute('data-theme'); else root.setAttribute('data-theme','dark');
-    localStorage.setItem('reachmark-theme', next);
+    const next=isDark()?'light':'dark';
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      if(next==='light') root.removeAttribute('data-theme');
+      else root.setAttribute('data-theme','dark');
+    } else {
+      root.classList.add('theme-switching');
+      if(next==='light') root.removeAttribute('data-theme');
+      else root.setAttribute('data-theme','dark');
+      if(motionTimer) clearTimeout(motionTimer);
+      motionTimer=setTimeout(function(){root.classList.remove('theme-switching');motionTimer=null;},460);
+    }
+    saveTheme(next);
     paintChrome();
   };
   paintChrome();
   document.addEventListener('DOMContentLoaded',()=>{
     paintChrome();
     const btn=document.getElementById('theme-toggle-public');
-    if(btn){
-      btn.addEventListener('click', window.toggleTheme);
+    if(btn && !btn.dataset.themeBound){
+      btn.dataset.themeBound='1';
+      btn.addEventListener('click',window.toggleTheme);
     }
-    // nav dynamic motion: sticky glass on scroll
+    // Sticky glass header responds smoothly to scroll without changing layout.
     const navEl=document.querySelector('.pub-head, nav, .public-nav');
     if(navEl){
       let tick=false;
       const onNavScroll=()=>{
         if(!tick){
           requestAnimationFrame(()=>{
-            if(window.scrollY>18) navEl.classList.add('scrolled');
-            else navEl.classList.remove('scrolled');
+            navEl.classList.toggle('scrolled',window.scrollY>18);
             tick=false;
           });
           tick=true;
         }
       };
-      window.addEventListener('scroll', onNavScroll, {passive:true});
+      window.addEventListener('scroll',onNavScroll,{passive:true});
       onNavScroll();
-    }
-    // motion: reveal on scroll
-    const els=document.querySelectorAll('.hero, .ribbon, .features .card, .honest, .sample-card, .enquiry-layout, .cta');
-    els.forEach((el,i)=>{el.style.opacity='0'; el.style.transform='translateY(14px)'; el.style.transition='opacity .6s ease, transform .6s cubic-bezier(.16,1,.3,1)'; el.style.transitionDelay=(i%3*80)+'ms'});
-    const io=new IntersectionObserver((entries)=>{
-      entries.forEach(e=>{
-        if(e.isIntersecting){ e.target.style.opacity='1'; e.target.style.transform='none'; io.unobserve(e.target); }
-      });
-    },{threshold:.12});
-    els.forEach(el=>io.observe(el));
-    // respect reduced motion
-    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-      els.forEach(el=>{el.style.opacity='1'; el.style.transform='none'; el.style.transition='none'});
     }
   });
 
