@@ -155,6 +155,7 @@ def preview_leaks(url, observe_fn=None):
             'key': key,
             'title': copy.get('title') or key,
             'leak': copy.get('leak') or gap.get('reason') or '',
+            'fix': copy.get('fix') or '',
             'evidence': gap.get('reason') or '',
             'weight': int(gap.get('weight') or 0),
             'source': gap.get('source') or 'observation',
