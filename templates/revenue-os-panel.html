@@ -1,0 +1,47 @@
+<section id="page-revenue-os" class="page rm-revenue-page">
+  <div class="page-heading rm-revenue-heading">
+    <div>
+      <div class="eyebrow">REACHMARK · COMMERCIAL OPERATIONS</div>
+      <h1>Revenue OS</h1>
+      <p>One working view from real prospect evidence to proposals, paid invoices, delivery, and retention.</p>
+    </div>
+    <div class="button-group">
+      <button class="secondary" type="button" id="ros-refresh">Refresh data</button>
+      <button class="primary" type="button" id="ros-backfill">Reconcile saved records</button>
+    </div>
+  </div>
+  <div class="notice rm-ros-truth"><strong>Evidence before estimates.</strong> Every number below comes from saved records. Empty stages stay at zero; website-gap scores are not revenue forecasts. Preparing a proposal never sends an email.</div>
+  <div id="ros-status" class="rm-ros-status" role="status" aria-live="polite">Loading saved commercial records…</div>
+  <div class="rm-ros-kpis" id="ros-kpis">
+    <article class="card rm-ros-kpi"><span>Saved leads</span><strong>—</strong><small>Real workspace records</small></article>
+    <article class="card rm-ros-kpi"><span>Verified opportunities</span><strong>—</strong><small>Reports with recorded evidence</small></article>
+    <article class="card rm-ros-kpi"><span>Proposals</span><strong>—</strong><small>Generated proposal records</small></article>
+    <article class="card rm-ros-kpi"><span>Paid clients</span><strong>—</strong><small>Based on invoices marked Paid</small></article>
+    <article class="card rm-ros-kpi"><span>Unpaid invoices</span><strong>—</strong><small>Draft, sent, or overdue</small></article>
+  </div>
+  <div class="rm-ros-columns">
+    <article class="card rm-ros-next">
+      <div class="section-top"><div><div class="eyebrow">NEXT BEST ACTION</div><h2>Move one opportunity forward</h2></div><span class="badge" id="ros-next-score">No score</span></div>
+      <div id="ros-next-body"><p class="muted small">Loading the next action from saved records…</p></div>
+      <div class="rm-ros-actions" id="ros-next-actions"></div>
+      <p class="small muted">The prepare action creates or reuses a report, concept, and draft proposal from saved evidence. It does not contact the prospect or invent a price.</p>
+    </article>
+    <article class="card rm-ros-funnel">
+      <div class="section-top"><div><div class="eyebrow">COMMERCIAL FUNNEL</div><h2>Actual records by stage</h2></div></div>
+      <ol id="ros-funnel" class="rm-ros-funnel-list"><li class="muted">Loading funnel…</li></ol>
+      <p id="ros-funnel-note" class="small muted"></p>
+    </article>
+  </div>
+  <div class="rm-ros-columns rm-ros-lower">
+    <article class="card">
+      <div class="section-top"><div><div class="eyebrow">WHERE TO FOCUS</div><h2>Opportunity segments</h2></div></div>
+      <div id="ros-wedges"><p class="small muted">Loading segments…</p></div>
+      <p class="small muted">Segment counts describe saved records, not proof of market demand.</p>
+    </article>
+    <article class="card">
+      <div class="section-top"><div><div class="eyebrow">RECENT ACTIVITY</div><h2>Commercial event trail</h2></div></div>
+      <ol id="ros-events" class="rm-ros-events"><li class="muted">Loading activity…</li></ol>
+    </article>
+  </div>
+  <div class="rm-ros-footer-note">Currency note: Reachmark supports multiple currencies. This screen intentionally does not add unlike currencies into one misleading revenue total. Open Invoices for individual invoice amounts and currencies.</div>
+</section>
