@@ -12,6 +12,15 @@
 - AI-assisted business workflows
 - Responsive web and PWA experience
 
+## Commercial operating system
+
+Reachmark connects real prospect discovery, evidence-backed website opportunities, human-approved outreach, draft proposals, contracts, projects, invoices, payment confirmation, delivery, and retention tracking. Open **Revenue OS** in the workspace for the canonical funnel, next best action, opportunity segments, and the saved commercial event trail. Metrics come from persisted records; empty stages remain empty, and the dashboard does not combine unlike currencies into one total.
+
+Operating guides:
+
+- [Commercial Operating System](docs/COMMERCIAL_OPERATING_SYSTEM.md) — positioning, offer boundaries, workflow, and weekly scorecard.
+- [Client Delivery Playbook](docs/CLIENT_DELIVERY_PLAYBOOK.md) — qualification, proposal, onboarding, delivery, handover, and data handling checklists.
+
 ## Technology
 
 Python · Flask · React · SQLite · Leaflet · Playwright · Docker
