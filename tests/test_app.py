@@ -53,11 +53,22 @@ class ProspectTests(unittest.TestCase):
             robots = self.client.get('/robots.txt')
             self.assertIn(b'Sitemap: https://reachmarkdigital.xyz/sitemap.xml', robots.data)
 
-    def test_homepage_has_search_console_meta_for_owned_domain(self):
+    def test_homepage_does_not_reuse_removed_search_console_token(self):
         page = self.client.get('/', headers={'Host': 'reachmarkdigital.xyz'})
         self.assertEqual(page.status_code, 200)
-        self.assertIn(b'name="google-site-verification"', page.data)
-        self.assertIn(b'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', page.data)
+        self.assertNotIn(b'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', page.data)
+
+    def test_adsense_account_meta_and_loader_are_on_public_homepage(self):
+        page = self.client.get('/', headers={'Host': 'reachmarkdigital.xyz'})
+        self.assertEqual(page.status_code, 200)
+        self.assertIn(b'name="google-adsense-account" content="ca-pub-5678865896620902"', page.data)
+        self.assertIn(b'adsbygoogle.js?client=ca-pub-5678865896620902', page.data)
+        self.assertIn(b'crossorigin="anonymous"', page.data)
+
+    def test_ads_txt_has_configured_ad_seller_record(self):
+        page = self.client.get('/ads.txt', headers={'Host': 'reachmarkdigital.xyz'})
+        self.assertEqual(page.status_code, 200)
+        self.assertEqual(page.get_data(as_text=True).strip(), 'google.com, pub-5678865896620902, DIRECT, f08c47fec0942fa0')
 
     def test_whatsapp_icon_only_when_configured(self):
         with patch.dict(os.environ, {'WHATSAPP_URL': 'off'}):
@@ -70,11 +81,6 @@ class ProspectTests(unittest.TestCase):
             self.assertIn('https://wa.me/14473227700', home)
             self.assertNotIn('Chat on WhatsApp', home)
 
-    def test_search_console_html_file_is_served_at_root(self):
-        name = 'googled647aceebb4093df.html'
-        page = self.client.get('/' + name)
-        self.assertEqual(page.status_code, 200)
-        self.assertEqual(page.get_data(as_text=True).strip(), 'google-site-verification: ' + name)
 
     def test_source_seen_at_schema_and_refresh(self):
         with module.db() as c:
