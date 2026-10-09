@@ -43,6 +43,7 @@ class ProductWorkbenchEnhancementTests(unittest.TestCase):
         self.assertIn("const pipeline=$('#pipeline-bars');if(pipeline)", app_js)
         self.assertIn("const recent=$('#recent-leads');if(recent)", app_js)
         self.assertIn("const activity=$('#activity');if(activity)", app_js)
+        self.assertIn("const outreach=$('#outreach-list');if(outreach)", app_js)
 
     def test_workspace_scripts_are_well_formed(self):
         workspace = (ROOT / "templates" / "index.html").read_text(encoding="utf-8")
