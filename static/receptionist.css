@@ -1,4 +1,4 @@
-/* Reachmark AI receptionist widget — brand: charcoal #20251F, lime #D5F268, warm white #F5F5EF */
+/* Reachmark AI receptionist widget — brand: charcoal #20251F, lime #D5F268 */
 #rm-receptionist-launch{position:fixed;right:18px;bottom:18px;z-index:2147483000;display:inline-flex;align-items:center;gap:9px;
   background:#20251F;color:#F5F5EF;border:1px solid #3a4433;border-radius:999px;padding:12px 18px;font:600 13px 'DM Sans',system-ui,sans-serif;
   cursor:pointer;box-shadow:0 12px 34px rgba(15,20,12,.28);transition:transform .18s ease,box-shadow .18s ease}
@@ -20,15 +20,20 @@
 .rm-msg.note{align-self:flex-start;background:transparent;border:1px dashed #d5dfc2;color:#5c6a4d;font-size:12.5px}
 .rm-msg.error{background:#FFF3F1;border-color:#f3cdc6;color:#8a3226}
 .rm-msg.thinking{opacity:.72;font-style:italic}
-.rm-form{display:flex;flex-wrap:wrap;gap:8px;padding:12px;border-top:1px solid #eef2e6;background:#FFFFFF}
-.rm-form input{flex:1;min-width:140px;border:1px solid #dfe5d2;border-radius:11px;padding:11px 13px;font:inherit;background:#fbfcf7}
+.rm-form{display:flex;flex-wrap:wrap;gap:8px;padding:12px;border-top:1px solid #eef2e6;background:#FFFFFF;align-items:center}
+.rm-form input{flex:1;min-width:120px;border:1px solid #dfe5d2;border-radius:11px;padding:11px 13px;font:inherit;background:#fbfcf7}
 .rm-form input:focus{outline:2px solid #D5F268;outline-offset:1px;background:#fff}
 .rm-form .rm-hp{position:absolute;left:-9999px;width:1px;height:1px}
 #rm-send{background:#D5F268;color:#1b201a;border:0;border-radius:11px;padding:11px 18px;font:700 13px 'Manrope','DM Sans',sans-serif;cursor:pointer}
 #rm-send:disabled{opacity:.6;cursor:progress}
+.rm-voice{background:#f4f7ea;color:#20251f;border:1px solid #dfe5d2;border-radius:11px;padding:10px 12px;font:650 12px 'Manrope',sans-serif;cursor:pointer}
+.rm-voice[aria-pressed="true"]{background:#20251f;color:#d5f268;border-color:#20251f}
 .rm-note{margin:0;padding:0 14px 12px;color:#7b866c;font-size:11px;background:#FFFFFF}
 .rm-note a{color:#42502f}
 .rm-sr{position:absolute;left:-9999px}
 @media(max-width:520px){.rm-panel{right:8px;left:8px;width:auto;bottom:74px;max-height:78vh}
   #rm-receptionist-launch{right:10px;bottom:12px;padding:11px 15px;font-size:12.5px}}
 @media(prefers-reduced-motion:reduce){#rm-receptionist-launch{transition:none}}
+body.rx-page #rm-receptionist-launch{position:static;margin:18px auto 0;display:inline-flex}
+body.rx-page .rm-panel{position:relative;right:auto;bottom:auto;width:min(560px,100%);max-height:min(70vh,640px);margin:0 auto;box-shadow:0 18px 50px rgba(19,26,15,.16)}
+body.rx-page .rm-panel[hidden]{display:none}

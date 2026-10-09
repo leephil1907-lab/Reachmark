@@ -33,16 +33,6 @@
 </style>
 <title>{{ seo.title if seo is defined and seo.title else 'Enquire — Reachmark' }}</title><meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Tell Reachmark about your project.' }}">{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">{% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}<meta property="og:type" content="website"><meta property="og:title" content="{{ seo.title if seo is defined else 'Enquire — Reachmark' }}"><meta property="og:description" content="{{ seo.description if seo is defined else '' }}"><meta property="og:image" content="{{ seo.og_image if seo is defined else '/static/social-card.png' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}<meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script></head><body class="public-page">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}{% include 'header-public.html' %}<main class="public-main" data-motion="fade-up">{% include 'enquiry-form.html' %}{% include 'adsense-footer.html' %}</main>
-<section class="trustpilot-section premium-reveal" style="padding:28px; margin:40px 0 20px;">
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
-    <div style="display:flex; align-items:center; gap:14px;">
-      <span style="font:600 13px 'Manrope',sans-serif; color:#1e2e15;">{{ t('enq.tp') }}</span>
-      <span style="font-size:10px; color:#8a9976;">{{ t('enq.tp_note') }}</span>
-    </div>
-    <a href="/reviews" style="font-size:10px; color:#8ca650; text-decoration:underline;">{{ t('about.read_reviews') }}</a>
-  </div>
-</section>
-
 {% include 'footer-public.html' %}<script src="/static/enquiry.js" defer></script>{% include 'tawkto.html' %}
 <script src="/static/theme.js" defer></script>
 <script src="/static/motion.js" defer></script><script src="/static/magnet.js" defer>

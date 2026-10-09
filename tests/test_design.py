@@ -80,14 +80,12 @@ class WorkspaceHooksTests(CrewBase):
 
 
 class PublicHooksTests(CrewBase):
-    def test_receptionist_page_reveals_aurora_and_magnets(self):
+    def test_receptionist_page_is_the_live_desk(self):
         body = self.client.get('/receptionist').data.decode('utf-8')
-        self.assertEqual(body.count('data-reveal'), 8)
-        self.assertIn('rx-aurora', body)
-        self.assertGreaterEqual(body.count('data-magnet'), 4)
-        self.assertIn('/static/reveal.js', body)
-        self.assertIn('/static/magnet.js', body)
-        self.assertIn('/static/reveal.css', body)
+        self.assertIn('id="rm-receptionist"', body)
+        self.assertIn('data-open-widget', body)
+        self.assertNotIn('rx-aurora', body)
+        self.assertNotIn('data-say', body)
 
     def test_enquire_and_showcase_buttons_are_magnetic(self):
         enquire = self.client.get('/enquire').data.decode('utf-8')

@@ -105,7 +105,7 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
 <details><summary>{{ t('pay.f4q') }}</summary><p>{{ t('pay.f4a1') }} <a href="/about#pricing">{{ t('pay.f4a2') }}</a> {{ t('pay.f4a3') }}</p></details>
 </section>
 </main>
-<footer class="site"><a href="/">{{ t('rx.nav_about') }}</a><a href="/showcase">{{ t('rx.nav_samples') }}</a><a href="/pricing">{{ t('nav.plans') }}</a><a href="/enquire">{{ t('pay.enquire') }}</a><a href="/signin">{{ t('pay.signin') }}</a>{% include 'newsletter-form.html' %}<br><small style="color:#7a8a5f">{{ t('foot.support') }} <a href="mailto:{{ support_email }}">{{ support_email }}</a></small></footer>
+{% include 'footer-public.html' %}
 {% include 'tawkto.html' %}
 <script>
 (function(){

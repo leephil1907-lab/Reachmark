@@ -1,136 +1,43 @@
 <!DOCTYPE html><html lang="{{ locale }}"><head>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ gtm_id }}');</script><!-- End Google Tag Manager -->{% endif %}
-{% if ga_id is defined and ga_id %}<!-- Global site tag (gtag.js) - Google Analytics --><script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
+{% if ga_id is defined and ga_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{{ seo.title if seo is defined and seo.title else 'AI Receptionist — Reachmark' }}</title><meta name="description" content="{{ seo.description if seo is defined and seo.description else 'The Reachmark AI receptionist: a facts-only front desk for your website.' }}">{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">{% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}<meta property="og:type" content="website"><meta property="og:title" content="{{ seo.title if seo is defined else 'AI Receptionist — Reachmark' }}"><meta property="og:description" content="{{ seo.description if seo is defined else '' }}"><meta property="og:image" content="{{ seo.og_image if seo is defined else '/static/social-card.png' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}<meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script>
-<meta name="theme-color" content="#20251f"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180">
+<title>{{ seo.title if seo is defined and seo.title else 'Front desk — Reachmark' }}</title>
+<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Talk to the Reachmark front desk. Published facts only — no guessed prices or dates.' }}">
+{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}
+<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">
+{% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}
+{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
+<meta property="og:type" content="website"><meta property="og:title" content="{{ seo.title if seo is defined else 'Front desk — Reachmark' }}">
+<meta property="og:description" content="{{ seo.description if seo is defined else '' }}">
+<meta name="theme-color" content="#20251f"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="icon" href="/static/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/static/fonts.css">
+<link rel="stylesheet" href="/static/dropdown.css">
+<link rel="stylesheet" href="/static/header.css">
+<link rel="stylesheet" href="/static/motion.css">
+<link rel="stylesheet" href="/static/xdesign.css">
 <link rel="stylesheet" href="/static/receptionist-page.css">
-<link rel="stylesheet" href="/static/reveal.css">
-<link rel="stylesheet" href="/static/dropdown.css"><link rel="stylesheet" href="/static/motion.css"><script src="/static/i18n.js"></script>
-</head><body class="rx-page">
-{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}
-<nav class="rx-nav" aria-label="{{ t('rx.nav_aria') }}"><a href="/" class="rx-brand"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
-<div class="rx-links"><a href="/">{{ t('rx.nav_about') }}</a><a href="/showcase">{{ t('rx.nav_samples') }}</a><a href="/receptionist" aria-current="page">{{ t('rx.nav_rx') }}</a><a href="/about#pricing">{{ t('rx.nav_pricing') }}</a><a href="/pricing">{{ t('nav.plans') }}</a>{% if client_logged_in %}<a href="/dashboard">{{ t('nav.dashboard') }}</a>{% elif owner_logged_in %}<a href="/workspace">{{ t('nav.workspace') }}</a>{% endif %}<a data-magnet class="rx-btn small" href="/enquire">{{ t('rx.nav_enquire') }}</a>{% include 'locale-switcher.html' %}</div></nav>
+<script src="/static/i18n.js"></script>
+<script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script>
+</head>
+<body class="x-site rx-page">
+{% if gtm_id is defined and gtm_id %}<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>{% endif %}
+{% include 'header-public.html' %}
 <main>
-<header class="rx-hero rx-aurora"><div class="rx-hero-copy">
-<p class="rx-eyebrow">{{ t('rx.eyebrow') }}</p>
-<div class="page-veil" aria-hidden="true"></div>
-<h1 data-split>{{ t('rx.h1') }}</h1>
-<p class="rx-sub">{{ t('rx.sub') }}</p>
-<ul class="rx-checks">
-<li>{{ t('rx.c1') }}</li>
-<li>{{ t('rx.c2') }}</li>
-<li>{{ t('rx.c3') }}</li>
-<li>{{ t('rx.c4') }}</li>
-</ul>
-<div class="rx-cta-row"><button type="button" data-magnet class="rx-btn" data-open-widget>{{ t('rx.try') }}</button><a data-magnet class="rx-btn ghost" href="/about#pricing">{{ t('rx.see_pricing') }}</a></div>
-<p class="rx-micro">{{ t('rx.micro_a') }} <em>{{ t('rx.micro_em') }}</em> {{ t('rx.micro_b') }}</p>
-<p class="rx-micro" data-frontdesk-status>{{ t('rx.checking') }}</p>
-</div>
-<div class="rx-hero-art" aria-label="{{ t('rx.ex_view') }}">
-<div class="rx-inbox"><p class="rx-demo-tag">{{ t('rx.ex_view') }}</p>
-<h2>{{ t('rx.overnight') }}</h2>
-<div class="rx-inbox-grid">
-<section><h3>{{ t('rx.k_updates') }}</h3><ul><li><b>2</b> {{ t('rx.u1') }}</li><li><b>1</b> {{ t('rx.u2') }}</li></ul></section>
-<section><h3>{{ t('rx.k_actions') }}</h3><ul><li>{{ t('rx.a1') }}</li><li>{{ t('rx.a2') }}</li></ul></section>
-<section><h3>{{ t('rx.k_handoffs') }}</h3><ul><li>{{ t('rx.hf1') }}</li></ul></section>
-</div>
-<p class="rx-inbox-foot">{{ t('rx.inbox_foot') }}</p>
-</div></div></header>
-
-<section data-reveal class="rx-strip" aria-label="{{ t('rx.ind_h') }}"><p>{{ t('rx.strip_p') }}</p>
-<ul><li>{{ t('rx.s1') }}</li><li>{{ t('rx.s2') }}</li><li>{{ t('rx.s3') }}</li><li>{{ t('rx.s4') }}</li><li>{{ t('rx.s5') }}</li><li>{{ t('rx.s6') }}</li><li>{{ t('rx.s7') }}</li></ul></section>
-
-<section data-reveal class="rx-demo" id="demo" aria-label="{{ t('rx.ex_conv') }}">
-<div class="rx-demo-copy">
-<p class="rx-eyebrow">{{ t('rx.demo_k') }}</p>
-<h2>{{ t('rx.demo_h') }}</h2>
-<p>{{ t('rx.demo_p') }}</p>
-<ol class="rx-steps" role="tablist" aria-label="{{ t('rx.steps_aria') }}">
-<li><button type="button" role="tab" aria-selected="true" data-step="0"><span>01</span><span>{{ t('rx.st1') }}<small>{{ t('rx.st1s') }}</small></span></button></li>
-<li><button type="button" role="tab" aria-selected="false" data-step="1"><span>02</span><span>{{ t('rx.st2') }}<small>{{ t('rx.st2s') }}</small></span></button></li>
-<li><button type="button" role="tab" aria-selected="false" data-step="2"><span>03</span><span>{{ t('rx.st3') }}<small>{{ t('rx.st3s') }}</small></span></button></li>
-<li><button type="button" role="tab" aria-selected="false" data-step="3"><span>04</span><span>{{ t('rx.st4') }}<small>{{ t('rx.st4s') }}</small></span></button></li>
-</ol></div>
-<div class="rx-phone" aria-live="polite">
-<p class="rx-demo-tag">{{ t('rx.ex_conv') }}</p>
-<div class="rx-screen" data-screen="0">
-<div class="rx-chat"><p class="them">{{ t('rx.c0_q') }}</p>
-<p class="us">{{ t('rx.c0_a', name=tiers.build.name, price=tiers.build.price_label, revs=tiers.build.revisions) }}</p>
-<p class="them">{{ t('rx.c0_m') }}</p>
-<p class="us">{{ t('rx.c0_r') }}</p></div>
-<p class="rx-screen-cap">{{ t('rx.cap0') }}</p></div>
-<div class="rx-screen" data-screen="1" hidden>
-<div class="rx-card"><h3>{{ t('rx.c1_h') }}</h3><dl><dt>{{ t('rx.c1_from') }}</dt><dd>Maya (maya@example.test)</dd><dt>{{ t('rx.c1_intent') }}</dt><dd>{{ t('rx.c1_dd2') }}</dd><dt>{{ t('rx.c1_saved') }}</dt><dd>{{ t('rx.c1_dd3') }}</dd></dl></div>
-<p class="rx-screen-cap">{{ t('rx.cap1') }}</p></div>
-<div class="rx-screen" data-screen="2" hidden>
-<div class="rx-card"><h3>{{ t('rx.c2_h') }}</h3><p>{{ t('rx.c2_p', name=tiers.build.name, price=tiers.build.price_label) }}</p><p class="rx-draft">{{ t('rx.c2_d') }}</p></div>
-<p class="rx-screen-cap">{{ t('rx.cap2') }}</p></div>
-<div class="rx-screen" data-screen="3" hidden>
-<div class="rx-chat"><p class="owner">{{ t('rx.c3_a') }}</p>
-<p class="owner">{{ t('rx.c3_b') }}</p></div>
-<p class="rx-screen-cap">{{ t('rx.cap3') }}</p></div>
-</div></section>
-
-<section data-reveal class="rx-features" aria-label="{{ t('rx.feat_aria') }}"><p class="rx-eyebrow">{{ t('rx.feat_k') }}</p>
-<h2>{{ t('rx.feat_h') }}</h2>
-<div class="rx-cards">
-<article><h3>{{ t('rx.f1h') }}</h3><p>{{ t('rx.f1p') }}</p></article>
-<article><h3>{{ t('rx.f2h') }}</h3><p>{{ t('rx.f2p') }}</p></article>
-<article><h3>{{ t('rx.f3h') }}</h3><p>{{ t('rx.f3p') }}</p></article>
-<article><h3>{{ t('rx.f4h') }}</h3><p>{{ t('rx.f4p') }}</p></article>
-</div></section>
-
-<section data-reveal class="rx-industries" aria-label="{{ t('rx.ind_aria') }}"><p class="rx-eyebrow">{{ t('rx.ind_k') }}</p>
-<h2>{{ t('rx.ind_h') }}</h2>
-<div class="rx-tabs" role="tablist" aria-label="{{ t('rx.ind_aria') }}">
-<button type="button" role="tab" aria-selected="true" data-tab="0">{{ t('rx.t0') }}</button>
-<button type="button" role="tab" aria-selected="false" data-tab="1">{{ t('rx.t1') }}</button>
-<button type="button" role="tab" aria-selected="false" data-tab="2">{{ t('rx.t2') }}</button>
-<button type="button" role="tab" aria-selected="false" data-tab="3">{{ t('rx.t3') }}</button>
-<button type="button" role="tab" aria-selected="false" data-tab="4">{{ t('rx.t4') }}</button>
-</div>
-<div class="rx-tabpanels">
-<div role="tabpanel" data-panel="0"><h3>{{ t('rx.p0h') }}</h3><p>{{ t('rx.p0p') }}</p><ul><li>{{ t('rx.p0a') }}</li><li>{{ t('rx.p0b') }}</li><li>{{ t('rx.p0c') }}</li></ul></div>
-<div role="tabpanel" data-panel="1" hidden><h3>{{ t('rx.p1h') }}</h3><p>{{ t('rx.p1p') }}</p><ul><li>{{ t('rx.p1a') }}</li><li>{{ t('rx.p1b') }}</li><li>{{ t('rx.p1c') }}</li></ul></div>
-<div role="tabpanel" data-panel="2" hidden><h3>{{ t('rx.p2h') }}</h3><p>{{ t('rx.p2p') }}</p><ul><li>{{ t('rx.p2a') }}</li><li>{{ t('rx.p2b') }}</li><li>{{ t('rx.p2c') }}</li></ul></div>
-<div role="tabpanel" data-panel="3" hidden><h3>{{ t('rx.p3h') }}</h3><p>{{ t('rx.p3p') }}</p><ul><li>{{ t('rx.p3a') }}</li><li>{{ t('rx.p3b') }}</li><li>{{ t('rx.p3c') }}</li></ul></div>
-<div role="tabpanel" data-panel="4" hidden><h3>{{ t('rx.p4h') }}</h3><p>{{ t('rx.p4p') }}</p><ul><li>{{ t('rx.p4a') }}</li><li>{{ t('rx.p4b') }}</li><li>{{ t('rx.p4c') }}</li></ul></div>
-</div></section>
-
-<section data-reveal class="rx-tones" aria-label="{{ t('rx.tone_aria') }}"><p class="rx-eyebrow">{{ t('rx.tone_k') }}</p>
-<h2>{{ t('rx.tone_h') }}</h2>
-<p class="rx-tones-sub">{{ t('rx.tone_sub') }}</p>
-<div class="rx-cards three">
-<article data-tone="warm"><h3>{{ t('rx.tone1h') }}</h3><p class="rx-tone-for">{{ t('rx.tone1f') }}</p><blockquote>{{ t('rx.tone1q') }}</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>{{ t('rx.hear') }}</button></p></article>
-<article data-tone="brief"><h3>{{ t('rx.tone2h') }}</h3><p class="rx-tone-for">{{ t('rx.tone2f') }}</p><blockquote>{{ t('rx.tone2q') }}</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>{{ t('rx.hear') }}</button></p></article>
-<article data-tone="patient"><h3>{{ t('rx.tone3h') }}</h3><p class="rx-tone-for">{{ t('rx.tone3f') }}</p><blockquote>{{ t('rx.tone3q') }}</blockquote><p><button type="button" data-magnet class="rx-btn small ghost" data-say>{{ t('rx.hear') }}</button></p></article>
-</div>
-<p class="rx-micro" data-tts-note hidden>{{ t('rx.tts_note') }}</p></section>
-
-<section data-reveal class="rx-pricing" aria-label="{{ t('rx.pr_aria') }}"><p class="rx-eyebrow">{{ t('rx.pr_k') }}</p>
-<h2>{{ t('rx.pr_h') }}</h2>
-<p>{{ t('rx.pr_p') }}</p>
-<ul class="rx-tiers">{% for t in brand.tiers %}<li><b>{{ t.line }}</b><span>{{ tier_notes[t.id] }}</span></li>{% endfor %}</ul>
-<p><a data-magnet class="rx-btn" href="/about#pricing">{{ t('rx.pr_a') }}</a></p></section>
-
-<section data-reveal class="rx-faq" aria-label="{{ t('rx.faq_aria') }}"><p class="rx-eyebrow">{{ t('rx.faq_k') }}</p>
-<h2>{{ t('rx.faq_h') }}</h2>
-<p class="rx-faq-sub">{{ t('rx.faq_sub') }}</p>
-<div class="rx-faq-list">
-{% for item in faqs %}<details><summary>{{ item.q[0]|upper }}{{ item.q[1:] }}?</summary><p>{{ item.a }}</p></details>
-{% endfor %}</div></section>
-
-<section data-reveal class="rx-final"><h2>{{ t('rx.fin_h') }}</h2>
-<p>{{ t('rx.fin_p') }}</p>
-<p class="rx-cta-row"><button type="button" data-magnet class="rx-btn" data-open-widget>{{ t('rx.try') }}</button><a data-magnet class="rx-btn ghost" href="/enquire">{{ t('rx.send_enq') }}</a></p></section>
-
-{% include 'adsense-footer.html' %}
-<footer class="rx-footer"><p>© <span data-year>2026</span> Reachmark · <a href="/">{{ t('rx.nav_about') }}</a> · <a href="/showcase">{{ t('rx.nav_samples') }}</a> · <a href="/about#pricing">{{ t('rx.nav_pricing') }}</a> · <a href="/pricing">{{ t('nav.plans') }}</a> · <a href="/enquire">{{ t('rx.send_enq') }}</a> · <a href="mailto:{{ support_email }}">{{ t('rx.foot_support') }}</a></p></footer>
+  <section class="x-hero">
+    <p class="x-kicker">{{ t('rx.eyebrow') }}</p>
+    <h1>{{ t('rx.h1') }}</h1>
+    <p class="x-lead">{{ t('rx.sub') }}</p>
+    <p class="x-hero-actions">
+      <button type="button" class="x-btn lime" data-open-widget>{{ t('rx.try') }}</button>
+      <a class="x-btn ghost" href="/enquire">{{ t('rx.send_enq') }}</a>
+    </p>
+  </section>
+  {% include 'adsense-footer.html' %}
 </main>
 {% include 'receptionist.html' %}
+{% include 'footer-public.html' %}
 
 {% if owner_logged_in %}
 <section class="rx-agent" aria-label="{{ t('rx.ag_aria') }}">
@@ -158,32 +65,6 @@
 <button type="button" class="ghost" data-act="invoice_list">{{ t('rx.ag_inv') }}</button>
 <button type="button" class="ghost" data-act="project_list">{{ t('rx.ag_proj') }}</button>
 </div></div>
-<div class="rx-agent-card"><h3>{{ t('rx.ag_find') }}</h3>
-<input id="ag-q" placeholder="{{ t('rx.ag_q_ph') }}" maxlength="120">
-<div class="rx-agent-row"><button type="button" id="ag-find">{{ t('rx.ag_search') }}</button></div></div>
-<div class="rx-agent-card"><h3>{{ t('rx.ag_add') }}</h3>
-<input id="ag-name" placeholder="{{ t('rx.ag_name_ph') }}" maxlength="200">
-<input id="ag-email" placeholder="{{ t('rx.ag_email_ph') }}" maxlength="250">
-<input id="ag-city" placeholder="{{ t('rx.ag_city_ph') }}" maxlength="200">
-<input id="ag-web" placeholder="{{ t('rx.ag_web_ph') }}" maxlength="1000">
-<div class="rx-agent-row"><button type="button" id="ag-add">{{ t('rx.ag_add_b') }}</button></div></div>
-<div class="rx-agent-card"><h3>{{ t('rx.ag_det') }}</h3>
-<input id="ag-id" placeholder="{{ t('rx.ag_id_ph') }}">
-<select id="ag-stage"><option value="">{{ t('rx.ag_stage') }}</option><option>New</option><option>Drafted</option><option>Contacted</option><option>Replied</option><option>Won</option><option>Not a fit</option></select>
-<textarea id="ag-note" placeholder="{{ t('rx.ag_note_ph') }}" maxlength="2000"></textarea>
-<div class="rx-agent-row"><button type="button" id="ag-get">{{ t('rx.ag_open') }}</button><button type="button" id="ag-save">{{ t('rx.ag_save') }}</button><button type="button" class="ghost" id="ag-audit">{{ t('rx.ag_audit') }}</button><button type="button" class="danger" id="ag-del">{{ t('rx.ag_del') }}</button></div></div>
-<div class="rx-agent-card"><h3>{{ t('rx.ag_send_h') }}</h3>
-<input id="ag-send-id" placeholder="{{ t('rx.ag_id_ph') }}">
-<input id="ag-basis" placeholder="{{ t('rx.ag_basis_ph') }}" maxlength="300">
-<label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:8px"><input type="checkbox" id="ag-ok" style="width:auto;margin:0"> {{ t('rx.ag_ok') }}</label>
-<div class="rx-agent-row"><button type="button" id="ag-send">{{ t('rx.ag_send_b') }}</button></div></div>
-<div class="rx-agent-card"><h3>{{ t('rx.ag_disc_h') }}</h3>
-<input id="ag-disc-city" placeholder="{{ t('rx.ag_dcity_ph') }}" maxlength="150">
-<input id="ag-disc-cat" placeholder="{{ t('rx.ag_dcat_ph') }}" maxlength="60">
-<div class="rx-agent-row"><button type="button" id="ag-disc">{{ t('rx.ag_disc_b') }}</button></div>
-<input id="ag-eq-id" placeholder="{{ t('rx.ag_eq_ph') }}" style="margin-top:10px">
-<select id="ag-eq-status"><option>New</option><option>In progress</option><option>Answered</option><option>Closed</option></select>
-<div class="rx-agent-row"><button type="button" id="ag-eq">{{ t('rx.ag_eq_b') }}</button></div></div>
 </div>
 <pre id="rx-agent-out">{{ t('rx.ag_out') }}</pre>
 <script>
@@ -191,29 +72,17 @@
   var out=document.getElementById('rx-agent-out');
   var csrf=(document.querySelector('meta[name=csrf-token]')||{}).content||'';
   function show(x){out.textContent=typeof x==='string'?x:JSON.stringify(x,null,2);}
-  var T_=window.T||function(k,f){return f;};
-  function act(tool,params){show(T_('rx.js_running','Running')+' '+tool+' …');
-    return fetch('/api/receptionist/act',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tool:tool,params:params||{}})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(o){show(o.j);return o;}).catch(function(e){show(T_('rx.js_error','Error')+': '+e.message);});}
-  function v(id){return (document.getElementById(id).value||'').trim();}
+  function act(tool,params){show('…');
+    return fetch('/api/receptionist/act',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tool:tool,params:params||{}})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(o){show(o.j);});}
   document.querySelectorAll('[data-act]').forEach(function(b){b.onclick=function(){var p={};try{p=JSON.parse(b.dataset.params||'{}');}catch(e){}act(b.dataset.act,p);};});
-  document.getElementById('ag-find').onclick=function(){act('lead_list',{q:v('ag-q'),limit:10});};
-  document.getElementById('ag-add').onclick=function(){act('lead_create',{name:v('ag-name'),email:v('ag-email'),city:v('ag-city'),website:v('ag-web')});};
-  document.getElementById('ag-get').onclick=function(){act('lead_get',{id:v('ag-id')});};
-  document.getElementById('ag-save').onclick=function(){var p={id:v('ag-id')};if(v('ag-stage'))p.stage=v('ag-stage');if(v('ag-note'))p.note=v('ag-note');act('lead_update',p);};
-  document.getElementById('ag-audit').onclick=function(){act('lead_audit',{id:v('ag-id')});};
-  document.getElementById('ag-del').onclick=function(){if(confirm(T_('rx.js_del_lead','Delete this lead?')))act('lead_delete',{id:v('ag-id')});};
-  document.getElementById('ag-send').onclick=function(){if(!document.getElementById('ag-ok').checked){show(T_('rx.js_tick','Tick the approval box first.'));return;}if(!confirm(T_('rx.js_send_c','Send this outreach email now?')))return;act('lead_send',{id:v('ag-send-id'),basis:v('ag-basis')});};
-  document.getElementById('ag-disc').onclick=function(){act('discover_run',{city:v('ag-disc-city'),category:v('ag-disc-cat')});};
-  document.getElementById('ag-eq').onclick=function(){act('enquiry_update',{id:v('ag-eq-id'),status:v('ag-eq-status'),notes:''});};
 })();
 </script>
 </section>
 {% endif %}
 
-<script src="/static/receptionist-page.js" defer></script>
-<script src="/static/reveal.js" defer></script>
 <script src="/static/dropdown.js" defer></script>
-<script src="/static/magnet.js" defer></script>
+<script src="/static/theme.js" defer></script>
+<script src="/static/receptionist-page.js" defer></script>
 <script src="/static/motion.js" defer></script>
 <script src="/static/pwa.js" defer></script>
 </body></html>

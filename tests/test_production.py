@@ -212,14 +212,18 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
         self.assertNotIn('Questions? Ask the front desk',home)
         self.assertIn('Concepts we&#39;ve built',home)
         about=self.client.get('/about').get_data(as_text=True)
-        self.assertLess(len(home),len(about)//2)
+        self.assertIn('I hunt missing websites',about)
+        self.assertNotIn('id="website-samples"',about)
+        self.assertNotIn("enquiry-form.html",about)
+        self.assertNotIn('id="review-form"',about)
     def test_about_and_reviews_keep_the_full_page(self):
         about=self.client.get('/about').get_data(as_text=True)
         self.assertIn('I hunt missing websites',about)
         reviews=self.client.get('/reviews').get_data(as_text=True)
-        self.assertIn('Reviews',reviews)
-        self.assertIn('review-form',reviews)
+        self.assertIn('id="review-form"',reviews)
         self.assertNotIn('I hunt missing websites',reviews)
+        self.assertNotIn('/static/carousel.js',reviews)
+        self.assertIn('/static/reviews.js',reviews)
     def test_auth_pages_use_the_visible_inverse_logo(self):
         for path in ('/signup','/signin','/login'):
             body=self.client.get(path).get_data(as_text=True)
@@ -231,12 +235,17 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
             self.assertNotIn('Sign in to the workspace',body,path)
             self.assertNotIn('Studio owner?',body,path)
 
+    def test_a_review_is_not_rendered_twice(self):
+        self.client.post('/api/client-reviews', json={'name':'Ada','business':'Studio','rating':5,'text':'Reachmark built a clear site for my shop.'})
+        body=self.client.get('/reviews').get_data(as_text=True)
+        self.assertEqual(body.count('Reachmark built a clear site for my shop.'), 1)
+
     def test_header_nav_stays_slim(self):
         home=self.client.get('/').get_data(as_text=True)
         nav=home.split('<nav class="main"')[1].split('</nav>')[0]
-        for label in ('Reviews','About','Enquire'):
+        for label in ('About','Enquire'):
             self.assertIn(label,nav)
-        for label in ('Samples','Receptionist'):
+        for label in ('Reviews','Samples','Receptionist'):
             self.assertNotIn(label,nav)
     def test_public_pages_show_exactly_one_support_bubble(self):
         for path in ('/','/showcase','/enquire'):

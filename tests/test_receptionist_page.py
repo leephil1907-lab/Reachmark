@@ -1,8 +1,7 @@
 """AI receptionist page regressions. Disposable databases; no external calls.
 
-Locks in: the page renders with the brand intact, the demo/tones/industries/FAQ
-sections exist, the FAQ matches the knowledge base the chat answers from, the
-live widget is embedded, and no competitor brand or invented proof appears.
+The public page is a greeting plus the live desk. Voice lives in the chat widget.
+FAQ answers stay in JSON-LD from the knowledge base the chat uses.
 """
 import json
 import re
@@ -20,23 +19,23 @@ class ReceptionistPageTests(unittest.TestCase):
 
     def test_page_renders_with_brand_and_identity_intact(self):
         html = self.page()
-        self.assertIn('AI Receptionist', html)
         self.assertIn('Reachmark', html)
         self.assertIn('/static/manifest.webmanifest', html)
         self.assertIn('/static/icon.svg', html)
-        self.assertIn('Every chat, enquiry and booking', html)
+        self.assertIn('Hello.', html)
+        self.assertNotIn('Hear it', html)
+        self.assertNotIn('Overnight, while you slept', html)
 
-    def test_page_has_the_demo_flow_tones_industries_and_faq(self):
+    def test_page_is_a_conversation_not_a_feature_deck(self):
         html = self.page()
-        for marker in ('data-step="0"', 'data-step="3"', 'Example conversation',
-                       'data-tab="0"', 'data-tab="4"', 'data-say', 'rx-faq-list',
-                       'Try it live', '/about#pricing', 'Included with every Reachmark build'):
-            self.assertIn(marker, html, f'missing section marker: {marker}')
-
-    def test_demo_panels_are_labelled_as_examples(self):
-        html = self.page()
-        self.assertGreater(html.count('Example'), 3,
-                           'demo content must be visibly labelled as an example')
+        self.assertIn('data-open-widget', html)
+        self.assertIn('id="rm-receptionist"', html)
+        self.assertIn('id="rm-speak"', html)
+        self.assertIn('id="rm-mic"', html)
+        self.assertNotIn('data-say', html)
+        self.assertNotIn('data-step="0"', html)
+        self.assertNotIn('class="rx-footer"', html)
+        self.assertIn('class="x-foot"', html)
 
     def test_widget_panel_starts_hidden(self):
         """The panel must stay shut until the visitor opens it (close must work too)."""
@@ -54,34 +53,7 @@ class ReceptionistPageTests(unittest.TestCase):
         self.assertIn('/static/receptionist-page.js', html)
         self.assertIn('/static/receptionist-page.css', html)
 
-    def test_faq_answers_come_from_the_knowledge_base(self):
-        from web.receptionist import load_knowledge
-        html = self.page()
-        checked = 0
-        for topic in load_knowledge():
-            if topic['qa']:
-                self.assertIn(topic['qa'][0]['a'][:60], html,
-                              f"FAQ drifted from the knowledge base on '{topic['topic']}'")
-                checked += 1
-        self.assertGreater(checked, 5, 'knowledge base has no questions to render')
-
-    def test_pricing_quotes_only_published_tiers(self):
-        html = self.page()
-        self.assertIn('Audit · $497', html)
-        self.assertIn('Build · $3,500', html)
-        self.assertIn('Care · $1,800', html)
-        self.assertIn('Outreach · $6,000', html)
-
-    def test_no_competitor_brand_or_invented_proof(self):
-        html = self.page()
-        low = html.lower()
-        self.assertNotIn('ringcentral', low)
-        self.assertNotIn('ringex', low)
-        for invented in ('$1.7M', '97%', 'customer satisfaction', 'case study',
-                         '★★★★★', '4.8/5', '127 reviews'):
-            self.assertNotIn(invented, html, f'invented proof leaked onto the page: {invented}')
-
-    def test_structured_faq_matches_the_knowledge_base(self):
+    def test_faq_answers_stay_in_structured_data(self):
         from web.receptionist import load_knowledge
         html = self.page()
         blobs = re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
@@ -101,6 +73,20 @@ class ReceptionistPageTests(unittest.TestCase):
         for entity, answer in zip(faqs, first_answers):
             self.assertEqual(entity['acceptedAnswer']['text'], answer)
 
+    def test_page_does_not_repeat_studio_pricing_cards(self):
+        html = self.page()
+        self.assertNotIn('Start Audit', html)
+        self.assertNotIn('id="pricing"', html)
+
+    def test_no_competitor_brand_or_invented_proof(self):
+        html = self.page()
+        low = html.lower()
+        self.assertNotIn('ringcentral', low)
+        self.assertNotIn('ringex', low)
+        for invented in ('$1.7M', '97%', 'customer satisfaction', 'case study',
+                         '★★★★★', '4.8/5', '127 reviews'):
+            self.assertNotIn(invented, html, f'invented proof leaked onto the page: {invented}')
+
     def test_discoverable_via_sitemap_and_robots(self):
         sitemap = self.client.get('/sitemap.xml').get_data(as_text=True)
         self.assertIn('/receptionist', sitemap)
@@ -110,7 +96,7 @@ class ReceptionistPageTests(unittest.TestCase):
     def test_static_assets_are_served(self):
         css = self.client.get('/static/receptionist-page.css')
         self.assertEqual(css.status_code, 200)
-        js = self.client.get('/static/receptionist-page.js')
+        js = self.client.get('/static/receptionist.js')
         self.assertEqual(js.status_code, 200)
         body = js.get_data(as_text=True)
         self.assertIn('speechSynthesis', body)

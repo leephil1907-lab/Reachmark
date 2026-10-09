@@ -1,461 +1,161 @@
-<!DOCTYPE html><html lang="{{ locale }}"><head>
-{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ gtm_id }}');</script><!-- End Google Tag Manager -->{% endif %}
-{% if ga_id is defined and ga_id %}<!-- Global site tag (gtag.js) - Google Analytics --><script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}</title><meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Discover businesses worldwide, verify website opportunities, and start meaningful conversations with personalized website proposals.' }}">{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">{% if google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}<meta name="theme-color" content="#20251f"><meta name="application-name" content="Reachmark"><meta property="og:type" content="website"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'A little discovery. A better conversation. Find businesses worldwide and turn real website opportunities into a thoughtful first hello.' }}"><meta property="og:site_name" content="Reachmark"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find Potential. Make Your Mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Global business discovery, real website signals, and thoughtful outreach. All in one focused workspace.' }}">{% if base %}<link rel="canonical" href="{{ base }}/about"><meta property="og:url" content="{{ base }}/about"><meta property="og:image" content="{{ base }}/static/social-card.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:image" content="{{ base }}/static/social-card.png">{% endif %}<link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest"><link rel="stylesheet" href="/static/fonts.css"><script type="application/ld+json">{{ structured|tojson }}</script><style>*{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0};background:#eef6d1;color:#252d22;font:14px 'DM Sans',sans-serif}a{color:inherit;text-decoration:none}button,a{transition:transform .2s,background .2s}nav{max-width:1280px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:25px 6%;border-bottom:1px solid #e2e7d6}.logo{width:200px;display:block}.nav-links{display:flex;gap:30px;align-items:center;font-size:10px;color:#2d4a0a}.button{display:inline-flex;align-items:center;gap:30px;background:#d5f268;color:#3d4d29;border:1px solid #cbe85b;padding:14px 19px;border-radius:6px;font-size:11px;font-weight:600}@media(hover:hover) and (pointer:fine){ .button:hover{background:#c7e55b;transform:translateY(-2px)} }.button.dark{background:#2d3825;border-color:#3a492f;color:#eaf1df}main{max-width:1280px;margin:auto;padding:0 6%}.hero{padding:95px 0 75px;display:grid;grid-template-columns:1.1fr 1fr;gap:60px;align-items:center}.eyebrow{font-size:8px;letter-spacing:1.7px;color:#8c9c77;display:flex;align-items:center;gap:7px}.eyebrow:before{content:'';width:17px;height:1px;background:#a7b68e}h1{font:650 clamp(40px,5.6vw,71px)/1.07 'Manrope',sans-serif;letter-spacing:-3px;margin:24px 0}h1 span{color:#8ca650}p{font-size:12px;line-height:1.9;color:#1e2e15;max-width:450px}.hero .button{margin-top:19px}.hero-note{font-size:8px;letter-spacing:.6px;color:#a7b298;margin-top:24px}.art{position:relative;aspect-ratio:1;background:#263221;border:1px solid #34482a;border-radius:50%;display:flex;align-items:center;justify-content:center}.art:before,.art:after{content:'';position:absolute;inset:-17px;border:1px solid #d9e2cb;border-radius:50%;pointer-events:none}.art:after{inset:-36px;opacity:.5}.art svg{width:72%;height:72%;animation:orbit 14s ease-in-out infinite}.art-dot{position:absolute;left:10%;top:23%;width:13px;height:13px;border:4px solid #f5f5ef;border-radius:50%;background:#a7c44b;box-shadow:0 0 0 1px #d9e2c7}.art-label{position:absolute;background:#f7f9f0;border:1px solid #e0e8d1;border-radius:6px;box-shadow:0 9px 30px #2c3a2310;padding:13px 18px;font-size:9px;color:#1e2e15;bottom:35px;left:-35px;display:flex;gap:12px;align-items:center}.art-label span{background:#e9f2d2;color:#95aa65;padding:6px 8px;border-radius:5px;font-size:17px}.label-two{bottom:auto;left:auto;right:-29px;top:38px}.art-caption{position:absolute;bottom:44px;color:#768e60;letter-spacing:2px;font-size:6px}.ribbon{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:25px 0;border-block:1px solid #e1e6d6;margin:12px 0 80px;font-size:9px;letter-spacing:.5px;color:#97a788}.ribbon span{display:flex;gap:9px;align-items:center}.ribbon b{font-size:13px;font-weight:400;color:#a2ba6c}.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:30px}.section-head h2{font:600 35px/1.2 'Manrope',sans-serif;letter-spacing:-1.3px;margin:13px 0 0;max-width:500px}.section-head p{font-size:11px;max-width:310px}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:70px}.card{background:#fcfcf8;border:1px solid #e2e7d8;border-radius:10px;padding:30px}.card .number{font-size:10px;border:1px solid #e2ead3;display:grid;place-items:center;width:34px;height:34px;border-radius:8px;color:#9bb677;background:#f3f7e9}.card h3{font:650 18px 'Manrope',sans-serif;letter-spacing:-.6px;margin:27px 0 13px;color:#526744}.card p{font-size:11px;color:#1e2e15}.card small{font-size:8px;color:#9bb17f;display:block;border-top:1px solid #edf1e5;padding-top:20px;margin-top:23px}.honest{background:#eaf0dc;border:1px solid #dfe8cc;border-radius:12px;display:grid;grid-template-columns:1fr 1.2fr;gap:50px;padding:43px;margin-bottom:65px}.honest h2{font:600 31px/1.25 'Manrope',sans-serif;letter-spacing:-1px;color:#0f1a0a;margin:16px 0}.honest p{font-size:11px;color:#1e2e15;max-width:500px}.honest strong{color:#1a3310;font-weight:500}.cta{background:#263321;border-radius:13px;padding:50px;display:flex;align-items:center;justify-content:space-between;gap:30px;margin-bottom:60px}.cta h2{font:500 33px 'Manrope',sans-serif;letter-spacing:-1px;color:#eaf3de;margin:0 0 14px}.cta p{color:#859d71;font-size:11px;margin:0}.cta .button{white-space:nowrap}footer{border-top:1px solid #e1e7d5;max-width:1280px;margin:auto;padding:27px 6% 38px;display:flex;justify-content:space-between;gap:35px;align-items:flex-start}.footer-logo{width:140px;opacity:.7}.footer-copy{font-size:8px;color:#a8b39b;line-height:1.9;max-width:420px}.footer-copy a{color:#90a872}.hero-copy{animation:rise .7s ease both}@keyframes rise{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:none}}@keyframes orbit{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(-5deg)}}@media(max-width:850px){.hero{padding:60px 0;gap:35px}.art-label{font-size:7px;padding:10px;left:-15px;bottom:25px}.label-two{left:auto;right:-15px;top:25px;bottom:auto}.art-label span{font-size:12px;padding:5px}.art-caption{font-size:5px;bottom:25px}.section-head{align-items:flex-start}.features{gap:13px}.card{padding:24px}.honest{gap:30px;padding:32px}.cta{padding:35px}.cta h2{font-size:28px}}@media(max-width:640px){nav{padding:21px 6%}.logo{width:160px}.nav-links>a:not(.button){display:none}.nav-links .button{font-size:9px;padding:11px 13px;gap:9px}.hero{grid-template-columns:1fr;padding:45px 0 30px;gap:55px}.hero h1{font-size:53px;letter-spacing:-2.5px;max-width:400px}.hero p{font-size:12px;max-width:300px}.hero .button{font-size:10px}.hero-note{font-size:7px}.art{width:76%;margin:0 auto 30px}.art-label{font-size:8px}.ribbon{margin:20px 0 45px;padding:22px 0;display:grid;grid-template-columns:1fr 1fr;font-size:7px;gap:16px}.section-head{display:block;margin-bottom:24px}.section-head h2{font-size:32px}.section-head p{font-size:11px;margin-top:20px}.features{grid-template-columns:1fr;margin-bottom:45px}.card{padding:26px}.card h3{font-size:19px;margin-top:23px}.card p{font-size:11px}.card small{font-size:8px}.honest{grid-template-columns:1fr;padding:28px;gap:12px;margin-bottom:35px}.honest h2{font-size:30px;margin-bottom:0}.honest p{font-size:11px}.cta{padding:30px;flex-direction:column;align-items:flex-start;gap:25px;margin-bottom:35px}.cta h2{font-size:28px}.cta p{font-size:10px}.cta .button{font-size:10px}footer{flex-direction:column;gap:15px}.footer-copy{font-size:8px}.footer-logo{width:140px}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}</style>
-<style>
-/* Bright redesign — airy, not jammed */
-body{background:#eef6d1;color:#1a2315}
-nav{padding:28px 6%;border-bottom:1px solid #d8e9b8;background:#eef6d1}
-.logo{width:200px}
-.nav-links{ gap:28px; font-size:11px; color:#1e2e15 }
-.nav-links a{position:relative}
-.nav-links a:hover{color:#3a4a2a}
-.nav-links a[href="/signin"]{background:#f0f5e0;border:1px solid #dfe9cc;padding:9px 14px;border-radius:7px;font-weight:600;color:#556842}
-.nav-links a[href="/signup"]{color:#3a4a2a;font-weight:600}
-main{padding:0 6%}
-.hero{padding:110px 0 90px;gap:70px}
-.hero-copy h1{letter-spacing:-3.5px}
-.ribbon{padding:32px 0;margin:20px 0 90px;gap:30px}
-.section-head{margin-bottom:40px}
-.features{gap:28px;margin-bottom:90px}
-.card{padding:32px;background:#ffffff;border:1px solid #eef1e4;border-radius:14px;box-shadow:0 4px 20px rgba(32,45,22,0.04)}
-.honest{padding:50px;border-radius:16px;gap:60px;margin-bottom:80px}
-.honest:first-of-type{background:#f7f9f0;border:1px solid #eef1e4}
-.sample-section{padding:50px 0 20px}
-.enquiry-layout{padding:70px 0 80px;gap:70px}
-.cta{padding:60px;border-radius:16px;background:linear-gradient(135deg,#20251f 0%,#2d3a22 100%);margin-bottom:70px}
-.cta h2{color:#e8f0d0}
-.cta p{color:#a8b89a}
-footer{padding:32px 6% 45px}
-@media(max-width:640px){.hero{padding:50px 0 40px} .features{gap:22px} .card{padding:28px}}
-</style>
-<style>
-/* Reachmark crystal rebuild — 🍋‍🟩 crystal green, Black & Green write-up, bigger logo */
-body{background:#eef6d1 !important; color:#0f1a0a}
-nav{background:#ffffff !important; border-color:#e2e7d6 !important; box-shadow:0 2px 12px rgba(32,45,22,.06) !important}
-.logo{width:200px !important; filter:drop-shadow(0 2px 8px rgba(32,45,22,.08))}
-.nav-links{color:#2d4a0a}
-.nav-links a{color:#0f1a0a}
-.nav-links a[href="/signin"]{background:#d5f268; border-color:#cbe85b; color:#0f1a0a}
-.nav-links a[href="/signup"]{color:#0f1a0a}
-.hero{background:linear-gradient(180deg, #eef6d1 0%, #e6f3c0 100%); border:1px solid #d8e9b8; border-radius:22px; padding:56px 44px; margin:40px 0 60px; box-shadow:0 12px 40px rgba(45,90,10,.08)}
-.hero h1{color:#0f1a0a}
-.hero h1 span{color:#3a7a0a}
-.hero p{color:#2d4a0a}
-.hero-note{color:#4a6428}
-.art{background:#0f1a0a; border-color:#1a3310}
-.card{background:#f7fbd9; border-color:#d8e9b8}
-.card h3{color:#0f1a0a}
-.card p{color:#2d4a0a}
-.honest{background:#f7fbd9 !important; border-color:#d8e9b8 !important}
-.honest h2{color:#0f1a0a}
-.honest p{color:#2d4a0a}
-.banner-viewport{background:#ffffff !important; border-color:#d8e9b8 !important}
-.banner-slide::before{background:radial-gradient(ellipse at 70% 50%, rgba(213,242,104,.28) 0%, transparent 60%), linear-gradient(135deg, #f7fbd9 0%, #eef6d1 100%) !important}
-.banner-slide h2{color:#0f1a0a !important}
-.banner-slide .banner-sub{color:#2d4a0a !important}
-.banner-kicker{color:#3a7a0a !important}
-.sample-section .card{background:#ffffff}
-.trustpilot-section, .review-section{background:#f7fbd9; border-color:#d8e9b8}
-</style>
-<link rel="stylesheet" href="/static/public.css">
-<link rel="stylesheet" href="/static/premium.css">
+<!DOCTYPE html>
+<html lang="{{ locale }}">
+<head>
+{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager --><script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','{{ gtm_id }}');</script>{% endif %}
+{% if ga_id is defined and ga_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{ seo.title if seo is defined and seo.title else 'About · Reachmark' }}</title>
+<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Reachmark is a website studio: we find businesses losing customers online, show the evidence, and build when they want the work.' }}">
+{% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}
+<meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">
+{% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
+<meta name="theme-color" content="#20251f">
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180">
+<link rel="manifest" href="/static/manifest.webmanifest">
+<link rel="stylesheet" href="/static/fonts.css">
 <link rel="stylesheet" href="/static/dropdown.css">
-<style>
-/* Premium stable — no auto move/enlarge on touch; user pinch only */
-html{ -webkit-text-size-adjust:100%; }
-body{ overflow-x:hidden; }
-.banner-viewport, .carousel-viewport{ touch-action: pan-y pinch-zoom; overscroll-behavior:contain; }
-@media(hover:none),(pointer:coarse){
-  .premium-reveal{ transform:translateY(12px) !important; }
-}
-*{ -webkit-tap-highlight-color:transparent; }
-</style>
-
-<style>
-/* —— Bright & Readable Fonts — high contrast, no faded wash —— */
-html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility; }
-body{ color:#0f1a0a !important; font-weight:500; }
-p{ color:#1e2e15 !important; font-weight:500 !important; }
-h1,h2,h3,h4{ color:#0f1a0a !important; font-weight:700 !important; }
-.card p, .honest p, .banner-sub, .sample-card p, .trust-card p, .client-review-card p{ color:#1e2e15 !important; font-weight:500 !important; line-height:1.75 !important; }
-.section-head p, .hero p, .features p{ color:#1e2e15 !important; }
-small, .hero-note, .art-caption, .ribbon{ color:#2d4a0a !important; font-weight:600 !important; }
-.eyebrow{ color:#1a3310 !important; font-weight:700 !important; letter-spacing:1.2px !important; }
-.card h3, .honest h2, .banner-slide h2{ color:#0f1a0a !important; }
-.card small, .trustpilot-foot, .review-section small{ color:#2d4a0a !important; }
-::placeholder{ color:#1e2e15 !important; }
-</style>
-
-<style>
-[data-theme="dark"]{color-scheme:dark}
-[data-theme="dark"] body{background:#1b2518;color:#e8f0d0}
-[data-theme="dark"] nav{background:rgba(27,37,24,0.96)!important;border-color:#2a3a22!important;backdrop-filter:blur(10px);box-shadow:0 2px 20px rgba(0,0,0,.18)!important}
-[data-theme="dark"] .nav-links, [data-theme="dark"] .public-links{color:#cbd5c0 !important}
-[data-theme="dark"] .nav-links a, [data-theme="dark"] .public-links a{color:#e8f0d0 !important}
-[data-theme="dark"] .nav-links a:hover, [data-theme="dark"] .public-links a:hover{color:#d5f268 !important}
-[data-theme="dark"] .nav-links a[href="/signin"], [data-theme="dark"] .public-links a[href="/signin"]{background:#d5f268!important;color:#0f1a0a!important;border-color:#cbe85b!important;opacity:1 !important}
-[data-theme="dark"] #theme-toggle-public{border-color:#2a3a22!important;color:#e8f0d0!important;background:rgba(255,255,255,0.06)!important}
-[data-theme="dark"] .hero{background:linear-gradient(180deg,#1e2e1a 0%,#1b2518 100%)!important;border-color:#2a3a22!important;box-shadow:0 12px 40px rgba(0,0,0,.22)!important}
-[data-theme="dark"] .hero h1{color:#e8f0d0!important}
-[data-theme="dark"] .hero h1 span, [data-theme="dark"] .banner-kicker{color:#d5f268!important}
-[data-theme="dark"] .hero p, [data-theme="dark"] .banner-sub, [data-theme="dark"] .honest p, [data-theme="dark"] .card p{color:#b8c7a8!important}
-[data-theme="dark"] .card, [data-theme="dark"] .honest, [data-theme="dark"] .enquiry-form-shell, [data-theme="dark"] .trustpilot-section, [data-theme="dark"] .review-section, [data-theme="dark"] .sample-section .card{background:#1e2e1a!important;border-color:#2a3a22!important;box-shadow:0 8px 32px rgba(0,0,0,.18)!important}
-[data-theme="dark"] .card h3, [data-theme="dark"] .honest h2, [data-theme="dark"] .trustpilot-section h2, [data-theme="dark"] .review-section h2{color:#e8f0d0!important}
-[data-theme="dark"] .cta{background:linear-gradient(135deg,#1a2315 0%,#252f1d 100%)!important;border:1px solid #2a3a22!important}
-[data-theme="dark"] .ribbon{border-color:#2a3a22!important;color:#9aa38e!important;background:transparent !important}
-[data-theme="dark"] footer.world-footer, [data-theme="dark"] footer{border-color:#1e2a1c!important;background:#131a12 !important}
-[data-theme="dark"] .banner-viewport, [data-theme="dark"] .carousel-viewport, [data-theme="dark"] .carousel-3d-hero{background:#1e2e1a!important;border-color:#2a3a22!important}
-[data-theme="dark"] .public-main, [data-theme="dark"] main{background:transparent !important}
-</style>
 <link rel="stylesheet" href="/static/header.css">
 <link rel="stylesheet" href="/static/motion.css">
 <link rel="stylesheet" href="/static/xdesign.css">
 <script src="/static/i18n.js"></script>
-</head><body class="x-public">
-{% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}
+{% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}
+<style>
+.about-founder{display:grid;grid-template-columns:minmax(220px,.9fr) 1.2fr;gap:36px;align-items:center;margin:8px auto 56px;width:min(var(--x-max),calc(100% - 48px));background:#fff;border:1px solid var(--x-line);border-radius:22px;padding:28px}
+.about-founder img.portrait{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center 12%;border-radius:16px;display:block;background:#20251f}
+.about-founder h2{font:400 clamp(28px,4vw,40px)/1.15 'Instrument Serif',Georgia,serif;letter-spacing:-.03em;margin:8px 0 14px}
+.about-founder p{margin:0 0 12px;color:#3c4638;line-height:1.7;max-width:52ch}
+.about-prices{width:min(var(--x-max),calc(100% - 48px));margin:0 auto 56px}
+.about-prices h2{font:400 clamp(28px,4vw,40px)/1.15 'Instrument Serif',Georgia,serif;letter-spacing:-.03em;margin:0 0 8px}
+.about-prices > p{color:#5c6358;margin:0 0 22px;max-width:52ch}
+.about-price-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.about-price{background:#fff;border:1px solid var(--x-line);border-radius:18px;padding:22px 20px;display:flex;flex-direction:column;gap:8px}
+.about-price.on{background:#20251f;color:#f3f6f1;border-color:#20251f}
+.about-price.on p,.about-price.on small{color:#c9d2c0}
+.about-price b{font-size:28px;letter-spacing:-.03em}
+.about-price small{color:#6b716c;text-transform:uppercase;letter-spacing:.12em;font:650 11px Manrope,sans-serif}
+.about-price ul{margin:8px 0 16px;padding:0;list-style:none;font-size:14px;line-height:1.7;color:#3c4638}
+.about-price.on ul{color:#d7decc}
+.about-price a{margin-top:auto;display:inline-flex;justify-content:center;padding:11px 14px;border-radius:999px;font:700 13px Manrope,sans-serif;text-decoration:none;border:1px solid #e2e7d6;color:#20251f;background:#fff}
+.about-price.on a{background:#d5f268;border-color:#cbe85b;color:#20251f}
+@media(max-width:720px){.about-founder,.about-price-grid{grid-template-columns:1fr}.about-founder{padding:18px}}
+</style>
+</head>
+<body class="x-site">
+{% if gtm_id is defined and gtm_id %}<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>{% endif %}
 {% include 'header-public.html' %}
 <main>
-<section class="banner-carousel premium-reveal" aria-label="{{ t('about.banners_aria') }}" role="region">
-  <div class="banner-viewport">
-    <div class="banner-track">
-      <!-- Banner 1 — Missing on the Map -->
-      <div class="banner-slide">
-        <div class="banner-badge"><span></span>{{ t('about.b1_badge') }}</div>
-        <div class="banner-copy">
-          <div class="banner-kicker"><span></span>{{ t('about.b1_kicker') }}</div>
-          <h2>{{ t('about.b1_h') }}<br><em>{{ t('about.b1_em') }}</em></h2>
-          <p class="banner-sub">{{ t('about.b1_sub') }}</p>
-          <div class="banner-ctas">
-            <a class="primary" href="/showcase">{{ t('about.b1_cta1') }}</a>
-            <a class="ghost" href="/enquire">{{ t('about.b1_cta2') }}</a>
-          </div>
-          <div class="banner-proof">
-            <span>{{ t('about.b1_p1') }}</span>
-            <span>{{ t('about.b1_p2') }}</span>
-            <span>{{ t('about.b1_p3') }}</span>
-          </div>
-        </div>
-        <div class="banner-visual"><img src="/static/banners/banner-1.jpg" alt="{{ t('about.b1_alt') }}"></div>
-      </div>
-      <!-- Banner 2 — We Don't Pitch Ideas -->
-      <div class="banner-slide">
-        <div class="banner-badge"><span></span>{{ t('about.b2_badge') }}</div>
-        <div class="banner-copy">
-          <div class="banner-kicker"><span></span>{{ t('about.b2_kicker') }}</div>
-          <h2>{{ t('about.b2_h') }}<br><em>{{ t('about.b2_em') }}</em></h2>
-          <p class="banner-sub">{{ t('about.b2_sub') }}</p>
-          <div class="banner-ctas">
-            <a class="primary" href="/showcase/getpaid">{{ t('about.b2_cta1') }}</a>
-            <a class="ghost" href="#website-samples">{{ t('about.b2_cta2') }}</a>
-          </div>
-          <div class="banner-proof">
-            <span>{{ t('about.b2_p1') }}</span>
-            <span>{{ t('about.b2_p2') }}</span>
-          </div>
-        </div>
-        <div class="banner-visual"><img src="/static/banners/banner-2.jpg" alt="{{ t('about.b2_alt') }}"></div>
-      </div>
-      <!-- Banner 3 — Do The Work. Get Found. -->
-      <div class="banner-slide">
-        <div class="banner-badge"><span></span>{{ t('about.b3_badge') }}</div>
-        <div class="banner-copy">
-          <div class="banner-kicker"><span></span>{{ t('about.b3_kicker') }}</div>
-          <h2>{{ t('about.b3_h') }}<br><em>{{ t('about.b3_em') }}</em></h2>
-          <p class="banner-sub">{{ t('about.b3_sub') }}</p>
-          <div class="banner-ctas">
-            <a class="primary" href="/enquire">{{ t('about.b3_cta1') }}</a>
-            <a class="ghost" href="/showcase/fintech-pulse">{{ t('about.b3_cta2') }}</a>
-          </div>
-          <div class="banner-proof">
-            <span>{{ t('about.b3_p1') }}</span>
-            <span>{{ t('about.b3_p2') }}</span>
-          </div>
-        </div>
-        <div class="banner-visual"><img src="/static/banners/banner-3.jpg" alt="{{ t('about.b3_alt') }}"></div>
-      </div>
-    </div>
-  </div>
-  <div class="banner-nav">
-    <div class="banner-dots" role="tablist" aria-label="{{ t('about.banner_slides') }}"><button aria-label="{{ t('about.banner_n', n=1) }}" class="active"></button><button aria-label="{{ t('about.banner_n', n=2) }}"></button><button aria-label="{{ t('about.banner_n', n=3) }}"></button></div>
-    <div class="banner-arrows"><button class="banner-prev" aria-label="{{ t('about.banner_prev') }}">‹</button><button class="banner-next" aria-label="{{ t('about.banner_next') }}">›</button></div>
-  </div>
-</section>
-<section class="carousel-3d premium-reveal" id="top-samples">
-  <div class="section-head">
-    <div><div class="eyebrow">{{ t('about.car_k') }}</div><h2>{{ t('about.car_h') }}<br>{{ t('about.car_h2') }}</h2></div>
-    <p>{{ t('about.car_p') }}</p>
-  </div>
-  <div class="carousel-3d-hero premium-reveal">
-    <img src="/static/samples/carousel-3d-hero.jpg" alt="{{ t('about.car_hero_alt') }}">
-    <div class="hero-overlay">
-      <div class="overlay-copy">
-        <div class="eyebrow" style="color:#8c9c77; margin-bottom:10px;">{{ t('about.car_ovk') }}</div>
-        <h4>{{ t('about.car_ovh') }}</h4>
-        <p>{{ t('about.car_ovp') }}</p>
-      </div>
-    </div>
-  </div>
-  <div class="carousel-viewport">
-    <div class="carousel-track">
-      <div class="carousel-slide">
-        <div class="slide-copy">
-          <div class="figma-badge"><span></span>{{ t('about.s1_badge') }}</div>
-          <div class="eyebrow">{{ t('about.s1_k') }}</div>
-          <h3>{{ t('about.s1_h') }}<br>{{ t('about.s1_h2') }}</h3>
-          <p>{{ t('about.s1_p') }}</p>
-          <a class="public-btn" href="/showcase/astra-clinic">{{ t('about.open_3d') }}</a>
-        </div>
-        <div class="carousel-mock"><img src="/static/samples/astra-clinic-preview.jpg" alt="{{ t('about.s1_alt') }}" loading="eager" decoding="async"></div>
-      </div>
-      <div class="carousel-slide">
-        <div class="slide-copy">
-          <div class="figma-badge"><span></span>{{ t('about.s2_badge') }}</div>
-          <div class="eyebrow">{{ t('about.s2_k') }}</div>
-          <h3>{{ t('about.s2_h') }}<br>{{ t('about.s2_h2') }}</h3>
-          <p>{{ t('about.s2_p') }}</p>
-          <a class="public-btn" href="/showcase/novera-law">{{ t('about.open_3d') }}</a>
-        </div>
-        <div class="carousel-mock"><img src="/static/samples/novera-law-preview.jpg" alt="{{ t('about.s2_alt') }}" loading="lazy" decoding="async"></div>
-      </div>
-      <div class="carousel-slide">
-        <div class="slide-copy">
-          <div class="figma-badge"><span></span>{{ t('about.s3_badge') }}</div>
-          <div class="eyebrow">{{ t('about.s3_k') }}</div>
-          <h3>{{ t('about.s3_h') }}<br>{{ t('about.s3_h2') }}</h3>
-          <p>{{ t('about.s3_p') }}</p>
-          <a class="public-btn" href="/showcase/bloom-market">{{ t('about.open_3d') }}</a>
-        </div>
-        <div class="carousel-mock"><img src="/static/samples/bloom-market-preview.jpg" alt="{{ t('about.s3_alt') }}" loading="lazy" decoding="async"></div>
-      </div>
-    </div>
-  </div>
-  <div class="carousel-nav">
-    <div class="carousel-dots"><button aria-label="{{ t('about.slide_n', n=1) }}" class="active"></button><button aria-label="{{ t('about.slide_n', n=2) }}"></button><button aria-label="{{ t('about.slide_n', n=3) }}"></button></div>
-    <div class="carousel-arrows"><button class="carousel-prev" aria-label="{{ t('about.prev') }}">‹</button><button class="carousel-next" aria-label="{{ t('about.next') }}">›</button></div>
-  </div>
-</section>
-<!-- Reviews strip — honest, no invented score -->
-<div class="premium-reveal" style="max-width:1280px; margin:18px auto 0; padding:0 6%; display:flex; justify-content:center;">
-  <div style="display:inline-flex; align-items:center; gap:12px; background:#fff; border:1px solid #e2e7d6; padding:10px 16px; border-radius:20px; box-shadow:0 4px 16px rgba(32,45,22,.06);">
-    <span style="font:800 12px 'Manrope',sans-serif; color:#3a7a0a;">{{ t('tp.rating') }}</span>
-    <span style="font-size:9px; color:#2d4a0a;">{{ t('tp.strip_note') }}</span>
-    <a href="/reviews" style="font-size:9px; color:#8ca650; text-decoration:underline; margin-left:4px;">{{ t('about.read_reviews') }}</a>
-  </div>
-</div>
-<div class="ribbon"><span><b>◎</b> {{ t('about.ribbon1') }}</span><span><b>⌁</b> {{ t('about.ribbon2') }}</span><span><b>↗</b> {{ t('about.ribbon3') }}</span><span><b>◫</b> {{ t('about.ribbon4') }}</span></div><section id="how-it-works"><div class="section-head"><div><div class="eyebrow">{{ t('about.how_k') }}</div><h2>{{ t('about.how_h1') }}<br>{{ t('about.how_h2') }}</h2></div><p>{{ t('about.how_p') }}</p></div><div class="features premium-stagger"><article class="card premium-reveal" style="position:relative; overflow:hidden;"><div class="hero-illustration" style="position:absolute; right:12px; top:12px; width:60px; height:60px; opacity:.07;"><svg viewBox="0 0 100 100" fill="none" stroke="#8ca650" stroke-width="1.5"><circle cx="50" cy="50" r="32"/><path d="M50 18v64M18 50h64"/><circle cx="50" cy="50" r="10" fill="#d5f268" stroke="none" opacity=".5"/></svg></div><span class="number">01</span><h3>{{ t('about.f1h') }}</h3><p>{{ t('about.f1p') }}</p><small>{{ t('about.f1s') }}</small></article><article class="card premium-reveal" style="position:relative; overflow:hidden;"><div class="hero-illustration" style="position:absolute; right:12px; top:12px; width:60px; height:60px; opacity:.07;"><svg viewBox="0 0 100 100" fill="none" stroke="#8ca650" stroke-width="1.5"><rect x="22" y="28" width="56" height="40" rx="6"/><circle cx="50" cy="48" r="12"/><path d="M36 68l12-12 10 10 14-14"/></svg></div><span class="number">02</span><h3>{{ t('about.f2h') }}</h3><p>{{ t('about.f2p') }}</p><small>{{ t('about.f2s') }}</small></article><article class="card premium-reveal" style="position:relative; overflow:hidden;"><div class="hero-illustration" style="position:absolute; right:12px; top:12px; width:60px; height:60px; opacity:.07;"><svg viewBox="0 0 100 100" fill="none" stroke="#8ca650" stroke-width="1.5"><path d="M22 30h56v40H22z"/><path d="M22 30l28 22 28-22"/><circle cx="78" cy="22" r="6" fill="#d5f268" stroke="none"/></svg></div><span class="number">03</span><h3>{{ t('about.f3h') }}</h3><p>{{ t('about.f3p') }}</p><small>{{ t('about.f3s') }}</small></article></div></section><section class="honest premium-reveal" id="our-approach"><div><div class="eyebrow">{{ t('about.ev_k') }}</div><h2>{{ t('about.ev_h1') }}<br>{{ t('about.ev_h2') }}</h2></div><div><p>{{ t('about.ev_p1') }}</p><p>{{ t('about.ev_p2') }}</p></div></section>
-<!-- FOUNDER STORY — Ernest Micheal personal brand (premium) -->
-<section class="founder-section premium-reveal" id="founder" style="display:grid; grid-template-columns: .95fr 1.25fr; gap:48px; align-items:center; background:#ffffff; border:1px solid #e2e7d6; border-radius:22px; padding:48px; margin:64px 0 56px; box-shadow:0 16px 48px rgba(32,45,22,.08);">
-  <div style="position:relative;">
-    <div style="position:absolute; inset:-14px; background:radial-gradient(circle at 35% 30%, #d5f268 0%, transparent 62%); opacity:.28; border-radius:22px; pointer-events:none;"></div>
-    <div style="position:relative; background:#0f1a0a; border:1px solid #1a3310; border-radius:18px; overflow:hidden; aspect-ratio:4/4.2; box-shadow:0 20px 48px rgba(16,24,12,.18);">
-      <img src="/static/ernest-micheal.jpg" alt="{{ t('about.founder_alt') }}" width="800" height="1296" style="width:100%;height:100%;object-fit:cover;object-position:center 12%;display:block;">
-      <div style="position:absolute; left:16px; bottom:16px; right:16px; background:rgba(255,255,255,.92); backdrop-filter:blur(8px); border:1px solid #e2e7d6; border-radius:12px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 8px 24px rgba(16,24,12,.12);">
-        <img src="/static/ernest-micheal-avatar.jpg" alt="" width="36" height="36" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex:0 0 auto;">
-        <div>
-          <div style="font:700 12px 'Manrope',sans-serif; color:#0f1a0a;">Ernest Micheal</div>
-          <div style="font:500 9px 'Manrope',sans-serif; color:#1e2e15; letter-spacing:.5px;">{{ t('about.founder_role') }}</div>
-        </div>
-        <div style="margin-left:auto; font:600 9px 'Manrope',sans-serif; color:#3a7a0a; background:#eef6d1; border:1px solid #d8e9b8; padding:6px 8px; border-radius:20px;">{{ t('about.global') }}</div>
-      </div>
-    </div>
-    <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
-      <span style="font:600 9px 'Manrope',sans-serif; color:#2d4a0a; background:#eef6d1; border:1px solid #d8e9b8; padding:7px 10px; border-radius:20px;">{{ t('about.tag_osm') }}</span>
-      <span style="font:600 9px 'Manrope',sans-serif; color:#2d4a0a; background:#ffffff; border:1px solid #e2e7d6; padding:7px 10px; border-radius:20px;">{{ t('about.tag_figma') }}</span>
-      <span style="font:600 9px 'Manrope',sans-serif; color:#2d4a0a; background:#ffffff; border:1px solid #e2e7d6; padding:7px 10px; border-radius:20px;">{{ t('about.tag_preview') }}</span>
-    </div>
-  </div>
-  <div>
-    <div class="eyebrow">{{ t('about.founder_k') }}</div>
-    <h2 style="font:700 30px/1.08 'Manrope',sans-serif; letter-spacing:-1.2px; color:#0f1a0a; margin:12px 0 14px;">{{ t('about.founder_h1') }}<br><span style="color:#3a7a0a;">{{ t('about.founder_h2') }}</span></h2>
-    <p style="font-size:12px; line-height:1.9; color:#2d4a0a; margin:0 0 14px; max-width:560px;">{{ t('about.founder_p1', name='Ernest Micheal') }}</p>
-    <p style="font-size:11px; line-height:1.8; color:#1e2e15; margin:0 0 18px; max-width:560px;">{{ t('about.founder_p2') }}</p>
-    <div style="display:flex; align-items:center; gap:12px; margin:0 0 18px; flex-wrap:wrap;">
-      <a href="/showcase" class="button" style="background:#0f1a0a; color:#eaf3de; border-color:#1a3310; padding:12px 16px; border-radius:10px;">{{ t('about.founder_cta') }} <span style="margin-left:6px;">↗</span></a>
-      <a href="#pricing" style="font:600 11px 'Manrope',sans-serif; color:#1a3310; text-decoration:underline; text-underline-offset:4px;">{{ t('about.founder_pricing') }}</a>
-    </div>
-    <div style="display:flex; align-items:center; gap:10px; border-top:1px solid #eef1e4; padding-top:16px; margin-top:4px;">
-      <div style="font:400 22px 'Manrope',sans-serif; color:#0f1a0a; letter-spacing:-.5px; transform:rotate(-2deg);">Ernest Micheal</div>
-      <span style="width:32px; height:1px; background:#a7b68e;"></span>
-      <span style="font:500 9px 'Manrope',sans-serif; color:#2d4a0a; letter-spacing:.6px;">{{ t('about.founder_mark') }}</span>
-    </div>
-  </div>
-</section>
-<section class="honest premium-reveal" style="background:#263321;border-color:#34482a;color:#eaf3de"><div><div class="eyebrow" style="color:#b8d07a">{{ t('about.chat_k') }}</div><h2 style="color:#eaf3de">{{ t('about.chat_h') }}</h2></div><div><p style="color:#9ab68a">{{ t('about.chat_p') }}</p><p style="color:#8ea574;font-size:10px;margin-top:12px">{{ t('about.chat_note') }}</p></div></section>
-<section class="hero"><div class="hero-copy"><div class="eyebrow">{{ t('about.hero_k') }}</div><h1>{{ t('home.h1a') }}<br><span>{{ t('home.h1b') }}</span></h1><p>{{ t('about.hero_p') }}</p><a class="button" href="#enquiry">{{ t('about.cta_a') }} <span>↗</span></a><div class="hero-note">{{ t('about.hero_note') }}</div></div><div class="art"><svg viewBox="0 0 320 320" role="img" aria-label="{{ t('about.globe_aria') }}"><g fill="none" stroke="#69884b" stroke-width=".7"><circle cx="160" cy="160" r="137"/><ellipse cx="160" cy="160" rx="65" ry="137"/><ellipse cx="160" cy="160" rx="114" ry="137"/><ellipse cx="160" cy="160" rx="137" ry="45"/><ellipse cx="160" cy="160" rx="137" ry="101"/><path d="M23 160h274M160 23v274"/></g><path d="M80 109Q130 42 210 82M80 109Q56 203 130 237M210 82Q258 149 238 215" fill="none" stroke="#c4e46f" stroke-width="1.6" stroke-dasharray="3 4"/><g fill="#d5f268"><circle cx="80" cy="109" r="5"/><circle cx="210" cy="82" r="5"/><circle cx="130" cy="237" r="5"/><circle cx="238" cy="215" r="5"/></g><g fill="none" stroke="#d5f268" opacity=".3"><circle cx="80" cy="109" r="12"/><circle cx="210" cy="82" r="12"/><circle cx="130" cy="237" r="12"/><circle cx="238" cy="215" r="12"/></g></svg><div class="art-dot"></div><div class="art-label"><span>◎</span> {{ t('about.art_world') }}</div><div class="art-label label-two"><span>↗</span> {{ t('about.art_hello') }}</div><span class="art-caption">{{ t('about.art_cap') }}</span></div></section>
+  <section class="x-hero">
+    <p class="x-kicker">{{ t('about.hero_k') }}</p>
+    <h1>{{ t('home.h1a') }} <em>{{ t('home.h1b') }}</em></h1>
+    <p class="x-lead">{{ t('about.hero_p') }}</p>
+    <p class="x-hero-actions">
+      <a class="x-btn lime" href="/enquire">{{ t('about.cta_a') }}</a>
+      <a class="x-btn ghost" href="/pricing">{{ t('nav.plans') }}</a>
+    </p>
+  </section>
 
-<!-- Premium 3D Carousel — Framer-like, top business samples -->
-
-
-
-
-<!-- Reachmark Banners — 3 professional ad banners, live carousel, every click has a direction -->
-
-
-
-
-<section class="sample-section premium-reveal" id="website-samples"><div class="section-head"><div><div class="eyebrow">{{ t('about.samp_k') }}</div><h2>{{ t('about.samp_h') }}<br>{{ t('about.samp_h2') }}</h2></div><p>{{ t('about.samp_p') }}</p></div>{% include 'sample-cards.html' %}</section>{% include 'enquiry-form.html' %}
-<!-- Reviews — only real client words -->
-<section id="trustpilot" class="trustpilot-section premium-reveal">
-  <div class="trustpilot-head">
+  <section class="x-pipe" id="how-it-works">
     <div>
-      <div class="eyebrow">{{ t('tp.eyebrow') }}</div>
-      <h2 style="font:600 32px/1.15 'Manrope',sans-serif; letter-spacing:-1.2px; color:#1e2e15; margin:12px 0 8px;">{{ t('tp.h1') }}<br>{{ t('tp.h2') }}</h2>
-      <p style="font-size:11px; color:#2d4a0a; max-width:420px; margin:0;">{{ t('tp.sub') }}</p>
+      <div class="kicker">{{ t('about.how_k') }}</div>
+      <h2>{{ t('about.how_h1') }} {{ t('about.how_h2') }}</h2>
+      <p>{{ t('about.how_p') }}</p>
     </div>
-    <div class="trustpilot-badge">
-      <div class="tp-logo"><span>{{ t('nav.reviews') }}</span></div>
-      <div>
-        <div style="font-size:9px; color:#1e2e15; margin-top:4px;"><strong style="color:#1e2e15; font-size:11px;">{{ t('tp.rating') }}</strong> {{ t('tp.count') }}</div>
-        <a href="/reviews" style="font-size:9px; color:#8ca650;">{{ t('about.read_reviews') }}</a>
-      </div>
+    <div class="x-steps">
+      <div class="x-step"><i>01</i><div><b>{{ t('about.f1h') }}</b><span>{{ t('about.f1p') }}</span></div></div>
+      <div class="x-step"><i>02</i><div><b>{{ t('about.f2h') }}</b><span>{{ t('about.f2p') }}</span></div></div>
+      <div class="x-step"><i>03</i><div><b>{{ t('about.f3h') }}</b><span>{{ t('about.f3p') }}</span></div></div>
     </div>
-  </div>
-  <div class="trustpilot-grid premium-stagger">
-    <article class="trust-card">
-      <div class="stars">★★★★★</div>
-      <p>{{ t('about.q1') }}</p>
-      <div class="author"><div class="avatar">SM</div><div><strong>{{ t('about.q1_who') }}</strong><small>{{ t('about.q1_role') }}</small></div></div>
-    </article>
-    <article class="trust-card">
-      <div class="stars">★★★★★</div>
-      <p>{{ t('about.q2') }}</p>
-      <div class="author"><div class="avatar">DK</div><div><strong>{{ t('about.q2_who') }}</strong><small>{{ t('about.q2_role') }}</small></div></div>
-    </article>
+  </section>
 
-  </div>
-  <div class="trustpilot-foot">{{ t('tp.foot') }} <a href="/showcase" style="color:#8ca650; text-decoration:underline;">{{ t('tp.foot_a') }}</a></div>
-</section>
+  <section class="x-plain" id="our-approach" aria-label="{{ t('about.ev_k') }}">
+    <div class="x-plain-item"><b>{{ t('about.ev_h1') }} {{ t('about.ev_h2') }}</b><span>{{ t('about.ev_p1') }}</span></div>
+    <div class="x-plain-item"><b>{{ t('about.ev_k') }}</b><span>{{ t('about.ev_p2') }}</span></div>
+  </section>
 
-
-<!-- Client Reviews — leave a review for good job done -->
-<section id="leave-review" class="review-section premium-reveal">
-  <div class="review-head">
+  <section class="about-founder" id="founder">
+    <img class="portrait" src="/static/ernest-micheal.jpg" width="800" height="1296" alt="{{ t('about.founder_alt') }}">
     <div>
-      <div class="eyebrow">{{ t('about.rev_k') }}</div>
-      <h2>{{ t('about.rev_h') }}<br>{{ t('about.rev_h2') }}</h2>
-      <p>{{ t('about.rev_p') }}</p>
+      <p class="x-kicker">{{ t('about.founder_role') }}</p>
+      <h2>{{ t('about.founder_h1') }} <em>{{ t('about.founder_h2') }}</em></h2>
+      <p>{{ t('about.founder_p1', name='Ernest Micheal') }}</p>
+      <p>{{ t('about.founder_p2') }}</p>
     </div>
-    <div style="display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #e2e7d6; padding:12px 16px; border-radius:12px; box-shadow:0 4px 16px rgba(32,45,22,.06);">
-      <span style="font:600 12px 'Manrope',sans-serif; color:#1e2e15;">{{ t('tp.rating') }}</span>
-      <span style="font-size:9px; color:#1e2e15;">{{ t('about.rev_avg') }}</span>
+  </section>
+
+  <section class="about-prices" id="pricing">
+    <p class="x-kicker">{{ t('about.price_k') }}</p>
+    <h2>{{ t('about.price_h') }} {{ t('about.price_h2') }}</h2>
+    <p>{{ t('about.price_p') }}</p>
+    <div class="about-price-grid">
+      <article class="about-price">
+        <small>{{ t('about.price_audit') }}</small>
+        <b>$497</b>
+        <p>{{ t('about.price_audit_p') }}</p>
+        <ul>
+          <li>{{ t('about.price_audit_f1') }}</li>
+          <li>{{ t('about.price_audit_f2') }}</li>
+          <li>{{ t('about.price_audit_f3') }}</li>
+          <li>{{ t('about.price_audit_f4') }}</li>
+        </ul>
+        <a href="/enquire?plan=audit">{{ t('about.price_audit_cta') }}</a>
+      </article>
+      <article class="about-price on">
+        <small>{{ t('about.price_build') }}</small>
+        <b>$3,500</b>
+        <p>{{ t('about.price_build_p') }}</p>
+        <ul>
+          <li>{{ t('about.price_build_f1') }}</li>
+          <li>{{ t('about.price_build_f2') }}</li>
+          <li>{{ t('about.price_build_f3') }}</li>
+          <li>{{ t('about.price_build_f4') }}</li>
+        </ul>
+        <a href="/enquire?plan=build">{{ t('about.price_build_cta') }}</a>
+      </article>
+      <article class="about-price">
+        <small>{{ t('about.price_care') }}</small>
+        <b>$1,800</b>
+        <p>{{ t('about.price_care_p') }}</p>
+        <ul>
+          <li>{{ t('about.price_care_f1') }}</li>
+          <li>{{ t('about.price_care_f2') }}</li>
+          <li>{{ t('about.price_care_f3') }}</li>
+          <li>{{ t('about.price_care_f4') }}</li>
+        </ul>
+        <a href="/enquire?plan=care">{{ t('about.price_care_cta') }}</a>
+      </article>
+      <article class="about-price">
+        <small>{{ t('about.price_out') }}</small>
+        <b>$6,000</b>
+        <p>{{ t('about.price_out_p') }}</p>
+        <ul>
+          <li>{{ t('about.price_out_f1') }}</li>
+          <li>{{ t('about.price_out_f2') }}</li>
+          <li>{{ t('about.price_out_f3') }}</li>
+          <li>{{ t('about.price_out_f4') }}</li>
+        </ul>
+        <a href="/enquire?plan=outreach">{{ t('about.price_out_cta') }}</a>
+      </article>
     </div>
-  </div>
-  <div class="review-grid">
+  </section>
+
+  <section class="x-cta">
     <div>
-      <div class="eyebrow" style="margin-bottom:12px;">{{ t('about.rev_wall') }}</div>
-      <div id="client-review-list" class="review-list">
-        <div class="client-review-card">
-          <div class="stars">★★★★★</div>
-          <p>{{ t('about.q3') }}</p>
-          <div class="meta"><span><strong>{{ t('about.q3_who') }}</strong> · {{ t('about.q3_role') }}</span><span>{{ t('about.verified') }}</span></div>
-        </div>
-
-      </div>
-      <div style="margin-top:14px; font-size:9px; color:#2d4a0a;">{{ t('about.rev_api') }}</div>
+      <h2>{{ t('about.cta_h') }}</h2>
+      <p>{{ t('about.cta_p') }}</p>
     </div>
-    <form id="review-form" class="review-form" novalidate>
-      <h3>{{ t('about.rev_form_h') }}</h3>
-      <p>{{ t('about.rev_form_p') }}</p>
-      <label for="r-name">{{ t('about.rev_name') }}</label>
-      <input id="r-name" name="name" type="text" placeholder="Alex Rivera" maxlength="80" required>
-      <label for="r-biz">{{ t('about.rev_biz') }} <span style="font-weight:400; color:#2d4a0a;">{{ t('about.rev_opt') }}</span></label>
-      <input id="r-biz" name="business" type="text" placeholder="Rivera Plumbing · London" maxlength="120">
-      <label>{{ t('about.rev_rating') }}</label>
-      <div class="star-input" role="radiogroup" aria-label="{{ t('about.rev_stars') }}">
-        <button type="button" data-star="1" aria-label="{{ t('about.rev_star_n', n=1) }}">★</button>
-        <button type="button" data-star="2" aria-label="{{ t('about.rev_stars_n', n=2) }}">★</button>
-        <button type="button" data-star="3" aria-label="{{ t('about.rev_stars_n', n=3) }}">★</button>
-        <button type="button" data-star="4" aria-label="{{ t('about.rev_stars_n', n=4) }}">★</button>
-        <button type="button" data-star="5" aria-label="{{ t('about.rev_stars_n', n=5) }}">★</button>
-      </div>
-      <input type="hidden" name="rating" value="">
-      <label for="r-text">{{ t('about.rev_text') }}</label>
-      <textarea id="r-text" name="text" placeholder="{{ t('about.rev_text_ph') }}" maxlength="800" required></textarea>
-      <button class="submit" type="submit">{{ t('about.rev_submit') }}</button>
-      <div id="review-toast" class="review-toast" role="status" aria-live="polite"></div>
-      <div style="margin-top:10px; font-size:9px; color:#2d4a0a;">{{ t('about.rev_legal') }}</div>
-    </form>
-  </div>
-</section>
-
-
-<!-- PRICING — Standard for premium studios (4 tiers) -->
-<section id="pricing" class="pricing-section premium-reveal" style="margin:72px 0 56px;">
-  <div class="section-head">
-    <div><div class="eyebrow">{{ t('about.price_k') }}</div><h2>{{ t('about.price_h') }}<br>{{ t('about.price_h2') }}</h2></div>
-    <p style="font-size:11px; color:#2d4a0a; max-width:360px;">{{ t('about.price_p') }}</p>
-  </div>
-  <div class="pricing-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px; align-items:stretch;">
-    <article class="pricing-card" style="background:#ffffff; border:1px solid #e2e7d6; border-radius:18px; padding:28px; display:flex; flex-direction:column; box-shadow:0 8px 28px rgba(32,45,22,.06);">
-      <div style="font:600 10px 'Manrope',sans-serif; letter-spacing:.8px; color:#3a7a0a;">{{ t('about.price_audit') }}</div>
-      <div style="font:800 28px 'Manrope',sans-serif; letter-spacing:-1px; color:#0f1a0a; margin:10px 0 4px;">$497 <span style="font:500 11px 'Manrope',sans-serif; color:#2d4a0a;">{{ t('about.price_audit_per') }}</span></div>
-      <p style="font-size:11px; line-height:1.7; color:#1e2e15; margin:0 0 18px;">{{ t('about.price_audit_p') }}</p>
-      <ul style="list-style:none; padding:0; margin:0 0 20px; display:grid; gap:9px; font-size:11px; color:#2d4a0a;">
-        <li>✓ {{ t('about.price_audit_f1') }}</li>
-        <li>✓ {{ t('about.price_audit_f2') }}</li>
-        <li>✓ {{ t('about.price_audit_f3') }}</li>
-        <li>✓ {{ t('about.price_audit_f4') }}</li>
-      </ul>
-      <a href="/enquire?plan=audit" class="button" style="margin-top:auto; justify-content:center; background:#ffffff; border:1px solid #e2e7d6; color:#0f1a0a; width:100%;">{{ t('about.price_audit_cta') }} <span>↗</span></a>
-      <div style="font:500 9px 'Manrope',sans-serif; color:#2d4a0a; text-align:center; margin-top:10px;">{{ t('about.price_audit_note') }}</div>
-    </article>
-    <article class="pricing-card" style="background:#0f1a0a; border:1px solid #1a3310; border-radius:18px; padding:28px; display:flex; flex-direction:column; box-shadow:0 18px 44px rgba(16,24,12,.18); position:relative; overflow:hidden;">
-      <div style="position:absolute; top:14px; right:14px; background:#d5f268; color:#0f1a0a; font:700 9px 'Manrope',sans-serif; letter-spacing:.6px; padding:6px 8px; border-radius:20px; border:1px solid #cbe85b;">{{ t('about.price_chosen') }}</div>
-      <div style="font:600 10px 'Manrope',sans-serif; letter-spacing:.8px; color:#d5f268;">{{ t('about.price_build') }}</div>
-      <div style="font:800 28px 'Manrope',sans-serif; letter-spacing:-1px; color:#eaf3de; margin:10px 0 4px;">$3,500 <span style="font:500 11px 'Manrope',sans-serif; color:#9aa38e;">{{ t('about.price_build_per') }}</span></div>
-      <p style="font-size:11px; line-height:1.7; color:#b8c7a8; margin:0 0 18px;">{{ t('about.price_build_p') }}</p>
-      <ul style="list-style:none; padding:0; margin:0 0 20px; display:grid; gap:9px; font-size:11px; color:#e8f0d0;">
-        <li>✓ {{ t('about.price_build_f1') }}</li>
-        <li>✓ {{ t('about.price_build_f2') }}</li>
-        <li>✓ {{ t('about.price_build_f3') }}</li>
-        <li>✓ {{ t('about.price_build_f4') }}</li>
-      </ul>
-      <a href="/enquire?plan=build" class="button" style="margin-top:auto; justify-content:center; background:#d5f268; border-color:#cbe85b; color:#0f1a0a; width:100%;">{{ t('about.price_build_cta') }} <span>↗</span></a>
-      <div style="font:500 9px 'Manrope',sans-serif; color:#8ea574; text-align:center; margin-top:10px;">{{ t('about.price_build_note') }}</div>
-    </article>
-    <article class="pricing-card" style="background:#ffffff; border:1px solid #e2e7d6; border-radius:18px; padding:28px; display:flex; flex-direction:column; box-shadow:0 8px 28px rgba(32,45,22,.06);">
-      <div style="font:600 10px 'Manrope',sans-serif; letter-spacing:.8px; color:#3a7a0a;">{{ t('about.price_care') }}</div>
-      <div style="font:800 28px 'Manrope',sans-serif; letter-spacing:-1px; color:#0f1a0a; margin:10px 0 4px;">$1,800 <span style="font:500 11px 'Manrope',sans-serif; color:#2d4a0a;">{{ t('about.price_care_per') }}</span></div>
-      <p style="font-size:11px; line-height:1.7; color:#1e2e15; margin:0 0 18px;">{{ t('about.price_care_p') }}</p>
-      <ul style="list-style:none; padding:0; margin:0 0 20px; display:grid; gap:9px; font-size:11px; color:#2d4a0a;">
-        <li>✓ {{ t('about.price_care_f1') }}</li>
-        <li>✓ {{ t('about.price_care_f2') }}</li>
-        <li>✓ {{ t('about.price_care_f3') }}</li>
-        <li>✓ {{ t('about.price_care_f4') }}</li>
-      </ul>
-      <a href="/enquire?plan=care" class="button" style="margin-top:auto; justify-content:center; background:#ffffff; border:1px solid #e2e7d6; color:#0f1a0a; width:100%;">{{ t('about.price_care_cta') }} <span>↗</span></a>
-      <div style="font:500 9px 'Manrope',sans-serif; color:#2d4a0a; text-align:center; margin-top:10px;">{{ t('about.price_care_note') }}</div>
-    </article>
-    <article class="pricing-card" style="background:#f7fbd9; border:1px solid #d8e9b8; border-radius:18px; padding:28px; display:flex; flex-direction:column; box-shadow:0 8px 28px rgba(32,45,22,.06);">
-      <div style="font:600 10px 'Manrope',sans-serif; letter-spacing:.8px; color:#3a7a0a;">{{ t('about.price_out') }}</div>
-      <div style="font:800 28px 'Manrope',sans-serif; letter-spacing:-1px; color:#0f1a0a; margin:10px 0 4px;">$6,000 <span style="font:500 11px 'Manrope',sans-serif; color:#2d4a0a;">{{ t('about.price_out_per') }}</span></div>
-      <p style="font-size:11px; line-height:1.7; color:#1e2e15; margin:0 0 18px;">{{ t('about.price_out_p') }}</p>
-      <ul style="list-style:none; padding:0; margin:0 0 20px; display:grid; gap:9px; font-size:11px; color:#2d4a0a;">
-        <li>✓ {{ t('about.price_out_f1') }}</li>
-        <li>✓ {{ t('about.price_out_f2') }}</li>
-        <li>✓ {{ t('about.price_out_f3') }}</li>
-        <li>✓ {{ t('about.price_out_f4') }}</li>
-      </ul>
-      <a href="/enquire?plan=outreach" class="button" style="margin-top:auto; justify-content:center; background:#ffffff; border:1px solid #e2e7d6; color:#0f1a0a; width:100%;">{{ t('about.price_out_cta') }} <span>↗</span></a>
-      <div style="font:500 9px 'Manrope',sans-serif; color:#2d4a0a; text-align:center; margin-top:10px;">{{ t('about.price_out_note') }}</div>
-    </article>
-  </div>
-  <p style="font-size:9px; color:#2d4a0a; text-align:center; margin:16px 0 0;">{{ t('about.price_foot') }}</p>
-</section>
-<style>
-@media(max-width:1100px){
-  .pricing-grid{grid-template-columns:repeat(2,1fr) !important;}
-}
-@media(max-width:900px){
-  .founder-section{grid-template-columns:1fr !important; padding:28px !important; gap:24px !important;}
-}
-@media(max-width:680px){
-  .pricing-grid{grid-template-columns:1fr !important;}
-}
-</style>
-<section class="cta"><div><h2>{{ t('about.cta_h') }}</h2><p>{{ t('about.cta_p') }}</p></div><a class="button" href="/enquire">{{ t('about.cta_a') }} <span>↗</span></a></section></main>{% include 'footer-public.html' %}<script src="/static/enquiry.js" defer></script>{% include 'tawkto.html' %}
-<script src="/static/carousel.js" defer>
-<script src="/static/dropdown.js" defer></script></script>
+    <div class="x-actions">
+      <a class="x-btn lime" href="/enquire">{{ t('about.cta_a') }}</a>
+    </div>
+  </section>
+  {% include 'adsense-footer.html' %}
+</main>
+{% include 'footer-public.html' %}
+{% include 'tawkto.html' %}
+<script src="/static/dropdown.js" defer></script>
+<script src="/static/theme.js" defer></script>
 <script src="/static/motion.js" defer></script>
-<script src="/static/theme.js" defer></script></body></html>
+<script src="/static/pwa.js" defer></script>
+</body>
+</html>

@@ -503,10 +503,10 @@ def register_receptionist(app, db, now, log, settings):
         except Exception:
             base = request.url_root.rstrip('/')
         seo = {
-            'title': 'AI Receptionist — Every chat, enquiry and booking, handled | Reachmark',
-            'description': ('Meet the Reachmark AI receptionist: a facts-only front desk that answers visitors, '
-                            'captures enquiries and hands over to a human with context. Try it live.'),
-            'keywords': 'AI receptionist, website chat assistant, lead capture, Reachmark',
+            'title': 'Front desk — Reachmark',
+            'description': ('Talk to the Reachmark front desk. It greets you, asks what you need, '
+                            'and answers from published facts only — never a guessed price or date.'),
+            'keywords': 'Reachmark front desk, website chat, Reachmark',
             'canonical': (base + '/receptionist') if base else None,
             'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
             'noindex': False,

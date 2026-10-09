@@ -12,8 +12,10 @@
   </div>
   <form class="rm-form" id="rm-form">
     <label class="rm-sr" for="rm-input">{{ t('rx.w_msg') }}</label>
+    <button type="button" id="rm-mic" class="rm-voice" aria-pressed="false" title="{{ t('rx.w_mic') }}">{{ t('rx.w_mic') }}</button>
     <input id="rm-input" name="message" type="text" maxlength="600" autocomplete="off"
            placeholder="{{ t('rx.w_ph') }}"/>
+    <button type="button" id="rm-speak" class="rm-voice" aria-pressed="false" title="{{ t('rx.w_speak') }}">{{ t('rx.w_speak') }}</button>
     <input id="rm-name" name="name" type="text" maxlength="120" autocomplete="name" placeholder="{{ t('rx.w_name') }}" hidden/>
     <input id="rm-email" name="email" type="email" maxlength="200" autocomplete="email" placeholder="{{ t('rx.w_email') }}" hidden/>
     <input id="rm-hp" name="company_url" type="text" class="rm-hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>

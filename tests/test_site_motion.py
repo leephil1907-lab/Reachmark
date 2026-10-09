@@ -32,8 +32,9 @@ class SharedHeaderTests(unittest.TestCase):
         for path in HEADER_PAGES:
             body = self.client.get(path).get_data(as_text=True)
             nav = body.split('<nav class="main"')[1].split('</nav>')[0]
-            for label in ('Reviews', 'About', 'Enquire', 'Plans'):
+            for label in ('About', 'Enquire', 'Plans'):
                 self.assertIn(label, nav, f'{label} on {path}')
+            self.assertNotIn('Reviews', nav, f'Reviews leaked into header on {path}')
             for label in ('Samples', 'Receptionist'):
                 self.assertNotIn(label, nav, f'{label} leaked into header on {path}')
 
