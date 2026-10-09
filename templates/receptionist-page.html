@@ -29,6 +29,9 @@
     <p class="x-kicker">{{ t('rx.eyebrow') }}</p>
     <h1>{{ t('rx.h1') }}</h1>
     <p class="x-lead">{{ t('rx.sub') }}</p>
+    <p class="rx-price-note"><strong>{{ tiers.build.name }}</strong> · {{ tiers.build.price_label }} <span>Final scope is confirmed before work begins.</span></p>
+    <ul class="rx-published-tiers" aria-label="Published service tiers">{% for tier in brand.tiers %}<li>{{ tier.line }}</li>{% endfor %}</ul>
+    <p class="rx-frontdesk-status" data-frontdesk-status role="status" aria-live="polite">Checking verified knowledge…</p>
     <p class="x-hero-actions">
       <button type="button" class="x-btn lime" data-open-widget>{{ t('rx.try') }}</button>
       <a class="x-btn ghost" href="/enquire">{{ t('rx.send_enq') }}</a>

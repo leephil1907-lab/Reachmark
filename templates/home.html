@@ -19,7 +19,7 @@
 <meta property="og:type" content="website"><meta property="og:site_name" content="Reachmark"><meta property="og:locale" content="en_US"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}"><meta property="og:image:alt" content="Reachmark"><meta name="twitter:image" content="{{ seo.og_image }}">{% endif %}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest">
-<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css">
+<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css"><link rel="stylesheet" href="/static/product-home.css"><link rel="stylesheet" href="/static/product-workbench.css">
 <script src="/static/i18n.js"></script>
 {% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}
 </head>
@@ -28,27 +28,43 @@
 {% include 'header-public.html' %}
 <div class="x-aurora" aria-hidden="true"></div>
 <main>
-  <section class="x-hero">
-    <p class="x-kicker">{{ t('home.kicker') }}</p>
-    <h1 data-split>{{ t('home.hero_h1a') }} <em>{{ t('home.hero_h1b') }}</em></h1>
-    <p class="x-lead">{{ t('home.sub') }}</p>
-    <p class="x-hero-actions">
-      {% if client_logged_in or owner_logged_in %}
-      <a class="x-btn lime" href="/workspace">{{ t('home.open_workspace') }}</a>
-      <a class="x-btn ghost" href="/enquire">{{ t('home.cta_project') }}</a>
-      {% else %}
-      <a class="x-btn lime" href="/signup">{{ t('nav.signup') }}</a>
-      <a class="x-btn ghost" href="/enquire">{{ t('home.cta_project') }}</a>
-      {% endif %}
-    </p>
-    <p class="x-hero-proof" aria-label="{{ t('home.proof_find') }}, {{ t('home.proof_diagnose') }}, {{ t('home.proof_approve') }}">
-      <span>{{ t('home.proof_find') }}</span>
-      <span>{{ t('home.proof_diagnose') }}</span>
-      <span>{{ t('home.proof_approve') }}</span>
-    </p>
-    {% if not client_logged_in and not owner_logged_in %}
-    <p class="x-hero-alt hero-signin">{{ t('home.hero_signin') }} <a href="/signin">{{ t('nav.signin') }}</a></p>
-    {% endif %}
+  <section class="ph-workbench" aria-labelledby="ph-title">
+    <div class="ph-workbench-top">
+      <a class="ph-brand" href="/" aria-label="Reachmark home"><span class="ph-brand-mark" aria-hidden="true">R</span><span class="ph-brand-rest">eachmark</span></a>
+      <div class="ph-top-status"><i></i> Evidence-first prospecting</div>
+      <a class="ph-signin" href="/signin">Sign in <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="ph-workbench-grid">
+      <div class="ph-intro">
+        <p class="ph-kicker"><span>01</span> THE DESIGNER'S OPPORTUNITY DESK</p>
+        <h1 id="ph-title">Find the work.<br><em>See the proof.</em></h1>
+        <p class="ph-lead">Reachmark finds public website opportunities, explains what was actually observed, and helps you turn the evidence into a thoughtful proposal.</p>
+        <div class="ph-actions">
+          {% if client_logged_in or owner_logged_in %}
+          <a class="ph-btn ph-btn-primary" href="/workspace">Open workspace <span>↗</span></a>
+          {% else %}
+          <a class="ph-btn ph-btn-primary" href="/signup">Create free account <span>↗</span></a>
+          {% endif %}
+          <a class="ph-btn ph-btn-secondary" href="/sample-report">Explore sample report</a>
+        </div>
+        <div class="ph-assurances"><span><b>✓</b> Public-page observations</span><span><b>✓</b> Human-approved outreach</span><span><b>✓</b> No invented outcomes</span></div>
+      </div>
+      <div class="ph-product-card" aria-label="Interactive public website check">
+        <div class="ph-card-top"><div><span class="ph-eyebrow">QUICK CHECK</span><h2>Start with a website</h2></div><span class="ph-live-tag"><i></i> Public URL</span></div>
+        <p class="ph-card-copy">Run a lightweight check before you create an account. A blocked check is reported as inconclusive — never labelled a failure.</p>
+        <form class="x-audit ph-audit" id="x-audit-form">
+          <label class="sr-only" for="x-audit-url">Website URL</label>
+          <div class="ph-url-input"><span aria-hidden="true">↗</span><input id="x-audit-url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="https://example.com" required></div>
+          <button class="ph-btn ph-btn-primary" type="submit" id="ph-audit-submit">Check website <span>→</span></button>
+        </form>
+        <div class="ph-result-shell">
+          <div class="ph-result-head"><span>OBSERVATIONS</span><span>Live check</span></div>
+          <div id="x-audit-out" class="x-audit-out ph-audit-out" aria-live="polite"><div class="ph-empty-state"><span class="ph-empty-icon">⌕</span><strong>Your evidence appears here</strong><p>Enter a public website URL to see what the check can actually observe.</p></div></div>
+        </div>
+        <div class="ph-card-foot"><span>◈</span> A check is not a revenue forecast or a full security audit.</div>
+      </div>
+    </div>
+    <div class="ph-workbench-bottom"><span>BUILT FOR INDEPENDENT DESIGNERS & SMALL STUDIOS</span><span>DISCOVER <b>·</b> VERIFY <b>·</b> PROPOSE</span></div>
   </section>
 
   <section class="x-report" id="sample-report" aria-label="{{ t('home.report_title') }}">
@@ -131,16 +147,7 @@
     </div>
   </section>
 
-  <section class="x-try" id="try-url">
-    <h2>{{ t('home.try_h') }}</h2>
-    <p>{{ t('home.try_p') }}</p>
-    <form class="x-audit" id="x-audit-form">
-      <label class="sr-only" for="x-audit-url">{{ t('home.audit_label') }}</label>
-      <input id="x-audit-url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="{{ t('home.audit_ph') }}" required>
-      <button class="x-btn lime" type="submit">{{ t('home.audit_go') }}</button>
-    </form>
-    <div id="x-audit-out" class="x-audit-out" hidden></div>
-  </section>
+
 
   <section class="x-plain" aria-label="{{ t('home.moat_h') }}">
     <div class="x-plain-item"><b>{{ t('home.q_h') }}</b><span>{{ t('home.q_p') }}</span></div>
@@ -325,7 +332,8 @@
       var leaks=j.leaks||[];
       var items=leaks.length?leaks.map(function(L){
         var extra=(L.evidence&&L.evidence!==L.leak)?'<span>'+esc(L.evidence)+'</span>':'';
-        return '<li><strong>'+esc(L.title||L.key)+'</strong><span>'+esc(L.leak||'')+'</span>'+extra+'</li>';
+        var fix=L.fix?'<span class="x-audit-fix">'+esc(L.fix)+'</span>':'';
+        return '<li><strong>'+esc(L.title||L.key)+'</strong><span>'+esc(L.leak||'')+'</span>'+extra+fix+'</li>';
       }).join(''):'<li><strong>No commercial gap on this check</strong><span>Nothing in the labelled leak list was measured on this page. That is not a score of zero — it is an empty observation.</span></li>';
       out.innerHTML=story+facts+'<p class="x-audit-label">'+esc(j.label||'Measured observations. Not a revenue forecast.')+'</p><ol class="x-audit-leaks">'+items+'</ol><p class="x-audit-gate">'+esc(j.gate||'Create an account for the full Digital Opportunity Report.')+' <a href="/signup">Create an account</a></p>';
     }catch(err){
@@ -335,6 +343,8 @@
   function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);});}
 })();
 </script>
+{% include 'receptionist.html' %}
+<script src="/static/product-workbench.js" defer></script>
 <script src="/static/pwa.js" defer></script>
 </body>
 </html>
