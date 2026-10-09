@@ -284,8 +284,8 @@ def about():
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
     }
-    gsv = ','.join(__import__('web.public_url', fromlist=['google_site_tokens']).google_site_tokens())
-    from web.public_url import organization_schema, website_schema
+    gsv = ','.join(google_site_tokens())
+    from web.public_url import google_site_tokens, organization_schema, website_schema
     origin = base or request.url_root.rstrip('/')
     structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description'])]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
