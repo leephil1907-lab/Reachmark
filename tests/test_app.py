@@ -55,7 +55,7 @@ class ProspectTests(unittest.TestCase):
 
     def test_homepage_has_no_search_console_token_until_new_one_is_configured(self):
         with patch.dict(os.environ, {}, clear=False):
-            os.environ.pop('GOOGLE_SITE_VERIFICATION', None)
+            os.environ.pop('GOOGLE_SITE_VERIFICATION_TOKENS', None)
             page = self.client.get('/', headers={'Host': 'reachmarkdigital.xyz'})
         self.assertEqual(page.status_code, 200)
         self.assertNotIn(b'name="google-site-verification"', page.data)
