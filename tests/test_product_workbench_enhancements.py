@@ -21,6 +21,7 @@ class ProductWorkbenchEnhancementTests(unittest.TestCase):
     def test_ranked_opportunities_use_server_order_without_fake_scores(self):
         script = (ROOT / "static" / "product-workbench.js").read_text(encoding="utf-8")
         self.assertIn("slice(0, 3)", script)
+        self.assertIn("sourceList === list.innerHTML", script)
         self.assertIn("measured gap weights", script)
         self.assertIn("No invented score or revenue estimate", script)
         self.assertNotIn("score = 99", script.lower())
