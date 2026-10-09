@@ -762,6 +762,8 @@ from web.funnel import register_funnel
 register_funnel(app, db, now, log)
 from web.public_audit import register_public_audit
 register_public_audit(app, db, now, log)
+from web.tickets import register_tickets
+register_tickets(app, db, now, log)
 from web.onboard import register_onboard
 register_onboard(app, db, now, log, search_save, CATEGORIES)
 from web.revenue_os import register_revenue_os

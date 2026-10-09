@@ -26,6 +26,12 @@ body.x-site,body.public-page,body.x-public{
   font-kerning:normal;font-feature-settings:"kern" 1,"liga" 1;
   overflow:visible;
 }
+body.x-site a:not([class]), body.x-public a:not([class]), body.public-page a:not([class]){
+  color:#20251f;text-decoration-color:#c8e85b;
+}
+body.x-site a:not([class]):hover, body.x-public a:not([class]):hover{
+  color:#3a7a0a;
+}
 .x-aurora{
   position:fixed;inset:0 auto auto 0;width:100%;height:min(72vh,640px);
   pointer-events:none;z-index:-1;
@@ -212,9 +218,9 @@ body.x-site,body.public-page,body.x-public{
 
 /* CTA */
 .x-cta{
-  width:min(var(--x-max),calc(100% - 48px));margin:0 auto 88px;
+  width:min(var(--x-max),calc(100% - 48px));margin:0 auto 56px;
   display:flex;justify-content:space-between;align-items:center;gap:24px;
-  background:#fff;border:1px solid var(--x-line);border-radius:24px;padding:32px 34px;
+  background:#fff;border:1px solid var(--x-line);border-radius:20px;padding:24px 26px;
   box-shadow:0 10px 40px rgba(16,24,20,.04);
 }
 .x-cta h2{font-family:var(--x-serif);font-weight:400;font-size:34px;margin:0 0 6px;letter-spacing:-.03em}
@@ -243,6 +249,9 @@ body.x-site,body.public-page,body.x-public{
 .x-foot-legal{display:flex;gap:16px;flex-wrap:wrap}
 .x-foot-legal a{color:#8a918b;font-size:12px;text-decoration:none}
 .x-foot-legal a:hover{color:#111}
+.x-foot-wa{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;color:#20251f}
+.x-foot-wa:hover{color:#25D366}
+.x-foot nav a.x-foot-wa::after{display:none}
 .x-foot-brand p{max-width:36ch;margin:12px 0 0}
 .x-foot a{position:relative}
 .x-foot nav a::after{content:'';position:absolute;left:0;bottom:-1px;width:0;height:1px;background:currentColor;transition:width .22s cubic-bezier(.22,1,.36,1)}
@@ -343,10 +352,12 @@ body .btn-lime{background:var(--x-lime)!important}
   .x-audit input{min-width:0;width:100%}
   .x-audit .x-btn{width:100%}
   .x-pipe{padding:22px 18px}
-  .x-cta h2{font-size:26px}
+  .x-cta{margin:24px auto 32px;padding:16px 16px;border-radius:16px;gap:12px}
+  .x-cta h2{font-size:22px;line-height:1.2}
+  .x-cta p{font-size:14px}
   .x-foot-in{grid-template-columns:1fr}
-  .x-actions,.x-btn,.x-hero-actions{width:100%}
-  .x-hero-actions .x-btn{width:100%}
+  .x-hero-actions{width:100%}
+  .x-hero-actions .x-btn,.x-cta .x-actions,.x-cta .x-btn{width:100%}
   .x-plain{grid-template-columns:1fr}
 }
 
@@ -433,6 +444,11 @@ body .btn-lime{background:var(--x-lime)!important}
 [data-theme="dark"] .x-foot{border-top-color:rgba(255,255,255,.08)}
 [data-theme="dark"] .x-foot a{color:#c5cec3}
 [data-theme="dark"] .x-foot a:hover,[data-theme="dark"] .x-foot h4{color:#fff}
+[data-theme="dark"] .x-foot-wa{color:#d5f268}
+[data-theme="dark"] body.x-site a:not([class]),
+[data-theme="dark"] body.x-public a:not([class]){color:#e8eedf}
+[data-theme="dark"] .x-audit-gate a{color:#d5f268}
+[data-theme="dark"] .x-audit-facts{color:#c5cec3}
 [data-theme="dark"] .x-foot p,[data-theme="dark"] .x-foot-bottom{color:#8b9486}
 [data-theme="dark"] .x-foot-legal a{color:#8b9486}
 [data-theme="dark"] .x-foot-legal a:hover{color:#fff}
@@ -502,8 +518,11 @@ body .btn-lime{background:var(--x-lime)!important}
 .x-audit{display:flex;gap:8px;max-width:560px;margin:8px auto 0;flex-wrap:wrap;justify-content:center}
 .x-audit input{flex:1;min-width:220px;border:1px solid var(--x-line,#e2e7d6);border-radius:12px;padding:12px 14px;font:15px Manrope,sans-serif;background:#fff}
 .x-audit-hint{font-size:13px;color:var(--x-muted,#6b7a5a);margin:8px auto 0;max-width:520px}
-.x-audit-out{margin:18px auto 0;max-width:560px;background:#fff;border:1px solid var(--x-line,#e2e7d6);border-radius:16px;padding:18px;text-align:left}
+.x-audit-out{margin:18px auto 0;max-width:560px;background:#fff;border:1px solid var(--x-line,#e2e7d6);border-radius:16px;padding:18px;text-align:left;overflow-wrap:anywhere}
+.x-audit-facts{margin:0 0 12px;padding:0;list-style:none;font-size:13px;color:#3c4638;line-height:1.5}
+.x-audit-facts li{margin:0 0 4px}
 .x-audit-label,.x-audit-gate{font-size:13px;color:#6b7a5a;line-height:1.5}
+.x-audit-gate a{color:#20251f;font-weight:700;text-decoration-color:#c8e85b}
 .x-audit-leaks{margin:12px 0;padding-left:18px}
 .x-audit-leaks li{margin:0 0 10px}
 .x-audit-leaks strong{display:block;color:#20251f}

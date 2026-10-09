@@ -98,6 +98,16 @@ LEAK_COPY = {
         'leak': 'Some on-site links failed at check time. Dead ends stop an enquiry.',
         'fix': 'Repair or remove broken links, especially around contact and services.',
     },
+    'cookie_interstitial': {
+        'title': 'Cookie or consent wall',
+        'leak': 'The HTML we received is a cookie or consent screen, not the working site. Forms, copy, and contact paths on the real page were not measured.',
+        'fix': 'The live site may be fine behind the wall. A person has to open it in a browser to see the offer.',
+    },
+    'js_shell': {
+        'title': 'JavaScript shell',
+        'leak': 'The HTML is mostly scripts with little readable copy. What a visitor sees after the page paints was not in this check.',
+        'fix': 'Server-render the offer and a contact path so a fetch — and a search engine — can read them.',
+    },
     'broken_anchors': {
         'title': 'In-page links go nowhere',
         'leak': 'In-page links point at sections that do not exist. Taps do nothing.',
@@ -122,7 +132,8 @@ LEAK_COPY = {
 
 COMMERCIAL_KEYS = (
     'no_website_listed', 'social_only', 'http_error', 'unreachable', 'dns_unresolved',
-    'parked_suspected', 'no_form_or_booking', 'no_contact_path', 'no_viewport',
+    'parked_suspected', 'cookie_interstitial', 'js_shell',
+    'no_form_or_booking', 'no_contact_path', 'no_viewport',
     'thin_page', 'missing_title', 'no_description', 'no_h1', 'slow_first_byte',
     'stale_copyright', 'broken_links', 'broken_anchors',
 )

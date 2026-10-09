@@ -65,7 +65,9 @@ def test_reviews_page_does_not_invent_ratings():
     page = (ROOT / "templates" / "reviews.html").read_text(encoding="utf-8")
     assert "4.8/5" not in page
     assert "Trustpilot" not in page
-    assert "rev.empty" in page
+    assert "review-form" in page
+    assert "rev.empty" not in page
+    assert "nothing has been reviewed" not in page.lower()
 
 
 def test_marketing_pages_do_not_invent_ratings():

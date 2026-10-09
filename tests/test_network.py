@@ -278,6 +278,22 @@ class OAuthTests(NetworkBase):
         ids = {p['id'] for p in r.get_json()['providers']}
         self.assertEqual(ids, {'google', 'microsoft'})
         self.assertTrue(all(p['configured'] is False for p in r.get_json()['providers']))
+        self.assertNotIn('google_redirect_uri', r.get_json())
+
+    def test_status_exposes_google_redirect_uri_when_configured(self):
+        env = {
+            'GOOGLE_CLIENT_ID': '897686058269-example.apps.googleusercontent.com',
+            'GOOGLE_CLIENT_SECRET': 'test-secret',
+            'PUBLIC_BASE_URL': 'https://reachmarkdigital.xyz',
+            'GOOGLE_OAUTH_REDIRECT_URI': '',
+        }
+        with patch.dict(os.environ, env):
+            r = self.client.get('/api/auth/oauth')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.get_json().get('google_redirect_uri'),
+            'https://reachmarkdigital.xyz/api/auth/oauth/google/callback',
+        )
 
     def test_unknown_provider_404_and_off_provider_400(self):
         self.assertEqual(self.client.get('/api/auth/oauth/github').status_code, 404)

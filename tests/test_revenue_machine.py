@@ -92,14 +92,14 @@ class PublicAuditLogicTests(unittest.TestCase):
         from web.public_audit import preview_leaks
 
         def fake_observe(url, **kwargs):
-            self.assertLessEqual(kwargs.get('timeout', 99), 8)
-            self.assertLessEqual(kwargs.get('max_bytes', 10**9), 65536)
+            self.assertLessEqual(kwargs.get('timeout', 99), 12)
+            self.assertLessEqual(kwargs.get('max_bytes', 10**9), 120000)
             return {
                 'ok': True, 'reason': None, 'final_url': url, 'status': 200,
                 'https': True, 'ms': 12, 'bytes': 800, 'headers': {'content-type': 'text/html'},
                 'signals': {
-                    'has_viewport': False, 'has_form': False, 'has_tel_or_mailto': False,
-                    'has_booking_or_whatsapp': False, 'word_count': 40, 'title': '',
+                    'has_viewport': False, 'viewport': '', 'has_form': False, 'has_tel_or_mailto': False,
+                    'has_booking_or_whatsapp': False, 'word_count': 40, 'visible_words': 40, 'title': '',
                     'description': '', 'https': True,
                 },
                 'robots': {'allowed': True}, 'link_check': {}, 'fetched_at': '2026-10-07',
@@ -111,6 +111,7 @@ class PublicAuditLogicTests(unittest.TestCase):
         self.assertIn('not a revenue forecast', (out.get('label') or '').lower())
         self.assertLessEqual(out['leak_count'], 3)
         self.assertTrue(out['leaks'])
+        self.assertTrue(out.get('facts'))
         for leak in out['leaks']:
             self.assertIn('title', leak)
             self.assertIn('leak', leak)
@@ -120,6 +121,28 @@ class PublicAuditLogicTests(unittest.TestCase):
         self.assertTrue(any(leak['title'] in story for leak in out['leaks']))
         self.assertIn('not a revenue forecast', story.lower())
         self.assertNotIn('will earn', story.lower())
+
+    def test_cookie_wall_is_not_the_same_three_generic_leaks(self):
+        from web.public_audit import preview_leaks
+
+        def fake_observe(url, **kwargs):
+            return {
+                'ok': True, 'reason': None, 'final_url': url, 'status': 200,
+                'https': True, 'ms': 40, 'bytes': 1200, 'headers': {'content-type': 'text/html'},
+                'signals': {
+                    'title': 'Cookie check', 'cookie_interstitial': True, 'visible_words': 12,
+                    'word_count': 12, 'form_count': 0, 'has_viewport': True, 'viewport': 'width=device-width',
+                    'https': True,
+                },
+                'robots': {'allowed': True}, 'link_check': {}, 'fetched_at': '2026-10-09',
+            }
+
+        out = preview_leaks('https://walled.example', observe_fn=fake_observe)
+        keys = [row['key'] for row in out['leaks']]
+        self.assertIn('cookie_interstitial', keys)
+        self.assertNotIn('thin_page', keys)
+        self.assertIn('cookie', (out.get('narrative') or '').lower())
+        self.assertTrue(any('Cookie' in f or 'consent' in f.lower() for f in out.get('facts') or []))
 
 
 if __name__ == '__main__':

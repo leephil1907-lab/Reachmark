@@ -72,6 +72,7 @@ RULES = [
     (r'^/api/analytics', 'free'),
     (r'^/api/quality', 'starter'),  # raw directory rows: paying members only
     (r'^/api/auth/(me|logout|export|close|request-verification)', 'free'),
+    (r'^/api/support/tickets', 'free'),
     (r'^/api/(invoices|projects)(/|$)', 'free'),
     (r'^/api/documents/(invoice|brief|proposal)(/|$)', 'free'),
     (r'^/api/documents/audit', 'starter'),

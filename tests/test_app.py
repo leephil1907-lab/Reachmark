@@ -62,13 +62,15 @@ class ProspectTests(unittest.TestCase):
     def test_whatsapp_icon_only_when_configured(self):
         with patch.dict(os.environ, {'WHATSAPP_URL': 'off'}):
             home = self.client.get('/').data.decode()
+            self.assertNotIn('x-foot-wa', home)
             self.assertNotIn('wa-float', home)
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop('WHATSAPP_URL', None)
             home = self.client.get('/').data.decode()
-            self.assertIn('class="wa-float"', home)
+            self.assertIn('class="x-foot-wa"', home)
             self.assertIn('https://wa.me/14473227700', home)
             self.assertNotIn('Chat on WhatsApp', home)
+            self.assertNotIn('wa-float', home)
 
     def test_search_console_html_file_is_served_at_root(self):
         name = 'googled647aceebb4093df.html'
@@ -300,5 +302,38 @@ class ProspectTests(unittest.TestCase):
             sess['csrf']='test-csrf'
         response=self.client.post('/api/review-links/foreign-response/handled',headers={'X-CSRF-Token':'test-csrf'})
         self.assertEqual(response.status_code,404)
+
+    def test_support_tickets_are_for_signed_in_clients(self):
+        r = self.client.post('/api/support/tickets', json={'subject': 'Help', 'body': 'The page will not save.'})
+        self.assertEqual(r.status_code, 401)
+        with self.client.session_transaction() as sess:
+            sess['csrf'] = 'test-csrf'
+        # visitor still blocked
+        r = self.client.post('/api/support/tickets', json={'subject': 'Help', 'body': 'The page will not save.'},
+                             headers={'X-CSRF-Token': 'test-csrf'})
+        self.assertEqual(r.status_code, 401)
+        import re
+        page = self.client.get('/signup').get_data(as_text=True)
+        tok = re.search(r'name="csrf-token" content="([^"]+)"', page)
+        self.client.post('/api/auth/signup', json={
+            'name': 'Pat Client', 'email': 'pat.ticket@example.test', 'password': 'password123'
+        }, headers={'X-CSRF-Token': tok.group(1)})
+        me = self.client.get('/api/auth/me').json
+        page = self.client.get('/dashboard').get_data(as_text=True)
+        tok = re.search(r'name="csrf-token" content="([^"]+)"', page)
+        r = self.client.post('/api/support/tickets', json={
+            'subject': 'Invoice question', 'body': 'Where do I download last month’s invoice?'
+        }, headers={'X-CSRF-Token': tok.group(1)})
+        self.assertEqual(r.status_code, 200, r.get_data(as_text=True))
+        self.assertTrue(r.json.get('ok'))
+        self.assertIn('support@', r.json.get('emailed_to') or '')
+        listed = self.client.get('/api/support/tickets')
+        self.assertEqual(listed.status_code, 401)
+        with self.client.session_transaction() as sess:
+            sess['owner'] = True
+        listed = self.client.get('/api/support/tickets')
+        self.assertEqual(listed.status_code, 200)
+        tickets = listed.json.get('tickets') or []
+        self.assertTrue(any(t.get('subject') == 'Invoice question' for t in tickets))
 
 if __name__=='__main__':unittest.main(verbosity=2)

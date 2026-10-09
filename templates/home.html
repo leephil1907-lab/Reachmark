@@ -296,12 +296,13 @@
         return;
       }
       var story=j.narrative?'<p class="x-audit-story">'+esc(j.narrative)+'</p>':'';
+      var facts=(j.facts||[]).length?'<ul class="x-audit-facts">'+j.facts.map(function(f){return '<li>'+esc(f)+'</li>';}).join('')+'</ul>':'';
       if(j.blocked){
-        out.innerHTML=story+'<p class="x-audit-block">'+esc(j.error||j.reason||'This site blocked the check. That is inconclusive, not a fault.')+'</p>';
+        out.innerHTML=story+facts+'<p class="x-audit-block">'+esc(j.error||j.reason||'This site blocked the check. That is inconclusive, not a fault.')+'</p>';
         return;
       }
       if(!r.ok){
-        out.innerHTML=story+'<p class="x-audit-block">'+esc(j.error||'This check could not finish.')+'</p>';
+        out.innerHTML=story+facts+'<p class="x-audit-block">'+esc(j.error||'This check could not finish.')+'</p>';
         return;
       }
       var leaks=j.leaks||[];
@@ -309,7 +310,7 @@
         var extra=(L.evidence&&L.evidence!==L.leak)?'<span>'+esc(L.evidence)+'</span>':'';
         return '<li><strong>'+esc(L.title||L.key)+'</strong><span>'+esc(L.leak||'')+'</span>'+extra+'</li>';
       }).join(''):'<li><strong>No commercial gap on this check</strong><span>Nothing in the labelled leak list was measured on this page. That is not a score of zero — it is an empty observation.</span></li>';
-      out.innerHTML=story+'<p class="x-audit-label">'+esc(j.label||'Measured observations. Not a revenue forecast.')+'</p><ol class="x-audit-leaks">'+items+'</ol><p class="x-audit-gate">'+esc(j.gate||'Create an account for the full Digital Opportunity Report.')+' <a href="/signup">Create an account</a></p>';
+      out.innerHTML=story+facts+'<p class="x-audit-label">'+esc(j.label||'Measured observations. Not a revenue forecast.')+'</p><ol class="x-audit-leaks">'+items+'</ol><p class="x-audit-gate">'+esc(j.gate||'Create an account for the full Digital Opportunity Report.')+' <a href="/signup">Create an account</a></p>';
     }catch(err){
       out.innerHTML='<p class="x-audit-block">This check could not reach the server.</p>';
     }

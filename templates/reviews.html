@@ -43,17 +43,13 @@
   </section>
   <div class="rev-wrap">
     <div id="client-review-list" class="rev-list">
-      {% if client_reviews %}
-        {% for r in client_reviews %}
-        <article class="client-review-card">
-          <div class="stars">{{ '★' * (r.rating|int) }}{{ '☆' * (5 - (r.rating|int)) }}</div>
-          <p>{{ r.text }}</p>
-          <div class="meta"><strong>{{ r.name }}</strong>{% if r.business %} · {{ r.business }}{% endif %}{% if r.created %} · {{ r.created[:10] }}{% endif %}</div>
-        </article>
-        {% endfor %}
-      {% else %}
-        <p class="rev-empty" id="rev-empty">{{ t('rev.empty') }}</p>
-      {% endif %}
+      {% for r in client_reviews or [] %}
+      <article class="client-review-card">
+        <div class="stars">{{ '★' * (r.rating|int) }}{{ '☆' * (5 - (r.rating|int)) }}</div>
+        <p>{{ r.text }}</p>
+        <div class="meta"><strong>{{ r.name }}</strong>{% if r.business %} · {{ r.business }}{% endif %}{% if r.created %} · {{ r.created[:10] }}{% endif %}</div>
+      </article>
+      {% endfor %}
     </div>
     <form id="review-form" class="review-form" novalidate>
       <h2>{{ t('rev.form_h') }}</h2>

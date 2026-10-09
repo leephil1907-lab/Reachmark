@@ -153,6 +153,29 @@ def observe(url, max_bytes=65536, timeout=12, respect_robots=True, verify_links=
         'broken_anchors': broken_anchors[:5],
         'broken_anchor_count': len(broken_anchors),
     }
+    script_count = len(re.findall(r'(?is)<script[\s>]', html))
+    blob = ((signals['title'] or '') + ' ' + html[:9000] + ' ' + text[:2500]).lower()
+    cookie_interstitial = bool(re.search(
+        r'(cookie check|we use cookies|cookie (consent|policy|preferences|banner)|'
+        r'gdpr.{0,40}(accept|agree)|accept (all )?cookies|manage cookies|'
+        r'consent.{0,40}(accept|agree|cookies))',
+        blob,
+    ))
+    js_shell = (signals['visible_words'] < 40 and script_count >= 4)
+    signals.update({
+        'word_count': signals['visible_words'],
+        'script_count': script_count,
+        'cookie_interstitial': cookie_interstitial,
+        'js_shell': js_shell,
+        'has_email_text': bool(re.search(r'[\w.+-]+@[\w-]+\.[a-z]{2,}', text)),
+        'has_phone_text': bool(re.search(r'(?:\+|00)\d[\d\s().-]{7,}\d', text)),
+        'has_whatsapp': bool(re.search(r'(?i)(wa\.me/|api\.whatsapp|whatsapp)', html)),
+        'input_count': len(re.findall(r'(?is)<input[\s>]', html)),
+        'has_viewport': bool(signals.get('viewport')),
+        'has_tel_or_mailto': bool(signals['has_tel_link'] or signals['has_mailto_link']),
+        'has_form': bool(signals['form_count']),
+        'has_booking_or_whatsapp': bool(signals['has_booking_link'] or re.search(r'(?i)(wa\.me/|whatsapp)', html)),
+    })
     result['signals'] = signals
     result['link_check'] = (check_links(html, result['final_url']) if verify_links
                             else {'checked': 0, 'broken': [], 'skipped': 0})
@@ -230,6 +253,8 @@ def gaps_from(observations, lead):
         ('parked_suspected', 3, 'Domain-parking or domain-sale wording appeared on the page.'),
         ('http_error', 2, 'The listed page returned a client or server error.'),
         ('unreachable', 1, 'The listed page did not connect at check time (may be local network or temporary).'),
+        ('cookie_interstitial', 3, 'The HTML we received is a cookie or consent screen, not the working site.'),
+        ('js_shell', 2, 'The HTML is mostly scripts with little readable copy — the painted page was not in this check.'),
         ('no_https', 2, 'The page was served over plain HTTP, without TLS.'),
         ('no_viewport', 2, 'No viewport meta tag — the page does not declare mobile scaling.'),
         ('slow_first_byte', 1, 'First byte took over 2.5 seconds on this check.'),
@@ -267,58 +292,86 @@ def gaps_from(observations, lead):
         found.append('unreachable')
     signals = (observations or {}).get('signals', {})
     if observations and observations.get('ok'):
+        wall = bool(signals.get('cookie_interstitial'))
+        shell = bool(signals.get('js_shell'))
+        if wall:
+            found.append('cookie_interstitial')
+            reasons['cookie_interstitial'] = (
+                f'Title “{(signals.get("title") or "?" )[:80]}” — cookie or consent wording in the HTML we received. '
+                'Forms and contact paths on the real page were not measured.')
+        if shell and not wall:
+            found.append('js_shell')
+            reasons['js_shell'] = (
+                f'{signals.get("script_count") or 0} script tag(s) and '
+                f'{signals.get("visible_words") or signals.get("word_count") or 0} visible words.')
         if not observations.get('https'):
             found.append('no_https')
-        if not signals.get('viewport'):
+        if not (signals.get('viewport') or signals.get('has_viewport')):
             found.append('no_viewport')
         if (observations.get('ms') or 0) > 2500:
             found.append('slow_first_byte')
-        if (signals.get('visible_words') or 0) < 120:
-            found.append('thin_page')
-        if not (signals.get('has_contact_link') or signals.get('has_tel_link') or signals.get('has_mailto_link')):
-            found.append('no_contact_path')
-        if not (signals.get('form_count') or signals.get('has_booking_link')):
-            found.append('no_form_or_booking')
-        years = [y for y in (signals.get('copyright_years') or []) if isinstance(y, int)]
-        if years and max(years) <= datetime.now(timezone.utc).year - 2:
-            found.append('stale_copyright')
-        if not signals.get('meta_description'):
-            found.append('no_description')
-        if not signals.get('img_count'):
-            found.append('no_images')
-        if signals.get('img_missing_alt'):
-            found.append('images_missing_alt')
-            reasons['images_missing_alt'] = (
-                f"{signals['img_missing_alt']} of {signals.get('img_count') or '?'} images have no alt text — "
-                'screen readers and image search skip them.')
-        if not (signals.get('title') or '').strip():
-            found.append('missing_title')
-        if not (signals.get('lang') or '').strip():
-            found.append('missing_lang')
-        h1s = signals.get('h1_count') or 0
-        if h1s == 0:
-            found.append('no_h1')
-        elif h1s > 1:
-            found.append('many_h1')
-            reasons['many_h1'] = (f'{h1s} H1 headings on one page — more than one top heading '
-                                   'confuses the structure.')
-        if signals.get('broken_anchor_count'):
-            found.append('broken_anchors')
-            first = (signals.get('broken_anchors') or ['?'])[0]
-            reasons['broken_anchors'] = (
-                f"{signals['broken_anchor_count']} in-page link(s) point at sections that do not exist "
-                f'(e.g. #{first}) — visitors tap and nothing happens.')
-        if observations.get('https') and (signals.get('http_resource_refs') or 0):
-            found.append('mixed_content')
-            reasons['mixed_content'] = (
-                f"{signals['http_resource_refs']} resource(s) load over plain HTTP on a secure page — "
-                'browsers may block them.')
-        if 'has_favicon' in signals and not signals.get('has_favicon'):
-            found.append('no_favicon')
-        if (signals.get('server_header') or '').strip():
-            found.append('server_disclosure')
-        if 'has_analytics' in signals and not signals.get('has_analytics'):
-            found.append('no_analytics_seen')
+        # Cookie/JS shells make thin-copy and missing-form look like the whole site. Don't pile those on.
+        if not wall:
+            words = signals.get('visible_words') or signals.get('word_count') or 0
+            if words < 120 and not shell:
+                found.append('thin_page')
+            contact = (
+                signals.get('has_contact_link') or signals.get('has_tel_link')
+                or signals.get('has_mailto_link') or signals.get('has_tel_or_mailto')
+                or signals.get('has_email_text') or signals.get('has_phone_text')
+                or signals.get('has_whatsapp')
+            )
+            if not contact:
+                found.append('no_contact_path')
+            enquire = (
+                signals.get('form_count') or signals.get('has_form')
+                or signals.get('has_booking_link') or signals.get('has_whatsapp')
+                or signals.get('has_booking_or_whatsapp')
+                or (signals.get('input_count') or 0) >= 2
+            )
+            if not enquire:
+                found.append('no_form_or_booking')
+        if not wall and not shell:
+            years = [y for y in (signals.get('copyright_years') or []) if isinstance(y, int)]
+            if years and max(years) <= datetime.now(timezone.utc).year - 2:
+                found.append('stale_copyright')
+            if not signals.get('meta_description'):
+                found.append('no_description')
+            if not signals.get('img_count'):
+                found.append('no_images')
+            if signals.get('img_missing_alt'):
+                found.append('images_missing_alt')
+                reasons['images_missing_alt'] = (
+                    f"{signals['img_missing_alt']} of {signals.get('img_count') or '?'} images have no alt text — "
+                    'screen readers and image search skip them.')
+            if not (signals.get('title') or '').strip():
+                found.append('missing_title')
+            if not (signals.get('lang') or '').strip():
+                found.append('missing_lang')
+            h1s = signals.get('h1_count') or 0
+            if h1s == 0:
+                found.append('no_h1')
+            elif h1s > 1:
+                found.append('many_h1')
+                reasons['many_h1'] = (f'{h1s} H1 headings on one page — more than one top heading '
+                                       'confuses the structure.')
+            if signals.get('broken_anchor_count'):
+                found.append('broken_anchors')
+                first = (signals.get('broken_anchors') or ['?'])[0]
+                reasons['broken_anchors'] = (
+                    f"{signals['broken_anchor_count']} in-page link(s) point at sections that do not exist "
+                    f'(e.g. #{first}) — visitors tap and nothing happens.')
+            if observations.get('https') and (signals.get('http_resource_refs') or 0):
+                found.append('mixed_content')
+                reasons['mixed_content'] = (
+                    f"{signals['http_resource_refs']} resource(s) load over plain HTTP on a secure page — "
+                    'browsers may block them.')
+            if 'has_favicon' in signals and not signals.get('has_favicon'):
+                found.append('no_favicon')
+            if (signals.get('server_header') or '').strip():
+                found.append('server_disclosure')
+            if 'has_analytics' in signals and not signals.get('has_analytics'):
+                found.append('no_analytics_seen')
         check = observations.get('link_check') or {}
         if check.get('broken'):
             found.append('broken_links')

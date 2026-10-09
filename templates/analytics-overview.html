@@ -13,6 +13,18 @@
 <div id="empty-machine" class="empty-machine" hidden></div>
 <div id="work-first" class="work-first" hidden></div>
 {% include 'desk-panel.html' %}
+{% if client_logged_in %}
+<section class="card" id="client-support" style="margin:22px 0">
+  <div class="section-top"><div><div class="mini-eyebrow">{{ t('tk.k') }}</div><h3>{{ t('tk.h') }}</h3></div></div>
+  <p class="small muted">{{ t('tk.p') }}</p>
+  <form id="ticket-form">
+    <label>{{ t('tk.subj') }}<input name="subject" maxlength="160" required></label>
+    <label>{{ t('tk.body') }}<textarea name="body" maxlength="4000" rows="5" required></textarea></label>
+    <button class="primary" type="submit">{{ t('tk.send') }}</button>
+    <p class="small muted" id="ticket-status" role="status"></p>
+  </form>
+</section>
+{% endif %}
 <details class="ws-records" id="ws-records">
   <summary>{{ t('ws.records') }}</summary>
   <p class="small muted">{{ t('ws.records_p') }}</p>

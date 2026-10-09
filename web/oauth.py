@@ -75,9 +75,12 @@ def _http_json(url, data=None, headers=None, timeout=8):
 def register_oauth(app, db, now, log):
     @app.get('/api/auth/oauth')
     def oauth_status():
-        return jsonify(providers=[
+        payload = {'providers': [
             {'id': pid, 'name': p['name'], 'configured': configured(p)}
-            for pid, p in PROVIDERS.items()])
+            for pid, p in PROVIDERS.items()]}
+        if configured(PROVIDERS['google']):
+            payload['google_redirect_uri'] = _redirect_uri('google')
+        return jsonify(payload)
 
     @app.get('/api/auth/oauth/<provider>')
     def oauth_start(provider):

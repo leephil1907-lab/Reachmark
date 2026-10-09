@@ -1,5 +1,7 @@
 /* Reachmark AI receptionist — talks to /api/receptionist/message. Voice lives in this widget. */
 (function () {
+  if (window.__rmReceptionist) return;
+  window.__rmReceptionist = true;
   var T_ = window.T || function (k, f) { return f; };
   var launch = document.getElementById('rm-receptionist-launch');
   var panel = document.getElementById('rm-receptionist');

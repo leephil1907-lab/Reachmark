@@ -15,8 +15,8 @@ from flask import jsonify, render_template, request, session
 from web.opportunity import LEAK_COPY
 from web.web_probe import gaps_from, observe
 
-PUBLIC_TIMEOUT = 8
-PUBLIC_MAX_BYTES = 65536
+PUBLIC_TIMEOUT = 12
+PUBLIC_MAX_BYTES = 120000
 PUBLIC_RATE_HOUR = 8
 
 
@@ -110,7 +110,13 @@ def leak_narrative(url, observations, leaks):
         bits.append(f'The page title we read was “{title}”.')
     if observations.get('https') is False:
         bits.append('The response was not over HTTPS.')
-    words = signals.get('word_count')
+    if signals.get('cookie_interstitial'):
+        bits.append('The HTML is a cookie or consent wall, so the working site was not measured.')
+    elif signals.get('js_shell'):
+        bits.append('The HTML is a script shell; copy that paints later was not in this check.')
+    words = signals.get('visible_words')
+    if not isinstance(words, int):
+        words = signals.get('word_count')
     if isinstance(words, int) and words >= 0:
         bits.append(f'The page read contained about {words} visible words.')
     if leaks:
@@ -154,12 +160,64 @@ def preview_leaks(url, observe_fn=None):
             'source': gap.get('source') or 'observation',
         })
     leaks.sort(key=lambda row: -row['weight'])
-    top = leaks[:3]
+    family = {
+        'cookie_interstitial': 'wall', 'js_shell': 'wall',
+        'thin_page': 'copy', 'missing_title': 'copy', 'no_h1': 'copy', 'many_h1': 'copy',
+        'no_description': 'copy', 'stale_copyright': 'copy',
+        'no_contact_path': 'ask', 'no_form_or_booking': 'ask',
+        'no_https': 'trust', 'mixed_content': 'trust', 'no_viewport': 'device',
+        'slow_first_byte': 'speed', 'broken_links': 'nav', 'broken_anchors': 'nav',
+        'no_images': 'media', 'images_missing_alt': 'media', 'no_favicon': 'media',
+        'missing_lang': 'a11y', 'no_analytics_seen': 'measure', 'server_disclosure': 'header',
+        'http_error': 'reach', 'unreachable': 'reach', 'dns_unresolved': 'reach',
+        'parked_suspected': 'reach', 'no_website_listed': 'reach', 'social_only': 'reach',
+    }
+    picked, used = [], set()
+    for row in leaks:
+        fam = family.get(row.get('key') or '', row.get('key') or 'other')
+        if fam in used:
+            continue
+        used.add(fam)
+        picked.append(row)
+        if len(picked) >= 3:
+            break
+    if len(picked) < min(3, len(leaks)):
+        for row in leaks:
+            if row in picked:
+                continue
+            picked.append(row)
+            if len(picked) >= 3:
+                break
+    top = picked[:3]
     blocked = False
     reason = observations.get('reason') or ''
     status = observations.get('status')
     if status in (401, 403, 429) or 'blocked this check' in reason.lower() or 'access restricted' in reason.lower():
         blocked = True
+    sig = observations.get('signals') or {}
+    facts = []
+    facts.append(f'Title: {(sig.get("title") or "(none)")[:160]}')
+    facts.append(
+        f'HTTP {observations.get("status") or "?"} in {observations.get("ms") or "?"} ms · '
+        f'{"HTTPS" if observations.get("https") else "not HTTPS"}'
+    )
+    if observations.get('bytes') is not None:
+        facts.append(f'{observations["bytes"]} bytes of HTML read')
+    words = sig.get('visible_words')
+    if not isinstance(words, int):
+        words = sig.get('word_count')
+    if isinstance(words, int):
+        facts.append(f'{words} visible words')
+    forms = sig.get('form_count') or (1 if sig.get('has_form') else 0)
+    contact = (
+        sig.get('has_contact_link') or sig.get('has_tel_link') or sig.get('has_mailto_link')
+        or sig.get('has_tel_or_mailto')
+    )
+    facts.append(f'{forms} form(s) · {"contact path found" if contact else "no tel/mailto/contact link"}')
+    if sig.get('cookie_interstitial'):
+        facts.append('Cookie or consent wall in the HTML we received')
+    if sig.get('js_shell'):
+        facts.append('Mostly scripts — the painted page was not in this HTML')
     return {
         'ok': bool(observations.get('ok')) and not blocked,
         'blocked': blocked,
@@ -168,6 +226,7 @@ def preview_leaks(url, observe_fn=None):
         'reason': reason if not observations.get('ok') else '',
         'leaks': top,
         'leak_count': len(top),
+        'facts': facts,
         'narrative': leak_narrative(url, observations, top),
         'measured': True,
         'full_report': False,

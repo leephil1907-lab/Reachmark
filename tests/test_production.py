@@ -207,10 +207,12 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
         for path in ('/showcase','/receptionist','/reviews','/about','/enquire','/signin','/signup'):
             self.assertIn(f'href="{path}"',home,path)
         self.assertNotIn('I hunt missing websites',home)
-        self.assertIn('Find the leak. Show the proof. You send the email.',home)
+        self.assertIn('Digital Opportunity Report',home)
         self.assertIn('© 2026 Reachmark',home)
         self.assertNotIn('Questions? Ask the front desk',home)
-        self.assertIn('Concepts we&#39;ve built',home)
+        self.assertNotIn('Clients, in their own words',home)
+        self.assertIn('rm-receptionist-launch',home)
+        self.assertIn('x-audit-form',home)
         about=self.client.get('/about').get_data(as_text=True)
         self.assertIn('I hunt missing websites',about)
         self.assertNotIn('id="website-samples"',about)
@@ -247,18 +249,12 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
             self.assertIn(label,nav)
         for label in ('Reviews','Samples','Receptionist'):
             self.assertNotIn(label,nav)
-    def test_public_pages_show_exactly_one_support_bubble(self):
-        for path in ('/','/showcase','/enquire'):
+    def test_public_pages_show_exactly_one_front_desk(self):
+        for path in ('/','/showcase','/enquire','/about','/receptionist','/privacy'):
             body=self.client.get(path).get_data(as_text=True)
-            tawk='embed.tawk.to' in body
-            whatsapp='class="wa-float"' in body
-            self.assertTrue(tawk or whatsapp,path)
-            self.assertFalse(tawk and whatsapp,path)
-            self.assertNotIn('rm-receptionist-launch',body,path)
-        body=self.client.get('/receptionist').get_data(as_text=True)
-        self.assertIn('rm-receptionist-launch',body)
-        self.assertNotIn('embed.tawk.to',body)
-        self.assertNotIn('class="wa-float"',body)
+            self.assertEqual(body.count('id="rm-receptionist-launch"'), 1, path)
+            self.assertNotIn('embed.tawk.to',body,path)
+            self.assertNotIn('wa-float',body,path)
 
 class PublicPathsWithAuthConfiguredTests(unittest.TestCase):
     """With a dashboard password set (like the live box), public pages stay public."""

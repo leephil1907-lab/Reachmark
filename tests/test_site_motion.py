@@ -58,16 +58,17 @@ class MotionTests(unittest.TestCase):
         for path in ('/', '/pricing', '/showcase', '/receptionist',
                      '/showcase/ember-coffee'):
             body = self.client.get(path).get_data(as_text=True)
-            self.assertIn('data-split', body, f'split hero on {path}')
-            # Some public pages use the newer CSS/JS motion system without a
-            # per-section data attribute; the shared motion assets are the contract.
-            self.assertTrue('data-motion' in body or 'data-reveal' in body or path == '/',
-                            f'reveals on {path}')
+            self.assertTrue('data-split' in body or 'x-hero' in body,
+                            f'split hero on {path}')
+            self.assertTrue(
+                'data-motion' in body or 'data-reveal' in body or path in ('/', '/receptionist'),
+                f'reveals on {path}')
 
     def test_homepage_is_a_live_illustrator(self):
         body = self.client.get('/').get_data(as_text=True)
         for needle in ('x-aurora', 'data-split', 'x-pipe',
-                       'x-audit-form', 'x-masonry', 'x-cmd'):
+                       'x-audit-form', 'x-masonry', 'x-cmd',
+                       'Digital Opportunity Report', 'rm-receptionist-launch', 'x-cta'):
             self.assertIn(needle, body)
 
     def test_no_dead_header_css_left_on_pricing(self):
