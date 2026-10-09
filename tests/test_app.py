@@ -53,10 +53,12 @@ class ProspectTests(unittest.TestCase):
             robots = self.client.get('/robots.txt')
             self.assertIn(b'Sitemap: https://reachmarkdigital.xyz/sitemap.xml', robots.data)
 
-    def test_homepage_does_not_reuse_removed_search_console_token(self):
-        page = self.client.get('/', headers={'Host': 'reachmarkdigital.xyz'})
+    def test_homepage_has_no_search_console_token_until_new_one_is_configured(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop('GOOGLE_SITE_VERIFICATION', None)
+            page = self.client.get('/', headers={'Host': 'reachmarkdigital.xyz'})
         self.assertEqual(page.status_code, 200)
-        self.assertNotIn(b'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', page.data)
+        self.assertNotIn(b'name="google-site-verification"', page.data)
 
     def test_adsense_account_meta_and_loader_are_on_public_homepage(self):
         page = self.client.get('/', headers={'Host': 'reachmarkdigital.xyz'})
