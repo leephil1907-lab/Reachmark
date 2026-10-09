@@ -323,6 +323,7 @@
   function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);});}
 })();
 </script>
+{% include 'receptionist.html' %}
 <script src="/static/product-workbench.js" defer></script>
 <script src="/static/pwa.js" defer></script>
 </body>
