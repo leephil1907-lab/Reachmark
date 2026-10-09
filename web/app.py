@@ -264,8 +264,10 @@ def healthz():
 
 @app.route('/ads.txt')
 def ads_txt():
-    seller = ADSENSE_CLIENT[3:] if ADSENSE_CLIENT.startswith('ca-') else ADSENSE_CLIENT
-    return Response('google.com, %s, DIRECT, f08c47fec0942fa0\n' % seller, mimetype='text/plain')
+    if not ADSENSE_CLIENT or not ADSENSE_CLIENT.startswith('ca-pub-'):
+        return Response('# AdSense publisher ID not configured yet. Add ADSENSE_CLIENT in the deployment environment.\\n', mimetype='text/plain')
+    seller = ADSENSE_CLIENT[3:]
+    return Response('google.com, %s, DIRECT, f08c47fec0942fa0\\n' % seller, mimetype='text/plain')
 @app.route('/about')
 def about():
     base=settings()['public_base_url'].rstrip('/')
