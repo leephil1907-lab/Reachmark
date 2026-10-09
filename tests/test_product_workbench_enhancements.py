@@ -24,6 +24,9 @@ class ProductWorkbenchEnhancementTests(unittest.TestCase):
         self.assertIn("sourceList === list.innerHTML", script)
         self.assertIn("measured gap weights", script)
         self.assertIn("No invented score or revenue estimate", script)
+        public_audit = (ROOT / "web" / "public_audit.py").read_text(encoding="utf-8")
+        self.assertIn("'fix': copy.get('fix') or '',", public_audit)
+        self.assertIn("L.fix", (ROOT / "templates" / "home.html").read_text(encoding="utf-8"))
         self.assertNotIn("score = 99", script.lower())
 
     def test_receptionist_has_product_aware_quick_prompts(self):
