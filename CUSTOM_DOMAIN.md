@@ -41,7 +41,7 @@ if you use Cloudflare.
 
 1. Add property `https://reachmarkdigital.xyz`
 2. Search Console for `https://reachmarkdigital.xyz`:
-   - HTML tag: add the NEW token from Search Console to Railway as `GOOGLE_SITE_VERIFICATION` (comma-separated if multiple properties)
+   - HTML tag: add the NEW token from Search Console to Railway as `GOOGLE_SITE_VERIFICATION_TOKENS` (comma-separated if multiple properties)
    - The old hard-coded HTML verification files and tokens have been removed; do not reuse them.
 3. Submit `https://reachmarkdigital.xyz/sitemap.xml` **after** `PUBLIC_BASE_URL` is
    the owned domain — not while the sitemap still lists `railway.app`
