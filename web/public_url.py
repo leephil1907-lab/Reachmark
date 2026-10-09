@@ -170,5 +170,5 @@ def google_site_tokens():
     Accept a comma-separated list so multiple properties can be verified without
     committing ownership tokens to source control.
     """
-    raw = os.getenv('GOOGLE_SITE_VERIFICATION', '').strip()
+    raw = os.getenv('GOOGLE_SITE_VERIFICATION_TOKENS', '').strip()
     return list(dict.fromkeys(token.strip() for token in raw.split(',') if token.strip()))
