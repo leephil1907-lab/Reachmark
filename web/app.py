@@ -443,6 +443,45 @@ def update_lead(lid):
     data['updated']=now()
     with db() as c: c.execute('UPDATE leads SET '+','.join(k+'=?' for k in data)+' WHERE id=?',[*data.values(),lid])
     return jsonify(ok=True)
+@app.route('/api/quality')
+def quality_state():
+    """Return saved manual verification records scoped to the signed-in workspace."""
+    cid = client_owner()
+    with db() as c:
+        if cid:
+            rows = c.execute(
+                'SELECT r.* FROM lead_reviews r JOIN leads l ON l.id=r.lead_id '
+                'WHERE l.owner_user_id=? ORDER BY r.reviewed_at DESC', (cid,)).fetchall()
+        else:
+            rows = c.execute('SELECT * FROM lead_reviews ORDER BY reviewed_at DESC').fetchall()
+    return jsonify(reviews=[dict(row) for row in rows])
+
+@app.route('/api/leads/<lid>/review', methods=['POST'])
+def save_lead_review(lid):
+    """Save an owner's evidence-backed manual website verification."""
+    item = lead(lid)
+    data = request.get_json(silent=True) or {}
+    verification = str(data.get('verification', 'INCONCLUSIVE')).strip().upper()
+    allowed = {'UNREVIEWED', 'WORKING', 'LISTED_URL_UNAVAILABLE', 'NO_SITE_FOUND', 'INCONCLUSIVE'}
+    if verification not in allowed:
+        return jsonify(error='Choose a valid verification outcome.'), 400
+    evidence_url = str(data.get('evidence_url', '') or '').strip()[:1000]
+    note = str(data.get('note', '') or '').strip()[:3000]
+    if evidence_url:
+        parsed = urlparse(evidence_url)
+        if parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password:
+            return jsonify(error='Evidence URL must be a valid HTTP or HTTPS URL without embedded credentials.'), 400
+    stamp = now()
+    with db() as c:
+        c.execute(
+            'INSERT INTO lead_reviews(lead_id,verification,evidence_url,note,reviewed_at) VALUES(?,?,?,?,?) '
+            'ON CONFLICT(lead_id) DO UPDATE SET verification=excluded.verification, '
+            'evidence_url=excluded.evidence_url, note=excluded.note, reviewed_at=excluded.reviewed_at',
+            (lid, verification, evidence_url, note, stamp))
+    log('manual_review', f'Manual verification saved for {item["name"]}: {verification}')
+    return jsonify(ok=True, review={'lead_id': lid, 'verification': verification,
+                                    'evidence_url': evidence_url, 'note': note, 'reviewed_at': stamp})
+
 @app.route('/api/import',methods=['POST'])
 def import_csv():
     f=request.files.get('file')
