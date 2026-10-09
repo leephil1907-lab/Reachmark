@@ -181,7 +181,7 @@ def headers(r):
     r.headers['X-Content-Type-Options']='nosniff'; r.headers['Referrer-Policy']='strict-origin-when-cross-origin'
     return r
 
-ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', '').strip() or 'ca-pub-5678865896620902'
+ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-5678865896620902').strip() or 'ca-pub-5678865896620902'
 ADSENSE_PATHS = {'/', '/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/sample-report'}
 ADSENSE_PREFIXES = ('/showcase/',)
 
