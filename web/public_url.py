@@ -16,12 +16,6 @@ SEO_HOME_DESCRIPTION = (
     'and send proposals backed by a Digital Opportunity Report. You approve every send.'
 )
 SEO_HOME_KEYWORDS = 'Reachmark, Reachmark Digital, website diagnosis, Digital Opportunity Report'
-# Search Console HTML-tag tokens. First token is reachmarkdigital.xyz (2026-10-08).
-GOOGLE_SITE_TOKENS = (
-    'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c',
-    'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg',
-)
-
 
 def is_ephemeral_public_url(url):
     try:
@@ -171,9 +165,10 @@ def whatsapp_url():
 
 
 def google_site_tokens():
-    tokens = []
-    extra = os.getenv('GOOGLE_SITE_VERIFICATION', '').strip()
-    for token in ((extra,) if extra else ()) + GOOGLE_SITE_TOKENS:
-        if token and token not in tokens:
-            tokens.append(token)
-    return tokens
+    """Return only explicitly configured Search Console verification tokens.
+
+    Accept a comma-separated list so multiple properties can be verified without
+    committing ownership tokens to source control.
+    """
+    raw = os.getenv('GOOGLE_SITE_VERIFICATION', '').strip()
+    return list(dict.fromkeys(token.strip() for token in raw.split(',') if token.strip()))
