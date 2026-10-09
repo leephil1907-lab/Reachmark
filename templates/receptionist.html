@@ -20,6 +20,7 @@
     <button type="submit" id="rm-send">{{ t('rx.w_send') }}</button>
   </form>
   <p class="rm-note">{{ t('rx.w_note') }} <a href="/enquire">{{ t('rx.w_full') }}</a></p>
+  {% if whatsapp_url %}<div class="rm-whatsapp-secondary"><span>Prefer WhatsApp?</span><a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer" aria-label="Continue on WhatsApp in a new tab">Open chat ↗</a></div>{% endif %}
 </section>
 <link rel="stylesheet" href="/static/receptionist.css"/>
 <script src="/static/receptionist.js" defer></script>
