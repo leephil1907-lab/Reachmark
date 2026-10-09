@@ -5,7 +5,7 @@
 .ph-example-top h3{margin:5px 0 0;color:#252b21;font-size:17px;letter-spacing:-.025em}
 .ph-example-disclaimer{max-width:180px;color:#777f6d;font-size:10px;line-height:1.5;text-align:right}
 .ph-example-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
-.ph-example-tabs button{min-height:35px;padding:8px 12px;border:1px solid #dfe5d2;border-radius:999px;background:#fff;color:#5b6352;font:650 11px/1.2 inherit;cursor:pointer;transition:background .18s,border-color .18s,color .18s}
+.ph-example-tabs button{min-height:35px;padding:8px 12px;border:1px solid #dfe5d2;border-radius:999px;background:#fff;color:#5b6352;font:650 11px/1.2 'DM Sans',system-ui,sans-serif;cursor:pointer;transition:background .18s,border-color .18s,color .18s}
 .ph-example-tabs button[aria-selected=true]{background:#293323;border-color:#293323;color:#f7f9f1}
 .ph-example-tabs button:focus-visible{outline:3px solid #9bb85b;outline-offset:2px}
 .ph-example-panel{padding:15px 16px;border-radius:10px;background:#fff;border:1px solid rgba(32,37,31,.08)}
