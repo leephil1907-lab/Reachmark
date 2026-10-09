@@ -32,3 +32,8 @@
 @media(max-width:520px){.rm-panel{right:8px;left:8px;width:auto;bottom:74px;max-height:78vh}
   #rm-receptionist-launch{right:10px;bottom:12px;padding:11px 15px;font-size:12.5px}}
 @media(prefers-reduced-motion:reduce){#rm-receptionist-launch{transition:none}}
+
+.rm-whatsapp-secondary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px 13px;background:#fff;color:#7b866c;font-size:11px}
+.rm-whatsapp-secondary a{display:inline-flex;align-items:center;gap:5px;color:#42502f;font-weight:750;text-decoration:none;border:1px solid #dfe5d2;border-radius:999px;padding:6px 10px;white-space:nowrap}
+.rm-whatsapp-secondary a:hover{background:#f3f7e9;border-color:#cbd8ad}
+.rm-whatsapp-secondary a:focus-visible{outline:2px solid #a5c34c;outline-offset:2px}
