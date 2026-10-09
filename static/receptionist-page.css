@@ -1,3 +1,7 @@
 /* Receptionist page uses shared public chrome. Widget layout lives in receptionist.css. */
 body.rx-page .x-hero{padding-bottom:12px}
 body.rx-page .x-hero-actions button.x-btn{cursor:pointer;font-family:Manrope,Arial,sans-serif}
+
+.rx-price-note{margin:14px 0 8px;color:#4d5b3d;font-size:13px;line-height:1.6}.rx-price-note strong{font-weight:800}.rx-price-note span{display:block;color:#78816d;font-size:11px}
+.rx-published-tiers{display:flex;flex-wrap:wrap;gap:7px 14px;list-style:none;padding:0;margin:10px 0;color:#667354;font-size:11px}.rx-published-tiers li{padding:4px 0}
+.rx-frontdesk-status{display:inline-flex;align-items:center;gap:7px;margin:12px 0 0;color:#6f7d5b;font-size:11px}.rx-frontdesk-status[data-status=online]:before{content:'';width:7px;height:7px;border-radius:50%;background:#8aa83d;box-shadow:0 0 0 3px rgba(138,168,61,.14)}.rx-frontdesk-status[data-status=unknown]:before{content:'';width:7px;height:7px;border-radius:50%;background:#c5a15d}
