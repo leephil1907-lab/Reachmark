@@ -182,8 +182,12 @@ def headers(r):
     return r
 
 ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-5678865896620902').strip() or 'ca-pub-5678865896620902'
-ADSENSE_PATHS = {'/', '/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/sample-report'}
-ADSENSE_PREFIXES = ('/showcase/',)
+ADSENSE_EXCLUDED_PREFIXES = (
+    '/api/', '/preview/', '/unsubscribe/', '/workspace', '/dashboard',
+    '/signin', '/signup', '/account', '/settings', '/admin', '/offline',
+    '/sw.js', '/healthz', '/static/',
+)
+ADSENSE_EXCLUDED_PATHS = {'/robots.txt', '/sitemap.xml', '/ads.txt'}
 
 @app.after_request
 def adsense_tags(response):
@@ -194,10 +198,11 @@ def adsense_tags(response):
     review-recording routes stay excluded. Sample detail pages match by prefix.
     """
     try:
-        if not ADSENSE_CLIENT or (request.path not in ADSENSE_PATHS
-                                  and not request.path.startswith(ADSENSE_PREFIXES)):
+        if not ADSENSE_CLIENT or request.path in ADSENSE_EXCLUDED_PATHS:
             return response
-        if 'text/html' not in response.headers.get('Content-Type', ''):
+        if request.path.startswith(ADSENSE_EXCLUDED_PREFIXES):
+            return response
+        if response.status_code >= 400 or 'text/html' not in response.headers.get('Content-Type', ''):
             return response
         body = response.get_data(as_text=True)
         if 'googlesyndication.com/pagead/js/adsbygoogle.js' in body:
