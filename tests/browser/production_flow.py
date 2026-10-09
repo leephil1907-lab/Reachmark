@@ -23,8 +23,8 @@ with tempfile.TemporaryDirectory() as tmp:
                 'ok': True, 'blocked': False, 'observed': True,
                 'narrative': 'Test-only fixture: public page fetch completed.',
                 'leaks': [
-                    {'key': 'contact_path', 'title': 'Contact path unclear', 'leak': 'No visible contact link was found in the fixture.', 'evidence': 'Fixture evidence: no matching contact link.'},
-                    {'key': 'page_title', 'title': 'Page title generic', 'leak': 'The title did not identify the service in the fixture.', 'evidence': "Fixture evidence: title was 'Home'."}
+                    {'key': 'contact_path', 'title': 'Contact path unclear', 'leak': 'No visible contact link was found in the fixture.', 'evidence': 'Fixture evidence: no matching contact link.', 'fix': 'Add a visible enquiry path.'},
+                    {'key': 'page_title', 'title': 'Page title generic', 'leak': 'The title did not identify the service in the fixture.', 'evidence': "Fixture evidence: title was 'Home'.", 'fix': 'Use a specific page title.'}
                 ],
                 'label': 'Measured observations from this check. Not a revenue forecast.',
                 'gate': 'Create an account to run the full report.'
