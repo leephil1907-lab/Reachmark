@@ -65,7 +65,7 @@ def organization_schema(base, description=''):
         'foundingDate': '2026',
         'areaServed': 'Worldwide',
         'slogan': 'Find potential. Make your mark.',
-        'alternateName': ['Reachmark', 'reachmarkdigital.xyz'],
+        'alternateName': ['Reachmark', 'Reachmark Digital', 'reachmarkdigital.xyz'],
         'description': description or SEO_HOME_DESCRIPTION,
         'contactPoint': [{
             '@type': 'ContactPoint',
