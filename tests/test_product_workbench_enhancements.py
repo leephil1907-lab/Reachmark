@@ -25,6 +25,15 @@ class ProductWorkbenchEnhancementTests(unittest.TestCase):
         self.assertIn("No invented score or revenue estimate", script)
         self.assertNotIn("score = 99", script.lower())
 
+    def test_receptionist_has_product_aware_quick_prompts(self):
+        widget = (ROOT / "templates" / "receptionist.html").read_text(encoding="utf-8")
+        script = (ROOT / "static" / "receptionist.js").read_text(encoding="utf-8")
+        self.assertIn("What does Reachmark do?", widget)
+        self.assertIn("How much does a website cost?", widget)
+        self.assertIn("What are the steps and timing?", widget)
+        self.assertIn("Can I talk to a person?", widget)
+        self.assertIn("requestSubmit()", script)
+
     def test_homepage_uses_receptionist_instead_of_competing_whatsapp_float(self):
         home = (ROOT / "templates" / "home.html").read_text(encoding="utf-8")
         header = (ROOT / "templates" / "header-public.html").read_text(encoding="utf-8")
