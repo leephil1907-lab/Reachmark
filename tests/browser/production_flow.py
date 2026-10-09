@@ -20,7 +20,7 @@ with tempfile.TemporaryDirectory() as tmp:
             except Exception:page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();page.wait_for_url('**/workspace**',timeout=15000)
             expect(page.locator('#stat-total')).to_have_text('2')
             page.locator('[data-tour="skip"]').click();
-            page.locator('.nav[data-page="leads"]').click();page.locator('#filter-contact').select_option('email');expect(page.locator('#lead-table tr')).to_have_count(1);page.locator('#lead-table tr:visible button').first.click()
+            page.locator('.nav[data-page="leads"]').click();page.locator('#filter-contact').select_option('email');expect(page.locator('#lead-cards .lead-card')).to_have_count(1);page.locator('#lead-cards .lead-card .lead-actions button.primary').first.click()
             page.get_by_text('Manual verification and evidence',exact=True).click();page.locator('#review-form [name="verification"]').select_option('NO_SITE_FOUND');page.locator('#review-form [name="evidence_url"]').fill('https://example.test/research');page.locator('#review-form [name="note"]').fill('Manually searched the business name and checked the source listing.');page.locator('#review-form [type="submit"]').click();expect(page.locator('#review-time')).to_contain_text('Manual review:')
             with page.expect_download() as download:page.get_by_role('link',name='Audit report PDF').click()
             saved=Path(tmp)/'audit.pdf';download.value.save_as(saved);assert saved.read_bytes().startswith(b'%PDF')
