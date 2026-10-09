@@ -64,7 +64,7 @@
       const actions=$('ros-next-actions');
       actions.innerHTML=links.join('');
       status('Prepared/reused: '+(result.steps||[]).join(', ')+'. Outbound messages: not sent. Review the proposal and set real prices before sharing.','success');
-      await load();
+      await load(true);
     }catch(error){status(error.message,'error');}
     finally{busy=false;button.disabled=false;button.textContent='Prepare report + proposal';}
   }
@@ -82,8 +82,8 @@
     if(!events.length){$('ros-events').innerHTML='<li class="rm-ros-empty">No commercial events recorded yet. Activity will appear here as real work moves through the pipeline.</li>';return;}
     $('ros-events').innerHTML=events.slice(0,10).map(e=>'<li><div><strong>'+esc(e.lead_name||e.object_type||'Workspace event')+' · '+esc(e.stage||'Activity')+'</strong>'+esc(e.detail||'Record updated')+'<small>'+esc(date(e.created))+'</small></div></li>').join('');
   }
-  async function load(){
-    if(busy)return;
+  async function load(force){
+    if(busy&&!force)return;
     status('Refreshing from saved workspace records…');
     try{
       const [command,metrics]=await Promise.all([api('/api/os/command'),api('/api/os/metrics')]);
