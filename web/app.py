@@ -184,7 +184,7 @@ def headers(r):
 ADSENSE_CLIENT = 'ca-pub-5678865896620902'  # publisher ID supplied for the current AdSense account
 ADSENSE_EXCLUDED_PREFIXES = (
     '/api/', '/preview/', '/unsubscribe/', '/workspace', '/dashboard',
-    '/signin', '/signup', '/account', '/settings', '/admin', '/offline',
+    '/signin', '/signup', '/login', '/client-login', '/account', '/settings', '/admin', '/offline',
     '/sw.js', '/healthz', '/static/',
 )
 ADSENSE_EXCLUDED_PATHS = {'/robots.txt', '/sitemap.xml', '/ads.txt'}
