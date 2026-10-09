@@ -15,16 +15,16 @@ class AdSenseTests(unittest.TestCase):
     tearDown = test_app.ProspectTests.tearDown
 
     def test_public_pages_carry_account_meta_and_loader_once(self):
-        for path in ('/', '/about', '/showcase', '/showcase/ember-coffee',
-                     '/enquire', '/receptionist', '/reviews', '/pricing'):
-            body = self.client.get(path).get_data(as_text=True)
+        for i, path in enumerate(('/', '/about', '/showcase', '/showcase/ember-coffee',
+                                  '/enquire', '/receptionist', '/reviews', '/pricing'), start=1):
+            body = self.client.get(path, environ_overrides={'REMOTE_ADDR': f'192.0.2.{i}'}).get_data(as_text=True)
             self.assertIn(META, body, path)
             self.assertIn(LOADER, body, path)
             self.assertEqual(body.count('adsbygoogle.js'), 1, f'double injection on {path}')
 
     def test_private_pages_and_apis_are_excluded(self):
-        for path in ('/signin', '/signup', '/workspace', '/dashboard'):
-            body = self.client.get(path).get_data(as_text=True)
+        for i, path in enumerate(('/signin', '/signup', '/workspace', '/dashboard'), start=21):
+            body = self.client.get(path, environ_overrides={'REMOTE_ADDR': f'192.0.2.{i}'}).get_data(as_text=True)
             self.assertNotIn('adsbygoogle', body, path)
             self.assertNotIn('google-adsense-account', body, path)
         api = self.client.get('/api/state')
@@ -39,7 +39,7 @@ class AdSenseTests(unittest.TestCase):
     def test_no_manual_ad_unit_renders_without_a_configured_slot(self):
         for path in ('/', '/about', '/showcase', '/enquire', '/pricing',
                      '/receptionist', '/workspace'):
-            body = self.client.get(path).get_data(as_text=True)
+            body = self.client.get(path, environ_overrides={'REMOTE_ADDR': '192.0.2.41'}).get_data(as_text=True)
             self.assertNotIn('data-ad-slot=', body, path)
 
     def test_content_security_policy_allows_the_ad_loader(self):
