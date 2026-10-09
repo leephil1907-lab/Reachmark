@@ -25,8 +25,13 @@
 <script src="/static/i18n.js"></script>
 {% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}
 <style>
-.about-founder{display:grid;grid-template-columns:minmax(220px,.9fr) 1.2fr;gap:36px;align-items:center;margin:8px auto 56px;width:min(var(--x-max),calc(100% - 48px));background:#fff;border:1px solid var(--x-line);border-radius:22px;padding:28px}
-.about-founder img.portrait{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center 12%;border-radius:16px;display:block;background:#20251f}
+.about-founder{display:grid;grid-template-columns:minmax(220px,.72fr) 1.28fr;gap:36px;align-items:center;margin:8px auto 56px;width:min(var(--x-max),calc(100% - 48px));background:#fff;border:1px solid var(--x-line);border-radius:22px;padding:28px}
+.about-founder img.portrait{width:100%;max-width:320px;height:320px;aspect-ratio:1/1;object-fit:cover;object-position:center 14%;border-radius:16px;display:block;background:#20251f;justify-self:center}
+.about-founder > div{min-width:0}
+[data-theme="dark"] .about-founder{background:#121812;border-color:rgba(213,242,104,.18);color:#eef3ea}
+[data-theme="dark"] .about-founder p:not(.x-kicker){color:#c3cdbd}
+[data-theme="dark"] .about-founder h2{color:#f3f7ef}
+@media(max-width:720px){.about-founder img.portrait{max-width:260px;height:260px;object-position:center 14%}}
 .about-founder h2{font:400 clamp(28px,4vw,40px)/1.15 'Instrument Serif',Georgia,serif;letter-spacing:-.03em;margin:8px 0 14px}
 .about-founder p{margin:0 0 12px;color:#3c4638;line-height:1.7;max-width:52ch}
 .about-prices{width:min(var(--x-max),calc(100% - 48px));margin:0 auto 56px}
