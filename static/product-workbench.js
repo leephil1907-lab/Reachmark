@@ -133,7 +133,8 @@
       evidence.textContent = sourceCopy.length ? sourceCopy[0].textContent : row.textContent;
       var next = document.createElement('p');
       next.className = 'ph-ranked-next';
-      next.textContent = 'Next step: review this evidence in the full report before deciding on a fix.';
+      var fix = row.querySelector('.x-audit-fix');
+      next.textContent = fix ? 'Recommended next step: ' + fix.textContent : 'Next step: review this evidence in the full report before deciding on a fix.';
       card.appendChild(rank);
       card.appendChild(cardTitle);
       card.appendChild(evidence);
