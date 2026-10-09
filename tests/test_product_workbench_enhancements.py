@@ -25,6 +25,15 @@ class ProductWorkbenchEnhancementTests(unittest.TestCase):
         self.assertIn("No invented score or revenue estimate", script)
         self.assertNotIn("score = 99", script.lower())
 
+    def test_homepage_uses_receptionist_instead_of_competing_whatsapp_float(self):
+        home = (ROOT / "templates" / "home.html").read_text(encoding="utf-8")
+        header = (ROOT / "templates" / "header-public.html").read_text(encoding="utf-8")
+        widget = (ROOT / "templates" / "receptionist.html").read_text(encoding="utf-8")
+        self.assertIn("{% include 'receptionist.html' %}", home)
+        self.assertIn("request.path not in ('/','/about'", header)
+        self.assertIn("rm-whatsapp-secondary", widget)
+        self.assertIn("{{ whatsapp_url }}", widget)
+
 
 if __name__ == "__main__":
     unittest.main()
