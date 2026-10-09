@@ -6,6 +6,7 @@ from __future__ import annotations
 
 CORE_SQL = """
 CREATE TABLE IF NOT EXISTS leads (id TEXT PRIMARY KEY, source_key TEXT UNIQUE, name TEXT NOT NULL, category TEXT, city TEXT, address TEXT, phone TEXT, email TEXT, website TEXT, status TEXT, stage TEXT DEFAULT 'New', source TEXT, source_url TEXT, note TEXT DEFAULT '', subject TEXT DEFAULT '', body TEXT DEFAULT '', token TEXT UNIQUE, created TEXT, updated TEXT, owner_user_id TEXT);
+CREATE TABLE IF NOT EXISTS lead_reviews (lead_id TEXT PRIMARY KEY, verification TEXT NOT NULL, evidence_url TEXT NOT NULL DEFAULT '', note TEXT NOT NULL DEFAULT '', reviewed_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, data TEXT);
 CREATE TABLE IF NOT EXISTS activity (id INTEGER PRIMARY KEY, kind TEXT, message TEXT, created TEXT);
 CREATE TABLE IF NOT EXISTS sends (id TEXT PRIMARY KEY, lead_id TEXT, recipient TEXT, state TEXT, error TEXT, created TEXT);
