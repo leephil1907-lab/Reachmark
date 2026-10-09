@@ -39,7 +39,7 @@ class ProductWorkbenchEnhancementTests(unittest.TestCase):
         header = (ROOT / "templates" / "header-public.html").read_text(encoding="utf-8")
         widget = (ROOT / "templates" / "receptionist.html").read_text(encoding="utf-8")
         self.assertIn("{% include 'receptionist.html' %}", home)
-        self.assertIn("request.path not in ('/','/about'", header)
+        self.assertNotIn("_whatsapp.html", header)
         self.assertIn("rm-whatsapp-secondary", widget)
         self.assertIn("{{ whatsapp_url }}", widget)
 
