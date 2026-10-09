@@ -103,3 +103,12 @@ nav.main a[aria-current="page"]{background:#20251f;color:#fff}
 [data-theme="dark"] .ls-btn{background:rgba(255,255,255,.06)!important;border-color:rgba(255,255,255,.14)!important;color:#f4f6f2!important}
 [data-theme="dark"] .pub-logo .logo-on-light{display:none}
 [data-theme="dark"] .pub-logo .logo-on-dark{display:block}
+
+/* Keep header/menu text readable during both themes. */
+.pub-head,.pub-menu,#theme-toggle-public{transition:background-color .35s ease,color .35s ease,border-color .35s ease,box-shadow .35s ease}
+[data-theme="dark"] .pub-head-in{color:#eef3ea}
+[data-theme="dark"] .pub-menu{color:#eef3ea}
+[data-theme="dark"] .pub-menu a{color:#f4f6f2}
+[data-theme="dark"] .ls-menu{background:#121812;border-color:rgba(213,242,104,.18)}
+[data-theme="dark"] .ls-opt{color:#eef3ea}
+[data-theme="dark"] .ls-opt:hover,[data-theme="dark"] .ls-opt.on{background:rgba(213,242,104,.13)}
