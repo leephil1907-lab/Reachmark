@@ -182,17 +182,16 @@ def headers(r):
     return r
 
 ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', '').strip()
-ADSENSE_PATHS = {'/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/workspace'}
+ADSENSE_PATHS = {'/', '/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/sample-report'}
 ADSENSE_PREFIXES = ('/showcase/',)
 
 @app.after_request
 def adsense_tags(response):
     """Serve the AdSense loader + account meta on public marketing pages.
 
-    Injected at serve time so templates are never edited for ads. /workspace is
-    included for the sidebar
-    unit; sample detail pages match by prefix; APIs, review links and the ad
-    recording stage stay excluded.
+    Injected at serve time so templates are never edited for ads. The homepage and
+    public marketing pages are eligible; private workspace, account, API, and
+    review-recording routes stay excluded. Sample detail pages match by prefix.
     """
     try:
         if not ADSENSE_CLIENT or (request.path not in ADSENSE_PATHS
