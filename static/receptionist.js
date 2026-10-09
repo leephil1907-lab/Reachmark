@@ -60,6 +60,14 @@
     if ('speechSynthesis' in window) try { window.speechSynthesis.cancel(); } catch (e) {}
     if (rec) try { rec.stop(); } catch (e) {}
   }
+  var quickPrompts = log.querySelector('.rm-quick-prompts');
+  if (quickPrompts) quickPrompts.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-rm-prompt]');
+    if (!button || send.disabled) return;
+    input.value = button.getAttribute('data-rm-prompt') || '';
+    if (typeof form.requestSubmit === 'function') form.requestSubmit();
+    else form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  });
   launch.addEventListener('click', function () { panel.hidden ? open() : shut(); });
   close.addEventListener('click', shut);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) shut(); });
