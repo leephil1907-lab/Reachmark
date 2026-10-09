@@ -181,24 +181,28 @@ def headers(r):
     r.headers['X-Content-Type-Options']='nosniff'; r.headers['Referrer-Policy']='strict-origin-when-cross-origin'
     return r
 
-ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-5678865896620902').strip()
-ADSENSE_PATHS = {'/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/workspace'}
-ADSENSE_PREFIXES = ('/showcase/',)
+ADSENSE_CLIENT = 'ca-pub-5678865896620902'  # publisher ID supplied for the current AdSense account
+ADSENSE_EXCLUDED_PREFIXES = (
+    '/api/', '/preview/', '/unsubscribe/', '/workspace', '/dashboard',
+    '/signin', '/signup', '/account', '/settings', '/admin', '/offline',
+    '/sw.js', '/healthz', '/static/',
+)
+ADSENSE_EXCLUDED_PATHS = {'/robots.txt', '/sitemap.xml', '/ads.txt'}
 
 @app.after_request
 def adsense_tags(response):
     """Serve the AdSense loader + account meta on public marketing pages.
 
-    Injected at serve time so templates are never edited for ads. /workspace is
-    included for the sidebar
-    unit; sample detail pages match by prefix; APIs, review links and the ad
-    recording stage stay excluded.
+    Injected at serve time so templates are never edited for ads. The homepage and
+    public marketing pages are eligible; private workspace, account, API, and
+    review-recording routes stay excluded. Sample detail pages match by prefix.
     """
     try:
-        if not ADSENSE_CLIENT or (request.path not in ADSENSE_PATHS
-                                  and not request.path.startswith(ADSENSE_PREFIXES)):
+        if not ADSENSE_CLIENT or request.path in ADSENSE_EXCLUDED_PATHS:
             return response
-        if 'text/html' not in response.headers.get('Content-Type', ''):
+        if request.path.startswith(ADSENSE_EXCLUDED_PREFIXES):
+            return response
+        if response.status_code >= 400 or 'text/html' not in response.headers.get('Content-Type', ''):
             return response
         body = response.get_data(as_text=True)
         if 'googlesyndication.com/pagead/js/adsbygoogle.js' in body:
@@ -221,7 +225,7 @@ def too_big(e): return jsonify(error=_t('er_051', locale_now())),413
 def home():
     base=settings()['public_base_url'].rstrip('/')
     canonical = (base + '/') if base else None
-    from web.public_url import SEO_HOME_DESCRIPTION, SEO_HOME_KEYWORDS, SEO_HOME_TITLE, faq_schema, organization_schema, website_schema
+    from web.public_url import SEO_HOME_DESCRIPTION, SEO_HOME_KEYWORDS, SEO_HOME_TITLE, faq_schema, google_site_tokens, organization_schema, website_schema
     seo = {
         'title': SEO_HOME_TITLE,
         'description': SEO_HOME_DESCRIPTION,
@@ -230,7 +234,7 @@ def home():
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
     }
-    gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
+    gsv = ','.join(google_site_tokens())
     origin = base or request.url_root.rstrip('/')
     structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description']), faq_schema()]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
@@ -264,7 +268,9 @@ def healthz():
 
 @app.route('/ads.txt')
 def ads_txt():
-    seller = ADSENSE_CLIENT[3:] if ADSENSE_CLIENT.startswith('ca-') else ADSENSE_CLIENT
+    if not ADSENSE_CLIENT or not ADSENSE_CLIENT.startswith('ca-pub-'):
+        return Response('# AdSense publisher ID not configured yet. Add ADSENSE_CLIENT in the deployment environment.\n', mimetype='text/plain')
+    seller = ADSENSE_CLIENT[3:]
     return Response('google.com, %s, DIRECT, f08c47fec0942fa0\n' % seller, mimetype='text/plain')
 @app.route('/about')
 def about():
@@ -278,8 +284,8 @@ def about():
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
     }
-    gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
-    from web.public_url import organization_schema, website_schema
+    gsv = ','.join(google_site_tokens())
+    from web.public_url import google_site_tokens, organization_schema, website_schema
     origin = base or request.url_root.rstrip('/')
     structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description'])]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user

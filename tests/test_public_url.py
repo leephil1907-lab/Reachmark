@@ -10,9 +10,14 @@ class PublicUrlTests(unittest.TestCase):
     def test_brand_constant(self):
         self.assertEqual(BRAND_PUBLIC_URL, 'https://reachmarkdigital.xyz')
 
-    def test_search_console_token_for_owned_domain(self):
-        tokens = google_site_tokens()
-        self.assertIn('zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c', tokens)
+    def test_search_console_verification_is_empty_until_configured(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop('GOOGLE_SITE_VERIFICATION_TOKENS_TOKENS', None)
+            self.assertEqual(google_site_tokens(), [])
+
+    def test_search_console_accepts_new_comma_separated_tokens(self):
+        with patch.dict(os.environ, {'GOOGLE_SITE_VERIFICATION_TOKENS_TOKENS': 'new-token-one, new-token-two, new-token-one'}):
+            self.assertEqual(google_site_tokens(), ['new-token-one', 'new-token-two'])
 
     def test_support_email_and_organization_schema(self):
         from web.public_url import faq_schema, organization_schema, support_email, website_schema
