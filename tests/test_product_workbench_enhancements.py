@@ -38,6 +38,12 @@ class ProductWorkbenchEnhancementTests(unittest.TestCase):
         self.assertIn("Can I talk to a person?", widget)
         self.assertIn("requestSubmit()", script)
 
+    def test_workspace_refresh_tolerates_removed_dashboard_panels(self):
+        app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("const pipeline=$('#pipeline-bars');if(pipeline)", app_js)
+        self.assertIn("const recent=$('#recent-leads');if(recent)", app_js)
+        self.assertIn("const activity=$('#activity');if(activity)", app_js)
+
     def test_workspace_scripts_are_well_formed(self):
         workspace = (ROOT / "templates" / "index.html").read_text(encoding="utf-8")
         self.assertIn('<script src="/static/app.js"></script>', workspace)
