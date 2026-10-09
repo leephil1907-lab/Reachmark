@@ -10,10 +10,9 @@ from urllib.parse import urlparse
 
 BRAND_PUBLIC_URL = 'https://reachmarkdigital.xyz'
 BRAND_SUPPORT_EMAIL = 'support@reachmarkdigital.xyz'
-SEO_HOME_TITLE = 'Reachmark — Find potential. Make your mark.'
+SEO_HOME_TITLE = 'Reachmark Digital | Website Growth & Web Design'
 SEO_HOME_DESCRIPTION = (
-    'Find businesses with weak websites, audit them with evidence, '
-    'and send proposals backed by a Digital Opportunity Report. You approve every send.'
+    'Reachmark Digital helps businesses uncover website gaps, improve their online presence, and turn clear opportunities into stronger websites. Explore our tools, previews, and services.'
 )
 SEO_HOME_KEYWORDS = 'Reachmark, Reachmark Digital, website diagnosis, Digital Opportunity Report'
 # Search Console HTML-tag tokens. First token is reachmarkdigital.xyz (2026-10-08).
@@ -58,7 +57,7 @@ def organization_schema(base, description=''):
     org = {
         '@context': 'https://schema.org',
         '@type': 'ProfessionalService',
-        'name': 'Reachmark',
+        'name': 'Reachmark Digital',
         'url': root,
         'email': email,
         'logo': root + '/static/icon.svg',
@@ -66,7 +65,7 @@ def organization_schema(base, description=''):
         'foundingDate': '2026',
         'areaServed': 'Worldwide',
         'slogan': 'Find potential. Make your mark.',
-        'alternateName': ['Reachmark Digital', 'reachmarkdigital.xyz'],
+        'alternateName': ['Reachmark', 'reachmarkdigital.xyz'],
         'description': description or SEO_HOME_DESCRIPTION,
         'contactPoint': [{
             '@type': 'ContactPoint',
@@ -88,14 +87,14 @@ def website_schema(base, description=''):
     return {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        'name': 'Reachmark',
-        'alternateName': ['Reachmark Digital', 'reachmarkdigital.xyz'],
+        'name': 'Reachmark Digital',
+        'alternateName': ['Reachmark', 'reachmarkdigital.xyz'],
         'url': root + '/',
         'inLanguage': 'en',
         'description': description or SEO_HOME_DESCRIPTION,
         'publisher': {
             '@type': 'ProfessionalService',
-            'name': 'Reachmark',
+            'name': 'Reachmark Digital',
             'url': root,
         },
     }
