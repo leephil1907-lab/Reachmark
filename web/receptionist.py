@@ -511,7 +511,8 @@ def register_receptionist(app, db, now, log, settings):
             'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
             'noindex': False,
         }
-        gsv = os.getenv('GOOGLE_SITE_VERIFICATION', 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
+        from web.public_url import google_site_tokens
+        gsv = ','.join(google_site_tokens())
         ga_id = os.getenv('GOOGLE_ANALYTICS_ID', '').strip() or 'G-CPSB1EDNFE'
         gt_id = os.getenv('GOOGLE_TAG_ID', '').strip() or 'GT-M6XWG99J'
         gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID', '').strip() or 'GTM-M3SJZ8S7'
