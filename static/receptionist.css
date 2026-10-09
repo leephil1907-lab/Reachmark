@@ -37,3 +37,8 @@
 .rm-whatsapp-secondary a{display:inline-flex;align-items:center;gap:5px;color:#42502f;font-weight:750;text-decoration:none;border:1px solid #dfe5d2;border-radius:999px;padding:6px 10px;white-space:nowrap}
 .rm-whatsapp-secondary a:hover{background:#f3f7e9;border-color:#cbd8ad}
 .rm-whatsapp-secondary a:focus-visible{outline:2px solid #a5c34c;outline-offset:2px}
+
+.rm-quick-prompts{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 2px;max-width:100%}
+.rm-quick-prompts button{border:1px solid #dce5cd;border-radius:999px;padding:7px 9px;background:#fff;color:#4f6039;font:600 11px/1.25 'DM Sans',system-ui,sans-serif;cursor:pointer;text-align:left}
+.rm-quick-prompts button:hover{background:#f0f5e4;border-color:#cbd8ad}
+.rm-quick-prompts button:focus-visible{outline:2px solid #a5c34c;outline-offset:2px}
