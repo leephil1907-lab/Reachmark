@@ -225,7 +225,7 @@ def too_big(e): return jsonify(error=_t('er_051', locale_now())),413
 def home():
     base=settings()['public_base_url'].rstrip('/')
     canonical = (base + '/') if base else None
-    from web.public_url import SEO_HOME_DESCRIPTION, SEO_HOME_KEYWORDS, SEO_HOME_TITLE, faq_schema, organization_schema, website_schema
+    from web.public_url import SEO_HOME_DESCRIPTION, SEO_HOME_KEYWORDS, SEO_HOME_TITLE, faq_schema, google_site_tokens, organization_schema, website_schema
     seo = {
         'title': SEO_HOME_TITLE,
         'description': SEO_HOME_DESCRIPTION,
@@ -234,7 +234,7 @@ def home():
         'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
         'noindex': False,
     }
-    gsv = ','.join(__import__('web.public_url', fromlist=['google_site_tokens']).google_site_tokens())
+    gsv = ','.join(google_site_tokens())
     origin = base or request.url_root.rstrip('/')
     structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description']), faq_schema()]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
