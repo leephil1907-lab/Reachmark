@@ -38,6 +38,11 @@ class ProductWorkbenchEnhancementTests(unittest.TestCase):
         self.assertIn("Can I talk to a person?", widget)
         self.assertIn("requestSubmit()", script)
 
+    def test_workspace_scripts_are_well_formed(self):
+        workspace = (ROOT / "templates" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('<script src="/static/app.js"></script>', workspace)
+        self.assertIn('<script defer src="/static/production.js"></script>', workspace)
+
     def test_homepage_uses_receptionist_instead_of_competing_whatsapp_float(self):
         home = (ROOT / "templates" / "home.html").read_text(encoding="utf-8")
         header = (ROOT / "templates" / "header-public.html").read_text(encoding="utf-8")
