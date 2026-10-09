@@ -12,11 +12,11 @@ class PublicUrlTests(unittest.TestCase):
 
     def test_search_console_verification_is_empty_until_configured(self):
         with patch.dict(os.environ, {}, clear=False):
-            os.environ.pop('GOOGLE_SITE_VERIFICATION_TOKENS', None)
+            os.environ.pop('GOOGLE_SITE_VERIFICATION_TOKENS_TOKENS', None)
             self.assertEqual(google_site_tokens(), [])
 
     def test_search_console_accepts_new_comma_separated_tokens(self):
-        with patch.dict(os.environ, {'GOOGLE_SITE_VERIFICATION_TOKENS': 'new-token-one, new-token-two, new-token-one'}):
+        with patch.dict(os.environ, {'GOOGLE_SITE_VERIFICATION_TOKENS_TOKENS': 'new-token-one, new-token-two, new-token-one'}):
             self.assertEqual(google_site_tokens(), ['new-token-one', 'new-token-two'])
 
     def test_support_email_and_organization_schema(self):
