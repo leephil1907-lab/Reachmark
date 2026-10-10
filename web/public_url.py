@@ -61,7 +61,7 @@ def organization_schema(base, description=''):
         'url': root,
         'email': email,
         'logo': root + '/static/icon.svg',
-        'image': root + '/static/social-card.png',
+        'image': root + '/static/social-card-v2.png',
         'foundingDate': '2026',
         'areaServed': 'Worldwide',
         'slogan': 'Find potential. Make your mark.',
