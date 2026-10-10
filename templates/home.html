@@ -36,8 +36,8 @@
       <a class="x-btn lime" href="/workspace">{{ t('home.open_workspace') }}</a>
       <a class="x-btn ghost" href="/enquire">{{ t('home.cta_project') }}</a>
       {% else %}
-      <a class="x-btn lime" href="/signup">{{ t('nav.signup') }}</a>
-      <a class="x-btn ghost" href="/enquire">{{ t('home.cta_project') }}</a>
+      <a class="x-btn lime" href="#try-url">{{ t('home.cta_audit') }}</a>
+      <a class="x-btn ghost" href="/sample-report">{{ t('home.cta_report') }}</a>
       {% endif %}
     </p>
     <p class="x-hero-proof" aria-label="{{ t('home.proof_find') }}, {{ t('home.proof_diagnose') }}, {{ t('home.proof_approve') }}">
@@ -192,6 +192,7 @@
       </article>
       {% endfor %}
     </section>
+    <p class="x-concepts-all"><a class="x-btn ghost" href="/showcase">{{ t('home.concepts_all') }}</a></p>
   </section>
 
   <section class="x-cta">
