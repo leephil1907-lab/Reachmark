@@ -227,7 +227,7 @@ def home():
         'description': SEO_HOME_DESCRIPTION,
         'keywords': SEO_HOME_KEYWORDS,
         'canonical': canonical,
-        'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
+        'og_image': (base + '/static/social-card-v2.png') if base else '/static/social-card-v2.png',
         'noindex': False,
     }
     gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
@@ -275,7 +275,7 @@ def about():
         'description': 'Reachmark is a website diagnosis studio at reachmarkdigital.xyz. We read public sites, write Digital Opportunity Reports of measured observations, and build or repair the pages that lose enquiries.',
         'keywords': 'Reachmark, Reachmark Digital, website diagnosis, Digital Opportunity Report',
         'canonical': canonical,
-        'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
+        'og_image': (base + '/static/social-card-v2.png') if base else '/static/social-card-v2.png',
         'noindex': False,
     }
     gsv = os.getenv('GOOGLE_SITE_VERIFICATION','ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
