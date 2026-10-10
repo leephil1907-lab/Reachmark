@@ -27,8 +27,7 @@
 {% if gtm_id is defined and gtm_id %}<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>{% endif %}
 {% include 'header-public.html' %}
 <div class="x-aurora" aria-hidden="true"></div>
-<main>
-  <section class="x-hero">
+<main>  <section class="x-hero" id="top">
     <p class="x-kicker">{{ t('home.kicker') }}</p>
     <h1 data-split>{{ t('home.hero_h1a') }} <em>{{ t('home.hero_h1b') }}</em></h1>
     <p class="x-lead">{{ t('home.sub') }}</p>
@@ -49,6 +48,17 @@
     {% if not client_logged_in and not owner_logged_in %}
     <p class="x-hero-alt hero-signin">{{ t('home.hero_signin') }} <a href="/signin">{{ t('nav.signin') }}</a></p>
     {% endif %}
+  </section>
+
+  <section class="x-try" id="try-url">
+    <h2>{{ t('home.try_h') }}</h2>
+    <p>{{ t('home.try_p') }}</p>
+    <form class="x-audit" id="x-audit-form">
+      <label class="sr-only" for="x-audit-url">{{ t('home.audit_label') }}</label>
+      <input id="x-audit-url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="{{ t('home.audit_ph') }}" required>
+      <button class="x-btn lime" type="submit">{{ t('home.audit_go') }}</button>
+    </form>
+    <div id="x-audit-out" class="x-audit-out" hidden></div>
   </section>
 
   <section class="x-report" id="sample-report" aria-label="{{ t('home.report_title') }}">
@@ -77,18 +87,19 @@
     </article>
   </section>
 
-  <section class="x-ad-placement" aria-label="Advertisement" style="max-width:1100px;margin:0 auto;padding:28px 20px;text-align:center">
-    <p style="margin:0 0 10px;font:600 11px/1.4 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#87907f">Advertisement</p>
-    <!-- Reachmark_Homepage_Display -->
-    <ins class="adsbygoogle"
-         style="display:block;min-height:100px"
-         data-ad-client="ca-pub-5678865896620902"
-         data-ad-slot="6958377660"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
+  <section class="x-pipe">
+    <div>
+      <div class="kicker">{{ t('home.offer_k') }}</div>
+      <h2>{{ t('home.offer_h') }}</h2>
+      <p>{{ t('home.offer_p') }}</p>
+      <p class="x-approve">{{ t('home.approve') }}</p>
+    </div>
+    <div class="x-steps">
+      <div class="x-step"><i>01</i><div><b>{{ t('home.d1h') }}</b><span>{{ t('home.d1p') }}</span></div></div>
+      <div class="x-step"><i>02</i><div><b>{{ t('home.d2h') }}</b><span>{{ t('home.d2p') }}</span></div></div>
+      <div class="x-step"><i>03</i><div><b>{{ t('home.d3h') }}</b><span>{{ t('home.d3p') }}</span></div></div>
+      <div class="x-step"><i>04</i><div><b>{{ t('home.d4h') }}</b><span>{{ t('home.d4p') }}</span></div></div>
+    </div>
   </section>
 
   <section class="x-shots" aria-label="{{ t('home.shots_h') }}">
@@ -114,32 +125,6 @@
         <figcaption>{{ t('home.shot_queue') }}</figcaption>
       </figure>
     </div>
-  </section>
-
-  <section class="x-pipe">
-    <div>
-      <div class="kicker">{{ t('home.offer_k') }}</div>
-      <h2>{{ t('home.offer_h') }}</h2>
-      <p>{{ t('home.offer_p') }}</p>
-      <p class="x-approve">{{ t('home.approve') }}</p>
-    </div>
-    <div class="x-steps">
-      <div class="x-step"><i>01</i><div><b>{{ t('home.d1h') }}</b><span>{{ t('home.d1p') }}</span></div></div>
-      <div class="x-step"><i>02</i><div><b>{{ t('home.d2h') }}</b><span>{{ t('home.d2p') }}</span></div></div>
-      <div class="x-step"><i>03</i><div><b>{{ t('home.d3h') }}</b><span>{{ t('home.d3p') }}</span></div></div>
-      <div class="x-step"><i>04</i><div><b>{{ t('home.d4h') }}</b><span>{{ t('home.d4p') }}</span></div></div>
-    </div>
-  </section>
-
-  <section class="x-try" id="try-url">
-    <h2>{{ t('home.try_h') }}</h2>
-    <p>{{ t('home.try_p') }}</p>
-    <form class="x-audit" id="x-audit-form">
-      <label class="sr-only" for="x-audit-url">{{ t('home.audit_label') }}</label>
-      <input id="x-audit-url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="{{ t('home.audit_ph') }}" required>
-      <button class="x-btn lime" type="submit">{{ t('home.audit_go') }}</button>
-    </form>
-    <div id="x-audit-out" class="x-audit-out" hidden></div>
   </section>
 
   <section class="x-plain" aria-label="{{ t('home.moat_h') }}">
@@ -190,9 +175,9 @@
         <button type="submit" class="x-search-go">{{ t('home.search') }}</button>
       </form>
     </div>
-    <div class="x-count"><b id="x-shown">{{ samples|length if samples is defined else 10 }}</b> {{ t('home.live_concepts') }}</div>
+    <div class="x-count"><b id="x-shown">{{ [samples|length, 6]|min if samples is defined else 6 }}</b> {{ t('home.live_concepts') }}</div>
     <section class="x-masonry" id="x-masonry" aria-label="{{ t('home.grid_aria') }}">
-      {% for sample in samples %}
+      {% for sample in samples[:6] %}
       <article class="x-card" data-name="{{ sample.name|lower }} {{ sample.category|lower }} {{ sample.style|lower }} {{ sample.slug }}" data-kind="sample {% if sample.slug in ['ember-coffee','stillwell-studio','bloom-market'] %}hospitality{% elif sample.slug in ['astra-clinic','novera-law','forma-homes'] %}professional{% else %}digital{% endif %}">
         <a href="/showcase/{{ sample.slug }}">
           <img class="shot" src="/static/samples/{{ sample.slug }}-preview.jpg" alt="{{ sample.name }} — {{ sample.category }}" loading="{{ 'eager' if loop.index < 3 else 'lazy' }}" decoding="async">
