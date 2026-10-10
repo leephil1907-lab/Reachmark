@@ -282,8 +282,8 @@ def about():
     from web.public_url import organization_schema, website_schema
     origin = base or request.url_root.rstrip('/')
     structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description'])]
-    ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-CPSB1EDNFE'  # GA4 ID provided by user
-    gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-M6XWG99J'  # second Google tag alongside GA4
+    ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-3T3SXLG2XT'  # GA4 ID provided by user
+    gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-KVHJTVJ2'  # second Google tag alongside GA4
     gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
     return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
 
