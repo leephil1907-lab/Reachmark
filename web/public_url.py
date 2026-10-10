@@ -57,7 +57,7 @@ def organization_schema(base, description=''):
     org = {
         '@context': 'https://schema.org',
         '@type': 'ProfessionalService',
-        'name': 'Reachmark Digital',
+        'name': 'Reachmark',
         'url': root,
         'email': email,
         'logo': root + '/static/icon.svg',
@@ -65,7 +65,7 @@ def organization_schema(base, description=''):
         'foundingDate': '2026',
         'areaServed': 'Worldwide',
         'slogan': 'Find potential. Make your mark.',
-        'alternateName': ['Reachmark', 'Reachmark Digital', 'reachmarkdigital.xyz'],
+        'alternateName': ['Reachmark Digital', 'reachmarkdigital.xyz'],
         'description': description or SEO_HOME_DESCRIPTION,
         'contactPoint': [{
             '@type': 'ContactPoint',
@@ -87,8 +87,8 @@ def website_schema(base, description=''):
     return {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        'name': 'Reachmark Digital',
-        'alternateName': ['Reachmark', 'reachmarkdigital.xyz'],
+        'name': 'Reachmark',
+        'alternateName': ['Reachmark Digital', 'reachmarkdigital.xyz'],
         'url': root + '/',
         'inLanguage': 'en',
         'description': description or SEO_HOME_DESCRIPTION,
