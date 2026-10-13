@@ -90,6 +90,8 @@ $('#map-filter').onchange=drawWorldLeads;
 $('#map-scan-form').onsubmit=async e=>{e.preventDefault();if(worldBusy||!worldMap)return;const bounds=worldBounds(),raw=worldMap.getBounds();const height=(bounds[2]-bounds[0])*111.32,width=(raw.getEast()-raw.getWest())*111.32*Math.max(.01,Math.cos(worldMap.getCenter().lat*Math.PI/180));if(height>25||width>25||raw.getEast()-raw.getWest()>2){mapMessage(T_('wsj.mp_zoom','Zoom in before scanning: choose an area at most 25 km wide and high.'));return}if(!confirm(T_('wsj.mp_scanq','Scan the visible rectangle for {c}? Other categories and unmapped businesses are not included.').replace('{c}',$('#map-category').value)))return;worldBusy=true;$('#map-start').disabled=true;try{await api('/api/map/scans','POST',{bounds,category:$('#map-category').value,label:$('#map-label').value.trim()});await loadMapScans();mapMessage(T_('wsj.mp_started','Scan started. Progress is saved per cell; you can leave this page and return.'))}catch(e){mapMessage(e.message)}finally{worldBusy=false;$('#map-start').disabled=false}};
 setInterval(async()=>{if(!document.hidden&&$('#page-global').classList.contains('active')){await loadMapScans();drawWorldLeads()}},5000);
 if(location.hash==='#global')openWorldMap();
+/* Hash-based navigation can finish after deferred scripts start. Retry once after load so the map never remains a blank panel. */
+window.addEventListener('load',function(){if(location.hash==='#global'&&!worldMap)openWorldMap();},{once:true});
 (function bootGooglePlaces(){
  const key=window.RM_GOOGLE_MAPS_KEY;
  const input=document.getElementById('map-search');
