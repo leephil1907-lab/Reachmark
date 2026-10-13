@@ -18,7 +18,7 @@ with tempfile.TemporaryDirectory() as tmp:
             page.goto(base);expect(page.locator('body')).to_be_visible();page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();
             try:page.wait_for_url('**/workspace**',timeout=8000)
             except Exception:page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();page.wait_for_url('**/workspace**',timeout=15000)
-            expect(page.locator('#stat-total')).to_have_text('2')
+            expect(page.locator('#stat-total')).to_have_text('2');review_handler_source=page.locator('#review-form').evaluate("(form)=>String(form.onsubmit)");assert 'savedReviewLabel' in review_handler_source,'Workspace did not load the updated manual-review handler: '+review_handler_source[:500]
             page.locator('[data-tour="skip"]').click();
             page.locator('.nav[data-page="leads"]').click();page.locator('#filter-contact').select_option('email');expect(page.locator('#lead-cards .lead-card')).to_have_count(1);page.locator('#lead-cards .lead-card button.text-link').first.click()
             page.get_by_text('Manual verification and evidence',exact=True).click();page.locator('#review-form [name="verification"]').select_option('NO_SITE_FOUND');page.locator('#review-form [name="evidence_url"]').fill('https://example.test/research');page.locator('#review-form [name="note"]').fill('Manually searched the business name and checked the source listing.');
