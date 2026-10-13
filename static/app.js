@@ -1,5 +1,6 @@
 var T_=window.T||function(k,f){return f;};
 let state={leads:[],activity:[],settings:{},suppressed:[],jobs:[]}, selected=null, toastTimer;
+window.__RM_ACTIVE_PAGE=location.hash.slice(1)||'overview';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const statusLabel=s=>({NOT_LISTED:T_('wsj.ap_sl1','Website not listed'),SOCIAL_ONLY:T_('wsj.ap_sl2','Social only'),HAS_WEBSITE:T_('wsj.ap_sl3','Has website')}[s]||s);
