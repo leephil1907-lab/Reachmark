@@ -58,8 +58,9 @@ def register_workflow(app,db,now,log):
             _cid=_sess.get('client_id') if (_sess.get('client_id') and _sess.get('role')=='client' and not _sess.get('owner')) else None
             _chk=(c.execute('SELECT id FROM leads WHERE id=? AND owner_user_id=?',(lid,_cid)).fetchone() if _cid else c.execute('SELECT id FROM leads WHERE id=?',(lid,)).fetchone())
             if not _chk:abort(404)
-            c.execute('INSERT OR REPLACE INTO lead_reviews VALUES(?,?,?,?,?)',(lid,status,note.strip(),url.strip(),now()))
-        log('review','Manual business verification recorded');return jsonify(ok=True)
+            reviewed_at=now()
+            c.execute('INSERT OR REPLACE INTO lead_reviews VALUES(?,?,?,?,?)',(lid,status,note.strip(),url.strip(),reviewed_at))
+        log('review','Manual business verification recorded');return jsonify(ok=True,reviewed_at=reviewed_at)
     @app.get('/api/projects')
     def list_projects():
         from flask import session
