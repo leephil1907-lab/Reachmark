@@ -182,6 +182,12 @@ class ProspectTests(unittest.TestCase):
         self.assertNotIn(b'GTM-M3SJZ8S7', page.data)
         self.assertIn(b'G-3T3SXLG2XT', page.data)
         self.assertIn(b'GT-KVHJTVJ2', page.data)
+        receptionist = self.client.get('/receptionist?locale=en')
+        self.assertEqual(receptionist.status_code, 200)
+        self.assertIn(b'data-frontdesk-status', receptionist.data)
+        self.assertIn(b'G-3T3SXLG2XT', receptionist.data)
+        self.assertIn(b'GT-KVHJTVJ2', receptionist.data)
+        self.assertNotIn(b'GTM-M3SJZ8S7', receptionist.data)
 
     def test_public_metadata(self):
         response=self.client.get('/about');self.assertIn(b'application/ld+json',response.data)
