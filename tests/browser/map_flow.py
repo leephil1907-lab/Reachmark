@@ -17,7 +17,11 @@ with tempfile.TemporaryDirectory() as temp:
             b=p.chromium.launch();page=b.new_page(viewport={'width':1440,'height':1100});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.on('dialog',lambda d:d.accept())
             page.route('https://tile.openstreetmap.org/**',lambda route:route.abort())
             page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();page.wait_for_url('**/workspace**')
-            page.goto(base+'/workspace#global');page.locator('#world-map.leaflet-container').wait_for()
+            page.goto(base+'/workspace#global')
+            try: page.locator('#world-map.leaflet-container').wait_for(timeout=5000)
+            except Exception as exc:
+                message=page.locator('#map-message').inner_text() if page.locator('#map-message').count() else 'map message element missing'
+                raise AssertionError(f"Map initialization failed: url={page.url}; leaflet_loaded={page.evaluate('!!window.L')}; page_errors={errors}; message={message}") from exc
             page.locator('#map-search').fill('6.52, 3.32');page.locator('#map-search-btn').click();page.locator('#map-category').select_option('Bakery');page.locator('#map-start').click()
             expect(page.locator('#map-records')).to_contain_text('1 mapped',timeout=15000)
             assert '1 mapped' in page.locator('#map-records').inner_text()
