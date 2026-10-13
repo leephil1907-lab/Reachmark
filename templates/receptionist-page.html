@@ -25,15 +25,82 @@
 {% if gtm_id is defined and gtm_id %}<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>{% endif %}
 {% include 'header-public.html' %}
 <main>
-  <section class="x-hero">
+  <section class="x-hero" data-frontdesk-status="checking" aria-describedby="frontdesk-live-status">
     <p class="x-kicker">{{ t('rx.eyebrow') }}</p>
     <h1>{{ t('rx.h1') }}</h1>
     <p class="x-lead">{{ t('rx.sub') }}</p>
+    <p id="frontdesk-live-status" class="rx-live-status" role="status" aria-live="polite">Checking front desk status…</p>
     <p class="x-hero-actions">
       <button type="button" class="x-btn lime" data-open-widget>{{ t('rx.try') }}</button>
       <a class="x-btn ghost" href="/enquire">{{ t('rx.send_enq') }}</a>
     </p>
   </section>
+
+  <section class="rx-services" aria-labelledby="rx-services-title">
+    <style>
+      .rx-services,.rx-faq{width:min(1060px,calc(100% - 40px));margin:0 auto 48px}
+      .rx-services h2,.rx-faq h2{font:400 clamp(26px,4vw,38px)/1.15 'Instrument Serif',Georgia,serif;letter-spacing:-.03em;margin:0 0 10px}
+      .rx-services-intro{color:var(--x-muted,#66705f);max-width:62ch;line-height:1.7;margin:0 0 20px}
+      .rx-service-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+      .rx-service-card{min-width:0;padding:22px;border:1px solid var(--x-line,#dce3d4);border-radius:16px;background:var(--x-card,#fff)}
+      .rx-service-card h3{font-size:17px;margin:0 0 6px}
+      .rx-service-price{font-size:23px;font-weight:750;letter-spacing:-.04em;margin:0 0 10px}
+      .rx-service-price small{font-size:12px;font-weight:500;letter-spacing:0;color:var(--x-muted,#66705f)}
+      .rx-service-card p{font-size:14px;line-height:1.65;color:var(--x-muted,#66705f);margin:0}
+      .rx-faq-list{display:grid;gap:10px}
+      .rx-faq-list details{padding:16px 18px;border:1px solid var(--x-line,#dce3d4);border-radius:12px;background:var(--x-card,#fff)}
+      .rx-faq-list summary{font-weight:700;cursor:pointer}
+      .rx-faq-list p{line-height:1.7;color:var(--x-muted,#66705f);margin:12px 0 0}
+      .rx-live-status{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--x-muted,#66705f)}
+      .rx-live-status[data-state="live"]{color:#47752b}
+      @media(max-width:640px){.rx-service-grid{grid-template-columns:1fr}.rx-service-card{padding:18px}}
+    </style>
+    <h2 id="rx-services-title">Studio services</h2>
+    <p class="rx-services-intro">Published starting prices from Reachmark’s service guide. Every scope is reviewed with you before work begins.</p>
+    {% set build_tier = tiers.build %}
+    <p class="rx-services-intro">Website builds: <strong>{{ build_tier.name }}</strong> — {{ build_tier.price_label }} {{ build_tier.unit }}.</p>
+    <div class="rx-service-grid">
+      {% for tier in brand.tiers %}
+      <article class="rx-service-card">
+        <h3>{{ tier.name }}</h3>
+        <p class="rx-service-price">{{ tier.price_label }} <small>{{ tier.unit }}</small></p>
+        <p>{{ tier.blurb }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if faqs %}
+  <section class="rx-faq" aria-labelledby="rx-faq-title">
+    <h2 id="rx-faq-title">Answers from the Reachmark knowledge base</h2>
+    <div class="rx-faq-list">
+      {% for item in faqs %}
+      <details><summary>{{ item.q }}</summary><p>{{ item.a }}</p></details>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <script>
+    (function(){
+      var hero=document.querySelector('[data-frontdesk-status]');
+      var status=document.getElementById('frontdesk-live-status');
+      if(!hero||!status)return;
+      fetch('/api/frontdesk/status',{headers:{'Accept':'application/json'}})
+        .then(function(r){if(!r.ok)throw new Error('unavailable');return r.json();})
+        .then(function(data){
+          if(!data.ok)throw new Error('unavailable');
+          hero.dataset.frontdeskStatus='live';
+          status.dataset.state='live';
+          status.textContent='Front desk online · '+data.topics+' knowledge topics ready';
+        })
+        .catch(function(){
+          hero.dataset.frontdeskStatus='unavailable';
+          status.dataset.state='unavailable';
+          status.textContent='Front desk status could not be checked right now.';
+        });
+    })();
+  </script>
   {% include 'adsense-footer.html' %}
 </main>
 {% include 'footer-public.html' %}
