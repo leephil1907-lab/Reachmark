@@ -39,6 +39,7 @@
   function end() {
     clearTarget();
     if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    if (card && card.parentNode) card.parentNode.removeChild(card);
     overlay = null;
     card = null;
     if (keyHandler) {
@@ -91,8 +92,8 @@
     card.className = 'tour-card';
     card.setAttribute('role', 'dialog');
     card.setAttribute('aria-label', T_('wsj.t_aria','Workspace tour'));
-    overlay.appendChild(card);
     document.body.appendChild(overlay);
+    document.body.appendChild(card);
     card.addEventListener('click', function (event) {
       var el = event.target;
       var action = el && el.getAttribute ? el.getAttribute('data-tour') : '';
