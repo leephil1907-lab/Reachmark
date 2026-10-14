@@ -22,7 +22,7 @@ with tempfile.TemporaryDirectory() as tmp:
             expect(page.locator('.tour-card')).to_be_visible()
             expect(page.locator('.tour-step')).to_contain_text('Step 1 of 6')
             expect(page.locator('#page-overview .analytics-heading')).to_have_attribute('data-tour-active','true')
-            tour_targets=['#page-leads .directory','#page-global .global-grid','#page-health .card','#page-crew','#page-settings .settings-grid']
+            tour_targets=['#page-leads .directory','#page-global .global-grid','#page-health .card','#page-crew .crew-hero','#page-settings .settings-grid']
             for step_number, selector in enumerate(tour_targets, start=2):
                 page.locator('[data-tour="next"]').click()
                 expect(page.locator('.tour-step')).to_contain_text(f'Step {step_number} of 6')
