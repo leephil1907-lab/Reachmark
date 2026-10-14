@@ -1,6 +1,5 @@
 /* Workspace tour: dimmed page, elevated spotlight and a readable, keyboard-friendly card. */
-.tour-overlay{position:fixed;inset:0;z-index:auto;display:block;padding:0;background:transparent;pointer-events:none}
-.tour-overlay::before{content:"";position:fixed;inset:0;background:rgba(20,25,18,.48);z-index:200;pointer-events:auto}
+.tour-overlay{position:fixed;inset:0;z-index:200;display:block;padding:0;background:rgba(20,25,18,.48);pointer-events:auto}
 .tour-card{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:202;pointer-events:auto;background:#fbfdf6;border:1px solid #dfe8d0;border-radius:18px;max-width:420px;width:calc(100vw - 32px);max-height:min(72vh,calc(100dvh - 32px));overflow:auto;padding:22px 24px;box-shadow:0 22px 70px rgba(15,22,12,.38);color:#26351e}
 .tour-card h3{margin:6px 0 8px;font:600 20px/1.2 Instrument Serif,Georgia,serif;color:#26351e}
 .tour-card p{font-size:13px;color:#53614a;line-height:1.65;margin:0 0 12px}
