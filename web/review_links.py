@@ -42,7 +42,7 @@ def _build_site_for(db, lead, link):
     from web.concept import detect_archetype, concept_copy, build_theme
     arch = detect_archetype(lead.get('category') or lead.get('name'))
     concept = link.get('concept') or {}
-    return {'archetype': arch, 'theme': build_theme(arch, {}),
+    return {'archetype': arch, 'theme': build_theme(arch, {}, f"{lead.get('category') or ''} {lead.get('name') or ''}"),
             'copy': concept_copy(arch, locale_now()), 'brandmark': '',
             'brandmark_generated': False, 'images': [],
             'facts': concept.get('facts') or [], 'profile': {}, 'generated': False}

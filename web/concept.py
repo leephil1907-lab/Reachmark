@@ -101,6 +101,15 @@ SHOWCASE = {
                         '/static/concept/home/offer-3.jpg'],
              'craft': '/static/concept/home/craft.jpg',
              'strip': '/static/concept/home/strip.jpg'},
+    # Restaurants, cafés, grills and fast food: the same food palette with dining
+    # photography, so a restaurant concept never shows croissants and sourdough.
+    'dining': {'hero': '/static/concept/dining/hero.jpg',
+               'offers': ['/static/concept/dining/offer-1.jpg',
+                          '/static/concept/dining/offer-2.jpg',
+                          '/static/concept/dining/offer-3.jpg'],
+               'craft': '/static/concept/dining/craft.jpg',
+               'strip': '/static/concept/dining/strip.jpg',
+               'kicker_key': 'pc.case_k_dining'},
     # Stay teaser: hero + first offer. The template guards missing slots,
     # so partial showcases still render complete pages.
     'stay': {'hero': '/static/concept/stay/hero.jpg',
@@ -122,7 +131,17 @@ def _luminance(hexcode):
     return 0.2126 * conv[0] + 0.7152 * conv[1] + 0.0722 * conv[2]
 
 
-def build_theme(archetype, brand=None):
+BAKERY_HINTS = ('bakery', 'bakeries', 'bake', 'pastry', 'patisserie', 'pâtisserie', 'cake', 'bread', 'boulanger', 'confection')
+
+
+def showcase_for(archetype, category=''):
+    """Concept photography for an archetype; food splits into bakery vs dining."""
+    if archetype == 'food' and category and not any(h in category.lower() for h in BAKERY_HINTS):
+        return dict(SHOWCASE['dining'])
+    return dict(SHOWCASE.get(archetype, {}))
+
+
+def build_theme(archetype, brand=None, category=''):
     """Compose the preview theme: observed brand first, trade palette behind.
 
     Returns {'colors': {...tokens incl. accent/accent_ink/line...},
@@ -163,7 +182,7 @@ def build_theme(archetype, brand=None):
         url = str((img or {}).get('url') or '')
         if url.lower().startswith(('https://', 'http://', 'data:image/')):
             images.append({'url': url[:800], 'alt': str(img.get('alt') or '')[:120]})
-    return {'colors': base, 'showcase': dict(SHOWCASE.get(arch, {})),
+    return {'colors': base, 'showcase': showcase_for(arch, category),
             'logo': logo[:800],
             'logo_source': str(brand.get('logo_source') or '')[:60],
             'images': images, 'fonts': fonts,

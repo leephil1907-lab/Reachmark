@@ -24,7 +24,14 @@ def query_overpass(query, headers):
                 _last = time.monotonic()
                 # A bounded request and response; at most one fallback per read-only query.
                 with requests.post(endpoint, data={'data': query}, headers=headers, timeout=(8, 50), stream=True) as r:
-                    if r.status_code in (429, 406):
+                    if r.status_code in (406, 403, 502, 503, 504):
+                        # This server refused or is overloaded (406 is how overpass-api.de rejects
+                        # some clients). That is not a rate limit: rest this endpoint and try the
+                        # next independent mirror instead of freezing every source.
+                        _cooldown[endpoint] = time.monotonic() + (300 if r.status_code in (403, 406) else 60)
+                        error = f'Map data provider {endpoint.split("/")[2]} answered HTTP {r.status_code}. Saved progress is retained; retry later.'
+                        continue
+                    if r.status_code == 429:
                         try: delay = min(3600, max(60, int(r.headers.get('Retry-After', '60'))))
                         except ValueError: delay = 60
                         _cooldown[endpoint] = time.monotonic() + delay

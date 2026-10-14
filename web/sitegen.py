@@ -221,7 +221,7 @@ def build_site(lead, audit=None, locale='en', use_llm=True):
     """
     profile = business_profile(lead, audit)
     archetype = detect_archetype(profile['category'] or profile['name'])
-    theme = build_theme(archetype, profile['brand'])
+    theme = build_theme(archetype, profile['brand'], f"{profile['category'] or ''} {profile['name'] or ''}")
     copy = generate_copy(profile, archetype, locale, use_llm=use_llm)
     brandmark = ''
     brandmark_generated = False

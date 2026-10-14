@@ -29,6 +29,8 @@ def _load_dotenv():
 
 
 _load_dotenv()
+from web.mail_env import normalize_smtp_env, profile_defaults, PROFILE_KEYS, from_header, from_domain
+normalize_smtp_env()
 DB = os.getenv('DATABASE_PATH', os.path.join(ROOT, 'prospect.sqlite3'))
 lock = threading.Lock()
 last_discovery = 0
@@ -57,10 +59,13 @@ from web.schema import initialize_database
 initialize_database(db)
 from web.services import discover_location, audit_website
 from web.portfolio import SAMPLES
-DEFAULTS={'sender_name':'','agency':'','reply_email':'','postal_address':'','public_base_url':'','offer':'clear, mobile-friendly websites that make it easier for customers to learn about services and get in touch'}
+DEFAULTS={**profile_defaults(),'public_base_url':'','offer':'clear, mobile-friendly websites that make it easier for customers to learn about services and get in touch'}
 def settings():
     with db() as c: r=c.execute('SELECT data FROM settings WHERE id=1').fetchone()
-    base={**DEFAULTS,**(json.loads(r[0]) if r else {})}
+    saved=json.loads(r[0]) if r else {}
+    # A blank sender field falls back to the studio's published details instead of an empty signature.
+    saved={k:v for k,v in saved.items() if not (k in PROFILE_KEYS and not str(v or '').strip())}
+    base={**DEFAULTS,**profile_defaults(),**saved}
     from web.public_url import resolve_public_base_url
     base['public_base_url']=resolve_public_base_url(base.get('public_base_url',''))
     return base
@@ -649,7 +654,7 @@ def preview(token):
         if _audit: brand=(_audit.get('observations') or {}).get('brand') or {}
     except Exception:
         brand={}
-    return render_template('preview.html',lead=lead,studio=settings()['agency'] or 'Reachmark Studio',copy=concept_copy(arch,loc),wa=wa,theme=build_theme(arch,brand))
+    return render_template('preview.html',lead=lead,studio=settings()['agency'] or 'Reachmark Studio',copy=concept_copy(arch,loc),wa=wa,theme=build_theme(arch,brand,f"{lead.get('category') or ''} {lead.get('name') or ''}"))
 @app.route('/unsubscribe/<token>',methods=['GET','POST'])
 def unsubscribe(token):
     with db() as c:
@@ -698,7 +703,7 @@ def send(lid):
         c.execute('INSERT OR IGNORE INTO optout_links VALUES(?,?)',(l['token'],recipient))
     log('approval',f'User confirmed message review and contact basis for {l["name"]}')
     try:
-        msg=EmailMessage(); msg['From']=os.environ['SMTP_FROM']; msg['To']=recipient; msg['Reply-To']=s['reply_email']; msg['Subject']=l['subject']; msg['Message-ID']=f'<{sid}@{os.environ["SMTP_FROM"].split("@")[-1]}>'
+        msg=EmailMessage(); msg['From']=from_header(s); msg['To']=recipient; msg['Reply-To']=s['reply_email']; msg['Subject']=l['subject']; msg['Message-ID']=f'<{sid}@{from_domain()}>'
         body=l['body']
         html=(l.get('html') or '').strip()
         unsub=(s.get('public_base_url') or '').rstrip('/')

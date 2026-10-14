@@ -37,6 +37,39 @@ def _first_name(name):
     return (cleaned.split(',')[0].split(' ')[0] or 'there').strip('.')
 
 
+GAP_STATUSES = ('DNS_UNRESOLVED', 'HTTP_ERROR', 'UNREACHABLE', 'PARKED_SUSPECTED', 'SOCIAL_ONLY', 'NOT_LISTED')
+
+
+def pitch_fit(lead, observations=None, observation_is_generic=None):
+    """Is a website pitch justified by something actually observed? Returns (ok, reason).
+
+    No website, a social-only link, a dead/parked/erroring site, or a measured gap on a
+    live page (broken links, no mobile viewport, no contact link, images without alt)
+    justify a message. A working site with nothing measured against it does not: the
+    crew holds that lead back instead of offering a website to a business that has one.
+    """
+    observations = observations or {}
+    website = (lead.get('website') or '').strip()
+    status = (lead.get('audit_status') or '').upper()
+    if not website or (lead.get('status') or '') == 'SOCIAL_ONLY' or status in GAP_STATUSES:
+        return True, ''
+    if status not in ('LIVE', 'BLOCKED'):
+        # Not observed live (offline demo, check failed, not audited yet): nothing proves
+        # the site works, so the message falls back to the listing facts as before.
+        return True, ''
+    if observation_is_generic is None:
+        signals = observations.get('signals', {}) or {}
+        measured = observations.get('ok') and (
+            (observations.get('link_check') or {}).get('broken') or signals.get('img_missing_alt')
+            or not signals.get('viewport') or not (signals.get('has_contact_link') or signals.get('has_tel_link')))
+        observation_is_generic = not (measured or signals.get('viewport') is False)
+    if not observation_is_generic:
+        return True, ''
+    if status == 'BLOCKED':
+        return False, 'the website blocked the check (inconclusive) — look at it by hand before pitching'
+    return False, 'the listed website is working and nothing was measured against it — no website pitch'
+
+
 def deterministic_draft(lead, concept, observations, settings, tone='Professional'):
     """Build email 1, two follow-ups and an SMS note. No inventing, no digits but real ones."""
     studio = (settings.get('agency') or STUDIO['name']).strip()
@@ -57,6 +90,10 @@ def deterministic_draft(lead, concept, observations, settings, tone='Professiona
         observation = f"the website on your listing didn't resolve when I checked ({lead.get('audit_reason', '')[:60]})"
     elif status == 'HTTP_ERROR':
         observation = f"the website on your listing returned an error when I tried it ({lead.get('audit_reason', '')[:60]})"
+    elif status == 'UNREACHABLE':
+        observation = "the website on your listing didn't load when I tried it"
+    elif status == 'PARKED_SUSPECTED':
+        observation = "the domain on your listing shows a parked or for-sale page instead of your business"
     elif observations.get('ok') and (observations.get('link_check') or {}).get('broken'):
         broken = observations['link_check']['broken']
         observation = (f"{len(broken)} of the links on your page failed when I tried them" if len(broken) > 1
@@ -69,11 +106,12 @@ def deterministic_draft(lead, concept, observations, settings, tone='Professiona
         observation = "your page has no tap-to-call or contact link, so a visitor has to hunt for how to reach you"
     else:
         observation = f"I had a look at how {name} shows up online{place}"
+    gap, hold_reason = pitch_fit(lead, observations, observation_is_generic=(observation.startswith('I had a look')))
 
     body_lines = [
         f"Hi {_first_name(name)},",
         '',
-        f"I'm {sender}. I noticed {observation}.",
+        f"I'm {sender}{(' from ' + studio) if studio.lower() != sender.lower() else ''}. I noticed {observation}.",
         '',
         f"So I sketched an independent concept for a {category} site — using only what is already listed publicly about "
         f"{name}, nothing invented.",
@@ -120,7 +158,8 @@ def deterministic_draft(lead, concept, observations, settings, tone='Professiona
 
     return {'email1': email1[:4000], 'follow_up_1': follow_up_1[:2000], 'follow_up_2': follow_up_2[:2000],
             'sms': sms[:320],
-            'observed': observation, 'generated_by': 'deterministic engine',
+            'observed': observation, 'pitch_fit': gap, 'hold_reason': hold_reason,
+            'generated_by': 'deterministic engine',
             'tone': tone, 'rules': rules('cold-email', 'writing principles', 5) + rules('copywriting', 'principle', 3)}
 
 
@@ -188,6 +227,11 @@ def run(ctx):
         audit = latest_audit(ctx.db, lead['id']) or {}
         draft = deterministic_draft(lead, concept, audit.get('observations') or {}, ctx.settings(), ctx.params.get('tone', 'Professional'))
 
+        if not draft['pitch_fit']:
+            ctx.receipt('held', f"{lead['name']}: not drafted — {draft['hold_reason']}.")
+            skipped.append({'lead_id': lead['id'], 'name': lead['name'], 'problems': [draft['hold_reason']]})
+            continue
+
         tightened, meta = tighten_with_provider(ctx, draft, lead, concept)
         if tightened:
             draft['email1'] = tightened
@@ -225,7 +269,8 @@ def run(ctx):
                      f"\n\n--- follow-up 2 (day 7) ---\n{draft['follow_up_2']}\n\n--- SMS / WhatsApp ---\n{draft['sms']}",
                      meta={'lead_id': lead['id'], 'brain': BRAIN_VERSION, 'observed': draft['observed'], 'llm': meta,
                            'rules_applied': draft['rules'][:6]})
-    summary = (f'Drafted {len(drafted)} first message(s) with follow-ups; {len(skipped)} held back by the guardrails. '
+    summary = (f'Drafted {len(drafted)} first message(s) with follow-ups; {len(skipped)} held back by the guardrails '
+               f'(no observed reason to pitch, or a failed quality check). '
                f'Nothing has been sent — each message goes to your approval queue next.')
     ctx.emit(summary)
     return {'summary': summary, 'data': {'drafts': drafted, 'held_back': skipped,

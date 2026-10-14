@@ -194,12 +194,14 @@
   function startRun(event) {
     event.preventDefault();
     var button = $('crew-submit');
+    var picked = (window.crewSelection || []).slice(0, 25);
     var body = {
       mode: $('crew-mode').value,
       agent: $('crew-agent').value,
-      location: $('crew-location').value,
+      location: picked.length ? '' : $('crew-location').value,
+      lead_ids: picked,
       category: $('crew-category').value,
-      limit: parseInt($('crew-limit').value, 10) || 6,
+      limit: picked.length || parseInt($('crew-limit').value, 10) || 6,
       tone: $('crew-tone').value,
       include_review_link: $('crew-link').checked,
       sms_note: $('crew-sms').checked,
@@ -209,6 +211,7 @@
     button.textContent = T_('wsj.cr_starting','Crew starting…');
     api('/api/crew/run', 'POST', body).then(function (result) {
       toast(T_('wsj.cr_started','Crew run started. Watch the timeline — everything outbound stops for your approval.'));
+      if (picked.length) window.crewSetSelection([]);
       return window.loadCrew();
     }).catch(function (error) {
       toast(error.message, true);
@@ -218,9 +221,36 @@
     });
   }
 
+  /* Map → crew handoff: businesses picked on the map become the run's input. */
+  window.crewSelection = [];
+  try { window.crewSelection = JSON.parse(sessionStorage.getItem('rm-crew-selection') || '[]').slice(0, 25); } catch (e) { window.crewSelection = []; }
+  function renderSelection() {
+    var host = $('crew-selection');
+    if (!host) return;
+    var n = window.crewSelection.length;
+    host.hidden = !n;
+    if (!n) { host.innerHTML = ''; return; }
+    host.innerHTML = '<span>' + esc(T_('wsj.cr_sel', '{n} business(es) selected from the map — the crew works on these instead of searching again.').replace('{n}', n)) + '</span> ' +
+      '<button type="button" class="text-link" id="crew-selection-clear">' + esc(T_('wsj.cr_sel_clear', 'Clear selection')) + '</button>';
+    var clear = $('crew-selection-clear');
+    if (clear) clear.addEventListener('click', function () { window.crewSetSelection([]); });
+  }
+  window.crewSetSelection = function (ids, append) {
+    var next = append ? (window.crewSelection || []).concat(ids || []) : (ids || []);
+    var seen = {}; next = next.filter(function (id) { if (!id || seen[id]) return false; seen[id] = 1; return true; });
+    if (next.length > 25) { toast(T_('wsj.cr_sel_max', 'The crew takes up to 25 businesses per run; the first 25 were kept.')); next = next.slice(0, 25); }
+    window.crewSelection = next;
+    try { sessionStorage.setItem('rm-crew-selection', JSON.stringify(next)); } catch (e) {}
+    renderSelection();
+    return next.length;
+  };
+  document.addEventListener('DOMContentLoaded', renderSelection);
+  if (document.readyState !== 'loading') setTimeout(renderSelection, 0);
+
   window.crewRunAgent = function (agentId) {
-    var body = { mode: 'single', agent: agentId, limit: parseInt($('crew-limit').value, 10) || 6,
-      location: $('crew-location').value, category: $('crew-category').value,
+    var picked = (window.crewSelection || []).slice(0, 25);
+    var body = { mode: 'single', agent: agentId, limit: picked.length || parseInt($('crew-limit').value, 10) || 6,
+      location: picked.length ? '' : $('crew-location').value, lead_ids: picked, category: $('crew-category').value,
       tone: $('crew-tone').value, fixtures: false,
       include_review_link: $('crew-link').checked };
     api('/api/crew/run', 'POST', body).then(function () {
@@ -311,6 +341,7 @@
         '<pre>' + esc(body.slice(0, 2400)) + '</pre>' +
         (payload.review_link ? '<p class="small muted">' + T_('wsj.cr_revlink','Review link:') + ' <code>' + esc(payload.review_link) + '</code></p>' : '') +
         '<div class="actions">' +
+        (/^https:\/\/wa\.me\//.test(payload.whatsapp_url || '') ? '<a class="button" target="_blank" rel="noopener noreferrer" href="' + esc(payload.whatsapp_url) + '">' + T_('wsj.cr_wa','Open in WhatsApp ↗') + '</a>' : '') +
         '<button class="primary" onclick="crewDecide(\'' + esc(item.id) + '\',\'approve\')">' + T_('wsj.cl_approve','Approve') + '</button>' +
         '<button onclick="crewDecide(\'' + esc(item.id) + '\',\'reject\')">' + T_('wsj.cl_reject','Reject') + '</button>' +
         '</div></article>';

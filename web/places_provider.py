@@ -172,3 +172,62 @@ def merge_rows(*sources):
                 elif not current:
                     target[field] = value
     return merged
+
+
+def discover_in_box(category, bounds, label='', max_pages=None, timeout=20):
+    """Google Places Text Search restricted to one map cell ``[south, west, north, east]``.
+
+    Used by the map finder so a scanned rectangle reads Google Maps listings as well as
+    OpenStreetMap — essential in cities (Lagos, Accra, Nairobi…) where OSM is thin.
+    Returns ``(rows, reason, capped)``; ``capped`` is True when the page limit was hit
+    and a smaller area would return more. Never raises. Pages are capped by
+    ``GOOGLE_PLACES_MAX_PAGES`` (default 1 → at most 20 places per cell, 1 billed call).
+    """
+    key = api_key()
+    if not key:
+        return [], 'Google Places is not configured (set GOOGLE_PLACES_API_KEY).', False
+    try:
+        south, west, north, east = [float(x) for x in bounds]
+    except (TypeError, ValueError):
+        return [], 'Invalid map cell.', False
+    if max_pages is None:
+        try:
+            max_pages = int(os.getenv('GOOGLE_PLACES_MAX_PAGES', '1'))
+        except ValueError:
+            max_pages = 1
+    max_pages = max(1, min(max_pages, 3))
+    headers = {'Content-Type': 'application/json', 'X-Goog-Api-Key': key,
+               'X-Goog-FieldMask': FIELD_MASK + ',nextPageToken'}
+    body = {'textQuery': (category or 'business').strip(), 'pageSize': 20,
+            'locationRestriction': {'rectangle': {'low': {'latitude': south, 'longitude': west},
+                                                  'high': {'latitude': north, 'longitude': east}}}}
+    rows, token, pages = [], '', 0
+    while pages < max_pages:
+        if token:
+            body['pageToken'] = token
+            time.sleep(1.5)  # Google needs a moment before a page token is valid.
+        _cooldown()
+        try:
+            r = requests.post(ENDPOINT, json=body, headers=headers, timeout=timeout)
+        except requests.RequestException as exc:
+            return rows, f'Google Places request failed ({type(exc).__name__}).', False
+        pages += 1
+        if r.status_code in (401, 403):
+            return rows, 'Google Places rejected the key (401/403). Check the key and that "Places API (New)" is enabled with billing.', False
+        if r.status_code == 429:
+            return rows, 'Google Places rate limit reached (429). Retry later.', False
+        if r.status_code >= 400:
+            return rows, f'Google Places returned HTTP {r.status_code}.', False
+        try:
+            payload = r.json()
+        except ValueError:
+            return rows, 'Google Places returned a non-JSON response.', False
+        for place in payload.get('places') or []:
+            row = _row(place, label)
+            if row:
+                row['category'] = category
+                rows.append(row)
+        token = payload.get('nextPageToken') or ''
+        if not token:
+            break
+    return rows, '', bool(token)

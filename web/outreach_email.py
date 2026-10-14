@@ -77,20 +77,28 @@ def _write_up(lead, site, audit, settings, locale):
     city = (lead.get('city') or '').strip()
     where = f' in {city}' if city else ''
     tag = ((site or {}).get('copy') or {}).get('tag') or ''
-    about = ((site or {}).get('copy') or {}).get('about') or ''
 
     greeting = _t('oe.greet', locale, n=name)
-    intro = _t('oe.intro', locale, s=sender, a=studio, c=category, w=where)
+    # "Refreshed" only when the current site was seen working; a dead or missing site gets a new one.
+    has_site = (lead.get('audit_status') or '').upper() == 'LIVE' or (
+        not lead.get('audit_status') and bool((lead.get('website') or '').strip()) and (lead.get('status') or '') == 'HAS_WEBSITE')
+    if sender.lower() == studio.lower():
+        # No personal sender name: introduce the studio once, never "Reachmark from Reachmark".
+        intro = _t('oe.intro_studio_refresh' if has_site else 'oe.intro_studio', locale, a=studio, c=category, w=where)
+    else:
+        intro = _t('oe.intro_refresh' if has_site else 'oe.intro', locale, s=sender, a=studio, c=category, w=where)
     observations = _observations(lead, audit)
     concept = _t('oe.concept', locale, n=name)
     if tag:
-        concept += ' ' + _t('oe.concept_tag', locale, t=tag)
-    if about:
-        concept += ' ' + about
+        concept += ' ' + _t('oe.concept_tag', locale, t=tag.strip().rstrip('.!;:,'))
+    # The concept page carries the longer write-up; the e-mail stays short (the
+    # cold-email guardrail caps it at 150 words), so the generic 'about' copy is left out.
     give = _t('oe.give', locale)
+    give_items = [_t(f'oe.give_{i}', locale) for i in (1, 2, 3)]
+    signature = sender if sender.lower() == studio.lower() else f'{sender}\n{studio}'
     return {'greeting': greeting, 'intro': intro, 'observations': observations,
-            'concept': concept, 'give': give, 'name': name, 'studio': studio,
-            'sender': sender}
+            'concept': concept, 'give': give, 'give_items': give_items, 'name': name, 'studio': studio,
+            'sender': sender, 'signature': signature}
 
 
 def _text_body(lead, link, site, settings, audit, locale):
@@ -103,6 +111,7 @@ def _text_body(lead, link, site, settings, audit, locale):
         lines += ['', _t('oe.noticed', locale)]
         lines += [f'  \u2022 {line}' for line in w['observations']]
     lines += ['', w['concept'], '', w['give']]
+    lines += [f'  \u2022 {item}' for item in w['give_items']]
     lines += ['', _t('oe.see', locale) + ': ' + site_url(base, token)]
     lines += ['', _t('oe.question', locale, n=w['name'])]
     for choice in CHOICES:
@@ -111,7 +120,7 @@ def _text_body(lead, link, site, settings, audit, locale):
     lead_token = (lead or {}).get('token') or ''
     if base and lead_token:
         lines.append(_t('oc.opturl', locale, u=f'{base}/unsubscribe/{lead_token}'))
-    lines += ['', w['sender'], w['studio']]
+    lines += ['', w['signature']]
     reply = (settings or {}).get('reply_email')
     if reply:
         lines.append(reply)
@@ -158,6 +167,7 @@ def _html_body(lead, link, site, settings, audit, locale):
 {obs_html}
 <p style="margin:16px 0 12px">{html.escape(w['concept'])}</p>
 <p style="margin:0 0 6px;font-weight:700;color:#0f1a0a">{html.escape(w['give'])}</p>
+<ul style="margin:0 0 4px;padding-left:20px;color:#33402a">{''.join(f'<li style="margin:0 0 6px">{html.escape(item)}</li>' for item in w['give_items'])}</ul>
 </div>
 <p style="margin:20px 0 10px">{_button(site_url(base, token), _t('oe.see', locale), primary=True)}</p>
 <div style="margin-top:22px;padding-top:18px;border-top:1px solid #eef1e4">
@@ -168,7 +178,7 @@ def _html_body(lead, link, site, settings, audit, locale):
 <div style="margin-top:22px;padding-top:16px;border-top:1px solid #eef1e4;font-size:12px;color:#8a9976;line-height:1.6">
 {html.escape(_t('oe.optout', locale))}<br>
 {('<a href=\"' + html.escape(base + '/unsubscribe/' + (lead.get('token') or '')) + '\" style=\"color:#6b7a5a\">Unsubscribe</a><br>') if base and lead.get('token') else ''}
-{html.escape(w['sender'])} &middot; {html.escape(w['studio'])}{(' &middot; ' + html.escape(reply)) if reply else ''}
+{html.escape(w['signature']).replace(chr(10), ' &middot; ')}{(' &middot; ' + html.escape(reply)) if reply else ''}
 </div>
 </div>
 <div style="text-align:center;margin-top:14px;font-size:11px;color:#8a9976">Reachmark &middot; Global &middot; {html.escape(host)}</div>
@@ -217,7 +227,8 @@ def ensure_link(db, now, lead, settings, locale=None):
     base = _base(settings)
     url = site_url(base, link['token'])
     try:
-        share = compose_share_message(lead, concept, (settings.get('agency') or 'Reachmark'), base, url)
+        share = compose_share_message(lead, concept, (settings.get('agency') or 'Reachmark'), base, url,
+                                      settings.get('sender_name') or '')
     except Exception:
         share = url
     with db() as c:

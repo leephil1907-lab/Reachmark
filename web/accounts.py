@@ -74,13 +74,13 @@ def send_branded(to_email, subject, text_body, html_title=None, cta_url=None, ct
     if host and frm:
         try:
             msg = EmailMessage()
-            msg['From'] = frm
+            from web.mail_env import from_header, from_domain, profile_defaults
+            msg['From'] = from_header({'agency': 'Reachmark'})
             msg['To'] = to_email
-            # Use reply_email if set, else frm
-            # We can't read settings here easily; use frm
-            msg['Reply-To'] = os.getenv('SMTP_FROM','')
+            # Replies go to the studio's published mailbox (REPLY_EMAIL overrides).
+            msg['Reply-To'] = profile_defaults()['reply_email'] or frm
             msg['Subject'] = subject
-            msg['Message-ID'] = f'<{outbox_id}@{frm.split("@")[-1]}>'
+            msg['Message-ID'] = f'<{outbox_id}@{from_domain()}>'
             msg.set_content(text_body)
             if html_body:
                 msg.add_alternative(html_body, subtype='html')

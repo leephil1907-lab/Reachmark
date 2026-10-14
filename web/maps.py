@@ -4,6 +4,7 @@ from web.i18n import t as _t, locale_now
 from flask import request, jsonify
 from web.services import geocode, HEADERS
 from web.map_provider import query_overpass
+from web.places_provider import available as places_available, discover_in_box
 
 LIMIT = 500
 
@@ -41,6 +42,38 @@ def rows_from_payload(payload, category, label):
             source='OpenStreetMap',source_url=f"https://www.openstreetmap.org/{item['type']}/{item['id']}",latitude=point.get('lat'),longitude=point.get('lon'),opening_hours=tags.get('opening_hours',''),social_url=tags.get('contact:facebook') or tags.get('contact:instagram',''),source_tags=tags))
     return rows
 
+def _combine(google_rows, osm_rows):
+    """Google listings plus the OSM listings Google did not already return.
+
+    A match is the same name within ~150 m; the OSM copy then only fills empty fields
+    (an e-mail or website OSM knows and Google does not expose). Same-name OSM rows
+    elsewhere (chain branches) are kept, exactly as before.
+    """
+    if not google_rows:
+        return list(osm_rows)
+    out = [dict(r) for r in google_rows]
+    for row in osm_rows:
+        name = (row.get('name') or '').strip().lower()
+        twin = None
+        for g in out:
+            if (g.get('name') or '').strip().lower() != name:
+                continue
+            try:
+                near = abs(float(g['latitude']) - float(row['latitude'])) < 0.0015 and abs(float(g['longitude']) - float(row['longitude'])) < 0.0015
+            except (KeyError, TypeError, ValueError):
+                near = False
+            if near:
+                twin = g
+                break
+        if twin is None:
+            out.append(row)
+            continue
+        for field in ('email', 'website', 'phone', 'opening_hours', 'social_url', 'address'):
+            if row.get(field) and not (twin.get(field) or '').strip():
+                twin[field] = row[field]
+    return out
+
+
 def _cid():
     from flask import session
     if session.get('client_id') and session.get('role') == 'client' and not session.get('owner'):
@@ -72,22 +105,42 @@ def register_maps(app, db, now, add_lead, categories):
                         if c.execute('SELECT state FROM map_scans WHERE id=?',(sid,)).fetchone()[0]=='cancelled': return
                         c.execute("UPDATE map_scans SET state='running',updated=? WHERE id=?",(now(),sid))
                         c.execute("UPDATE map_cells SET state='running',updated=? WHERE id=?",(now(),cell['id']))
+                    cell_bounds=json.loads(cell['bounds'])
+                    # Google Maps listings first (when a key is set): far better coverage
+                    # than OpenStreetMap in many cities, with phone numbers and websites.
+                    google_rows,google_note,google_capped=[],'',False
+                    if places_available():
+                        try:
+                            google_rows,google_note,google_capped=discover_in_box(scan['category'],cell_bounds,scan['label'])
+                        except Exception:
+                            app.logger.warning('Google Places cell lookup failed',exc_info=True)
+                            google_note='Google Places lookup failed.'
+                    osm_rows,osm_ok,partial=[],False,False
                     try:
                         key,value=categories[scan['category']]
-                        box=','.join(str(x) for x in json.loads(cell['bounds']))
+                        box=','.join(str(x) for x in cell_bounds)
                         query=f'[out:json][timeout:35];nwr({box})["{key}"="{value}"]["name"];out center tags {LIMIT+1};'
                         data=query_overpass(query,HEADERS)
-                        rows=rows_from_payload(data,scan['category'],scan['label'])
-                        for row in rows:
-                            if scan.get('owner_user_id'): row['owner_user_id'] = scan['owner_user_id']
-                            add_lead(row)
+                        osm_rows=rows_from_payload(data,scan['category'],scan['label'])
                         partial=bool(data.get('remark')) or len(data['elements'])>LIMIT
-                        status='partial' if partial else 'checked'
-                        message=('Source incomplete or listing cap reached. Zoom into this cell and scan smaller areas.' if partial else 'Selected category queried; not proof of exhaustive business coverage.')
-                        found=len(rows)
+                        osm_ok=True
                     except Exception:
                         app.logger.warning('Map cell could not complete',exc_info=True)
-                        status='failed';found=0;message='Source request failed. Saved leads remain available. Wait at least one minute, then resume.'
+                    rows=_combine(google_rows,osm_rows)
+                    for row in rows:
+                        if scan.get('owner_user_id'): row['owner_user_id'] = scan['owner_user_id']
+                        add_lead(row)
+                    found=len(rows)
+                    sources=' + '.join(n for n,used in (('Google Maps',bool(google_rows)),('OpenStreetMap',osm_ok)) if used) or 'OpenStreetMap'
+                    if not osm_ok and not google_rows:
+                        status='failed';message='Source request failed. Saved leads remain available. Wait at least one minute, then resume.'+(f' {google_note}' if google_note else '')
+                    elif partial or google_capped:
+                        status='partial';message=f'{sources}: listing cap reached. Zoom into this cell and scan smaller areas.'
+                    else:
+                        status='checked'
+                        message=(f'{sources} queried; not proof of exhaustive business coverage.' if osm_ok else
+                                 'Google Maps listings saved; OpenStreetMap was unavailable for this cell.')
+                        if google_note and places_available(): message+=f' {google_note}'
                     with db() as c:
                         c.execute('UPDATE map_cells SET state=?,found=?,message=?,updated=? WHERE id=?',(status,found,message,now(),cell['id']))
                 with db() as c:

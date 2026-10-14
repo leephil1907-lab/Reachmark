@@ -24,7 +24,7 @@ from crew.skills_loader import rules
 # Category family → concept direction. `theme` matches a CSS palette in
 # static/review.css; the words are placeholders the business replaces with facts.
 FAMILIES = {
-    'food': {'theme': 'ember', 'label': 'café & hospitality',
+    'food': {'theme': 'ember', 'label': 'food & hospitality',
              'promise': 'Give people one clear place to see what you serve, when you are open, and how to find you.',
              'sections': [('Your menu, made findable', 'A clean, scannable menu section that works on a phone — with your prices, added only once you confirm them.'),
                           ('When you are open', 'Opening hours and location up front, plus one-tap directions, so nobody guesses.'),
@@ -165,15 +165,16 @@ def build_review_link(ctx, lead, concept):
     """Create (or refresh) the review link for this lead and return it."""
     ensure_link_tables(ctx.db)
     studio = (ctx.settings().get('agency') or STUDIO['name']).strip()
+    sender = (ctx.settings().get('sender_name') or '').strip()
     base = (ctx.settings().get('public_base_url') or '').rstrip('/')
     token_preview = '/r/<token>'
-    share = compose_share_message(lead, concept, studio, base, token_preview)
-    chat_preview = compose_chat_message(lead, studio, token_preview, concept.get('family_label', ''))
+    share = compose_share_message(lead, concept, studio, base, token_preview, sender)
+    chat_preview = compose_chat_message(lead, studio, token_preview, concept.get('family_label', ''), sender)
     link = create_link(ctx.db, ctx.now, lead, concept, share, run_id=ctx.run['id'], chat_message=chat_preview)
-    share = compose_share_message(lead, concept, studio, base, f'{base}/r/{link["token"]}' if base else f'/r/{link["token"]}')
+    share = compose_share_message(lead, concept, studio, base, f'{base}/r/{link["token"]}' if base else f'/r/{link["token"]}', sender)
     with ctx.db() as c:
         chat = compose_chat_message(lead, studio, f'{base}/r/{link["token"]}' if base else f'/r/{link["token"]}',
-                                    concept.get('family_label', ''))
+                                    concept.get('family_label', ''), sender)
         c.execute('UPDATE review_links SET share_message=?,chat_message=?,updated=? WHERE id=?',
                   (share, chat, ctx.now(), link['id']))
     link['share_message'] = share
@@ -182,24 +183,33 @@ def build_review_link(ctx, lead, concept):
     return link
 
 
-def compose_share_message(lead, concept, studio, base, link_url):
+def _who(studio, sender=''):
+    """("I'm Ernest Micheal from Reachmark", "Ernest Micheal\nReachmark") — never "I'm Reachmark"."""
+    sender = (sender or '').strip()
+    if sender and sender.lower() != (studio or '').lower():
+        return f"I'm {sender} from {studio}", f"{sender}\n{studio}"
+    return f"This is {studio}", studio
+
+
+def compose_share_message(lead, concept, studio, base, link_url, sender=''):
     """The forward-to-the-business message that carries the review link."""
     name = lead.get('name') or 'there'
     place = f" in {lead['city']}" if lead.get('city') else ''
+    intro, signature = _who(studio, sender)
     return (
         f"Hello {name},\n\n"
-        f"I'm {studio}. I noticed a couple of small things about how customers find you{place}"
+        f"{intro}. I noticed a couple of small things about how customers find you{place}"
         f"{' — ' + concept['family_label'] + ' is a competitive space' if concept.get('family') else ''}, "
         f"so I sketched an independent website concept using only the details already listed publicly.\n\n"
         f"You can look at it here (about 60 seconds, nothing to install): {link_url}\n\n"
         f"At the end of the page there are three buttons — if a website like this would help, tap "
         f"“Yes — build my website” and I'll come back with scope and a fixed price. If not, tap "
         f"“Not right now” or “I already have a website” and I won't follow up again.\n\n"
-        f"Either way, thank you for the minute.\n\n{studio}\n" + ETHICS['opt_out_share']
+        f"Either way, thank you for the minute.\n\n{signature}\n" + ETHICS['opt_out_share']
     )[:2000]
 
 
-def compose_chat_message(lead, studio, link_url, family_label=''):
+def compose_chat_message(lead, studio, link_url, family_label='', sender=''):
     """The same invitation sized for WhatsApp or SMS — plain text, link early, one ask.
 
     Kept under 480 characters on purpose: a first message to a business should be readable
@@ -208,7 +218,7 @@ def compose_chat_message(lead, studio, link_url, family_label=''):
     name = (lead.get('name') or 'there').strip()
     kind = f"{family_label} " if family_label else ''
     text = (
-        f"Hi {name} — {studio} here.\n\n"
+        f"Hi {name} — {(sender + ' from ' + studio) if sender and sender.lower() != studio.lower() else studio} here.\n\n"
         f"I built a 60-second {kind}concept page for you using only the details already public "
         f"about your business: {link_url}\n\n"
         f"{ETHICS['chat_no_charge']} If it is not useful, "

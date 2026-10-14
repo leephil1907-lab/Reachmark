@@ -89,3 +89,9 @@
 .chief-thinking{opacity:.6;font-style:italic}
 .chief-form{display:flex;gap:10px;margin-top:4px}
 .chief-form input{flex:1;min-width:0;padding:12px 14px;border:1px solid #d5dcc4;border-radius:12px;font:600 14px Manrope,Arial,sans-serif;background:#fbfdf4;color:#1a2315}
+.crew-selection{margin-top:12px;padding:10px 12px;border-radius:10px;background:#f1f8dc;border:1px solid #cfe39a;color:#2f3a22;font:600 12.5px/1.5 'Manrope','DM Sans',sans-serif;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.crew-selection[hidden]{display:none}
+.crew-selection .text-link{font:inherit;text-decoration:underline;background:none;border:0;padding:0;color:#4d6420;cursor:pointer}
+[data-theme="dark"] .crew-selection{background:rgba(213,242,104,.08);border-color:rgba(213,242,104,.25);color:#e6eedc}
+[data-theme="dark"] .crew-selection .text-link{color:#d5f268}
+.crew-approval .actions a.button{display:inline-flex;align-items:center;padding:8px 14px;border-radius:10px;border:1px solid #25d366;color:#0f5132;background:#eafaf0;font:700 12.5px 'Manrope',sans-serif;text-decoration:none}

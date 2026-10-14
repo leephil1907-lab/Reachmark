@@ -46,8 +46,11 @@ class LifecycleMailTests(BillingBase):
                                  json={'slot_start': slot, 'name': 'Mail Booker',
                                        'email': 'booker@example.test'})
         self.assertEqual(r.status_code, 201, r.data[:200])
-        self.assertEqual(sent.call_count, 1)
-        self.assertEqual(sent.call_args[0][0], 'booker@example.test')
+        # With no reply e-mail saved, the owner copy goes to the studio's published
+        # mailbox (the default sender profile) rather than being dropped.
+        self.assertEqual(sent.call_count, 2)
+        self.assertEqual(sent.call_args_list[0][0][0], 'booker@example.test')
+        self.assertEqual(sent.call_args_list[1][0][0], 'support@reachmarkdigital.xyz')
 
     def test_booking_notifies_owner_when_reply_email_set(self):
         self.make_owner()

@@ -178,7 +178,7 @@ def cmd_concept(db, lead, base_url):
     audit = _latest_audit(db, lead['id'])
     brand = (audit.get('observations') or {}).get('brand') or {} if audit else {}
     arch = detect_archetype(lead.get('category'))
-    theme = build_theme(arch, brand)
+    theme = build_theme(arch, brand, f"{lead.get('category') or ''} {lead.get('name') or ''}")
     colors = theme['colors']
     link = (base_url.rstrip('/') + f"/preview/{lead['token']}" if lead.get('token')
             else 'no preview token on this lead yet')

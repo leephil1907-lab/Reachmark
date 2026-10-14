@@ -14,6 +14,11 @@ chat, source or the browser (MCP connectors store only a *variable name* like
 | Variable | Purpose |
 |---|---|
 | `SMTP_HOST/PORT/SECURITY/USER/PASSWORD/FROM` | Your mail provider (TLS only: 587+starttls or 465+ssl). Until set, approved mail queues in the outbox — never *sent*. |
+| SMTP aliases | Also accepted and mapped at start-up: `SMTP_SERVER`/`MAIL_HOST`, `SMTP_USERNAME`/`MAIL_USERNAME`/`GMAIL_USER`, `SMTP_PASS`/`SMTP_APP_PASSWORD`/`GMAIL_APP_PASSWORD`, `MAIL_FROM`/`EMAIL_FROM`. `SMTP_FROM` defaults to `SMTP_USER` (Gmail sends only as its own address or a verified alias); port 465 implies `ssl`. Gmail: `smtp.gmail.com`, 587, `starttls`, a 16-character **App Password** (needs 2-Step Verification). |
+| `SENDER_NAME` / `SENDER_AGENCY` / `REPLY_EMAIL` / `SENDER_POSTAL_ADDRESS` | Default sender profile when Settings is blank (defaults: Ernest Micheal · Reachmark · support@reachmarkdigital.xyz · Lagos, Nigeria). Values saved in Settings win. |
+| `GOOGLE_PLACES_API_KEY` | Enables Google Maps listings in the map finder and the Scout (Places API (New), billing required). Without it only OpenStreetMap is read — thin in many cities, including Lagos. |
+| `GOOGLE_PLACES_MAX_PAGES` | Google pages per map cell, 1–3 (default 1 = up to 20 places, one billed request per cell). |
+| `DEFAULT_PHONE_COUNTRY_CODE` | Country code for local numbers in WhatsApp links (default `234`). |
 | `DASHBOARD_PASSWORD` | Dev/compat gate for the dashboard. Production uses the owner login below. |
 | `DATABASE_PATH` | Absolute SQLite path (default: project dir; Docker: `/data/sitegap.sqlite3`; Railway: `/data/prospect.sqlite3` on an attached volume — without a volume, redeploys wipe the database). |
 | `PORT` | Default `8000`. |

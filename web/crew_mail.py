@@ -120,11 +120,12 @@ def send_email(db, now, log, lead, subject, body, settings, approval_id='', run_
                 'outbox_id': outbox_id, 'dispatch_id': dispatch_id}
 
     message = EmailMessage()
-    message['From'] = os.environ['SMTP_FROM']
+    from web.mail_env import from_header, from_domain
+    message['From'] = from_header(settings)
     message['To'] = recipient
     message['Reply-To'] = settings.get('reply_email', '')
     message['Subject'] = subject
-    message['Message-ID'] = f'<{send_id}@{os.environ["SMTP_FROM"].split("@")[-1]}>'
+    message['Message-ID'] = f'<{send_id}@{from_domain()}>'
     message.set_content(full_body)
     if html:
         # The branded proposal e-mail: Reachmark logo, the write-up, the finished

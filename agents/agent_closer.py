@@ -121,6 +121,28 @@ def _recheck(draft):
     return guardrails(draft)
 
 
+def whatsapp_url(phone, text):
+    """A wa.me link with the message pre-filled. The owner taps it and sends by hand —
+    the crew itself never sends WhatsApp. Local numbers (leading 0) get the default
+    country code (DEFAULT_PHONE_COUNTRY_CODE, 234 for Nigeria)."""
+    import os, re
+    from urllib.parse import quote
+    raw = (phone or '').strip()
+    digits = re.sub(r'\D', '', raw)
+    if not digits:
+        return ''
+    if raw.startswith('+'):
+        pass
+    elif digits.startswith('00'):
+        digits = digits[2:]
+    elif digits.startswith('0'):
+        cc = re.sub(r'\D', '', os.getenv('DEFAULT_PHONE_COUNTRY_CODE', '234')) or '234'
+        digits = cc + digits[1:]
+    if not 8 <= len(digits) <= 15:
+        return ''
+    return f'https://wa.me/{digits}?text={quote(text or "")}'
+
+
 def _raise(ctx):
     """Build the approval list from the drafts and review links in this run."""
     leads = ctx.load_leads()
@@ -133,6 +155,16 @@ def _raise(ctx):
             link_row = c.execute("SELECT token FROM review_links WHERE lead_id=? AND status='ready' ORDER BY created DESC LIMIT 1",
                                  (lead['id'],)).fetchone()
         link = get_link(ctx.db, token=link_row['token']) if link_row else None
+        # Same test the Scribe applies: never offer a website without an observed reason.
+        try:
+            from agents.agent_scribe import pitch_fit
+            from agents.agent_auditor import latest_audit
+            fit, why = pitch_fit(lead, ((latest_audit(ctx.db, lead['id']) or {}).get('observations') or {}))
+        except Exception:
+            fit, why = True, ''
+        if not fit:
+            ctx.receipt('held', f"{lead['name']}: nothing raised — {why}.")
+            continue
         has_email = bool((lead.get('email') or '').strip())
         if has_email:
             ok, reason = preflight(ctx.db, ctx.now, lead, settings)
@@ -171,11 +203,14 @@ def _raise(ctx):
             base = (settings.get('public_base_url') or '').rstrip('/')
             share = link.get('share_message') or ''
             share = share.replace('/r/<token>', f"/r/{link['token']}").replace('{link}', f"{base}/r/{link['token']}")
+            wa = whatsapp_url(lead.get('phone') or '', share)
             items.append({
                 'lead_id': lead['id'], 'channel': 'manual', 'kind': 'manual_share',
                 'title': f"Share message for {lead['name']} (no e-mail on record)",
                 'to': lead.get('phone') or '', 'body': share, 'review_link': f"/r/{link['token']}",
-                'preflight': 'no e-mail address — this one is copy-and-paste into WhatsApp, SMS or a call note.',
+                'whatsapp_url': wa,
+                'preflight': ('no e-mail address — approve, then tap “Open in WhatsApp” to send it yourself from your phone.'
+                              if wa else 'no e-mail address — this one is copy-and-paste into WhatsApp, SMS or a call note.'),
             })
         else:
             ctx.receipt('closer', f"{lead['name']}: nothing to approve — no contact details and no review link.")
