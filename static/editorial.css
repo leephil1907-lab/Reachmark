@@ -399,3 +399,34 @@ html[data-theme="dark"] body.rm-ed main>section.x-founder{background:transparent
   body.rm-ed .ed-out .ed-out-txt{flex:1 1 calc(100% - 56px)}
   body.rm-ed .ed-out .ed-out-btn{margin-left:52px}
 }
+
+/* ---------- 16. Kinetic ticker (motionsites-style loop) ---------- */
+body.rm-ed .ed-ticker{position:relative;z-index:2;background:#141a10;border-top:1px solid rgba(213,242,104,.22);
+  border-bottom:1px solid rgba(213,242,104,.22);overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+body.rm-ed .ed-ticker-track{display:flex;width:max-content;animation:edTick 34s linear infinite}
+body.rm-ed .ed-ticker:hover .ed-ticker-track{animation-play-state:paused}
+body.rm-ed .ed-ticker-run{display:flex;align-items:center;gap:34px;padding:13px 17px;flex:0 0 auto}
+body.rm-ed .ed-tick-k{font:800 10.5px/1 var(--ed-display);letter-spacing:.14em;text-transform:uppercase;color:var(--ed-lime);
+  padding:6px 10px;border:1px solid rgba(213,242,104,.4);border-radius:999px;white-space:nowrap}
+body.rm-ed .ed-tick{display:inline-flex;align-items:baseline;gap:9px;white-space:nowrap;font:500 13.5px/1 var(--ed-body);color:#b7c2a9}
+body.rm-ed .ed-tick b{font:800 13px/1 var(--ed-display);letter-spacing:.03em;color:#eef3e8}
+body.rm-ed .ed-tick b span{font-weight:500;font-size:11px;color:#77826b}
+body.rm-ed .ed-tick b.ed-tick-miss{color:#ff8d7a;text-transform:uppercase;font-size:11.5px;letter-spacing:.08em}
+body.rm-ed .ed-tick b.ed-tick-ok{color:var(--ed-lime);text-transform:uppercase;font-size:11.5px;letter-spacing:.08em}
+body.rm-ed .ed-tick-dot{width:7px;height:7px;border-radius:50%;background:var(--ed-lime);align-self:center;animation:edPing 1.4s ease-in-out infinite}
+@keyframes edTick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){body.rm-ed .ed-ticker-track{animation:none;flex-wrap:wrap;width:auto}}
+
+/* ---------- 17. Cursor spotlight on big target cards ---------- */
+body.rm-ed .ed-spot{position:relative;isolation:isolate}
+body.rm-ed .ed-spot::before{content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;pointer-events:none;opacity:0;
+  transition:opacity .35s var(--ed-ease);
+  background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(213,242,104,.14),transparent 65%)}
+body.rm-ed .ed-spot:hover::before{opacity:1}
+body.rm-ed .ed-spot>*{position:relative;z-index:1}
+
+/* ---------- 18. Gentle aurora drift on the hero stage glow ---------- */
+@media (prefers-reduced-motion:no-preference){
+  body.rm-ed .ed-stage::after{animation:edGlowDrift 9s ease-in-out infinite alternate}
+  @keyframes edGlowDrift{from{transform:translateX(-50%) scaleX(1);opacity:1}to{transform:translateX(-46%) scaleX(1.12);opacity:.72}}
+}

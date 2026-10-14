@@ -42,7 +42,7 @@
             <a class="x-btn lime" href="/dashboard">{{ icon('dashboard', 18) }}<span>{{ t('home.open_dashboard') }}</span></a>
             <a class="x-btn ghost" href="/enquire">{{ icon('pen', 18) }}<span>{{ t('home.cta_project') }}</span></a>
             {% else %}
-            <a class="x-btn lime" href="#try-url">{{ icon('scan', 18) }}<span>{{ t('home.hx_cta') }}</span></a>
+            <a class="x-btn lime" data-magnet href="#try-url">{{ icon('scan', 18) }}<span>{{ t('home.hx_cta') }}</span></a>
             <a class="x-btn ghost" href="/sample-report">{{ icon('file-text', 18) }}<span>{{ t('home.cta_report') }}</span></a>
             {% endif %}
           </p>
@@ -106,8 +106,27 @@
     </div>
   </section>
 
+  <!-- 1b. Kinetic ticker — what a Reachmark pass measures, on loop -->
+  <div class="ed-ticker" aria-hidden="true">
+    <div class="ed-ticker-track">
+      {% for i in range(2) %}
+      <div class="ed-ticker-run">
+        <span class="ed-tick-k">{{ t('home.hx_panel') }}</span>
+        <span class="ed-tick">willowgrove.example <b>78<span>/100</span></b></span>
+        <span class="ed-tick">{{ t('home.hx_f1') }} <b class="ed-tick-miss">{{ t('home.hx_f1v') }}</b></span>
+        <span class="ed-tick">{{ t('home.hx_f3') }} <b>4.8s</b></span>
+        <span class="ed-tick">northstarlaw.example <b>64<span>/100</span></b></span>
+        <span class="ed-tick">{{ t('home.hx_f2') }} <b class="ed-tick-miss">{{ t('home.hx_f2v') }}</b></span>
+        <span class="ed-tick">{{ t('home.hx_f4') }} <b class="ed-tick-ok">{{ t('home.hx_f4v') }}</b></span>
+        <span class="ed-tick">emberandoak.example <b>71<span>/100</span></b></span>
+        <span class="ed-tick">{{ t('home.hx_ready') }} <i class="ed-tick-dot"></i></span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
   <!-- 2. Product: interactive sample report -->
-  <section class="rm-workspace-preview" id="sample-report" aria-labelledby="rm-preview-title">
+  <section class="rm-workspace-preview" data-motion="fade-up" id="sample-report" aria-labelledby="rm-preview-title">
     <div class="rm-preview-intro">
       <p class="rm-preview-eyebrow"><span class="ed-n">01 /</span> THE REACHMARK WORKSPACE</p>
       <h2 id="rm-preview-title">Find the gap. See the evidence. Know what to do next.</h2>
@@ -157,7 +176,7 @@
             <p id="rm-preview-next">Review the mobile appointment path and make the primary contact action easy to spot.</p>
           </div>
           <div class="rm-preview-actions">
-            <a class="x-btn lime" href="#try-url">Check a real website {{ icon('arrow-down', 16) }}</a>
+            <a class="x-btn lime" data-magnet href="#try-url">Check a real website {{ icon('arrow-down', 16) }}</a>
             <a class="rm-preview-report-link" href="/sample-report">Open sample report</a>
           </div>
         </div>
@@ -234,7 +253,7 @@
   </section>
 
   <!-- 7. Why Reachmark -->
-  <section class="x-plain" aria-label="{{ t('home.moat_h') }}">
+  <section class="x-plain" data-motion="fade-up" aria-label="{{ t('home.moat_h') }}">
     <div class="ed-plain-head">
       <p class="ed-k"><span class="ed-n">06 /</span> {{ t('home.moat_k') }}</p>
       <h2>{{ t('home.moat_h') }}</h2>
@@ -247,7 +266,7 @@
   </section>
 
   <!-- 8. Concept gallery -->
-  <section class="x-concepts" aria-labelledby="x-concepts-h">
+  <section class="x-concepts" data-motion="fade-up" aria-labelledby="x-concepts-h">
     <div class="x-concepts-head">
       <p class="ed-k"><span class="ed-n">07 /</span> {{ t('foot.samples') }}</p>
       <h2 id="x-concepts-h">{{ t('home.concepts_h') }}</h2>
@@ -314,19 +333,19 @@
   </section>
 
   <!-- 11. Final call to action — two clear paths -->
-  <section class="x-cta" data-ed="cta">
+  <section class="x-cta" data-ed="cta" data-motion="fade-up">
     <div class="ed-cta-head">
       <p class="ed-k">{{ t('home.foot_started') }}</p>
       <h2>{{ t('home.h1a') }} <em>{{ t('home.h1b') }}</em></h2>
     </div>
     <div class="ed-paths">
-      <a class="ed-path" href="{{ '/dashboard' if client_logged_in else '/signup' }}">
+      <a class="ed-path ed-spot" href="{{ '/dashboard' if client_logged_in else '/signup' }}">
         <span class="ed-k">{{ t('home.who_design') }}</span>
         <b>{{ t('home.open_dashboard') if client_logged_in else t('nav.signup') }}</b>
         <span class="ed-path-p">{{ t('home.sub') }}</span>
         <span class="ed-go">{{ t('home.open_dashboard') if client_logged_in else t('home.price_free_cta') }}{{ icon('arrow-up-right', 16) }}</span>
       </a>
-      <a class="ed-path" href="/enquire">
+      <a class="ed-path ed-spot" href="/enquire">
         <span class="ed-k">{{ t('home.who_need') }}</span>
         <b>{{ t('home.band_h1') }} {{ t('home.band_h2') }}</b>
         <span class="ed-path-p">{{ t('home.band_p') }}</span>
@@ -352,6 +371,7 @@
 </div>
 
 <script src="/static/motion.js"></script>
+<script src="/static/magnet.js" defer></script>
 <script src="/static/dropdown.js"></script>
 <script src="/static/theme.js"></script>
 <script>
@@ -454,6 +474,18 @@ document.querySelectorAll('a[href="#try-url"]').forEach(function(a){a.addEventLi
     }
   });
   function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);});}
+})();
+</script>
+<script>
+(function(){
+  if(!window.matchMedia||matchMedia('(pointer: coarse)').matches||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  document.querySelectorAll('.ed-spot').forEach(function(el){
+    el.addEventListener('pointermove',function(e){
+      var r=el.getBoundingClientRect();
+      el.style.setProperty('--mx',(e.clientX-r.left)+'px');
+      el.style.setProperty('--my',(e.clientY-r.top)+'px');
+    });
+  });
 })();
 </script>
 <script src="/static/home-product.js" defer></script>
