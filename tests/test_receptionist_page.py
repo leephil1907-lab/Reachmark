@@ -6,6 +6,7 @@ FAQ answers stay in JSON-LD from the knowledge base the chat uses.
 import json
 import re
 import unittest
+from unittest.mock import patch
 
 import tests.test_app as test_app
 class ReceptionistPageTests(unittest.TestCase):
@@ -92,6 +93,28 @@ class ReceptionistPageTests(unittest.TestCase):
         self.assertIn('/receptionist', sitemap)
         robots = self.client.get('/robots.txt').get_data(as_text=True)
         self.assertIn('Allow: /receptionist', robots)
+
+    def test_homepage_leads_with_interactive_product_preview(self):
+        html = self.client.get('/').get_data(as_text=True)
+        assert html.index('id="sample-report"') < html.index('id="try-url"')
+        self.assertIn('data-preview-select="clinic"', html)
+        self.assertIn('data-preview-select="law"', html)
+        self.assertIn('data-preview-select="cafe"', html)
+        self.assertIn('not live audit results', html.lower())
+        self.assertIn('/static/home-product.css', html)
+        self.assertIn('/static/home-product.js', html)
+        self.assertIn('/api/public/audit', html)
+
+    def test_whatsapp_is_an_inline_secondary_handoff_inside_receptionist(self):
+        with patch.dict('os.environ', {'WHATSAPP_URL': 'https://wa.me/14155550123'}):
+            html = self.client.get('/').get_data(as_text=True)
+        start = html.index('<section id="rm-receptionist"')
+        end = html.index('</section>', start)
+        widget = html[start:end]
+        self.assertIn('class="rm-whatsapp-link"', widget)
+        self.assertIn('https://wa.me/14155550123', widget)
+        self.assertIn('Prefer WhatsApp?', widget)
+        self.assertNotIn('wa-float', widget)
 
     def test_static_assets_are_served(self):
         css = self.client.get('/static/receptionist-page.css')
