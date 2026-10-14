@@ -17,7 +17,7 @@ with tempfile.TemporaryDirectory() as temp:
             b=p.chromium.launch();page=b.new_page(viewport={'width':1440,'height':1100});errors=[];responses=[];page.on('pageerror',lambda e:errors.append(str(e)));page.on('response',lambda r:responses.append((r.url,r.status)) if 'world-map.js' in r.url or 'leaflet.js' in r.url else None);page.on('dialog',lambda d:d.accept())
             page.route('https://tile.openstreetmap.org/**',lambda route:route.abort())
             page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();page.wait_for_url('**/workspace**')
-            page.goto(base+'/workspace');page.evaluate("navigate('global')")
+            page.goto(base+'/workspace');page.locator('[data-tour="skip"]').click();page.evaluate("navigate('global')")
             try: page.locator('#world-map.leaflet-container').wait_for(timeout=5000)
             except Exception as exc:
                 message=page.locator('#map-message').inner_text() if page.locator('#map-message').count() else 'map message element missing'
