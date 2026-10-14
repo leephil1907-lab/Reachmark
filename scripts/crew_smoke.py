@@ -111,7 +111,8 @@ def main():
     check('review page renders', page.status_code == 200, f'{len(page.data)} bytes')
     check('page says it is not the official website', b'not the official website' in page.data)
     check('page includes the live contact form', b'id="w-form"' in page.data)
-    check('single tawk bubble on the page', b'embed.tawk.to' in page.data and b'Ask the studio' not in page.data)
+    check('obsolete Ask the studio widget is absent', b'Ask the studio' not in page.data)
+    check('no duplicate Tawk embeds', page.data.count(b'embed.tawk.to') <= 1)
     check('unknown token 404s', client.get('/r/not-a-real-token').status_code == 404)
     answered = client.post(f'/api/r/{token}/respond',
                            json={'choice': 'want', 'name': 'Demo Owner', 'email': 'owner@example.test',

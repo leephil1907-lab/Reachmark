@@ -1,14 +1,39 @@
 # Reachmark: production launch and operations
 
-## What is ready, and what still needs activation
+## Current production status — checked 2026-10-14
 
-Implemented: studio-owner sessions, **client portal (signup/signin) with assigned-project and invoice visibility**, **branded invoice creator with line items, tax/discount and manual status tracking**, **Smartsupp Live Chat integration (lazy-loaded only when key is set, visible on About/Showcase/Enquire/Previews and workspace)**, CSRF checks, login throttling, secure production cookies, production startup validation, Docker/Caddy deployment files, persistent SQLite storage, scheduled snapshot service, verified offline restore, optional encrypted offsite copies, optional Sentry integration, CI/deployment workflows and post-deploy verification.
+Reachmark **is deployed on Railway**. This document previously described a not-yet-created VPS as the only production target; that statement was stale and did not reflect the live deployment.
 
-**Not yet activated:** a VPS, domain/DNS, public HTTPS certificates, GitHub deployment secrets/environment, external uptime/error/backup alerts, offsite storage and a dedicated map-data contract. There is no live production deployment to certify yet. Docker is not available in the development sandbox, so the actual container build/start must be checked by CI/on the target host. Local Python/browser/backup tests are not a substitute for that launch test.
+- **Repository:** [leephil1907-lab/Reachmark](https://github.com/leephil1907-lab/Reachmark), branch `main`.
+- **Railway service:** `Reachmark`, production environment, one replica in SFO.
+- **Public domain:** [https://reachmarkdigital.xyz](https://reachmarkdigital.xyz); the Railway domain `reachmark-production.up.railway.app` is also attached.
+- **Latest deployment observed:** `9f2faa5df85353c845723e335f4f4fe470d6dd45`, created 2026-10-10, status `SUCCESS` (analytics-tag changes).
+- **Persistence:** a live 500 MB Railway volume mounted at `/data`; `DATABASE_PATH` is configured as `/data/reachmark.sqlite3`.
+- **Health check:** Railway is configured to check `/healthz`. The endpoint checks that SQLite can be queried and returns the release SHA and whether the database directory is writable.
+- **Observed requests:** Railway logs from 2026-10-13 show successful HTTP 200 responses for the homepage and several public pages/assets, plus the sitemap. This is evidence of reachability, not a full end-to-end acceptance test.
 
-Primary production architecture (locked for this release): a small VPS with roughly 2 vCPU, 2+ GB RAM and 25+ GB disk, Docker Compose, Caddy, one Gunicorn application container using **1 worker / 4 threads**, persistent SQLite on `/data`, and the dedicated backup service. Reassess storage against lead/source-tag/backup growth. Do not run multiple app replicas: discovery workers use in-process coordination and startup recovery. For multiple users/replicas, migrate job coordination and storage first. This is the single release architecture; Railway/Render-style replicas are not the production target for this release.
+### What is verified, and what is not
 
-### Zero-budget path (your current situation)
+The service is live and the deployment is marked successful. The following still require explicit checks before calling the product production-ready:
+
+- Run the full automated test suite and verify the CI result for the exact deployed commit.
+- Exercise the real flow: discover a real business, inspect its website, save evidence, generate a report, and approve outreach before sending.
+- Verify signup/sign-in, account isolation, owner access, CSRF rejection, and private API/PDF/CSV denial.
+- Confirm Google OAuth end-to-end. Logs include redirects to `/signin?oauth=error` on 2026-10-11; the exact provider-side cause is not established from logs alone.
+- Re-test map discovery against its public providers. Historical logs on 2026-10-07/08 contain provider-unavailable failures and an earlier `AttributeError`; do not assume those older errors still reproduce after later deployments.
+- Verify actual email delivery with a controlled, approved test message.
+- Verify analytics/tag behavior in their provider dashboards, not just the presence of IDs.
+- Prove a backup can be restored. A mounted volume is persistence, not an independent backup. This Railway service description does not by itself prove the Docker Compose backup sidecar or off-site backup process is running.
+- Add independent uptime and backup-failure alerts, and monitor the 500 MB volume.
+- Run browser/mobile accessibility and performance checks against the deployed site.
+
+**Important:** do not send bulk outreach, treat provider failures as proof a business is broken, or claim an integration is operational until the relevant live test passes. All outreach must remain explicitly user-approved.
+
+## Alternate self-hosting and migration options
+
+The remaining VPS, Docker Compose and Caddy instructions below are for a future migration or a separate self-hosted installation. They are **not** a description of the current Railway deployment. If migrating, re-run the complete release checklist and update this status section with the new verified release.
+
+### Zero-budget self-hosting options
 
 You noted no funds right now. Do **not** purchase anything yet. Two safe options until budget is available:
 
@@ -156,7 +181,7 @@ docker compose build --build-arg RELEASE_SHA="$(git rev-parse HEAD)"
 docker compose up -d
 ```
 
-Caddy requests/renews HTTPS certificates only when a real domain resolves correctly and ports are reachable. Visit `/login` to sign in. The owner username is not required: this is a single-owner password login. Sessions last up to eight hours, have HttpOnly/SameSite=Strict cookies and use Secure cookies in production. Writes require the session CSRF token. Five failed login attempts per trusted client address trigger a 15-minute block. This is not MFA; consider an external identity gateway with MFA for additional protection.
+Caddy requests/renews HTTPS certificates only when a real domain resolves correctly and ports are reachable. Visit `/login` to sign in. The owner username is not required: this is a single-owner password login. Sessions use a 30-day sliding lifetime, HttpOnly/SameSite=Lax cookies and Secure cookies in production when APP_ENV=production. Re-check this statement against the deployed commit when changing session policy. Writes require the session CSRF token. Five failed login attempts per trusted client address trigger a 15-minute block. This is not MFA; consider an external identity gateway with MFA for additional protection.
 
 Production must set `APP_ENV=production`, a 32+ character `SECRET_KEY`, `OWNER_PASSWORD_HASH`, HTTPS `PUBLIC_BASE_URL`, and absolute persistent `DATABASE_PATH`. The helper creates a scrypt password hash; preserve single quotes around it in the env file so `$` separators survive dotenv parsing. Missing requirements prevent startup. `DASHBOARD_PASSWORD` Basic auth is a development compatibility feature, not the production authentication method.
 

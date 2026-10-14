@@ -18,18 +18,42 @@ with tempfile.TemporaryDirectory() as tmp:
             page.goto(base);expect(page.locator('body')).to_be_visible();page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();
             try:page.wait_for_url('**/workspace**',timeout=8000)
             except Exception:page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();page.wait_for_url('**/workspace**',timeout=15000)
-            expect(page.locator('#stat-total')).to_have_text('2')
-            page.locator('[data-tour="skip"]').click();
-            page.locator('.nav[data-page="leads"]').click();page.locator('#filter-contact').select_option('email');expect(page.locator('#lead-table tr')).to_have_count(1);page.locator('#lead-table tr:visible button').first.click()
-            page.get_by_text('Manual verification and evidence',exact=True).click();page.locator('#review-form [name="verification"]').select_option('NO_SITE_FOUND');page.locator('#review-form [name="evidence_url"]').fill('https://example.test/research');page.locator('#review-form [name="note"]').fill('Manually searched the business name and checked the source listing.');page.locator('#review-form [type="submit"]').click();expect(page.locator('#review-time')).to_contain_text('Manual review:')
+            expect(page.locator('#stat-total')).to_have_text('2');review_handler_source=page.locator('#review-form').evaluate("(form)=>String(form.onsubmit)");assert 'savedReviewLabel' in review_handler_source,'Workspace did not load the updated manual-review handler: '+review_handler_source[:500]
+            expect(page.locator('.tour-card')).to_be_visible()
+            expect(page.locator('.tour-step')).to_contain_text('Step 1 of 6')
+            expect(page.locator('#page-overview .analytics-heading')).to_have_attribute('data-tour-active','true')
+            tour_targets=['#page-leads .directory','#page-global .global-grid','#page-health .card','#page-crew .crew-hero','#page-settings .settings-grid']
+            for step_number, selector in enumerate(tour_targets, start=2):
+                page.locator('[data-tour="next"]').click()
+                expect(page.locator('.tour-step')).to_contain_text(f'Step {step_number} of 6')
+                expect(page.locator(selector)).to_have_attribute('data-tour-active','true')
+            page.locator('[data-tour="next"]').click()
+            expect(page.locator('.tour-card')).to_have_count(0)
+            page.locator('#tour-btn').click()
+            expect(page.locator('.tour-card')).to_be_visible()
+            page.locator('[data-tour="skip"]').click()
+            expect(page.locator('.tour-card')).to_have_count(0)
+            page.locator('.nav[data-page="leads"]').click();page.locator('#filter-contact').select_option('email');expect(page.locator('#lead-cards .lead-card')).to_have_count(1);page.locator('#lead-cards .lead-card button.text-link').first.click()
+            page.get_by_text('Manual verification and evidence',exact=True).click();page.locator('#review-form [name="verification"]').select_option('NO_SITE_FOUND');page.locator('#review-form [name="evidence_url"]').fill('https://example.test/research');page.locator('#review-form [name="note"]').fill('Manually searched the business name and checked the source listing.');
+            with page.expect_response(lambda r: '/api/leads/' in r.url and r.url.endswith('/review') and r.request.method=='POST',timeout=10000) as review_response_info: page.locator('#review-form [type="submit"]').click()
+            review_response=review_response_info.value;assert review_response.status==200,f"Review save failed: HTTP {review_response.status}: {review_response.text()}";review_id=review_response.url.split('/api/leads/')[1].split('/review')[0];quality_response=page.request.get(base+'/api/quality');assert quality_response.status==200;assert any(r['lead_id']==review_id for r in quality_response.json()['reviews']),"Review POST returned success but the saved review is missing from /api/quality";expect(page.locator('#review-time')).to_contain_text('Manual review:',timeout=10000)
             with page.expect_download() as download:page.get_by_role('link',name='Audit report PDF').click()
             saved=Path(tmp)/'audit.pdf';download.value.save_as(saved);assert saved.read_bytes().startswith(b'%PDF')
-            page.locator('.close-inline').click();page.locator('.nav[data-page="projects"]').click();page.get_by_role('button',name='New project').click();page.locator('#project-form [name="title"]').fill('Temporary café project');page.locator('#project-form [name="stage"]').select_option('Proposal');page.locator('#project-form [name="scope"]').fill('A simple saved website scope.');page.locator('#project-form [name="quote"]').fill('100.50');page.locator('#project-form [name="due_date"]').fill('2026-01-01');page.locator('#project-form [name="next_action"]').fill('Review the client preview');page.locator('#project-form [type="submit"]').click();expect(page.locator('#project-board')).to_contain_text('Temporary café project');expect(page.locator('#project-reminders')).to_contain_text('1 overdue')
+            page.locator('.close-inline').click()
+            if not page.locator('.nav-more').evaluate("(el)=>el.open"):
+                page.locator('.nav-more summary').click()
+            expect(page.locator('.nav-more[open] .nav[data-page="projects"]')).to_be_visible()
+            page.locator('.nav-more[open] .nav[data-page="projects"]').click();page.get_by_role('button',name='New project').click();page.locator('#project-form [name="title"]').fill('Temporary café project');page.locator('#project-form [name="stage"]').select_option('Proposal');page.locator('#project-form [name="scope"]').fill('A simple saved website scope.');page.locator('#project-form [name="quote"]').fill('100.50');page.locator('#project-form [name="due_date"]').fill('2026-01-01');page.locator('#project-form [name="next_action"]').fill('Review the client preview');page.locator('#project-form [type="submit"]').click();expect(page.locator('#project-board')).to_contain_text('Temporary café project');expect(page.locator('#project-reminders')).to_contain_text('1 overdue')
             page.get_by_role('button',name='Open project',exact=False).click()
             with page.expect_download() as download:page.get_by_role('link',name='Draft proposal & quote PDF').click()
             saved=Path(tmp)/'proposal.pdf';download.value.save_as(saved);assert saved.read_bytes().startswith(b'%PDF')
             page.get_by_role('button',name='Close project',exact=True).click();page.screenshot(path=str(Path(tmp)/'project-board-desktop.png'),full_page=True)
             page.set_viewport_size({'width':390,'height':844});overflow=page.evaluate("""() => ({scrollWidth:document.documentElement.scrollWidth,innerWidth:innerWidth,items:[...document.querySelectorAll('body *')].map(el=>{const r=el.getBoundingClientRect();return {tag:el.tagName,id:el.id,cls:el.className,x:r.x,right:r.right,width:r.width}}).filter(x=>x.right>innerWidth+1||x.x< -1).slice(0,20)})""");assert overflow['scrollWidth']<=overflow['innerWidth'],overflow;page.screenshot(path=str(Path(tmp)/'project-board-mobile.png'),full_page=True)
+            if not page.locator('.nav-more').evaluate("(el)=>el.open"):
+                page.locator('.nav-more summary').click()
+            expect(page.locator('.nav-more[open] .nav[data-page="crew"]')).to_be_visible()
+            page.locator('.nav-more[open] .nav[data-page="crew"]').click()
+            expect(page.locator('#page-crew')).to_be_visible()
             page.evaluate("navigate('crew')");expect(page.locator('#crew-agent-grid .crew-agent')).to_have_count(8);expect(page.locator('#crew-run-hint')).to_contain_text('Nothing is ever sent');expect(page.locator('#crew-guardrails')).to_contain_text('needs a separate owner approval');expect(page.locator('#page-crew')).to_be_visible();page.evaluate("navigate('settings')");page.get_by_role('button',name='Sign out of owner session').click();expect(page).to_have_url(base+'/login');assert page.request.get(base+'/api/projects').status==401
             assert not errors,errors;print('PASS: owner login/CSRF, private pages, lead filters, evidence review, PDF downloads, project board, overdue reminders, AI crew console, mobile, logout. Disposable records only.');b.close()
     finally:server.shutdown();thread.join(timeout=5)

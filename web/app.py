@@ -235,7 +235,7 @@ def home():
     structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description']), faq_schema()]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-3T3SXLG2XT'  # GA4 ID provided by user
     gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-KVHJTVJ2'  # second Google tag alongside GA4
-    gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
+    gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID', '').strip()  # Only load GTM when a real container ID is configured.
     try:
         from web.funnel import record as funnel_record
         funnel_record(db, now, 'visit', {'path': '/'})
@@ -284,7 +284,7 @@ def about():
     structured=[organization_schema(origin, seo['description']), website_schema(origin, seo['description'])]
     ga_id = os.getenv('GOOGLE_ANALYTICS_ID','').strip() or 'G-3T3SXLG2XT'  # GA4 ID provided by user
     gt_id = os.getenv('GOOGLE_TAG_ID','').strip() or 'GT-KVHJTVJ2'  # second Google tag alongside GA4
-    gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID','').strip() or 'GTM-M3SJZ8S7'  # placeholder — replace via GOOGLE_TAG_MANAGER_ID env for real GTM verification
+    gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID', '').strip()  # Only load GTM when a real container ID is configured.
     return render_template('about.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
 
 # Legal pages — English-authoritative like /about (standard for legal documents).

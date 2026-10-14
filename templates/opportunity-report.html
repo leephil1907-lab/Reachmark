@@ -29,6 +29,10 @@
     </p>
     <p class="oe-note">{{ asset.disclaimer if asset is defined and asset.disclaimer else (report.evidence.disclaimer if report.evidence is mapping else t('doc.disc_default')) }}</p>
 
+    {% if report.evidence is mapping and report.evidence.checked_at %}
+    <p class="oe-note">Evidence checked: {{ report.evidence.checked_at }}. This is the time of the saved website check, not a guarantee the page is unchanged now.</p>
+    {% endif %}
+
     <section class="oe-score-row">
       <article>
         <small>{{ t('doc.rank') }}</small>
@@ -45,6 +49,13 @@
         <b>{{ report.solution.name }}</b>
         <p>{{ report.solution.why }}</p>
       </article>
+    </section>
+
+    <section aria-labelledby="score-method-title" class="oe-note" style="margin:24px 0">
+      <h2 id="score-method-title">How to read the opportunity score</h2>
+      <p>The 0–100 score is a relative ranking of detected website gaps, not a website-quality grade, conversion probability, or revenue estimate. The base is 18 plus 9 times the sum of observed gap weights, capped at 100. Listings without an owned website have a minimum score of 78; social-only listings have a minimum of 74. When no gaps are detected, a listed website scores 12 and a listing without a website scores 64.</p>
+      <p>Priority also considers the type of gap: High is assigned at 70+ or for certain major access/website gaps; Medium at 40+ or when a commercial gap is present; otherwise Low. A check can miss content behind scripts, consent walls, bot protection, or temporary network failures. Confirm each finding manually before contacting a business. No score proves lost sales or interest in buying.</p>
+      <p>Observed page details are evidence; proposed fixes and outreach wording are recommendations. Review both before use.</p>
     </section>
 
     <ol class="oe-asset">

@@ -173,6 +173,22 @@ class ProspectTests(unittest.TestCase):
         from web.services import audit_website
         with patch('web.services.socket.getaddrinfo',return_value=[(2,1,6,'',('127.0.0.1',443))]),patch('web.services.urllib3.HTTPSConnectionPool') as pool:
             self.assertEqual(audit_website('https://private.example')['status'],'CHECK_FAILED');pool.assert_not_called()
+    def test_homepage_uses_prospect_positioning_without_placeholder_gtm(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop('GOOGLE_TAG_MANAGER_ID', None)
+            page = self.client.get('/?locale=en')
+        self.assertEqual(page.status_code, 200)
+        self.assertIn(b'<title>Reachmark: Find Businesses Losing Customers Online</title>', page.data)
+        self.assertNotIn(b'GTM-M3SJZ8S7', page.data)
+        self.assertIn(b'G-3T3SXLG2XT', page.data)
+        self.assertIn(b'GT-KVHJTVJ2', page.data)
+        receptionist = self.client.get('/receptionist?locale=en')
+        self.assertEqual(receptionist.status_code, 200)
+        self.assertIn(b'data-frontdesk-status', receptionist.data)
+        self.assertIn(b'G-3T3SXLG2XT', receptionist.data)
+        self.assertIn(b'GT-KVHJTVJ2', receptionist.data)
+        self.assertNotIn(b'GTM-M3SJZ8S7', receptionist.data)
+
     def test_public_metadata(self):
         response=self.client.get('/about');self.assertIn(b'application/ld+json',response.data)
         self.assertIn(b'Reachmark',response.data)

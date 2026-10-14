@@ -512,9 +512,9 @@ def register_receptionist(app, db, now, log, settings):
             'noindex': False,
         }
         gsv = os.getenv('GOOGLE_SITE_VERIFICATION', 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
-        ga_id = os.getenv('GOOGLE_ANALYTICS_ID', '').strip() or 'G-CPSB1EDNFE'
-        gt_id = os.getenv('GOOGLE_TAG_ID', '').strip() or 'GT-M6XWG99J'
-        gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID', '').strip() or 'GTM-M3SJZ8S7'
+        ga_id = os.getenv('GOOGLE_ANALYTICS_ID', '').strip() or 'G-3T3SXLG2XT'
+        gt_id = os.getenv('GOOGLE_TAG_ID', '').strip() or 'GT-KVHJTVJ2'
+        gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID', '').strip()
         faqs = []
         for topic in load_knowledge():
             if topic['qa']:

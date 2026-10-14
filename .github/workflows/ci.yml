@@ -39,6 +39,10 @@ jobs:
               with open(f'/tmp/lighthouse-{name}.json', encoding='utf-8') as f:
                   report=json.load(f)
               print(name, {k: round((v.get('score') or 0)*100) if v.get('score') is not None else None for k,v in report.get('categories',{}).items()})
+              for audit_ref in report.get('categories',{}).get('accessibility',{}).get('auditRefs',[]):
+                  audit=report.get('audits',{}).get(audit_ref.get('id'),{})
+                  if audit.get('score') is not None and audit.get('score') < 1:
+                      print(f"{name} accessibility issue: {audit.get('id')} | {audit.get('title')} | score={audit.get('score')} | {audit.get('displayValue','')}")
               if report.get('runtimeError'):
                   raise SystemExit(f"{name} Lighthouse runtime error: {report['runtimeError']}")
           PY
