@@ -38,3 +38,6 @@ body{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
 body.rx-page #rm-receptionist-launch{position:static;margin:18px auto 0;display:inline-flex}
 body.rx-page .rm-panel{position:relative;right:auto;bottom:auto;width:min(560px,100%);max-height:min(70vh,640px);margin:0 auto;box-shadow:0 18px 50px rgba(19,26,15,.16)}
 body.rx-page .rm-panel[hidden]{display:none}
+
+/* WhatsApp stays a quiet, optional handoff inside the receptionist—not a competing floating launcher. */
+.rm-note-sep{padding:0 3px;color:#9aa58b}.rm-whatsapp-link{display:inline-flex;align-items:center;gap:4px;color:#43552e!important;text-decoration:underline;text-decoration-color:#c9df8d;text-underline-offset:3px;font-weight:650}.rm-whatsapp-link:hover{color:#20251f!important}
