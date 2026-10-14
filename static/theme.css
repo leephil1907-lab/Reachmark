@@ -1,0 +1,243 @@
+/* ==========================================================================
+   Reachmark theme layer — loaded LAST on the workspace and every public page.
+
+   Why this file exists: many components were written with hard-coded light
+   surfaces (#fff cards, inputs, pills) or hard-coded dark text (#0f1a0a …).
+   The older dark-mode rules only flipped the page text to light, so those
+   components ended up with white-on-white or dark-on-dark text.
+
+   This layer fixes that in one place:
+     1. Theme tokens (text, muted, surface, line, accent-text) per theme,
+        all muted text ≥ 4.5:1 on its surface.
+     2. Light-mode contrast fixes (kickers, eyebrows, small print).
+     3. Workspace dark mode.
+     4. Public pages dark mode.
+   `html[data-theme=…]` is used (not bare `[data-theme]`) for specificity
+   so we win over page-level <style> blocks without piling up !important.
+   ========================================================================== */
+
+:root{
+  --rm-text:#1c2219;
+  --rm-text-2:#424b3c;      /* body copy            9.0:1 on #fff */
+  --rm-text-3:#59634f;      /* muted / small print  6.1:1 on #fff, 5.6:1 on #f4f5ef */
+  --rm-accent-text:#4d6417; /* eyebrows & kickers   6.3:1 on #fff */
+  --rm-surface:#ffffff;
+  --rm-surface-2:#f6f7f1;
+  --rm-line:#e2e7d6;
+  --rm-lime:#d5f268;
+  --rm-on-lime:#141a10;
+}
+html[data-theme="dark"]{
+  --rm-text:#eef3e8;
+  --rm-text-2:#c3ccb9;      /* 10.6:1 on #141b12 */
+  --rm-text-3:#a2ad96;      /*  7.4:1 on #141b12 */
+  --rm-accent-text:#d1ec6c; /* 13:1  on #141b12 */
+  --rm-surface:#141b12;
+  --rm-surface-2:#1b2418;
+  --rm-line:rgba(213,242,104,.16);
+  color-scheme:dark;
+}
+
+/* --------------------------------------------------------------------------
+   1. Light mode — near-miss contrast (4.2–4.4) and clearly failing small text
+   -------------------------------------------------------------------------- */
+html:not([data-theme="dark"]) :is(.x-kicker,.eyebrow,.mini-eyebrow,.public-eyebrow,.sample-kicker,.tagline){color:var(--rm-accent-text)}
+html:not([data-theme="dark"]) :is(.rm-preview-choice-note,.rm-preview-list-label,.x-foot-bottom span,.x-foot-legal a,.divider,.per,.form-privacy,.public-form-note){color:var(--rm-text-3)}
+html:not([data-theme="dark"]) :is(.stat-top,.stat-foot,p.small.muted,.notice,.breadcrumbs .muted,.page-heading p){color:var(--rm-text-3)}
+html:not([data-theme="dark"]) :is(.badge,.tag){color:#3f4f1c}
+html:not([data-theme="dark"]) .sidebar small{color:#a9b39c}           /* on the dark rail */
+html:not([data-theme="dark"]) .sub{color:var(--rm-text-3)}
+/* Active nav pill: lime pill, dark text (was lime text on lime = 1.0:1) */
+/* Active nav pill in light mode is the dark forest pill — light text on it */
+html:not([data-theme="dark"]) .pub-head nav.main > a[aria-current="page"],
+html:not([data-theme="dark"]) .pub-head nav.main > a.on,
+html:not([data-theme="dark"]) .pub-head nav.main > a.active{color:#f4f8ea!important}
+html:not([data-theme="dark"]) .x-tabs button.on{color:#fff}
+/* Enquire / showcase / login small print */
+html:not([data-theme="dark"]) :is(.enquiry-faq summary,.enquiry-faq p,.enquiry-points p){color:var(--rm-text-2)}
+html:not([data-theme="dark"]) .gallery-callout h2{color:#f4f8ea!important}  /* callout is a dark panel */
+html:not([data-theme="dark"]) .login-card small,
+html:not([data-theme="dark"]) .brand + small{color:var(--rm-text-3)}
+
+/* Advertisement slot label: was #8a9976 (3.0:1) */
+.adsense-footer > div:first-child{color:var(--rm-text-3)!important}
+
+/* --------------------------------------------------------------------------
+   2. Workspace — dark mode
+   -------------------------------------------------------------------------- */
+html[data-theme="dark"] #workspace-content{color:var(--rm-text)}
+html[data-theme="dark"] #workspace-content :is(h1,h2,h3,h4,h5,strong,.section-top h3,.card h3,.stat strong,.stat b,legend){color:var(--rm-text)}
+html[data-theme="dark"] #workspace-content :is(p,li,td,dd,label,.card p,.page-heading p){color:var(--rm-text-2)}
+html[data-theme="dark"] #workspace-content :is(small,.muted,.small,.stat-top,.stat-foot,.mini-eyebrow,th,dt,
+  .oe-board-head p,details summary,.topbar-date,.breadcrumbs span,.hint,.help,.note){color:var(--rm-text-3)}
+html[data-theme="dark"] #workspace-content :is(.eyebrow,.text-link,a.text-link,.kicker){color:var(--rm-accent-text)}
+html[data-theme="dark"] .sidebar small{color:#a9b39c}
+
+/* Components that stayed white */
+html[data-theme="dark"] #workspace-content :is(
+  .crew-agent,.crew-skill,.crew-stat,.crew-hero-card,.project-column,#oe-funnel li,.stat,article.stat,
+  .ws-start,#ws-start,.notice,.desk-msg.desk-assistant,.desk-chat,.desk-panel,.panel,.directory,
+  .settings-grid > *,.global-grid > *,.oe-board,.oe-card,.lead-row,.record,.invoice,.plan-card,
+  .empty,.empty-state,table,thead,.modal,.drawer,.dropdown-menu,.ui-dd-menu,details){
+  background-color:var(--rm-surface);
+  border-color:var(--rm-line);
+}
+html[data-theme="dark"] #workspace-content :is(.card,.stat){background-color:var(--rm-surface)}
+html[data-theme="dark"] #workspace-content tr:nth-child(even) td{background-color:rgba(255,255,255,.02)}
+
+/* Form controls */
+html[data-theme="dark"] #workspace-content :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea),
+html[data-theme="dark"] .ui-dd-btn{
+  background-color:var(--rm-surface-2)!important;
+  color:var(--rm-text)!important;
+  border-color:rgba(213,242,104,.22)!important;
+}
+html[data-theme="dark"] #workspace-content ::placeholder{color:#8e9984;opacity:1}
+html[data-theme="dark"] .ui-dd-menu,html[data-theme="dark"] .ui-dd-list{background:var(--rm-surface-2);color:var(--rm-text);border-color:var(--rm-line)}
+html[data-theme="dark"] .ui-dd-menu :is(li,button,a),html[data-theme="dark"] .ui-dd-list :is(li,button,a){color:var(--rm-text)}
+
+/* Chips, pills, secondary buttons (keep lime primaries as they are) */
+html[data-theme="dark"] #workspace-content :is(#chief-chips button,#desk-chips button,.chip,.chips button,.filter button,.seg button,.tabs button):not(.on):not(.active):not(.primary){
+  background-color:var(--rm-surface-2);color:var(--rm-text-2);border-color:var(--rm-line);
+}
+html[data-theme="dark"] #workspace-content :is(.tag,.badge,span.tag,span.badge,.pill){
+  background-color:rgba(213,242,104,.10);color:#dbe9c6;border-color:rgba(213,242,104,.22);
+}
+html[data-theme="dark"] #workspace-content button:not(.primary):not(.on):not(.active):not([class*="lime"]):not(.nav){
+  border-color:var(--rm-line);
+}
+html[data-theme="dark"] .leaflet-bar a{background:var(--rm-surface-2);color:var(--rm-text);border-color:var(--rm-line)}
+html[data-theme="dark"] .leaflet-control-attribution{background:rgba(20,27,18,.8)!important;color:#a2ad96!important}
+html[data-theme="dark"] .leaflet-control-attribution a{color:#d1ec6c!important}
+
+/* --------------------------------------------------------------------------
+   3. Public pages — dark mode
+   -------------------------------------------------------------------------- */
+
+/* Shared surfaces that were hard-coded white */
+html[data-theme="dark"] :is(
+  main.wrap .card,.card.pop,.how,#plan-note,.crypto,section#crypto,.cur-toggle,.faq details,section.faq details,
+  article.about-price,form#review-form,.review-form,.enquiry-form,.public-form,.form-card,
+  article.sample-card,.sample-explainer,.overlay-copy,.concept-gallery-notice div,.gallery-callout,
+  .rm-preview-window,.rm-preview-list,.rm-preview-report,.rm-preview-next,.rm-preview-example-tag,
+  .rm-preview-choice,footer.site){
+  background:var(--rm-surface)!important;
+  border-color:var(--rm-line)!important;
+  color:var(--rm-text-2);
+}
+html[data-theme="dark"] .rm-preview-choice.is-active{background:rgba(213,242,104,.12)!important;border-color:rgba(213,242,104,.4)!important}
+html[data-theme="dark"] .adsense-footer{background:var(--rm-surface)!important;border-color:var(--rm-line)!important}
+
+/* Headings and copy inside those surfaces */
+html[data-theme="dark"] :is(main.wrap .card,.how,.crypto,.faq,article.about-price,form#review-form,
+  article.sample-card,.sample-explainer,.overlay-copy,.gallery-callout,.rm-preview-window,.public-main,.enquiry-intro,.form-top)
+  :is(h1,h2,h3,h4,strong,b,summary,.price,.amt,.amount){color:var(--rm-text)!important}
+html[data-theme="dark"] :is(main.wrap .card,.how,.crypto,.faq,article.about-price,form#review-form,
+  article.sample-card,.sample-explainer,.overlay-copy,.gallery-callout,.rm-preview-window,.public-main,.enquiry-intro,.enquiry-points,.form-top)
+  :is(p,li,label,span:not(.x-contact-icon):not(.dot),dd,td){color:var(--rm-text-2)}
+html[data-theme="dark"] :is(.card li,.card p,.tagline,.per,.sub,.hint,.form-privacy,.public-form-note,.sample-card p,.public-heading p){color:var(--rm-text-3)!important}
+html[data-theme="dark"] :is(.eyebrow,.x-kicker,.public-eyebrow,.sample-kicker,.overlay-copy .eyebrow,.mini-eyebrow){color:var(--rm-accent-text)!important}
+
+/* Page-level headings hard-coded to #0f1a0a on enquire/showcase */
+html[data-theme="dark"] :is(.public-main,.public-heading,.enquiry-intro,.form-top,.gallery-callout) :is(h1,h2,h3,h4){color:var(--rm-text)!important}
+html[data-theme="dark"] .rm-pre-split span,html[data-theme="dark"] h1 .rm-pre-split span{color:inherit!important}
+html[data-theme="dark"] .public-main label{color:var(--rm-text-2)!important}
+
+/* Form controls on public pages */
+html[data-theme="dark"] :is(.public-main,main.wrap,form#review-form,.enquiry-form,.crypto,.x-search) :is(input:not([type=checkbox]):not([type=radio]),select,textarea),
+html[data-theme="dark"] select#crypto-period,html[data-theme="dark"] select#crypto-tier,html[data-theme="dark"] select#crypto-coin,
+html[data-theme="dark"] .locale-select{
+  background-color:var(--rm-surface-2)!important;color:var(--rm-text)!important;border-color:rgba(213,242,104,.24)!important;
+}
+html[data-theme="dark"] :is(input,textarea)::placeholder{color:#8e9984!important;opacity:1}
+html[data-theme="dark"] .form-top span{background:rgba(213,242,104,.12)!important;color:var(--rm-accent-text)!important}
+
+/* Buttons */
+html[data-theme="dark"] :is(.cur-toggle button,.seg button,.x-tabs button):not(.on):not(.active){color:var(--rm-text-2)!important;background:transparent!important}
+html[data-theme="dark"] :is(.cur-toggle button,.x-tabs button).on{background:var(--rm-lime)!important;color:var(--rm-on-lime)!important}
+html[data-theme="dark"] :is(a.btn-ghost,.btn-ghost,.sample-card-actions a,.about-price a:not(.primary)){
+  background:transparent!important;color:var(--rm-text)!important;border-color:rgba(213,242,104,.35)!important;
+}
+html[data-theme="dark"] :is(button.submit,button.public-btn,a.public-btn,.gallery-callout a.public-btn,.x-search-go,.crypto button:not(.ui-dd-btn),.card .btn:not(.btn-ghost)){
+  background:var(--rm-lime)!important;color:var(--rm-on-lime)!important;border-color:var(--rm-lime)!important;
+}
+html[data-theme="dark"] a.rm-preview-report-link{color:var(--rm-accent-text)!important}
+html[data-theme="dark"] .sample-image,html[data-theme="dark"] .sample-figma{background-color:var(--rm-surface-2)!important;color:var(--rm-text-2)!important}
+
+/* Active nav pill in dark mode: lime pill with dark text, readable */
+html[data-theme="dark"] .pub-head nav.main > a[aria-current="page"],
+html[data-theme="dark"] .pub-head nav.main > a.on,
+html[data-theme="dark"] .pub-head nav.main > a.active{background:var(--rm-lime)!important;color:var(--rm-on-lime)!important}
+
+/* Footer: premium.css forces every <nav> white with a shadow; the footer columns
+   inherited that and became blank boxes in dark mode. Reset them. */
+.x-foot nav{background:transparent!important;box-shadow:none!important;border:0!important;padding:0!important;
+  position:static!important;animation:none!important;max-width:none!important}
+html[data-theme="dark"] .x-foot :is(nav a,a){color:var(--rm-text-2)!important}
+html[data-theme="dark"] .x-foot :is(h4,h5,strong,.x-contact-card b){color:var(--rm-text)!important}
+html[data-theme="dark"] .x-foot :is(small,.x-foot-bottom span,.x-contact-card small){color:var(--rm-text-3)!important}
+
+/* Old public-nav bar on enquire/showcase (premium.css: nav{background:#fff!important}) */
+html[data-theme="dark"] body > nav:not(.main),html[data-theme="dark"] .public-nav{background:rgba(12,16,11,.9)!important;border-color:var(--rm-line)!important}
+html[data-theme="dark"] body > nav:not(.main) a,html[data-theme="dark"] .public-nav a{color:var(--rm-text-2)}
+
+/* Body background on enquire/showcase was forced to #eef6d1!important */
+html[data-theme="dark"] body{background-color:#0b0f0a!important;color:var(--rm-text)}
+html[data-theme="dark"] .topbar :is(small,.muted,.date,time,.breadcrumbs span){color:var(--rm-text-3)}
+html[data-theme="dark"] .topbar :is(strong,b,.breadcrumbs strong){color:var(--rm-text)}
+
+/* Workspace dark — second pass (from probe.py / ws_contrast.py) */
+html[data-theme="dark"] #workspace-content :is(#empty-machine,#desk-board,#desk-form,#rm-provider-status,
+  #os-pipeline > li,#pf-stats > li,.ws-start,.ws-records,.desk-board,.desk-chat){
+  background:var(--rm-surface)!important;border-color:var(--rm-line)!important;
+}
+html[data-theme="dark"] #workspace-content :is(#desk-form,.desk-chat form){background:var(--rm-surface-2)!important}
+html[data-theme="dark"] #workspace-content .desk-msg.desk-assistant{background:var(--rm-surface-2)!important;color:var(--rm-text)!important}
+html[data-theme="dark"] #workspace-content .crew-actions button:not(.primary){background:var(--rm-surface-2)!important;color:var(--rm-text)!important;border-color:var(--rm-line)!important}
+html[data-theme="dark"] #workspace-content :is(.tag,.badge){background:rgba(213,242,104,.10)!important;color:#dbe9c6!important}
+html[data-theme="dark"] #workspace-content :is(.stat-value,[id^="metric-"]){color:var(--rm-text)!important}
+html[data-theme="dark"] #workspace-content :is(.ws-start-copy,.ops-subtle-note,.pipeline-footer,.footer-slogan){color:var(--rm-text-3)!important}
+/* Unclassed helper spans (captions, axis labels, footers) were 2.9–3.7:1 */
+html[data-theme="dark"] #workspace-content span:not([class]):not(button span):not(a.primary span):not(.primary span){color:var(--rm-text-3)}
+html[data-theme="dark"] #workspace-content :is(h1,h2,h3,h4,strong,b) span:not([class]){color:inherit}
+html[data-theme="dark"] .workspace-footer :is(span,a),html[data-theme="dark"] footer :is(.footer-slogan){color:var(--rm-text-3)!important}
+/* Topbar date */
+html[data-theme="dark"] .topbar #today{color:var(--rm-text-3)}
+html:not([data-theme="dark"]) .topbar #today{color:#59634f}
+html[data-theme="dark"] input[type=checkbox],html[data-theme="dark"] input[type=radio]{accent-color:#d5f268;color-scheme:dark}
+html[data-theme="dark"] .drawer-tabs button{color:var(--rm-text-3)!important}
+html[data-theme="dark"] .drawer-tabs button.active{color:var(--rm-accent-text)!important}
+html[data-theme="dark"] #workspace-content :is(.gbp-empty,.data-live){color:var(--rm-text-3)}
+html[data-theme="dark"] #workspace-content .data-live{color:var(--rm-accent-text)}
+html:not([data-theme="dark"]) #workspace-content :is(.gbp-empty,.code-block,.ops-notice){color:#4f5a45}
+
+/* public.css locks these to #1e2e15 !important */
+html[data-theme="dark"] :is(.public-heading p,.sample-card p,.sample-card-copy p,.enquiry-intro>p,.enquiry-points p,.sample-explainer){color:var(--rm-text-2)!important}
+html[data-theme="dark"] .enquiry-points strong{color:var(--rm-text)!important}
+html[data-theme="dark"] .sample-card :is(p,.sample-card-copy p){color:var(--rm-text-3)!important}
+
+/* ---- third pass (audit.py) ---- */
+/* Login owner page: the brand panel is dark; keep its lime eyebrow */
+html .brand .eyebrow{color:#d5f268!important}
+.trust small{color:#b3c2a2!important}
+.form .eyebrow,.meta{color:var(--rm-text-3)!important}
+
+/* Public nav links on enquire/showcase in dark mode (premium.css sets dark ink) */
+html[data-theme="dark"] .pub-head nav.main > a:not([aria-current="page"]):not(.on):not(.active){color:var(--rm-text-2)!important}
+
+/* Home: workspace preview small labels (light) */
+html:not([data-theme="dark"]) :is(.rm-preview-eyebrow,.rm-preview-overline,.rm-preview-example-tag,.rm-preview-next-label){color:var(--rm-accent-text)!important}
+html:not([data-theme="dark"]) :is(.rm-preview-choice-type,.rm-preview-domain,.rm-preview-disclaimer,.rm-preview-report span:not([class])){color:var(--rm-text-3)!important}
+html:not([data-theme="dark"]) article.x-card span:not([class]){color:var(--rm-text-3)}
+/* Home: finding number chips keep their light chip, so keep dark text */
+.rm-preview-finding-icon{color:#33421a!important}
+
+/* Enquire: step numbers sit on a pale lime chip in both themes */
+.enquiry-points span{color:#3f5214!important}
+html:not([data-theme="dark"]) :is(.form-top span,.enquiry-form-shell label span,.enquiry-form-shell small){color:var(--rm-text-3)!important}
+html[data-theme="dark"] :is(.enquiry-form-shell label span,.enquiry-form-shell small,label small){color:var(--rm-text-3)!important}
+
+/* Showcase dark: gallery notice + overlay copy */
+html[data-theme="dark"] .concept-gallery-notice span{color:var(--rm-text-2)!important}
+html[data-theme="dark"] .concept-gallery-notice span:first-child{color:var(--rm-accent-text)!important}
+html[data-theme="dark"] .overlay-copy p{color:var(--rm-text-3)!important}

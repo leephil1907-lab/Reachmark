@@ -2933,5 +2933,15 @@
   "tk.list": "Support tickets",
   "tk.list_p": "From signed-in clients. Also mailed to support@reachmarkdigital.xyz.",
   "tk.empty": "No tickets yet.",
-  "home.concepts_all": "See all design concepts"
+  "home.concepts_all": "See all design concepts",
+  "wsj.t_t7": "Outreach studio",
+  "wsj.t_b7": "Build campaigns from saved businesses. Nothing is sent until you approve it.",
+  "wsj.t_t8": "Enquiry inbox",
+  "wsj.t_b8": "Messages from your public pages land here, ready to answer or turn into a project.",
+  "wsj.t_t9": "Website samples",
+  "wsj.t_b9": "Concept sites you can show a prospect before any build starts.",
+  "wsj.t_t10": "Contracts, invoices and clients",
+  "wsj.t_b10": "Keep the paperwork beside the work: contracts, invoices and client plans in one place.",
+  "wsj.t_t11": "Replay any time",
+  "wsj.t_b11": "Open this tour again from “Take the tour” whenever you want a refresher."
 }

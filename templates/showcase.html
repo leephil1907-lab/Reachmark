@@ -30,7 +30,7 @@
 [data-theme="dark"] .banner-viewport, [data-theme="dark"] .carousel-viewport, [data-theme="dark"] .carousel-3d-hero{background:#1e2e1a!important;border-color:#2a3a22!important}
 [data-theme="dark"] .public-main, [data-theme="dark"] main{background:transparent !important}
 </style>
-<script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script></head><body class="public-page">
+<script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script>{% include '_theme_head.html' %}</head><body class="public-page">
 {% if gtm_id is defined and gtm_id %}<!-- Google Tag Manager (noscript) --><noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript><!-- End Google Tag Manager (noscript) -->{% endif %}{% include 'header-public.html' %}<main class="public-main"><header class="public-heading" data-motion="fade-up"><div class="public-eyebrow">{{ t('show.eyebrow') }}</div><h1 data-split>{{ t('show.h1a') }}<br>{{ t('show.h1b') }}</h1><p>{{ t('show.sub') }}</p></header>
 <!-- Concept gallery notice: these are original Reachmark design concepts, not client claims. -->
 <div class="premium-reveal concept-gallery-notice" style="max-width:1280px;margin:18px auto 0;padding:0 6%;">

@@ -25,7 +25,7 @@
   gap:10px;
   align-items:center;
 }
-.sidebar .brand-wordmark{width:148px;height:auto}
+.sidebar .brand-wordmark{width:176px;height:auto}
 #sidebar-toggle{
   width:30px;height:30px;border-radius:10px;margin-left:auto;
   background:rgba(213,242,104,.1);border:1px solid rgba(213,242,104,.2);
@@ -370,4 +370,34 @@ main{margin-left:252px;background:var(--ws-soft);min-height:100vh}
   .sidebar .nav-more[open] .nav.active{background:var(--ws-lime);color:#1a2110}
   .sidebar .nav-more[open] .nav b{display:inline-block!important}
   .sidebar .nav-more[open] .nav-group-label{display:none!important}
+}
+
+/* Sidebar ad: fixed 200×200 slot so it can never squeeze the navigation.
+   (data-ad-format=auto served a ~400px tall unit and the nav collapsed to one item.) */
+.adsense-sidebar{text-align:center;overflow:hidden}
+.adsense-sidebar-label{font:700 8px Manrope,Arial,sans-serif;letter-spacing:2px;color:#a9b39c;margin-bottom:8px;text-align:left}
+@media (min-width:641px){.sidebar nav{min-height:min(360px,50vh)!important}}
+.adsense-sidebar ins{max-height:200px;overflow:hidden}
+@media (max-height:1100px){.adsense-sidebar{display:none!important}}
+.profile{display:flex;align-items:center}
+.profile #profile-name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.profile-logout{flex:0 0 auto;display:inline-grid;place-items:center;padding:0 10px}
+.profile-logout span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+[data-theme="dark"] .ls-btn{background:#1b2418!important;color:#eef3e8!important;border-color:rgba(213,242,104,.22)!important}
+[data-theme="dark"] .ls-btn span{color:inherit!important}
+
+/* Phone topbar: one tidy row. Was wrapping into 3 rows that covered the page. */
+@media (max-width:640px){
+  .topbar{gap:8px}
+  .breadcrumbs{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .breadcrumbs .muted,.breadcrumbs .slash{display:none}
+  .top-right{flex-wrap:nowrap!important;gap:6px;margin-left:auto}
+  .top-right .data-live,.top-right #today,.top-right>a.text-link[href="/app"]{display:none!important}
+  .top-right #tour-btn{font-size:0!important;width:36px;min-width:36px;height:36px;padding:0!important;display:inline-grid;place-items:center;border-radius:999px}
+  .top-right #tour-btn::before{content:"?";font:800 15px Manrope,sans-serif}
+  .top-right .ls-btn{width:38px;min-width:38px;height:36px;padding:0!important;gap:0;justify-content:center;border-radius:999px!important;overflow:hidden}
+  .top-right .ls-btn>span:not(.chev),.top-right .ls-btn .chev{display:none!important}
+  .top-right .ls-wrap{flex:0 0 38px;width:38px}
+  .top-right .ls-menu{right:0;left:auto}
+  .top-right #theme-toggle{width:36px;height:36px;flex:0 0 36px}
 }

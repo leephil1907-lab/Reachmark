@@ -16,6 +16,40 @@ def _clean_secret(value):
         return ''
     return value
 
+# One Content-Security-Policy, built from a source list so prod and dev cannot drift.
+# Google Analytics / Tag Manager and AdSense's ad-quality endpoints must be allowed,
+# otherwise analytics silently record nothing and AdSense flags the inventory.
+_GOOGLE_ADS = ['https://pagead2.googlesyndication.com', 'https://googleads.g.doubleclick.net',
+               'https://tpc.googlesyndication.com', 'https://*.adtrafficquality.google',
+               'https://csi.gstatic.com', 'https://www.google.com']
+_GOOGLE_TAGS = ['https://www.googletagmanager.com', 'https://*.googletagmanager.com',
+                'https://www.google-analytics.com', 'https://*.google-analytics.com',
+                'https://analytics.google.com', 'https://*.analytics.google.com',
+                'https://stats.g.doubleclick.net', 'https://*.g.doubleclick.net']
+_TAWK = ['https://embed.tawk.to', 'https://va.tawk.to', 'https://*.tawk.to']
+_MAPS = ['https://maps.googleapis.com', 'https://maps.gstatic.com']
+_CSP_SOURCES = {
+    'default-src': ["'self'"],
+    'script-src': ["'self'", "'unsafe-inline'", *_GOOGLE_ADS, *_GOOGLE_TAGS, *_TAWK, *_MAPS],
+    'style-src': ["'self'", "'unsafe-inline'", 'https://embed.tawk.to', 'https://*.tawk.to'],
+    'img-src': ["'self'", 'data:', 'https://tile.openstreetmap.org', 'https://tile.openstreetmap.de',
+                'https://*.basemaps.cartocdn.com', *_MAPS, 'https://*.googleapis.com', 'https://*.ggpht.com',
+                *_GOOGLE_ADS, *_GOOGLE_TAGS, *_TAWK],
+    'font-src': ["'self'", 'https://*.tawk.to'],
+    'connect-src': ["'self'", *_GOOGLE_ADS, *_GOOGLE_TAGS, *_TAWK, 'wss://*.tawk.to',
+                    'https://maps.googleapis.com', 'https://places.googleapis.com'],
+    'frame-src': ["'self'", *_GOOGLE_ADS, 'https://www.googletagmanager.com', *_TAWK],
+    'object-src': ["'none'"],
+    'base-uri': ["'self'"],
+    'form-action': ["'self'"],
+}
+def _csp(extra=None):
+    parts = dict(_CSP_SOURCES, **(extra or {}))
+    return '; '.join(k + ' ' + ' '.join(dict.fromkeys(v)) for k, v in parts.items())
+_CSP_DEV = _csp()
+_CSP_PROD = _csp({'frame-ancestors': ["'self'"]})
+
+
 def install_security(app, db):
     production=os.getenv('APP_ENV')=='production'
     key=_clean_secret(os.getenv('SECRET_KEY','')); password_hash=_clean_secret(os.getenv('OWNER_PASSWORD_HASH',''))
@@ -144,7 +178,7 @@ def install_security(app, db):
     @app.after_request
     def security_headers(response):
         if production:response.headers['X-Frame-Options']='SAMEORIGIN'
-        response.headers['Content-Security-Policy']="default-src 'self'; script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://embed.tawk.to https://va.tawk.to https://*.tawk.to https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://embed.tawk.to https://*.tawk.to; img-src 'self' data: https://tile.openstreetmap.org https://tile.openstreetmap.de https://*.basemaps.cartocdn.com https://maps.gstatic.com https://maps.googleapis.com https://*.googleapis.com https://*.ggpht.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://*.tawk.to https://embed.tawk.to https://va.tawk.to; font-src 'self' https://*.tawk.to; connect-src 'self' https://pagead2.googlesyndication.com https://*.tawk.to https://embed.tawk.to https://va.tawk.to wss://*.tawk.to https://maps.googleapis.com https://places.googleapis.com; frame-src 'self' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://*.tawk.to https://embed.tawk.to https://va.tawk.to; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'" if production else "default-src 'self'; script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://embed.tawk.to https://va.tawk.to https://*.tawk.to https://maps.googleapis.com https://maps.gstatic.com; style-src 'self' 'unsafe-inline' https://embed.tawk.to https://*.tawk.to; img-src 'self' data: https://tile.openstreetmap.org https://tile.openstreetmap.de https://*.basemaps.cartocdn.com https://maps.gstatic.com https://maps.googleapis.com https://*.googleapis.com https://*.ggpht.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://*.tawk.to https://embed.tawk.to https://va.tawk.to; font-src 'self' https://*.tawk.to; connect-src 'self' https://pagead2.googlesyndication.com https://*.tawk.to https://embed.tawk.to https://va.tawk.to wss://*.tawk.to https://maps.googleapis.com https://places.googleapis.com; frame-src 'self' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://*.tawk.to https://embed.tawk.to https://va.tawk.to; object-src 'none'; base-uri 'self'; form-action 'self'"
+        response.headers['Content-Security-Policy']=_CSP_PROD if production else _CSP_DEV
         if production:response.headers['Strict-Transport-Security']='max-age=31536000'
         if request.path in ('/login','/logout'):response.headers['Cache-Control']='no-store';response.headers['X-Robots-Tag']='noindex, nofollow'
         return response

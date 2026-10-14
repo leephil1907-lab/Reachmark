@@ -18,7 +18,7 @@
   display:flex;align-items:center;gap:16px;
 }
 .pub-logo{display:flex;align-items:center;flex:0 1 auto;min-width:0}
-.pub-logo img{height:28px;width:auto;max-width:min(168px,46vw);display:block}
+.pub-logo img{height:42px;width:auto;max-width:min(200px,46vw);display:block}
 .pub-logo .logo-on-dark{display:none}
 nav.main{display:flex;align-items:center;gap:2px;margin-left:10px}
 nav.main a{
@@ -76,7 +76,7 @@ nav.main a[aria-current="page"]{background:#20251f;color:#fff}
   .pub-menu a{min-height:44px}
 }
 @media(max-width:480px){
-  .pub-logo img{height:24px;max-width:min(148px,52vw)}
+  .pub-logo img{height:34px;max-width:min(160px,48vw)}
   .head-cta .btn{padding:9px 12px;font-size:12px}
 }
 [data-theme="dark"] .pub-head{

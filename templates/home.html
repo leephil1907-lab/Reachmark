@@ -22,7 +22,7 @@
 <link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css"><link rel="stylesheet" href="/static/home-product.css">
 <script src="/static/i18n.js"></script>
 {% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}
-</head>
+{% include '_theme_head.html' %}</head>
 <body class="x-site">
 {% if gtm_id is defined and gtm_id %}<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>{% endif %}
 {% include 'header-public.html' %}

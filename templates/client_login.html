@@ -26,9 +26,11 @@ button[type=submit]:disabled{opacity:.65;cursor:wait;transform:none}
 .locale-select{margin-top:18px;font:700 12px Manrope,sans-serif;padding:8px 10px;border-radius:999px;border:1px solid rgba(32,37,31,.12);background:#fff;color:#20251f;cursor:pointer}
 #verify-note{display:none;margin:12px 0 0;padding:12px;border-radius:12px;background:#eef6d1;border:1px solid #d8e9b8;color:#2d4a0a;font:600 12px Manrope,sans-serif}
 @media(max-width:520px){.auth-card{padding:24px 18px}.auth-card h1{font-size:26px}}
-</style></head><body>
+</style><link rel="stylesheet" href="/static/auth.css">{% with theme_init=false %}{% include '_theme_head.html' %}{% endwith %}</head><body>
 <div id="rm-progress" aria-hidden="true"></div>
-<a href="/" class="auth-logo" aria-label="Reachmark home"><img src="/static/logo-inverse.svg" alt="Reachmark"></a>
+{% include '_auth_aside.html' %}
+<main class="auth-main">
+<a href="/" class="auth-logo" aria-label="Reachmark home"><img src="/static/logo-inverse.svg" alt="Reachmark" width="174" height="48"></a>
 <div class="auth-card">
   <h1>{{ t('au.c_f_h') }}</h1>
   <p class="lead">{{ t('au.c_lead') }}</p>
@@ -48,6 +50,7 @@ button[type=submit]:disabled{opacity:.65;cursor:wait;transform:none}
   <p class="auth-note" style="font-size:11px"><a href="/terms">{{ t('foot.terms') }}</a> · <a href="/privacy">{{ t('foot.privacy') }}</a></p>
   {% include 'locale-switcher.html' %}
 </div>
+</main>
 <script src="/static/i18n.js"></script>
 <script>
 var T_=window.T||function(k,f){return f;};

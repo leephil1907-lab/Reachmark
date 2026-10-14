@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/static/xdesign.css">
 <link rel="stylesheet" href="/static/opportunity.css">
 <script src="/static/i18n.js"></script>
-</head>
+{% with theme_init=false %}{% include '_theme_head.html' %}{% endwith %}</head>
 <body class="oe-public">
   <header class="oe-top">
     <a href="/" class="oe-logo"><img src="/static/logo-primary.svg" alt="Reachmark"></a>

@@ -2933,5 +2933,15 @@
   "tk.list": "Support-Tickets",
   "tk.list_p": "Von angemeldeten Kunden. Auch an support@reachmarkdigital.xyz.",
   "tk.empty": "Noch keine Tickets.",
-  "home.concepts_all": "Alle Designkonzepte ansehen"
+  "home.concepts_all": "Alle Designkonzepte ansehen",
+  "wsj.t_t7": "Outreach-Studio",
+  "wsj.t_b7": "Kampagnen aus gespeicherten Unternehmen bauen. Nichts wird ohne Ihre Freigabe gesendet.",
+  "wsj.t_t8": "Anfragen-Postfach",
+  "wsj.t_b8": "Nachrichten von Ihren öffentlichen Seiten landen hier – bereit zur Antwort oder als neues Projekt.",
+  "wsj.t_t9": "Website-Beispiele",
+  "wsj.t_b9": "Konzeptseiten, die Sie Interessenten zeigen können, bevor gebaut wird.",
+  "wsj.t_t10": "Verträge, Rechnungen und Kunden",
+  "wsj.t_b10": "Der Papierkram direkt neben der Arbeit: Verträge, Rechnungen und Kundenpläne an einem Ort.",
+  "wsj.t_t11": "Jederzeit wiederholen",
+  "wsj.t_b11": "Starten Sie diese Tour jederzeit erneut über „Tour starten“."
 }

@@ -48,7 +48,7 @@
 .about-wa svg{flex:0 0 auto}
 @media(max-width:720px){.about-founder,.about-price-grid{grid-template-columns:1fr}.about-founder{padding:18px}}
 </style>
-</head>
+{% include '_theme_head.html' %}</head>
 <body class="x-site">
 {% if gtm_id is defined and gtm_id %}<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>{% endif %}
 {% include 'header-public.html' %}

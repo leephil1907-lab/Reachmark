@@ -2933,5 +2933,15 @@
   "tk.list": "Tickets d’assistance",
   "tk.list_p": "Des clients connectés. Aussi envoyés à support@reachmarkdigital.xyz.",
   "tk.empty": "Aucun ticket pour l’instant.",
-  "home.concepts_all": "Voir tous les concepts de design"
+  "home.concepts_all": "Voir tous les concepts de design",
+  "wsj.t_t7": "Studio de prospection",
+  "wsj.t_b7": "Créez des campagnes à partir des entreprises enregistrées. Rien ne part sans votre accord.",
+  "wsj.t_t8": "Boîte des demandes",
+  "wsj.t_b8": "Les messages de vos pages publiques arrivent ici, prêts à recevoir une réponse ou à devenir un projet.",
+  "wsj.t_t9": "Exemples de sites",
+  "wsj.t_b9": "Des sites concepts à montrer à un prospect avant de commencer la création.",
+  "wsj.t_t10": "Contrats, factures et clients",
+  "wsj.t_b10": "La paperasse à côté du travail : contrats, factures et offres clients au même endroit.",
+  "wsj.t_t11": "À revoir quand vous voulez",
+  "wsj.t_b11": "Relancez cette visite depuis « Faire la visite » dès que vous en avez besoin."
 }

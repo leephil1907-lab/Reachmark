@@ -1,0 +1,26 @@
+{# Brand panel for sign-in / sign-up (desktop). Decorative layers are aria-hidden. #}
+<aside class="auth-aside" aria-label="Reachmark">
+  <div class="auth-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="auth-grid" aria-hidden="true"></div>
+  <a href="/" class="auth-aside-logo" aria-label="{{ t('common.home_aria') }}"><img src="/static/logo-inverse.svg" alt="Reachmark" width="290" height="80"></a>
+  <div class="auth-aside-copy">
+    <p class="auth-kicker">{{ t('home.kicker') }}</p>
+    <h2>{{ t('home.hero_h1a') }} <em>{{ t('home.hero_h1b') }}</em></h2>
+    <p>{{ t('home.sub') }}</p>
+    <ol class="auth-steps">
+      <li><span>01</span>{{ t('home.proof_find') }}</li>
+      <li><span>02</span>{{ t('home.proof_diagnose') }}</li>
+      <li><span>03</span>{{ t('home.proof_approve') }}</li>
+    </ol>
+  </div>
+  <div class="auth-float" aria-hidden="true">
+    <div class="auth-chip a"><b>3</b> observations</div>
+    <div class="auth-report">
+      <small>Digital Opportunity Report</small>
+      <strong>Harbour Street Bakery</strong>
+      <div class="bar"><span style="width:78%"></span></div>
+      <ul><li>Mobile menu hides the call button</li><li>No booking path on the homepage</li><li>Contact form returns an error</li></ul>
+    </div>
+    <div class="auth-chip b">✓ You approve every send</div>
+  </div>
+</aside>

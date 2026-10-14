@@ -40,7 +40,7 @@
 /* Public report */
 .oe-public{margin:0;background:#fbfbfb;color:#161a16;font:16px/1.7 Manrope,'DM Sans',sans-serif}
 .oe-top{max-width:820px;margin:0 auto;padding:22px 24px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:13px;color:#5c6658}
-.oe-logo img{height:24px;display:block}
+.oe-logo img{height:36px;width:auto;display:block}
 .oe-sheet{max-width:820px;margin:0 auto;padding:28px 24px 64px}
 .oe-sheet h1{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:clamp(32px,5vw,48px);line-height:1.15;letter-spacing:-.03em;margin:8px 0 12px}
 .oe-sheet h2{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:28px;margin:0 0 12px}

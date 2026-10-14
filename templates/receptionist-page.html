@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="/static/receptionist-page.css">
 <script src="/static/i18n.js"></script>
 <script type="application/ld+json">{{ structured|tojson if structured is defined else {} | tojson }}</script>
-</head>
+{% include '_theme_head.html' %}</head>
 <body class="x-site rx-page">
 {% if gtm_id is defined and gtm_id %}<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>{% endif %}
 {% include 'header-public.html' %}

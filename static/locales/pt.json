@@ -2933,5 +2933,15 @@
   "tk.list": "Tickets de suporte",
   "tk.list_p": "De clientes com sessão. Também enviados para support@reachmarkdigital.xyz.",
   "tk.empty": "Ainda não há tickets.",
-  "home.concepts_all": "Ver todos os conceitos de design"
+  "home.concepts_all": "Ver todos os conceitos de design",
+  "wsj.t_t7": "Estúdio de prospecção",
+  "wsj.t_b7": "Crie campanhas a partir de negócios salvos. Nada é enviado sem a sua aprovação.",
+  "wsj.t_t8": "Caixa de pedidos",
+  "wsj.t_b8": "As mensagens das suas páginas públicas chegam aqui, prontas para responder ou virar projeto.",
+  "wsj.t_t9": "Exemplos de sites",
+  "wsj.t_b9": "Sites conceito que você pode mostrar a um cliente antes de começar a construir.",
+  "wsj.t_t10": "Contratos, faturas e clientes",
+  "wsj.t_b10": "A papelada ao lado do trabalho: contratos, faturas e planos de clientes num só lugar.",
+  "wsj.t_t11": "Reveja quando quiser",
+  "wsj.t_b11": "Abra este tour novamente em “Fazer o tour” sempre que precisar."
 }
