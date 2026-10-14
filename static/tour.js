@@ -17,6 +17,9 @@
   var overlay = null;
   var card = null;
   var target = null;
+  var keyHandler = null;
+  var trigger = null;
+  var previousTabindex = null;
 
   function mark() {
     try { window.localStorage.setItem(KEY, '1'); } catch (e) { /* private mode: tour simply repeats */ }
@@ -25,41 +28,65 @@
     try { return !!window.localStorage.getItem(KEY); } catch (e) { return true; }
   }
   function clearTarget() {
-    if (target) { target.classList.remove('tour-spot'); target = null; }
+    if (!target) return;
+    target.classList.remove('tour-spot');
+    target.removeAttribute('data-tour-active');
+    if (previousTabindex === null) target.removeAttribute('tabindex');
+    else target.setAttribute('tabindex', previousTabindex);
+    target = null;
+    previousTabindex = null;
   }
   function end() {
     clearTarget();
     if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
     overlay = null;
     card = null;
+    if (keyHandler) {
+      document.removeEventListener('keydown', keyHandler);
+      keyHandler = null;
+    }
     mark();
+    if (trigger && trigger.isConnected && typeof trigger.focus === 'function') trigger.focus({ preventScroll: true });
+    trigger = null;
   }
   function show(i) {
     index = Math.max(0, Math.min(STEPS.length - 1, i));
     var step = STEPS[index];
     clearTarget();
     if (typeof window.navigate === 'function') window.navigate(step.page);
-    target = document.querySelector(step.sel) || document.getElementById('page-' + step.page);
+    target = document.querySelector(step.sel) ||
+      document.querySelector('#page-' + step.page + ' .page-heading') ||
+      document.getElementById('page-' + step.page);
     if (target) {
+      previousTabindex = target.hasAttribute('tabindex') ? target.getAttribute('tabindex') : null;
+      if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
       target.classList.add('tour-spot');
-      if (target.scrollIntoView) target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      target.setAttribute('data-tour-active', 'true');
+      if (target.scrollIntoView) {
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        target.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+      }
     }
     var dots = STEPS.map(function (_, n) {
       return '<span class="' + (n === index ? 'on' : '') + '"></span>';
     }).join('');
     card.innerHTML = '<p class="tour-step">' + T_('wsj.t_step','Step {n} of {m}').replace('{n}', index + 1).replace('{m}', STEPS.length) + '</p>' +
       '<h3>' + step.title + '</h3><p>' + step.body + '</p>' +
-      '<div class="tour-dots">' + dots + '</div>' +
+      '<div class="tour-dots" aria-hidden="true">' + dots + '</div>' +
       '<div class="tour-btns"><button type="button" data-tour="back"' +
       (index === 0 ? ' disabled' : '') + '>' + T_('wsj.t_back','Back') + '</button>' +
       '<button type="button" data-tour="skip">' + T_('wsj.t_skip','Skip') + '</button>' +
       '<button type="button" data-tour="next" class="primary">' +
       (index === STEPS.length - 1 ? T_('wsj.t_finish','Finish') : T_('wsj.t_next','Next')) + '</button></div>';
+    var nextButton = card.querySelector('[data-tour="next"]');
+    if (nextButton) nextButton.focus({ preventScroll: true });
   }
   function start() {
     if (overlay) end();
+    trigger = document.activeElement;
     overlay = document.createElement('div');
     overlay.className = 'tour-overlay';
+    overlay.setAttribute('aria-label', T_('wsj.t_aria','Workspace tour'));
     card = document.createElement('div');
     card.className = 'tour-card';
     card.setAttribute('role', 'dialog');
@@ -75,12 +102,20 @@
       } else if (action === 'back') show(index - 1);
       else if (action === 'skip') end();
     });
-    document.addEventListener('keydown', function esc(event) {
-      if (event.key === 'Escape' && overlay) {
+    keyHandler = function (event) {
+      if (!overlay) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
         end();
-        document.removeEventListener('keydown', esc);
+      } else if (event.key === 'ArrowRight' && index < STEPS.length - 1) {
+        event.preventDefault();
+        show(index + 1);
+      } else if (event.key === 'ArrowLeft' && index > 0) {
+        event.preventDefault();
+        show(index - 1);
       }
-    });
+    };
+    document.addEventListener('keydown', keyHandler);
     show(0);
   }
   function startIfNew() { if (!seen() && !location.hash) start(); }  // deep links win: the tour must not steal them
