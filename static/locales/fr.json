@@ -73,8 +73,8 @@
   "about.founder_h2": "pour que vous ayez le client.",
   "about.founder_k": "MARQUE PERSONNELLE · POURQUOI J’AI CRÉÉ REACHMARK",
   "about.founder_mark": "MARQUE DU FONDATEUR · APERÇUS FAITS MAIN",
-  "about.founder_p1": "Je suis {name} — fondateur de Reachmark. J’ai commencé par chercher sur OpenStreetMap de vraies entreprises sans site ou avec un site cassé, puis un aperçu 3D en direct qu’elles pouvaient ouvrir et accepter. Pas de listes fictives. Pas de devinettes. Juste un meilleur premier bonjour.",
-  "about.founder_p2": "Chaque modèle s’inspire de Figma Community, est pleinement fonctionnel, et doit paraître premium dès le premier clic. Ma promesse : si je ne peux pas le montrer, je ne le vends pas. Vous voyez l’aperçu avant de payer.",
+  "about.founder_p1": "Je suis {name}, et je construis Reachmark. Tout est parti d’un constat que je n’arrivais plus à ignorer : des entreprises qui font un travail vraiment bon perdent, sans bruit, des clients dont elles n’entendront jamais parler, parce que leur site ne montre pas qui elles sont vraiment. Alors je suis allé les chercher sur OpenStreetMap — de vraies entreprises sans site, ou avec un site cassé — et j’ai créé des aperçus en direct qu’elles pouvaient ouvrir et auxquels elles pouvaient vraiment dire oui. Pas de fausses listes. Pas de devinettes.",
+  "about.founder_p2": "Je le construis une amélioration honnête à la fois, avec une règle simple : être utile, dire la vérité et montrer le travail. Si je ne peux pas livrer quelque chose, je ne le vends pas — vous voyez l’aperçu avant de payer. Je n’ai pas toutes les réponses, et j’ai arrêté d’attendre de les avoir. Si vous avez vous aussi une idée en tête, voici ce que j’ai appris : commencez avant de vous sentir prêt, continuez d’apprendre en chemin, et faites en sorte que la prochaine version soit un peu meilleure que la précédente.",
   "about.founder_pricing": "Voir les tarifs ↓",
   "about.founder_role": "Fondateur · Reachmark",
   "about.global": "Mondial",
@@ -2943,5 +2943,8 @@
   "wsj.t_t10": "Contrats, factures et clients",
   "wsj.t_b10": "La paperasse à côté du travail : contrats, factures et offres clients au même endroit.",
   "wsj.t_t11": "À revoir quand vous voulez",
-  "wsj.t_b11": "Relancez cette visite depuis « Faire la visite » dès que vous en avez besoin."
+  "wsj.t_b11": "Relancez cette visite depuis « Faire la visite » dès que vous en avez besoin.",
+  "home.founder_k": "Le mot du fondateur",
+  "home.founder_q": "Une bonne entreprise ne devrait pas perdre de clients simplement parce que son site ne lui rend pas justice. J’ai créé Reachmark pour repérer ces écarts et aider à les combler — honnêtement, preuves à l’appui.",
+  "home.founder_link": "Pourquoi je l’ai créé"
 }

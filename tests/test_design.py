@@ -193,3 +193,26 @@ class RatingTests(CrewBase):
         with module.db() as c:
             columns = {row[1] for row in c.execute('PRAGMA table_info(review_responses)')}
         self.assertIn('rating', columns)
+
+
+def test_home_follows_standard_landing_order():
+    """Hero → product → try → how → trust → shots → why → gallery → plans → founder → CTA."""
+    from pathlib import Path
+    home = (Path(__file__).resolve().parents[1] / 'templates' / 'home.html').read_text(encoding='utf-8')
+    order = ['class="x-hero"', 'id="sample-report"', 'id="try-url"', 'class="x-pipe"', 'class="x-trust"',
+             'class="x-shots"', 'class="x-plain"', 'class="x-concepts"', 'class="x-plans"',
+             'class="x-founder"', 'class="x-cta"']
+    pos = [home.index(m) for m in order]
+    assert pos == sorted(pos), dict(zip(order, pos))
+    assert 'href="/about#founder"' in home
+
+
+def test_founder_copy_present_in_every_locale():
+    import json
+    from pathlib import Path
+    loc = Path(__file__).resolve().parents[1] / 'static' / 'locales'
+    for f in loc.glob('*.json'):
+        d = json.loads(f.read_text(encoding='utf-8'))
+        for k in ('home.founder_k', 'home.founder_q', 'home.founder_link', 'about.founder_p1', 'about.founder_p2'):
+            assert d.get(k), f'{f.name} missing {k}'
+        assert '{name}' in d['about.founder_p1'], f.name

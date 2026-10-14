@@ -241,3 +241,70 @@ html[data-theme="dark"] :is(.enquiry-form-shell label span,.enquiry-form-shell s
 html[data-theme="dark"] .concept-gallery-notice span{color:var(--rm-text-2)!important}
 html[data-theme="dark"] .concept-gallery-notice span:first-child{color:var(--rm-accent-text)!important}
 html[data-theme="dark"] .overlay-copy p{color:var(--rm-text-3)!important}
+
+/* --------------------------------------------------------------------------
+   4. Ambient desktop background — public pages
+   A slow-drifting colour mesh (::before) + grain, faint grid and a soft
+   cursor spotlight (::after). Desktop only, both themes, GPU-friendly
+   (transform-only animation), and fully still for prefers-reduced-motion.
+   -------------------------------------------------------------------------- */
+@media (min-width:1024px){
+  /* Make body the stacking context so the z-index:-1 layers paint above its
+     background colour (html has its own background, so body's isn't the canvas). */
+  :is(body.x-site,body.x-public,body.public-page){isolation:isolate}
+  :is(body.x-site,body.x-public,body.public-page)::before,
+  :is(body.x-site,body.x-public,body.public-page)::after{
+    content:"";position:fixed;pointer-events:none;z-index:-1;
+  }
+  :is(body.x-site,body.x-public,body.public-page)::before{
+    inset:-18%;width:auto;height:auto;opacity:1;
+    -webkit-mask-image:none;mask-image:none;
+    background:
+      radial-gradient(38% 34% at 14% 18%, rgba(213,242,104,.50), transparent 70%),
+      radial-gradient(30% 30% at 86% 12%, rgba(134,222,192,.34), transparent 70%),
+      radial-gradient(34% 30% at 72% 84%, rgba(255,198,150,.26), transparent 72%),
+      radial-gradient(30% 28% at 22% 82%, rgba(186,176,255,.22), transparent 72%),
+      radial-gradient(24% 22% at 50% 46%, rgba(213,242,104,.18), transparent 70%);
+    filter:saturate(1.05);
+    animation:rm-drift 38s ease-in-out infinite alternate;
+    will-change:transform;
+  }
+  :is(body.x-site,body.x-public,body.public-page)::after{
+    inset:0;
+    background:
+      radial-gradient(520px 420px at var(--rm-mx,50%) var(--rm-my,24%), rgba(213,242,104,.20), transparent 70%),
+      linear-gradient(rgba(32,37,31,.045) 1px, transparent 1px) 0 0/56px 56px,
+      linear-gradient(90deg, rgba(32,37,31,.045) 1px, transparent 1px) 0 0/56px 56px,
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .32 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity:.5;
+    -webkit-mask-image:radial-gradient(120% 90% at 50% 20%, #000 40%, transparent 100%);
+            mask-image:radial-gradient(120% 90% at 50% 20%, #000 40%, transparent 100%);
+  }
+  html[data-theme="dark"] :is(body.x-site,body.x-public,body.public-page)::before{
+    opacity:1;filter:none;
+    background:
+      radial-gradient(38% 34% at 14% 18%, rgba(213,242,104,.15), transparent 70%),
+      radial-gradient(30% 30% at 86% 12%, rgba(64,206,170,.13), transparent 70%),
+      radial-gradient(34% 30% at 72% 84%, rgba(134,112,255,.12), transparent 72%),
+      radial-gradient(30% 28% at 22% 82%, rgba(255,170,92,.07), transparent 72%),
+      radial-gradient(24% 22% at 50% 46%, rgba(213,242,104,.07), transparent 70%);
+  }
+  html[data-theme="dark"] :is(body.x-site,body.x-public,body.public-page)::after{
+    background:
+      radial-gradient(520px 420px at var(--rm-mx,50%) var(--rm-my,24%), rgba(213,242,104,.10), transparent 70%),
+      linear-gradient(rgba(213,242,104,.035) 1px, transparent 1px) 0 0/56px 56px,
+      linear-gradient(90deg, rgba(213,242,104,.035) 1px, transparent 1px) 0 0/56px 56px,
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity:.6;
+  }
+  /* The static aurora photo now sits on top of the live mesh as a soft wash */
+  .x-aurora{opacity:.28}
+}
+@keyframes rm-drift{
+  0%  {transform:translate3d(-4%,-3%,0) rotate(0deg)  scale(1)}
+  50% {transform:translate3d(3%,2%,0)  rotate(7deg)  scale(1.08)}
+  100%{transform:translate3d(-2%,4%,0) rotate(-5deg) scale(1.03)}
+}
+@media (prefers-reduced-motion:reduce){
+  :is(body.x-site,body.x-public,body.public-page)::before{animation:none!important}
+}

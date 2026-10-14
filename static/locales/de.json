@@ -73,8 +73,8 @@
   "about.founder_h2": "damit Sie den Kunden bekommen.",
   "about.founder_k": "PERSONAL BRAND · WARUM ICH REACHMARK GEBAUT HABE",
   "about.founder_mark": "GRÜNDERMARKE · HANDGEMACHTE VORSCHAUEN",
-  "about.founder_p1": "Ich bin {name} — Gründer von Reachmark. Ich habe auf OpenStreetMap echte Betriebe ohne Website oder mit einer kaputten gesucht und dann eine live 3D-Vorschau gebaut, die sie öffnen und ja sagen konnten. Keine Fake-Listen. Kein Raten. Nur ein besseres erstes Hallo.",
-  "about.founder_p2": "Jede Vorlage ist von Figma Community inspiriert, voll funktionsfähig und soll sich vom ersten Klick an premium anfühlen. Mein Versprechen: wenn ich es nicht zeigen kann, verkaufe ich es nicht. Sie sehen die Vorschau, bevor Sie zahlen.",
+  "about.founder_p1": "Ich bin {name} und baue Reachmark. Angefangen hat es mit einem Muster, das mir immer wieder auffiel: Unternehmen, die wirklich gute Arbeit leisten, verlieren still und leise Kunden, von denen sie nie erfahren werden – weil ihre Website nicht zeigt, wer sie wirklich sind. Also habe ich auf OpenStreetMap nach ihnen gesucht – echte Betriebe ohne Website oder mit einer kaputten – und Live-Vorschauen gebaut, die sie öffnen und zu denen sie wirklich Ja sagen konnten. Keine erfundenen Listen. Kein Raten.",
+  "about.founder_p2": "Ich baue es eine ehrliche Verbesserung nach der anderen, mit einer einfachen Regel: nützlich sein, die Wahrheit sagen und die Arbeit zeigen. Was ich nicht liefern kann, verkaufe ich nicht – Sie sehen die Vorschau, bevor Sie bezahlen. Ich habe nicht alles durchschaut, und ich habe aufgehört, darauf zu warten. Wenn Sie selbst auf einer Idee sitzen, hier ist, was ich gelernt habe: Fangen Sie an, bevor Sie sich bereit fühlen, lernen Sie unterwegs weiter und machen Sie die nächste Version ein kleines bisschen besser als die letzte.",
   "about.founder_pricing": "Preise ansehen ↓",
   "about.founder_role": "Gründer · Reachmark",
   "about.global": "Global",
@@ -2943,5 +2943,8 @@
   "wsj.t_t10": "Verträge, Rechnungen und Kunden",
   "wsj.t_b10": "Der Papierkram direkt neben der Arbeit: Verträge, Rechnungen und Kundenpläne an einem Ort.",
   "wsj.t_t11": "Jederzeit wiederholen",
-  "wsj.t_b11": "Starten Sie diese Tour jederzeit erneut über „Tour starten“."
+  "wsj.t_b11": "Starten Sie diese Tour jederzeit erneut über „Tour starten“.",
+  "home.founder_k": "Vom Gründer",
+  "home.founder_q": "Gute Unternehmen sollten keine Kunden verlieren, nur weil ihre Website ihnen nicht gerecht wird. Ich habe Reachmark gebaut, um diese Lücken zu finden und sie schließen zu helfen – ehrlich und mit den Belegen auf dem Tisch.",
+  "home.founder_link": "Warum ich es gebaut habe"
 }

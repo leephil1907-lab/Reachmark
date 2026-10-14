@@ -73,8 +73,8 @@
   "about.founder_h2": "para que tú consigas el cliente.",
   "about.founder_k": "MARCA PERSONAL · POR QUÉ CONSTRUÍ REACHMARK",
   "about.founder_mark": "MARCA DEL FUNDADOR · PREVIEWS HECHOS A MANO",
-  "about.founder_p1": "Soy {name} — fundador de Reachmark. Empecé buscando en OpenStreetMap negocios reales sin web o con una rota, y luego un preview 3D en vivo que pudieran abrir y decir que sí. Sin listas falsas. Sin adivinar. Solo un mejor primer hola.",
-  "about.founder_p2": "Cada plantilla está inspirada en Figma Community, es funcional y se siente premium desde el primer clic. Mi promesa: si no puedo mostrarlo, no lo vendo. Ves el preview antes de pagar.",
+  "about.founder_p1": "Soy {name} y construyo Reachmark. Todo empezó con algo que no dejaba de ver: negocios que hacen un trabajo realmente bueno y pierden, sin darse cuenta, clientes de los que nunca sabrán nada, porque su web no muestra quiénes son de verdad. Así que salí a buscarlos en OpenStreetMap —negocios reales sin web o con una rota— y creé previews en vivo que pudieran abrir y a los que pudieran decir que sí. Sin listas falsas. Sin suposiciones.",
+  "about.founder_p2": "Lo construyo una mejora honesta a la vez, con una regla sencilla: ser útil, decir la verdad y mostrar el trabajo. Si no puedo entregar algo, no lo vendo: ves el preview antes de pagar. No lo tengo todo resuelto, y he dejado de esperar a tenerlo. Si tú también tienes una idea guardada, esto es lo que he aprendido: empieza antes de sentirte listo, sigue aprendiendo por el camino y haz que la próxima versión sea un poco mejor que la anterior.",
   "about.founder_pricing": "Ver precios ↓",
   "about.founder_role": "Fundador · Reachmark",
   "about.global": "Global",
@@ -2943,5 +2943,8 @@
   "wsj.t_t10": "Contratos, facturas y clientes",
   "wsj.t_b10": "El papeleo junto al trabajo: contratos, facturas y planes de clientes en un solo lugar.",
   "wsj.t_t11": "Repítelo cuando quieras",
-  "wsj.t_b11": "Vuelve a abrir este recorrido desde “Hacer el recorrido” siempre que lo necesites."
+  "wsj.t_b11": "Vuelve a abrir este recorrido desde “Hacer el recorrido” siempre que lo necesites.",
+  "home.founder_k": "Del fundador",
+  "home.founder_q": "Un buen negocio no debería perder clientes solo porque su web no le hace justicia. Creé Reachmark para encontrar esas brechas y ayudar a cerrarlas, con honestidad y con la evidencia sobre la mesa.",
+  "home.founder_link": "Lee por qué lo creé"
 }

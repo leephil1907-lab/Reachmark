@@ -73,8 +73,8 @@
   "about.founder_h2": "to be seen.",
   "about.founder_k": "PERSONAL BRAND · WHY I BUILT REACHMARK",
   "about.founder_mark": "FOUNDER'S MARK · HANDCRAFTED PREVIEWS",
-  "about.founder_p1": "I’m {name}, the builder behind Reachmark. I’m creating this platform around a problem I keep coming back to: good businesses can be overlooked when their online presence doesn’t show the quality of what they do. Reachmark is my way of turning that gap into an opportunity—with real discovery, thoughtful design, and practical tools that help businesses take their next step.",
-  "about.founder_p2": "I’m building Reachmark one improvement at a time, with a simple standard: be useful, be honest, and show the work. I believe you don’t need to have everything figured out before you begin; you need the courage to start, the patience to learn, and the consistency to make each version better than the last. That’s the mindset behind this project—and the future I’m working toward.",
+  "about.founder_p1": "I’m {name}, and I build Reachmark. It started with a pattern I couldn’t stop noticing: businesses doing genuinely good work, quietly losing customers they’ll never hear about, because their website doesn’t show who they really are. So I went looking for them on OpenStreetMap — real businesses with no site, or a broken one — and built live previews they could open and actually say yes to. No fake lists. No guessing.",
+  "about.founder_p2": "I’m building it one honest improvement at a time, with a simple rule: be useful, tell the truth, and show the work. If I can’t deliver something, I won’t sell it — you see the preview before you pay. I don’t have everything figured out, and I’ve stopped waiting until I do. If you’re sitting on an idea of your own, here’s what I’ve learned: start before you feel ready, keep learning as you go, and make the next version a little better than the last.",
   "about.founder_pricing": "See pricing ↓",
   "about.founder_role": "Founder · Reachmark",
   "about.global": "Global",
@@ -2943,5 +2943,8 @@
   "wsj.t_t10": "Contracts, invoices and clients",
   "wsj.t_b10": "Keep the paperwork beside the work: contracts, invoices and client plans in one place.",
   "wsj.t_t11": "Replay any time",
-  "wsj.t_b11": "Open this tour again from “Take the tour” whenever you want a refresher."
+  "wsj.t_b11": "Open this tour again from “Take the tour” whenever you want a refresher.",
+  "home.founder_k": "From the founder",
+  "home.founder_q": "Good businesses shouldn’t lose customers just because their website undersells them. I built Reachmark to find those gaps and help close them — honestly, with the evidence on the table.",
+  "home.founder_link": "Read why I built it"
 }

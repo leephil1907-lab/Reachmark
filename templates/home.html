@@ -27,7 +27,9 @@
 {% if gtm_id is defined and gtm_id %}<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>{% endif %}
 {% include 'header-public.html' %}
 <div class="x-aurora" aria-hidden="true"></div>
-<main>  <section class="x-hero" id="top">
+<main>
+  <!-- 1. Hero -->
+  <section class="x-hero" id="top">
     <p class="x-kicker">{{ t('home.kicker') }}</p>
     <h1 data-split>{{ t('home.hero_h1a') }} <em>{{ t('home.hero_h1b') }}</em></h1>
     <p class="x-lead">{{ t('home.sub') }}</p>
@@ -50,6 +52,7 @@
     {% endif %}
   </section>
 
+  <!-- 2. Product: interactive sample report -->
   <section class="rm-workspace-preview" id="sample-report" aria-labelledby="rm-preview-title">
     <div class="rm-preview-intro">
       <p class="rm-preview-eyebrow">THE REACHMARK WORKSPACE</p>
@@ -109,6 +112,7 @@
     <p class="rm-preview-disclaimer"><span aria-hidden="true">ⓘ</span> Sample businesses show the report experience. Live reports are generated from the public listing and website checks available for the business you select.</p>
   </section>
 
+  <!-- 3. Try it: live URL check -->
   <section class="x-try" id="try-url">
     <h2>{{ t('home.try_h') }}</h2>
     <p>{{ t('home.try_p') }}</p>
@@ -120,8 +124,7 @@
     <div id="x-audit-out" class="x-audit-out" hidden></div>
   </section>
 
-  
-
+  <!-- 4. How it works -->
   <section class="x-pipe">
     <div>
       <div class="kicker">{{ t('home.offer_k') }}</div>
@@ -137,6 +140,17 @@
     </div>
   </section>
 
+  <!-- 5. Trust: sourcing, sending, privacy -->
+  <section class="x-trust" aria-label="{{ t('home.trust_h') }}">
+    <h2>{{ t('home.trust_h') }}</h2>
+    <div class="x-trust-grid">
+      <a href="/sourcing"><b>{{ t('home.trust_src') }}</b><span>{{ t('home.trust_src_p') }}</span></a>
+      <a href="/sending"><b>{{ t('home.trust_send') }}</b><span>{{ t('home.trust_send_p') }}</span></a>
+      <a href="/privacy"><b>{{ t('home.trust_priv') }}</b><span>{{ t('home.trust_priv_p') }}</span></a>
+    </div>
+  </section>
+
+  <!-- 6. Screenshots -->
   <section class="x-shots" aria-label="{{ t('home.shots_h') }}">
     <div class="x-shots-head">
       <h2>{{ t('home.shots_h') }}</h2>
@@ -162,6 +176,7 @@
     </div>
   </section>
 
+  <!-- 7. Why Reachmark -->
   <section class="x-plain" aria-label="{{ t('home.moat_h') }}">
     <div class="x-plain-item"><b>{{ t('home.q_h') }}</b><span>{{ t('home.q_p') }}</span></div>
     <div class="x-plain-item"><b>{{ t('home.p_h') }}</b><span>{{ t('home.p_p') }}</span></div>
@@ -169,28 +184,7 @@
     <div class="x-plain-item"><b>{{ t('home.n_h') }}</b><span>{{ t('home.n_p') }}</span></div>
   </section>
 
-  <section class="x-plans" id="plans-preview" aria-label="{{ t('home.price_h') }}">
-    <div class="x-plans-head">
-      <h2>{{ t('home.price_h') }}</h2>
-      <p>{{ t('home.price_p') }}</p>
-    </div>
-    <div class="x-plans-grid">
-      <article><small>Free</small><b>$0</b><p>{{ t('home.price_free') }}</p><a href="/signup">{{ t('home.price_free_cta') }}</a></article>
-      <article><small>Starter</small><b>$19</b><p>{{ t('home.price_st') }}</p><a href="/pricing">{{ t('home.price_st_cta') }}</a></article>
-      <article class="on"><small>Pro</small><b>$59</b><p>{{ t('home.price_pro') }}</p><a href="/pricing">{{ t('home.price_pro_cta') }}</a></article>
-    </div>
-    <p class="x-plans-note"><a href="/pricing">{{ t('home.price_all') }}</a></p>
-  </section>
-
-  <section class="x-trust" aria-label="{{ t('home.trust_h') }}">
-    <h2>{{ t('home.trust_h') }}</h2>
-    <div class="x-trust-grid">
-      <a href="/sourcing"><b>{{ t('home.trust_src') }}</b><span>{{ t('home.trust_src_p') }}</span></a>
-      <a href="/sending"><b>{{ t('home.trust_send') }}</b><span>{{ t('home.trust_send_p') }}</span></a>
-      <a href="/privacy"><b>{{ t('home.trust_priv') }}</b><span>{{ t('home.trust_priv_p') }}</span></a>
-    </div>
-  </section>
-
+  <!-- 8. Concept gallery -->
   <section class="x-concepts" aria-labelledby="x-concepts-h">
     <div class="x-concepts-head">
       <h2 id="x-concepts-h">{{ t('home.concepts_h') }}</h2>
@@ -230,6 +224,32 @@
     <p class="x-concepts-all"><a class="x-btn ghost" href="/showcase">{{ t('home.concepts_all') }}</a></p>
   </section>
 
+  <!-- 9. Plans -->
+  <section class="x-plans" id="plans-preview" aria-label="{{ t('home.price_h') }}">
+    <div class="x-plans-head">
+      <h2>{{ t('home.price_h') }}</h2>
+      <p>{{ t('home.price_p') }}</p>
+    </div>
+    <div class="x-plans-grid">
+      <article><small>Free</small><b>$0</b><p>{{ t('home.price_free') }}</p><a href="/signup">{{ t('home.price_free_cta') }}</a></article>
+      <article><small>Starter</small><b>$19</b><p>{{ t('home.price_st') }}</p><a href="/pricing">{{ t('home.price_st_cta') }}</a></article>
+      <article class="on"><small>Pro</small><b>$59</b><p>{{ t('home.price_pro') }}</p><a href="/pricing">{{ t('home.price_pro_cta') }}</a></article>
+    </div>
+    <p class="x-plans-note"><a href="/pricing">{{ t('home.price_all') }}</a></p>
+  </section>
+
+  <!-- 10. Founder -->
+  <section class="x-founder" aria-label="{{ t('home.founder_k') }}">
+    <img class="x-founder-photo" src="/static/ernest-micheal-avatar.jpg" width="320" height="320" loading="lazy" alt="{{ t('about.founder_alt') }}">
+    <div class="x-founder-copy">
+      <p class="x-kicker">{{ t('home.founder_k') }}</p>
+      <blockquote><p>{{ t('home.founder_q') }}</p></blockquote>
+      <p class="x-founder-by"><b>Ernest Micheal</b> · {{ t('about.founder_role') }}</p>
+      <a class="x-btn ghost" href="/about#founder">{{ t('home.founder_link') }}</a>
+    </div>
+  </section>
+
+  <!-- 11. Final call to action -->
   <section class="x-cta">
     <div>
       <h2>{{ t('home.band_h1') }} {{ t('home.band_h2') }}</h2>
@@ -259,6 +279,11 @@
 <script src="/static/motion.js"></script>
 <script src="/static/dropdown.js"></script>
 <script src="/static/theme.js"></script>
+<script>
+/* Hero "Run a free check" → scroll to the URL check and put the cursor in the field. */
+document.querySelectorAll('a[href="#try-url"]').forEach(function(a){a.addEventListener('click',function(){
+  setTimeout(function(){var i=document.getElementById('x-audit-url');if(i)i.focus({preventScroll:true})},450)})});
+</script>
 <script>
 (function(){
   var q=document.getElementById('x-q');

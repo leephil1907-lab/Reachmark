@@ -73,8 +73,8 @@
   "about.founder_h2": "para você ficar com o cliente.",
   "about.founder_k": "MARCA PESSOAL · PORQUE CONSTRUÍ A REACHMARK",
   "about.founder_mark": "MARCA DO FUNDADOR · PREVIEWS FEITOS À MÃO",
-  "about.founder_p1": "Sou {name} — fundador da Reachmark. Comecei a procurar no OpenStreetMap negócios reais sem site ou com um partido, e depois um preview 3D ao vivo que pudessem abrir e dizer sim. Sem listas falsas. Sem adivinhar. Só um melhor primeiro olá.",
-  "about.founder_p2": "Cada modelo é inspirado na Figma Community, é funcional e deve parecer premium no primeiro clique. A minha promessa: se não puder mostrar, não vendo. Vê o preview antes de pagar.",
+  "about.founder_p1": "Sou {name} e construo a Reachmark. Tudo começou com um padrão que eu não conseguia deixar de ver: negócios que fazem um trabalho realmente bom perdendo, em silêncio, clientes de quem nunca vão ouvir falar, porque o site não mostra quem eles são de verdade. Então fui procurá-los no OpenStreetMap — negócios reais sem site, ou com um site quebrado — e criei previews ao vivo que eles pudessem abrir e aos quais pudessem realmente dizer sim. Sem listas falsas. Sem adivinhação.",
+  "about.founder_p2": "Estou construindo uma melhoria honesta de cada vez, com uma regra simples: ser útil, dizer a verdade e mostrar o trabalho. Se eu não puder entregar algo, não vendo — você vê o preview antes de pagar. Não tenho tudo resolvido, e parei de esperar até ter. Se você também tem uma ideia guardada, aqui vai o que aprendi: comece antes de se sentir pronto, continue aprendendo pelo caminho e faça a próxima versão um pouco melhor que a anterior.",
   "about.founder_pricing": "Ver preços ↓",
   "about.founder_role": "Fundador · Reachmark",
   "about.global": "Global",
@@ -2943,5 +2943,8 @@
   "wsj.t_t10": "Contratos, faturas e clientes",
   "wsj.t_b10": "A papelada ao lado do trabalho: contratos, faturas e planos de clientes num só lugar.",
   "wsj.t_t11": "Reveja quando quiser",
-  "wsj.t_b11": "Abra este tour novamente em “Fazer o tour” sempre que precisar."
+  "wsj.t_b11": "Abra este tour novamente em “Fazer o tour” sempre que precisar.",
+  "home.founder_k": "Palavra do fundador",
+  "home.founder_q": "Um bom negócio não deveria perder clientes só porque o site não lhe faz justiça. Criei a Reachmark para encontrar essas lacunas e ajudar a fechá-las — com honestidade e com as evidências na mesa.",
+  "home.founder_link": "Leia por que eu a criei"
 }
