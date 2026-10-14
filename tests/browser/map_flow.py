@@ -26,7 +26,7 @@ with tempfile.TemporaryDirectory() as temp:
             expect(page.locator('#map-records')).to_contain_text('1 mapped',timeout=15000)
             assert '1 mapped' in page.locator('#map-records').inner_text()
             page.locator('[data-map-fit]').click();page.screenshot(path=str(Path(temp)/'map-desktop.png'),full_page=True)
-            page.reload();page.locator('#world-map.leaflet-container').wait_for();expect(page.locator('#map-history')).to_contain_text('· checked')
+            page.reload();page.evaluate("navigate('global')");page.locator('#world-map.leaflet-container').wait_for();expect(page.locator('#map-history')).to_contain_text('· checked')
             page.set_viewport_size({'width':390,'height':844});page.evaluate('worldMap.invalidateSize()');page.screenshot(path=str(Path(temp)/'map-mobile.png'),full_page=True)
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'), 'mobile overflow'
             assert not errors,errors
