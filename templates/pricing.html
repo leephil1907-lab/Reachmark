@@ -59,6 +59,11 @@ footer.site a{color:#3c4732;font-weight:700;text-decoration:none;margin:0 10px}
 <p class="eyebrow">{{ t('pay.eyebrow') }}</p>
 <h1 data-split>{{ t('pay.h1') }}</h1>
 <p class="sub">{{ t('pay.sub') }}</p>
+<div class="how" role="note" aria-label="Billing terms" style="margin:0 0 24px;padding:18px 22px">
+  <strong>Clear billing terms</strong>
+  <p>Paid plans are a one-time purchase for the access period you select: 30 days for monthly or 365 days for annual. They do not automatically renew. To keep paid access after expiry, make another purchase. Cancelling an account does not create a prorated refund; fees are non-refundable except where the law requires otherwise. Check the selected currency, tier and period at checkout before paying.</p>
+  <p>Plan features and available limits are shown on this page and in your workspace. If a numeric usage limit is not displayed, do not assume an unpublished allowance.</p>
+</div>
 {% include 'adsense-footer.html' %}
 <div class="cur-toggle" role="group" aria-label="{{ t('pay.cur_aria') }}"><button type="button" id="cur-usd" class="on">USD $</button><button type="button" id="cur-ngn">NGN ₦</button></div>
 <div class="cur-toggle" role="group" aria-label="{{ t('pay.per_aria') }}"><button type="button" id="per-monthly" class="on">{{ t('pay.period_m') }}</button><button type="button" id="per-annual">{{ t('pay.period_y') }} · {{ t('pay.save') }}</button></div>
