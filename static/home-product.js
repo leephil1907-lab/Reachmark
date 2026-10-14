@@ -1,4 +1,4 @@
-/* Interactive, explicitly fictional workspace preview for the public Reachmark homepage. */
+/* Interactive sample workspace preview for the public Reachmark homepage. */
 (function () {
   'use strict';
   var root = document.querySelector('[data-rm-preview]');
@@ -7,7 +7,7 @@
   var examples = {
     clinic: {
       name: 'Willow Grove Dental',
-      category: 'ILLUSTRATIVE REPORT · FICTIONAL HEALTHCARE BUSINESS',
+      category: 'SAMPLE REPORT · HEALTHCARE',
       findings: [
         ['Make the next step obvious', 'Example: keep a clear appointment or call action easy to find on smaller screens.'],
         ['Answer key questions earlier', 'Example: help visitors quickly find services, opening hours, and what to expect.'],
@@ -17,7 +17,7 @@
     },
     law: {
       name: 'Northstar Family Law',
-      category: 'ILLUSTRATIVE REPORT · FICTIONAL PROFESSIONAL SERVICE',
+      category: 'SAMPLE REPORT · PROFESSIONAL SERVICES',
       findings: [
         ['Clarify the service path', 'Example: help visitors move from a practice area to a relevant next step without hunting.'],
         ['Write for the client’s first question', 'Example: explain who each service is for and what a first conversation involves.'],
@@ -27,7 +27,7 @@
     },
     cafe: {
       name: 'Harborlight Café',
-      category: 'ILLUSTRATIVE REPORT · FICTIONAL HOSPITALITY BUSINESS',
+      category: 'SAMPLE REPORT · HOSPITALITY',
       findings: [
         ['Put local essentials within reach', 'Example: make hours, menu, location, and directions quick to find.'],
         ['Keep the visit decision simple', 'Example: surface the information people need before choosing to visit or order.'],

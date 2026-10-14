@@ -6,11 +6,11 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/xdesign.css">
 <style>
-body{margin:0;font-family:Manrope,Arial,sans-serif;background:#fbfbfb;color:#111314;min-height:100vh;display:grid;place-items:center;padding:24px}
-.card{width:100%;max-width:520px;background:#fff;border:1px solid #e2e7d6;border-radius:20px;padding:32px;box-shadow:0 18px 48px rgba(16,24,12,.08)}
+body{margin:0;font-family:Manrope,Arial,sans-serif;background:radial-gradient(ellipse at 15% 0%,#f0f6dc 0,transparent 42%),#f7f8f3;color:#111314;min-height:100vh;display:grid;place-items:center;padding:24px}
+.card{width:100%;max-width:560px;background:#fff;border:1px solid #e2e7d6;border-radius:22px;padding:clamp(22px,5vw,36px);box-shadow:0 24px 70px rgba(16,24,12,.08)}
 .kicker{font:600 10px/1 Manrope,sans-serif;letter-spacing:1.6px;color:#6b7a5a;text-transform:uppercase}
 h1{font:700 28px/1.1 Manrope,sans-serif;letter-spacing:-.8px;margin:10px 0 8px;color:#0f1a0a}
-p{color:#535f4c;font-size:14px;line-height:1.6}
+p{color:#535f4c;font-size:14px;line-height:1.7}.steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:22px 0;padding:0;list-style:none}.steps li{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid #e7ebdf;border-radius:12px;background:#fbfcf8;color:#35402e;font-size:12px;line-height:1.5}.steps b{display:grid;place-items:center;flex:0 0 25px;height:25px;border-radius:8px;background:#eef6d1;color:#43552a;font-size:11px}.helper{font-size:12px;color:#75806d;margin-top:8px}@media(max-width:420px){.steps{grid-template-columns:1fr}}
 label{display:block;font:600 12px Manrope,sans-serif;margin:16px 0 6px;color:#20251f}
 input,select{width:100%;padding:12px 14px;border:1px solid #d8e0c8;border-radius:10px;font:15px Manrope,sans-serif;background:#fcfcf8}
 button{margin-top:22px;width:100%;border:0;background:#d5f268;color:#20251f;font:700 14px Manrope,sans-serif;padding:14px;border-radius:12px;cursor:pointer}
@@ -22,7 +22,13 @@ button{margin-top:22px;width:100%;border:0;background:#d5f268;color:#20251f;font
 <form class="card" id="onboard-form">
   <div class="kicker">After signup</div>
   <h1>Where should we look first?</h1>
-  <p>Pick a city and a niche. We pull up to 10 public listings from OpenStreetMap and score them from stored evidence — no invented numbers, no live crawl of every site.</p>
+  <p>Find up to 10 public business listings for your city and niche. Then review a business, run a website check, open its Digital Opportunity Report, and prepare outreach you approve before anything is sent.</p>
+  <ol class="steps" aria-label="Your first workflow">
+    <li><b>01</b><span><strong>Discover</strong><br>Find relevant businesses in your market.</span></li>
+    <li><b>02</b><span><strong>Review</strong><br>Choose a business and check its public website.</span></li>
+    <li><b>03</b><span><strong>Build a report</strong><br>See findings and a recommended next step.</span></li>
+    <li><b>04</b><span><strong>Approve outreach</strong><br>Review every message before sending.</span></li>
+  </ol>
   <label for="city">City</label>
   <input id="city" name="city" required maxlength="80" placeholder="e.g. Lagos" autocomplete="address-level2">
   <label for="category">Niche</label>
@@ -30,7 +36,8 @@ button{margin-top:22px;width:100%;border:0;background:#d5f268;color:#20251f;font
     <option value="">Choose a niche</option>
     {% for name in categories %}<option value="{{ name }}">{{ name }}</option>{% endfor %}
   </select>
-  <button type="submit" id="go">Find 10 businesses</button>
+  <p class="helper">Start with public listings. You can refine the shortlist before contacting anyone.</p>
+  <button type="submit" id="go">Find businesses</button>
   <div class="msg" id="msg"></div>
   <a class="skip" href="/dashboard">Skip for now</a>
 </form>
@@ -55,7 +62,7 @@ document.getElementById('onboard-form').onsubmit=async (e)=>{
     location.href=j.next||'/dashboard#leads';
   }catch(err){
     msg.textContent=err.message; msg.style.display='block';
-    btn.disabled=false; btn.textContent='Find 10 businesses';
+    btn.disabled=false; btn.textContent='Find businesses';
   }
 };
 </script>

@@ -395,7 +395,7 @@ def compose_sales_asset(lead, report, prototype_url=None, proposal_url=None, boo
 
 
 def fictional_sample_report():
-    """The public sample: real report template, labelled fictional, no invented prices."""
+    """The public sample: real report template, clearly labelled as a sample, with no quoted prices."""
     lead = {
         'name': 'Harbour Street Bakery',
         'category': 'Bakery',
@@ -436,12 +436,12 @@ def fictional_sample_report():
         'solution': {
             'name': 'A visible enquiry path on a page you own',
             'why': 'The example findings all point at one missing next step on mobile.',
-            'note': 'Example only. This is not a quote and not a live audit.',
+            'note': 'Sample recommendation. Pricing is confirmed separately after scope review.',
             'addresses': True,
             'addressed_count': 3,
         },
         'evidence': {
-            'disclaimer': 'Fictional example. Format only. Not a live audit, not a revenue forecast, not proof anyone wants work.',
+            'disclaimer': 'Sample report showing how Reachmark organises findings and recommendations. Live reports use the public listing and website checks available for the selected business.',
         },
         'created': '2026-10-07',
     }

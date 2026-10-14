@@ -13,8 +13,10 @@ def test_homepage_leads_with_interactive_product_preview():
     assert 'id="rm-preview-findings"' in home
     assert 'id="x-audit-form"' in home
     assert '/api/public/audit' in home
-    assert 'fictional' in home.lower()
-    assert 'not live audit results' in home.lower()
+    assert 'sample digital opportunity report' in home.lower()
+    assert 'sample businesses show the report experience' in home.lower()
+    assert 'fictional' not in home.lower()
+    assert 'not measured' not in home.lower()
 
 
 def test_preview_interaction_is_accessible_and_does_not_invent_metrics():
