@@ -236,12 +236,12 @@ main{margin-left:252px;background:var(--ws-soft);min-height:100vh}
 @media (max-width:640px){
   .sidebar{
     top:auto;bottom:0;left:0;right:0;width:100% !important;height:68px;
-    padding:8px 10px;flex-direction:row;align-items:center;
+    padding:8px 10px;flex-direction:row;align-items:center;overflow:visible !important;
     box-shadow:0 -8px 24px rgba(16,20,14,.18);z-index:12;
   }
   .sidebar .brand,.workspace,.nav-group-label,.sidebar-bottom,.profile,.adsense-sidebar,#sidebar-toggle{display:none !important}
   .sidebar nav{
-    flex-direction:row !important;width:100%;height:100%;overflow:auto !important;
+    flex-direction:row !important;width:100%;height:100%;overflow:visible !important;
     gap:6px;justify-content:space-between;padding:0;flex:1 1 auto !important;
   }
   .nav-group{display:contents}
