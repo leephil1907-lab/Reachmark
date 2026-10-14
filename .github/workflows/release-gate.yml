@@ -58,7 +58,9 @@ jobs:
           done
           test -s /tmp/healthz.json
           grep -q '"status":"ok"' /tmp/healthz.json
-          test "$(stat -c %U "$RUNNER_TEMP/reachmark-data")" = "reachmark"
+          # The runner has no "reachmark" user, so compare numeric owner IDs: the
+          # bind-mounted data folder must be owned by the container's reachmark user.
+          test "$(stat -c %u "$RUNNER_TEMP/reachmark-data")" = "$(docker exec reachmark-release-gate id -u reachmark)"
           docker exec reachmark-release-gate sh -c "test -w /data && test -w /backups"
       - name: Install Playwright
         run: |
