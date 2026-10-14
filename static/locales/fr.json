@@ -2932,5 +2932,6 @@
   "tk.need": "Connectez-vous pour envoyer un ticket.",
   "tk.list": "Tickets d’assistance",
   "tk.list_p": "Des clients connectés. Aussi envoyés à support@reachmarkdigital.xyz.",
-  "tk.empty": "Aucun ticket pour l’instant."
+  "tk.empty": "Aucun ticket pour l’instant.",
+  "home.concepts_all": "Voir tous les concepts de design"
 }

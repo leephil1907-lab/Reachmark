@@ -7,6 +7,7 @@ import tests.test_app as test_app
 from werkzeug.security import generate_password_hash
 from scripts.backup import snapshot,restore
 from web.workflow import duplicates
+from web.public_url import SEO_HOME_TITLE
 
 class PWAAndManifestTests(unittest.TestCase):
     """The installable-app contract: manifest, icons, screenshots, service worker, offline."""
@@ -115,7 +116,7 @@ class PWAAndManifestTests(unittest.TestCase):
         self.assertEqual(manifest['short_name'], 'Reachmark')
         self.assertIn('Digital Opportunity Report', manifest['description'])
         home = self.client.get('/').get_data(as_text=True)
-        self.assertIn('Reachmark — Find potential. Make your mark.', home)
+        self.assertIn('<title>' + SEO_HOME_TITLE + '</title>', home)
         self.assertIn('apple-mobile-web-app-title', home)
         self.assertIn('application-name', home)
         self.assertIn('/static/apple-touch-icon-180.png', home)
@@ -203,7 +204,7 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
     tearDown=test_app.ProspectTests.tearDown
     def test_home_is_a_slim_multipage_hub(self):
         home=self.client.get('/').get_data(as_text=True)
-        self.assertIn('Reachmark — Find potential. Make your mark.',home)
+        self.assertIn('<title>'+SEO_HOME_TITLE+'</title>',home)
         for path in ('/showcase','/receptionist','/reviews','/about','/enquire','/signin','/signup'):
             self.assertIn(f'href="{path}"',home,path)
         self.assertNotIn('I hunt missing websites',home)
@@ -214,13 +215,13 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
         self.assertIn('rm-receptionist-launch',home)
         self.assertIn('x-audit-form',home)
         about=self.client.get('/about').get_data(as_text=True)
-        self.assertIn('I hunt missing websites',about)
+        self.assertIn('id="founder"',about)
         self.assertNotIn('id="website-samples"',about)
         self.assertNotIn("enquiry-form.html",about)
         self.assertNotIn('id="review-form"',about)
     def test_about_and_reviews_keep_the_full_page(self):
         about=self.client.get('/about').get_data(as_text=True)
-        self.assertIn('I hunt missing websites',about)
+        self.assertIn('id="founder"',about)
         reviews=self.client.get('/reviews').get_data(as_text=True)
         self.assertIn('id="review-form"',reviews)
         self.assertNotIn('I hunt missing websites',reviews)

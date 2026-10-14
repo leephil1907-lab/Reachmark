@@ -2932,5 +2932,6 @@
   "tk.need": "请登录后再发送工单。",
   "tk.list": "支持工单",
   "tk.list_p": "来自已登录客户。同时发到 support@reachmarkdigital.xyz。",
-  "tk.empty": "还没有工单。"
+  "tk.empty": "还没有工单。",
+  "home.concepts_all": "查看全部设计概念"
 }

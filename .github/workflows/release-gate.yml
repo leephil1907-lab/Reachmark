@@ -26,7 +26,7 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
       - name: Run backend regression suite
-        run: python -m unittest discover -s tests -p "test*.py" -v
+        run: pip install pytest && python -m pytest tests -v -p no:cacheprovider
       - name: Set up Node
         uses: actions/setup-node@v4
         with:

@@ -2932,5 +2932,6 @@
   "tk.need": "Melden Sie sich an, um ein Ticket zu senden.",
   "tk.list": "Support-Tickets",
   "tk.list_p": "Von angemeldeten Kunden. Auch an support@reachmarkdigital.xyz.",
-  "tk.empty": "Noch keine Tickets."
+  "tk.empty": "Noch keine Tickets.",
+  "home.concepts_all": "Alle Designkonzepte ansehen"
 }

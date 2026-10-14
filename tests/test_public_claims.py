@@ -40,19 +40,26 @@ def test_home_leads_with_the_report_not_designer_praise():
     assert "SEO_HOME_TITLE" in home_fn
     assert "Find potential. Make your mark." in seo
     assert "Digital Opportunity Report" in seo
-    assert "Find businesses with weak websites" in seo
+    assert "Find Businesses Losing Customers Online" in seo
     assert 'id="sample-report"' in home
-    assert "adsense" not in home.lower()
+    assert '<ins class="adsbygoogle"' not in home  # verification tag only, no ad units
+    assert "adsense-homepage-banner" not in home
     assert 'href="/sample-report"' in home
     assert 'x-who-design' not in home
-    hero = home.split('<section class="x-hero">', 1)[1].split('</section>', 1)[0]
-    assert 'href="/signup"' in hero
-    assert 'href="/enquire"' in hero
+    hero = home.split('<section class="x-hero"', 1)[1].split('</section>', 1)[0]
+    visitor_hero = hero.split('{% else %}', 1)[1].split('{% endif %}', 1)[0]
+    assert 'href="#try-url"' in visitor_hero  # product-first: run a live audit
+    assert 'href="/sample-report"' in visitor_hero
+    assert 'href="/workspace"' in hero  # signed-in users jump straight to their workspace
+    assert 'href="/signup"' in home
+    assert 'href="/enquire"' in home
     assert 'href="/signin"' in hero
     assert 'Get the app' not in hero
     assert 'Open Reachmark' not in hero
     assert 'hero-signin' in hero
-    assert home.find('home.foot_started') > 0 or 'Get started' in home or "home.foot_started" in home
+    footer = (ROOT / "templates" / "footer-public.html").read_text(encoding="utf-8")
+    assert "{% include 'footer-public.html' %}" in home
+    assert "home.foot_started" in footer  # the "Get started" column lives in the shared footer
     assert 'id="plans-preview"' in home
     assert 'ws-leads.png' in home
     assert home.find("sample-report") < home.find("x-pipe")

@@ -2932,5 +2932,6 @@
   "tk.need": "Inicia sesión para enviar un ticket.",
   "tk.list": "Tickets de soporte",
   "tk.list_p": "De clientes con sesión. También se envían a support@reachmarkdigital.xyz.",
-  "tk.empty": "Aún no hay tickets."
+  "tk.empty": "Aún no hay tickets.",
+  "home.concepts_all": "Ver todos los conceptos de diseño"
 }

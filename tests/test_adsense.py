@@ -9,7 +9,7 @@ from unittest.mock import patch
 import tests.test_app as test_app
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CLIENT = 'ca-pub-3894582071697384'
+CLIENT = 'ca-pub-5678865896620902'
 META = f'<meta name="google-adsense-account" content="{CLIENT}">'
 LOADER = f'pagead/js/adsbygoogle.js?client={CLIENT}'
 
@@ -26,11 +26,18 @@ class AdSenseTests(unittest.TestCase):
             self.assertIn(LOADER, body, path)
             self.assertEqual(body.count('adsbygoogle.js'), 1, f'double injection on {path}')
 
-    def test_homepage_has_no_adsense(self):
+    def test_homepage_carries_verification_but_no_ad_units(self):
+        """Google verifies the site on the homepage, so the account tag lives there once.
+
+        No ad units are placed on the homepage.
+        """
         body = self.client.get('/').get_data(as_text=True)
-        self.assertNotIn('adsbygoogle', body)
-        self.assertNotIn('google-adsense-account', body)
+        self.assertIn(META, body)
+        self.assertIn(LOADER, body)
+        self.assertEqual(body.count('adsbygoogle.js'), 1, 'double injection on /')
+        self.assertNotIn('<ins class="adsbygoogle"', body)
         self.assertNotIn('adsense-homepage-banner', body)
+        self.assertNotIn('adsense-footer', body)
 
     def test_private_pages_and_apis_are_excluded(self):
         for path in ('/login',):
@@ -45,7 +52,7 @@ class AdSenseTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('text/plain', response.headers.get('Content-Type', ''))
         self.assertEqual(response.get_data(as_text=True),
-                         'google.com, pub-3894582071697384, DIRECT, f08c47fec0942fa0\n')
+                         'google.com, pub-5678865896620902, DIRECT, f08c47fec0942fa0\n')
 
     def test_content_security_policy_allows_the_loader(self):
         policy = self.client.get('/').headers.get('Content-Security-Policy', '')
@@ -86,3 +93,15 @@ class AdSenseTests(unittest.TestCase):
             source = handle.read()
         self.assertNotIn('adsbygoogle', source)
         self.assertNotIn('google-adsense-account', source)
+
+    def test_only_the_homepage_template_hardcodes_the_tag(self):
+        """Ads are injected at serve time; no other template carries the loader by hand."""
+        templates = os.path.join(ROOT, 'templates')
+        offenders = []
+        for name in sorted(os.listdir(templates)):
+            if not name.endswith('.html') or name == 'home.html':
+                continue
+            with open(os.path.join(templates, name), encoding='utf-8') as handle:
+                if 'adsbygoogle.js' in handle.read():
+                    offenders.append(name)
+        self.assertEqual(offenders, [])

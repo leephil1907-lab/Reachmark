@@ -63,11 +63,12 @@ class ProspectTests(unittest.TestCase):
         with patch.dict(os.environ, {'WHATSAPP_URL': 'off'}):
             home = self.client.get('/').data.decode()
             self.assertNotIn('x-foot-wa', home)
+            self.assertNotIn('x-contact-whatsapp', home)
             self.assertNotIn('wa-float', home)
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop('WHATSAPP_URL', None)
             home = self.client.get('/').data.decode()
-            self.assertIn('class="x-foot-wa"', home)
+            self.assertIn('x-contact-whatsapp', home)
             self.assertIn('https://wa.me/14473227700', home)
             self.assertNotIn('Chat on WhatsApp', home)
             self.assertNotIn('wa-float', home)
