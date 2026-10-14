@@ -23,75 +23,93 @@
 <script src="/static/i18n.js"></script>
 {% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}
 {% include '_theme_head.html' %}</head>
-<body class="x-site">
+<body class="x-site rm-ed">
 {% from '_icons.html' import icon, brand_mark %}
 {% if gtm_id is defined and gtm_id %}<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>{% endif %}
 {% include 'header-public.html' %}
 <div class="x-aurora" aria-hidden="true"></div>
 <main>
-  <!-- 1. Hero — "Signal" layout: promise on the left, a live audit running on the right -->
-  <section class="x-hero" id="top" data-signal>
-    <div class="hx-grid" aria-hidden="true"></div>
-    <div class="hx-copy">
-      <p class="hx-live"><span class="hx-pulse" aria-hidden="true"></span>{{ t('home.hx_live') }}</p>
-      <h1 class="hx-title" data-split><span class="hx-line">{{ t('home.hx_h1a') }}</span> <em class="hx-line">{{ t('home.hx_h1b') }}</em></h1>
-      <p class="hx-sub">{{ t('home.hx_sub') }}</p>
-      <p class="x-hero-actions">
-        {% if client_logged_in %}
-        <a class="x-btn lime" href="/dashboard">{{ icon('dashboard', 18) }}<span>{{ t('home.open_dashboard') }}</span></a>
-        <a class="x-btn ghost" href="/enquire">{{ icon('pen', 18) }}<span>{{ t('home.cta_project') }}</span></a>
-        {% else %}
-        <a class="x-btn lime" href="#try-url">{{ icon('scan', 18) }}<span>{{ t('home.hx_cta') }}</span></a>
-        <a class="x-btn ghost" href="/sample-report">{{ icon('file-text', 18) }}<span>{{ t('home.cta_report') }}</span></a>
-        {% endif %}
-      </p>
-      <ul class="hx-trust">
-        <li>{{ icon('globe', 16) }}{{ t('home.hx_t1') }}</li>
-        <li>{{ icon('shield-check', 16) }}{{ t('home.hx_t2') }}</li>
-        <li>{{ icon('sparkles', 16) }}{{ t('home.hx_t3') }}</li>
-      </ul>
-      {% if not client_logged_in %}
-      <p class="x-hero-alt hero-signin">{{ t('home.hero_signin') }} <a href="/signin">{{ t('nav.signin') }}</a></p>
-      {% endif %}
-    </div>
-    <div class="hx-stage" aria-hidden="true">
-      <div class="hx-glow"></div>
-      <div class="hx-panel" data-hx
-           data-demos='[{"name":"Willow Grove Dental","cat":{{ t('home.hx_c1')|tojson }},"url":"willowgrove.example","score":78,"speed":"4.8s"},{"name":"Northstar Family Law","cat":{{ t('home.hx_c2')|tojson }},"url":"northstarlaw.example","score":64,"speed":"3.9s"},{"name":"Ember &amp; Oak","cat":{{ t('home.hx_c3')|tojson }},"url":"emberandoak.example","score":71,"speed":"5.6s"}]'>
-        <div class="hx-bar">
-          <span class="hx-dots"><i></i><i></i><i></i></span>
-          <span class="hx-url">{{ icon('lock', 12) }}<b data-hx-url>willowgrove.example</b><span class="hx-caret"></span></span>
-          <span class="hx-tag">{{ t('home.hx_demo') }}</span>
-        </div>
-        <div class="hx-head">
-          <div class="hx-biz"><span class="hx-av" data-hx-av>W</span><div><b data-hx-name>Willow Grove Dental</b><small data-hx-cat>{{ t('home.hx_c1') }}</small></div></div>
-          <div class="hx-gauge">
-            <svg viewBox="0 0 48 48"><circle class="hx-g-bg" cx="24" cy="24" r="20"/><circle class="hx-g-fg" data-hx-ring cx="24" cy="24" r="20" pathLength="100"/></svg>
-            <b data-hx-score>78</b>
-          </div>
-        </div>
-        <div class="hx-progress"><span class="hx-track"><span data-hx-bar></span></span><em><span data-hx-state data-scan="{{ t('home.hx_scan') }}" data-done="{{ t('home.hx_score') }}">{{ t('home.hx_score') }}</span></em></div>
-        <ul class="hx-rows">
-          <li class="is-bad" data-hx-row><span class="hx-st">{{ icon('x', 14) }}</span><span>{{ t('home.hx_f1') }}</span><b>{{ t('home.hx_f1v') }}</b></li>
-          <li class="is-warn" data-hx-row><span class="hx-st">{{ icon('smartphone', 14) }}</span><span>{{ t('home.hx_f2') }}</span><b>{{ t('home.hx_f2v') }}</b></li>
-          <li class="is-warn" data-hx-row><span class="hx-st">{{ icon('gauge', 14) }}</span><span>{{ t('home.hx_f3') }}</span><b data-hx-speed>4.8s</b></li>
-          <li class="is-ok" data-hx-row><span class="hx-st">{{ icon('check', 14) }}</span><span>{{ t('home.hx_f4') }}</span><b>{{ t('home.hx_f4v') }}</b></li>
-        </ul>
-        <div class="hx-out" data-hx-out>
-          <span class="hx-out-ic">{{ icon('mail-check', 18) }}</span>
-          <span><b>{{ t('home.hx_ready') }}</b><small>{{ t('home.hx_draft') }}</small></span>
-          <span class="hx-out-btn">{{ t('home.hx_approve') }}{{ icon('arrow-right', 14) }}</span>
+  <!-- 1. Hero — editorial headline, then the live audit console on a full-width stage -->
+  <section class="x-hero" data-ed="hero" id="top" data-signal>
+    <div class="ed-wrap ed-hero-copy">
+      <h1 class="hx-title ed-title" data-split><span class="hx-line">{{ t('home.hx_h1a') }}</span> <em class="hx-line ed-mark">{{ t('home.hx_h1b') }}</em></h1>
+      <div class="ed-hero-row">
+        <p class="ed-k ed-proof"><span>{{ t('home.proof_find') }}</span><i aria-hidden="true">→</i><span>{{ t('home.proof_diagnose') }}</span><i aria-hidden="true">→</i><span>{{ t('home.proof_approve') }}</span></p>
+        <div class="ed-hero-side">
+          <p class="hx-sub">{{ t('home.hx_sub') }}</p>
+          <p class="x-hero-actions">
+            {% if client_logged_in %}
+            <a class="x-btn lime" href="/dashboard">{{ icon('dashboard', 18) }}<span>{{ t('home.open_dashboard') }}</span></a>
+            <a class="x-btn ghost" href="/enquire">{{ icon('pen', 18) }}<span>{{ t('home.cta_project') }}</span></a>
+            {% else %}
+            <a class="x-btn lime" href="#try-url">{{ icon('scan', 18) }}<span>{{ t('home.hx_cta') }}</span></a>
+            <a class="x-btn ghost" href="/sample-report">{{ icon('file-text', 18) }}<span>{{ t('home.cta_report') }}</span></a>
+            {% endif %}
+          </p>
+          <ul class="hx-trust">
+            <li>{{ icon('globe', 16) }}{{ t('home.hx_t1') }}</li>
+            <li>{{ icon('shield-check', 16) }}{{ t('home.hx_t2') }}</li>
+            <li>{{ icon('sparkles', 16) }}{{ t('home.hx_t3') }}</li>
+          </ul>
+          {% if not client_logged_in %}
+          <p class="x-hero-alt hero-signin">{{ t('home.hero_signin') }} <a href="/signin">{{ t('nav.signin') }}</a></p>
+          {% endif %}
         </div>
       </div>
-      <div class="hx-chip hx-chip-a">{{ icon('file-text', 16) }}{{ t('home.hx_ready') }}</div>
-      <div class="hx-chip hx-chip-b">{{ icon('shield-check', 16) }}{{ t('home.hx_t2') }}</div>
+    </div>
+
+    <div class="ed-stage" aria-hidden="true">
+      <div class="ed-console" data-hx
+           data-demos='[{"name":"Willow Grove Dental","cat":{{ t('home.hx_c1')|tojson }},"url":"willowgrove.example","score":78,"speed":"4.8s"},{"name":"Northstar Family Law","cat":{{ t('home.hx_c2')|tojson }},"url":"northstarlaw.example","score":64,"speed":"3.9s"},{"name":"Ember &amp; Oak","cat":{{ t('home.hx_c3')|tojson }},"url":"emberandoak.example","score":71,"speed":"5.6s"}]'>
+        <div class="ed-chrome">
+          <span class="ed-dots"><i></i><i></i><i></i></span>
+          <span class="ed-url">{{ icon('lock', 12) }}<b data-hx-url>willowgrove.example</b><span class="ed-caret"></span></span>
+          <span class="ed-badge">{{ t('home.hx_demo') }}</span>
+        </div>
+        <div class="ed-app">
+          <nav class="ed-side">
+            <span class="ed-side-brand">{{ brand_mark(26) }}<b>Reachmark</b></span>
+            <span class="ed-nav">{{ icon('compass', 15) }}{{ t('ws.n_global') }}</span>
+            <span class="ed-nav on">{{ icon('gauge', 15) }}{{ t('ws.n_health') }}</span>
+            <span class="ed-nav">{{ icon('file-text', 15) }}{{ t('ws.n_leads') }}</span>
+            <span class="ed-nav">{{ icon('send', 15) }}{{ t('ws.n_outreach') }}</span>
+            <span class="ed-nav">{{ icon('users', 15) }}{{ t('ws.n_crew') }}</span>
+          </nav>
+          <div class="ed-main">
+            <header class="ed-mhead">
+              <div class="ed-biz"><span class="ed-av" data-hx-av>W</span><div><b data-hx-name>Willow Grove Dental</b><small data-hx-cat>{{ t('home.hx_c1') }}</small></div></div>
+              <span class="ed-state"><i></i><span data-hx-state data-scan="{{ t('home.hx_scan') }}" data-done="{{ t('home.hx_panel') }}">{{ t('home.hx_panel') }}</span></span>
+            </header>
+            <div class="ed-progress"><span data-hx-bar></span></div>
+            <div class="ed-kpis">
+              <div class="ed-kpi ed-kpi-score">
+                <div class="ed-ring"><svg viewBox="0 0 48 48"><circle class="ed-ring-bg" cx="24" cy="24" r="20"/><circle class="ed-ring-fg" data-hx-ring cx="24" cy="24" r="20" pathLength="100"/></svg><b data-hx-score>78</b></div>
+                <span><small>{{ t('home.hx_score') }}</small><em>/ 100</em></span>
+              </div>
+              <div class="ed-kpi"><small>{{ t('home.report_iss_l') }}</small><b>{{ t('home.report_iss') }}</b></div>
+              <div class="ed-kpi"><small>{{ t('home.report_rank_l') }}</small><b class="ed-hi">{{ t('home.report_rank') }}</b></div>
+            </div>
+            <ul class="ed-rows">
+              <li class="is-bad" data-hx-row><span class="ed-st">{{ icon('x', 13) }}</span><span class="ed-lbl">{{ icon('mail', 15) }}{{ t('home.hx_f1') }}</span><b>{{ t('home.hx_f1v') }}</b></li>
+              <li class="is-warn" data-hx-row><span class="ed-st">!</span><span class="ed-lbl">{{ icon('smartphone', 15) }}{{ t('home.hx_f2') }}</span><b>{{ t('home.hx_f2v') }}</b></li>
+              <li class="is-warn" data-hx-row><span class="ed-st">!</span><span class="ed-lbl">{{ icon('clock', 15) }}{{ t('home.hx_f3') }}</span><b data-hx-speed>4.8s</b></li>
+              <li class="is-ok" data-hx-row><span class="ed-st">{{ icon('check', 13) }}</span><span class="ed-lbl">{{ icon('lock', 15) }}{{ t('home.hx_f4') }}</span><b>{{ t('home.hx_f4v') }}</b></li>
+            </ul>
+            <div class="ed-out" data-hx-out>
+              <span class="ed-out-ic">{{ icon('mail-check', 18) }}</span>
+              <span class="ed-out-txt"><b>{{ t('home.hx_ready') }}</b><small>{{ t('home.hx_draft') }}</small></span>
+              <span class="ed-out-btn">{{ t('home.hx_approve') }}{{ icon('arrow-right', 14) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- 2. Product: interactive sample report -->
   <section class="rm-workspace-preview" id="sample-report" aria-labelledby="rm-preview-title">
     <div class="rm-preview-intro">
-      <p class="rm-preview-eyebrow">THE REACHMARK WORKSPACE</p>
+      <p class="rm-preview-eyebrow"><span class="ed-n">01 /</span> THE REACHMARK WORKSPACE</p>
       <h2 id="rm-preview-title">Find the gap. See the evidence. Know what to do next.</h2>
       <p>Explore a sample Digital Opportunity Report, then run a live check on any public website.</p>
     </div>
@@ -150,6 +168,7 @@
 
   <!-- 3. Try it: live URL check -->
   <section class="x-try" id="try-url">
+    <p class="ed-k"><span class="ed-n">02 /</span> {{ t('foot.check') }}</p>
     <h2>{{ t('home.try_h') }}</h2>
     <p>{{ t('home.try_p') }}</p>
     <form class="x-audit" id="x-audit-form">
@@ -163,7 +182,7 @@
   <!-- 4. How it works -->
   <section class="x-pipe" id="how-it-works">
     <div>
-      <div class="kicker">{{ t('home.offer_k') }}</div>
+      <div class="kicker"><span class="ed-n">03 /</span> {{ t('home.offer_k') }}</div>
       <h2>{{ t('home.offer_h') }}</h2>
       <p>{{ t('home.offer_p') }}</p>
       <p class="x-approve">{{ t('home.approve') }}</p>
@@ -178,6 +197,7 @@
 
   <!-- 5. Trust: sourcing, sending, privacy -->
   <section class="x-trust" aria-label="{{ t('home.trust_h') }}">
+    <p class="ed-k"><span class="ed-n">04 /</span> {{ t('foot.trust') }}</p>
     <h2>{{ t('home.trust_h') }}</h2>
     <div class="x-trust-grid">
       <a href="/sourcing"><span class="x-ic">{{ icon('database', 20, 'draw') }}</span>{{ icon('arrow-up-right', 16, 'x-go') }}<b>{{ t('home.trust_src') }}</b><span>{{ t('home.trust_src_p') }}</span></a>
@@ -189,6 +209,7 @@
   <!-- 6. Screenshots -->
   <section class="x-shots" aria-label="{{ t('home.shots_h') }}">
     <div class="x-shots-head">
+      <p class="ed-k"><span class="ed-n">05 /</span> {{ t('foot.product') }}</p>
       <h2>{{ t('home.shots_h') }}</h2>
       <p>{{ t('home.shots_p') }}</p>
     </div>
@@ -214,6 +235,11 @@
 
   <!-- 7. Why Reachmark -->
   <section class="x-plain" aria-label="{{ t('home.moat_h') }}">
+    <div class="ed-plain-head">
+      <p class="ed-k"><span class="ed-n">06 /</span> {{ t('home.moat_k') }}</p>
+      <h2>{{ t('home.moat_h') }}</h2>
+      <p>{{ t('home.moat_p') }}</p>
+    </div>
     <div class="x-plain-item"><span class="x-ic">{{ icon('target', 20, 'draw') }}</span><b>{{ t('home.q_h') }}</b><span>{{ t('home.q_p') }}</span></div>
     <div class="x-plain-item"><span class="x-ic">{{ icon('file-text', 20, 'draw') }}</span><b>{{ t('home.p_h') }}</b><span>{{ t('home.p_p') }}</span></div>
     <div class="x-plain-item"><span class="x-ic">{{ icon('activity', 20, 'draw') }}</span><b>{{ t('home.m_h') }}</b><span>{{ t('home.m_p') }}</span></div>
@@ -223,6 +249,7 @@
   <!-- 8. Concept gallery -->
   <section class="x-concepts" aria-labelledby="x-concepts-h">
     <div class="x-concepts-head">
+      <p class="ed-k"><span class="ed-n">07 /</span> {{ t('foot.samples') }}</p>
       <h2 id="x-concepts-h">{{ t('home.concepts_h') }}</h2>
       <p>{{ t('home.concepts_p') }}</p>
     </div>
@@ -263,6 +290,7 @@
   <!-- 9. Plans -->
   <section class="x-plans" id="plans-preview" aria-label="{{ t('home.price_h') }}">
     <div class="x-plans-head">
+      <p class="ed-k"><span class="ed-n">08 /</span> {{ t('nav.plans') }}</p>
       <h2>{{ t('home.price_h') }}</h2>
       <p>{{ t('home.price_p') }}</p>
     </div>
@@ -276,23 +304,34 @@
 
   <!-- 10. Founder -->
   <section class="x-founder" aria-label="{{ t('home.founder_k') }}">
-    <img class="x-founder-photo" src="/static/ernest-micheal-avatar.jpg" width="320" height="320" loading="lazy" alt="{{ t('about.founder_alt') }}">
+    <img class="x-founder-photo" src="/static/ernest-micheal.jpg" width="800" height="1296" loading="lazy" alt="{{ t('about.founder_alt') }}">
     <div class="x-founder-copy">
-      <p class="x-kicker">{{ t('home.founder_k') }}</p>
+      <p class="x-kicker"><span class="ed-n">09 /</span> {{ t('home.founder_k') }}</p>
       <blockquote><p>{{ t('home.founder_q') }}</p></blockquote>
       <p class="x-founder-by"><b>Ernest Micheal</b> · {{ t('about.founder_role') }}</p>
       <a class="x-btn ghost" href="/about#founder">{{ t('home.founder_link') }}{{ icon('arrow-right', 16) }}</a>
     </div>
   </section>
 
-  <!-- 11. Final call to action -->
-  <section class="x-cta">
-    <div>
-      <h2>{{ t('home.band_h1') }} {{ t('home.band_h2') }}</h2>
-      <p>{{ t('home.band_p') }}</p>
+  <!-- 11. Final call to action — two clear paths -->
+  <section class="x-cta" data-ed="cta">
+    <div class="ed-cta-head">
+      <p class="ed-k">{{ t('home.foot_started') }}</p>
+      <h2>{{ t('home.h1a') }} <em>{{ t('home.h1b') }}</em></h2>
     </div>
-    <div class="x-actions">
-      <a class="x-btn lime" href="/enquire">{{ t('home.cta_project') }}{{ icon('arrow-right', 18) }}</a>
+    <div class="ed-paths">
+      <a class="ed-path" href="{{ '/dashboard' if client_logged_in else '/signup' }}">
+        <span class="ed-k">{{ t('home.who_design') }}</span>
+        <b>{{ t('home.open_dashboard') if client_logged_in else t('nav.signup') }}</b>
+        <span class="ed-path-p">{{ t('home.sub') }}</span>
+        <span class="ed-go">{{ t('home.open_dashboard') if client_logged_in else t('home.price_free_cta') }}{{ icon('arrow-up-right', 16) }}</span>
+      </a>
+      <a class="ed-path" href="/enquire">
+        <span class="ed-k">{{ t('home.who_need') }}</span>
+        <b>{{ t('home.band_h1') }} {{ t('home.band_h2') }}</b>
+        <span class="ed-path-p">{{ t('home.band_p') }}</span>
+        <span class="ed-go">{{ t('home.need_cta') }}{{ icon('arrow-up-right', 16) }}</span>
+      </a>
     </div>
   </section>
 </main>
