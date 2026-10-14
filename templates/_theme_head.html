@@ -7,4 +7,6 @@
 /* Ambient cursor spotlight for the desktop background (see theme.css §4) */
 try{if(matchMedia('(min-width:1024px) and (pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){var r=document.documentElement,q=0;addEventListener('pointermove',function(e){if(q)return;q=requestAnimationFrame(function(){q=0;r.style.setProperty('--rm-mx',e.clientX+'px');r.style.setProperty('--rm-my',e.clientY+'px')})},{passive:true})}}catch(e){}
 })();</script>{% endif %}
-<link rel="stylesheet" href="/static/theme.css?v=1">
+<link rel="stylesheet" href="/static/site-live.css?v=2">
+<script src="/static/site-live.js?v=2" defer></script>
+<link rel="stylesheet" href="/static/theme.css?v=2">

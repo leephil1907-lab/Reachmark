@@ -182,8 +182,10 @@ def headers(r):
     return r
 
 ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-5678865896620902').strip()
-ADSENSE_PATHS = {'/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/workspace'}
-ADSENSE_PREFIXES = ('/showcase/',)
+ADSENSE_PATHS = {'/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/workspace',
+                 '/privacy', '/terms', '/disclosure', '/app'}
+# Sample detail pages, unsubscribe confirmations and prospect website mockups (/preview/<token>).
+ADSENSE_PREFIXES = ('/showcase/', '/unsubscribe/', '/preview/')
 
 @app.after_request
 def adsense_tags(response):
@@ -244,13 +246,22 @@ def home():
     return render_template('home.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
 @app.route('/workspace')
 def workspace():
+    """Owner (admin) workspace. Clients are sent to their own dashboard."""
     from flask import session
-    if not (session.get('owner') or (session.get('client_id') and session.get('role')=='client')):
-        return redirect('/signin')
-    return render_template('index.html',samples=SAMPLES)
+    if session.get('owner'):
+        return render_template('index.html',samples=SAMPLES)
+    if session.get('client_id') and session.get('role')=='client':
+        return redirect('/dashboard')
+    return redirect('/signin')
 @app.route('/dashboard')
 def client_dashboard():
-    return render_template('index.html',samples=SAMPLES)
+    """Signed-up users land here; the owner is sent to the admin workspace."""
+    from flask import session
+    if session.get('owner'):
+        return redirect('/workspace')
+    if session.get('client_id') and session.get('role')=='client':
+        return render_template('index.html',samples=SAMPLES)
+    return redirect('/signin')
 @app.route('/healthz')
 def healthz():
     with db() as c: c.execute('SELECT id FROM leads LIMIT 1').fetchone()

@@ -217,7 +217,7 @@ class ProspectTests(unittest.TestCase):
         before=len(self.client.get('/api/state').json['leads'])
         self.assertEqual(self.client.get('/showcase').status_code,200)
         for slug in ['ember-coffee','stillwell-studio','forma-homes','astra-clinic','novera-law','bloom-market']:
-            response=self.client.get('/showcase/'+slug);self.assertEqual(response.status_code,200);self.assertIn(b'FICTIONAL DESIGN SAMPLE',response.data)
+            response=self.client.get('/showcase/'+slug);self.assertEqual(response.status_code,200);self.assertIn(b'DESIGN CONCEPT',response.data);self.assertNotIn(b'FICTIONAL',response.data.upper())
         self.assertEqual(len(self.client.get('/api/state').json['leads']),before)
         self.assertEqual(self.client.get('/showcase/missing').status_code,404)
     def test_enquiry_persists_with_reference(self):

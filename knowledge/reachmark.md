@@ -35,7 +35,7 @@ A: No. The concept preview is prepared before any commitment, and there is no pu
 ## topic: samples and design direction
 tags: samples, portfolio, examples, designs, showcase, figma, 3d
 Q: can i see examples
-A: Yes — the /showcase page currently holds 8 clearly labelled fictional samples: Ember & Oak (café), Stillwell (wellness), Forma House (renovation/trades), Astra (clinic), Novera Law (legal), Bloom Market (retail), Fintech Pulse (finance dashboard) and Get Paid (invoice SaaS). Each has a live 3D preview. They are fictional directions, not client work.
+A: Yes — the /showcase page currently holds 8 clearly labelled design concepts (sample sites, not client work): Ember & Oak (café), Stillwell (wellness), Forma House (renovation/trades), Astra (clinic), Novera Law (legal), Bloom Market (retail), Fintech Pulse (finance dashboard) and Get Paid (invoice SaaS). Each has a live 3D preview. They show design directions, not client work.
 Q: do you use figma
 A: Yes. The samples are Figma-inspired directions, and Bespoke work includes custom Figma designed from scratch.
 

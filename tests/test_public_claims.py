@@ -26,7 +26,9 @@ def test_showcase_keeps_concepts_explicitly_labeled():
 
 def test_sample_sites_are_described_as_concepts_not_client_work():
     page = (ROOT / "templates" / "sample-site.html").read_text(encoding="utf-8")
-    assert "fictional" in page.lower()
+    assert "concept" in page.lower()
+    assert "not client work" in page.lower()
+    assert "fictional" not in page.lower()
 
 
 def test_home_leads_with_the_report_not_designer_praise():
@@ -50,7 +52,7 @@ def test_home_leads_with_the_report_not_designer_praise():
     visitor_hero = hero.split('{% else %}', 1)[1].split('{% endif %}', 1)[0]
     assert 'href="#try-url"' in visitor_hero  # product-first: run a live audit
     assert 'href="/sample-report"' in visitor_hero
-    assert 'href="/workspace"' in hero  # signed-in users jump straight to their workspace
+    assert 'href="{{ account_home }}"' in hero  # signed-in users jump to /dashboard (clients) or /workspace (owner)
     assert 'href="/signup"' in home
     assert 'href="/enquire"' in home
     assert 'href="/signin"' in hero

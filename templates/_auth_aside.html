@@ -1,3 +1,4 @@
+{% from '_icons.html' import icon %}
 {# Brand panel for sign-in / sign-up (desktop). Decorative layers are aria-hidden. #}
 <aside class="auth-aside" aria-label="Reachmark">
   <div class="auth-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -21,6 +22,6 @@
       <div class="bar"><span style="width:78%"></span></div>
       <ul><li>Mobile menu hides the call button</li><li>No booking path on the homepage</li><li>Contact form returns an error</li></ul>
     </div>
-    <div class="auth-chip b">✓ You approve every send</div>
+    <div class="auth-chip b">{{ icon('shield-check',14) }} You approve every send</div>
   </div>
 </aside>

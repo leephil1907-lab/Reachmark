@@ -228,8 +228,10 @@ class SessionNavTests(SwitchedBase):
     def test_nav_adapts_to_session(self):
         self.assertIn('Create account', self.client.get('/').data.decode())
         self.make_client()
-        self.assertIn('/workspace', self.client.get('/').data.decode())
-        self.assertIn('/workspace', self.client.get('/pricing').data.decode())
+        # Clients land on their own dashboard; /workspace is the owner's console.
+        self.assertIn('/dashboard', self.client.get('/').data.decode())
+        self.assertIn('/dashboard', self.client.get('/pricing').data.decode())
+        self.assertNotIn('href="/workspace"', self.client.get('/').data.decode())
         with self.client.session_transaction() as s:
             s.clear()
             s['owner'] = True

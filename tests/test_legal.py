@@ -31,9 +31,9 @@ class LegalTests(CrewBase):
             self.assertIn('href="/terms"', body, path)
             self.assertIn('href="/privacy"', body, path)
 
-    def test_legal_pages_carry_front_desk_but_no_ads(self):
+    def test_legal_pages_carry_front_desk_and_ads(self):
         for path, _ in self.PAGES:
             body = self.client.get(path).data.decode()
             self.assertIn('rm-receptionist-launch', body, f'{path} missing front desk')
             self.assertNotIn('embed.tawk.to', body, f'{path} must not load Tawk')
-            self.assertNotIn('adsbygoogle', body, f'{path} should stay ad-free')
+            self.assertIn('adsbygoogle', body, f'{path} should load AdSense')

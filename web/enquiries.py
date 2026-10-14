@@ -23,7 +23,7 @@ def register_enquiries(app, db, now, log):
         except: base = request.url_root.rstrip('/')
         seo = {
             'title': 'Website Samples — 10 Premium Figma-inspired designs | Reachmark',
-            'description': 'Explore 10 premium Figma-inspired fictional website concepts — café, wellness, homes, clinic, law, boutique, fintech, crypto, Web3, SaaS invoice — each with a live 3D preview. Find your direction and enquire.',
+            'description': 'Explore 10 premium Figma-inspired website concepts — café, wellness, homes, clinic, law, boutique, fintech, crypto, Web3, SaaS invoice — each with a live 3D preview. Find your direction and enquire.',
             'keywords': 'website samples, Figma templates, Reachmark portfolio, 3D previews, clinic, law, boutique, fintech',
             'canonical': (base + '/showcase') if base else None,
             'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
@@ -47,7 +47,7 @@ def register_enquiries(app, db, now, log):
         except: base = request.url_root.rstrip('/')
         seo = {
             'title': f"{sample['name']} — {sample['category']} Website Sample | Reachmark",
-            'description': sample['description'] + f" Fictional {sample['category'].lower()} design by Reachmark — Figma {sample['figma']}. Enquire about a similar website.",
+            'description': sample['description'] + f" {sample['category']} design concept by Reachmark — Figma {sample['figma']}. Enquire about a similar website.",
             'keywords': f"{sample['name']}, {sample['category']}, Reachmark, {sample['figma']}, website sample",
             'canonical': (base + f"/showcase/{slug}") if base else None,
             'og_image': (base + f"/static/samples/{slug}-preview.jpg") if base else f"/static/samples/{slug}-preview.jpg",

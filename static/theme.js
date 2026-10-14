@@ -22,7 +22,7 @@
     if(meta) meta.setAttribute('content',dark?'#0a0c0b':'#fbfbf8');
     const btn=document.getElementById('theme-toggle-public');
     if(btn){
-      btn.textContent=dark?'☾':'◐';
+      if(!btn.querySelector('svg')) btn.textContent=dark?'☾':'◐';
       btn.setAttribute('aria-pressed',dark?'true':'false');
       btn.setAttribute('title',dark?'Switch to light theme':'Switch to dark theme');
     }

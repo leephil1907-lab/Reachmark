@@ -1,11 +1,14 @@
 {# AI receptionist widget — include on any public page with: {% include 'receptionist.html' %} #}
+{% from '_icons.html' import icon, brand_mark %}
 <button id="rm-receptionist-launch" type="button" aria-label="{{ t('rx.w_open') }}" aria-expanded="false">
-  <span class="rm-dot"></span> {{ t('rx.w_ask') }}
+  <span class="rm-launch-av">{{ brand_mark(34) }}<span class="rm-dot" aria-hidden="true"></span></span>
+  <span class="rm-launch-label">{{ t('rx.w_ask') }}</span>
 </button>
 <section id="rm-receptionist" class="rm-panel" hidden aria-label="{{ t('rx.w_aria') }}">
   <header class="rm-head">
-    <div><b>{{ t('rx.w_title') }}</b><small>{{ t('rx.w_sub') }}</small></div>
-    <button type="button" id="rm-close" aria-label="{{ t('rx.w_close') }}">×</button>
+    <span class="rm-head-av">{{ brand_mark(36) }}<span class="rm-dot" aria-hidden="true"></span></span>
+    <div class="rm-head-copy"><b>{{ t('rx.w_title') }}</b><small>{{ t('rx.w_sub') }}</small></div>
+    <button type="button" id="rm-close" aria-label="{{ t('rx.w_close') }}">{{ icon('x', 18) }}</button>
   </header>
   <div class="rm-log" id="rm-log" role="log" aria-live="polite">
     <div class="rm-msg assistant">{{ t('rx.w_hello') }}</div>

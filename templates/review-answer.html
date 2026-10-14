@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="{{ locale }}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+{% from '_icons.html' import icon %}<!DOCTYPE html><html lang="{{ locale }}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ lead.name or 'Thank you' }} — {{ t('rv.thanks') }}</title>
 <meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#20251F">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
@@ -22,7 +22,7 @@
 </head><body>
 <div class="card">
   <div class="brand"><img src="/static/logo-primary.png" alt="Reachmark" onerror="this.style.display='none'"><span><b>Reachmark</b><small>FIND POTENTIAL · MAKE YOUR MARK</small></span></div>
-  <div class="tick">✓</div>
+  <div class="tick">{{ icon('check',26) }}</div>
   <h1>{{ t('rv.thanks') }}</h1>
   <span class="answer">{{ response.label }}</span>
   <p>{{ t('rv.c_' + response.choice) }}</p>

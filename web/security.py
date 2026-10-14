@@ -99,7 +99,7 @@ def install_security(app, db):
         if session.get('client_id') and session.get('role')=='client':
             return 'client'
         return 'none'
-    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),client_logged_in=bool(session.get('client_id')),current_role=current_role(),production_mode=production,support_email=brand_support_email()))
+    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),client_logged_in=bool(session.get('client_id')),current_role=current_role(),account_home=('/workspace' if session.get('owner') else '/dashboard'),production_mode=production,support_email=brand_support_email()))
     @app.before_request
     def owner_guard():
         if public():return

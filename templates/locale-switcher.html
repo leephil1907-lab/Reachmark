@@ -66,20 +66,20 @@ Array.prototype.forEach.call(sel.options,function(o){
   var b=document.createElement('button');b.type='button';b.className='ls-opt'+(o.value===cur?' on':'');b.setAttribute('role','option');b.setAttribute('aria-selected',o.value===cur?'true':'false');
   b.dataset.code=o.value;
   b.dataset.name=o.text;
-  b.innerHTML=(FLAGS[o.value]||'')+'<span>'+o.text+'</span>'+(o.value===cur?'<span class="tick">✓</span>':'');
+  b.innerHTML=(FLAGS[o.value]||'')+'<span>'+o.text+'</span>'+(o.value===cur?'<span class="tick"><svg class="tick-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>':'');
   b.onclick=function(e){
     e.stopPropagation();
     var code=o.value;
     cur=code;
     sel.value=code;
-    btn.innerHTML=(FLAGS[code]||'')+'<span>'+o.text+'</span><span class="chev">▼</span>';
+    btn.innerHTML=(FLAGS[code]||'')+'<span>'+o.text+'</span><span class="chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>';
     wrap.classList.remove('open');
     btn.setAttribute('aria-expanded','false');
     optButtons.forEach(function(btnOpt){
       var isCur=btnOpt.dataset.code===code;
       btnOpt.className='ls-opt'+(isCur?' on':'');
       btnOpt.setAttribute('aria-selected',isCur?'true':'false');
-      btnOpt.innerHTML=(FLAGS[btnOpt.dataset.code]||'')+'<span>'+btnOpt.dataset.name+'</span>'+(isCur?'<span class="tick">✓</span>':'');
+      btnOpt.innerHTML=(FLAGS[btnOpt.dataset.code]||'')+'<span>'+btnOpt.dataset.name+'</span>'+(isCur?'<span class="tick"><svg class="tick-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>':'');
     });
     go(code);
   };
@@ -87,7 +87,7 @@ Array.prototype.forEach.call(sel.options,function(o){
   menu.appendChild(b);
 });
 if(!curName)curName=sel.options[0]?sel.options[0].text:'English';
-btn.innerHTML=(FLAGS[cur]||'')+'<span>'+curName+'</span><span class="chev">▼</span>';
+btn.innerHTML=(FLAGS[cur]||'')+'<span>'+curName+'</span><span class="chev"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>';
 btn.onclick=function(e){e.stopPropagation();var open=wrap.classList.toggle('open');btn.setAttribute('aria-expanded',open?'true':'false');};
 document.addEventListener('click',function(){wrap.classList.remove('open');btn.setAttribute('aria-expanded','false');});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){wrap.classList.remove('open');btn.setAttribute('aria-expanded','false');}});

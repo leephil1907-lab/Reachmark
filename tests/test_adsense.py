@@ -20,7 +20,8 @@ class AdSenseTests(unittest.TestCase):
 
     def test_public_pages_carry_the_tags_exactly_once(self):
         for path in ('/about', '/showcase', '/showcase/ember-coffee', '/enquire',
-                     '/receptionist', '/reviews', '/pricing'):
+                     '/receptionist', '/reviews', '/pricing', '/privacy', '/terms',
+                     '/disclosure', '/app'):
             body = self.client.get(path).get_data(as_text=True)
             self.assertIn(META, body, path)
             self.assertIn(LOADER, body, path)
@@ -38,6 +39,15 @@ class AdSenseTests(unittest.TestCase):
         self.assertNotIn('<ins class="adsbygoogle"', body)
         self.assertNotIn('adsense-homepage-banner', body)
         self.assertNotIn('adsense-footer', body)
+
+    def test_unsubscribe_and_prospect_mockups_carry_the_tags(self):
+        import web.app as webapp
+        self.assertIn('/unsubscribe/', webapp.ADSENSE_PREFIXES)
+        self.assertIn('/preview/', webapp.ADSENSE_PREFIXES)
+
+    def test_publisher_id_comes_from_the_environment(self):
+        import web.app as webapp
+        self.assertEqual(webapp.ADSENSE_CLIENT, os.getenv('ADSENSE_CLIENT', CLIENT).strip())
 
     def test_private_pages_and_apis_are_excluded(self):
         for path in ('/login',):

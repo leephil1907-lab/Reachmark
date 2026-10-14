@@ -57,7 +57,7 @@
     <p class="app-note" style="padding:0;margin:0 0 8px;color:#3a7a0a;font-weight:650">{{ t('app.no_store') }}</p>
     <div class="app-actions">
       {% if client_logged_in or owner_logged_in %}
-      <a class="x-btn dark" href="/workspace">{{ t('home.open_workspace') }}</a>
+      <a class="x-btn dark" href="{{ account_home }}">{{ t('home.open_workspace') if owner_logged_in else t('home.open_dashboard') }}</a>
       {% else %}
       <a class="x-btn dark" href="/">{{ t('app.open') }}</a>
       {% endif %}
@@ -95,7 +95,7 @@
       </div>
       <div class="how-panel how-installed">
         <h3>{{ t('app.installed') }}</h3>
-        <p><a class="text-link" href="/workspace">{{ t('home.open_workspace') }}</a></p>
+        <p><a class="text-link" href="{{ account_home }}">{{ t('home.open_workspace') if owner_logged_in else t('home.open_dashboard') }}</a></p>
       </div>
     </div>
   </section>

@@ -311,7 +311,7 @@ def run(ctx):
 
     if params.get('fixtures'):
         rows = load_fixtures(limit)
-        ctx.receipt('fixture', f'Offline demo mode: {len(rows)} fictional test records loaded. They are labelled '
+        ctx.receipt('fixture', f'Offline demo mode: {len(rows)} demo test records loaded. They are labelled '
                                '"Fixture (offline demo)" and can be purged in one click.',
                     evidence='fixtures/demo_leads.json')
     elif params.get('location'):
