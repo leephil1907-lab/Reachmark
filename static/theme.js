@@ -68,26 +68,5 @@
     }
   });
 
-  // hidden owner access: 5 rapid clicks on logo → /login (no visible link)
-  let clicks=0, timer=null;
-  const goOwner=()=>{ clicks=0; location.href='/login'; };
-  const attach=(el)=>{ if(!el) return; el.style.cursor='pointer'; el.addEventListener('click', (e)=>{
-    // Only count if not already navigating
-    clicks++;
-    if(clicks===1){ timer=setTimeout(()=>{clicks=0;}, 2200); }
-    if(clicks>=5){ clearTimeout(timer); e.preventDefault(); goOwner(); }
-  }); };
-  // public pages logo selectors
-  document.querySelectorAll('.logo, .public-logo, [aria-label="Reachmark home"] img, .brand-wordmark, .brand-compact').forEach(attach);
-  // also allow hidden keyboard: type "reach" quickly
-  let keys='';
-  document.addEventListener('keydown', (e)=>{
-    keys+=e.key.toLowerCase();
-    if(keys.length>10) keys=keys.slice(-10);
-    if(keys.endsWith('reach')){
-      keys='';
-      goOwner();
-    }
-  });
-
+  // The admin console is reached only by typing /admin — no hidden shortcuts on the public site.
 })();

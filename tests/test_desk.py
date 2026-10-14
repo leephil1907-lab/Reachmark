@@ -30,7 +30,7 @@ class DeskRouteTests(CrewBase):
     def test_workspace_is_a_pipeline_desk_not_an_operator_room(self):
         with self.client.session_transaction() as sess:
             sess['owner'] = True
-        body = self.client.get('/workspace').data.decode()
+        body = self.client.get('/admin').data.decode()
         self.assertIn('desk-form', body)
         self.assertIn('desk-log', body)
         self.assertIn('desk.js', body)

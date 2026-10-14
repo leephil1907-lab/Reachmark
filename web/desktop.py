@@ -16,7 +16,7 @@ def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     port = int(os.getenv('PORT', '8000'))
     host = os.getenv('DESKTOP_HOST', '127.0.0.1')
-    path = '/workspace'
+    path = '/admin'
     if '--public' in argv:
         path = '/'
     os.environ.setdefault('APP_ENV', os.getenv('APP_ENV', 'development'))

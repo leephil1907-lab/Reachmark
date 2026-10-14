@@ -74,7 +74,7 @@ def install_security(app, db):
     with db() as c:c.execute('CREATE TABLE IF NOT EXISTS login_attempts(client TEXT PRIMARY KEY,failures INTEGER,blocked_until REAL)')
     def public():
         p=request.path
-        if p in ('/','/app','/sw.js','/login','/healthz','/about','/offline','/robots.txt','/sitemap.xml','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/signup','/signin','/client-login','/forgot','/reset','/verify','/pricing','/billing/callback','/api/billing/status','/api/billing/webhook','/api/newsletter','/privacy','/terms','/disclosure','/api/cron/expiry-warnings'): return True
+        if p in ('/','/app','/sw.js','/login','/admin','/api/auth/csrf','/healthz','/about','/offline','/robots.txt','/sitemap.xml','/showcase','/enquire','/receptionist','/reviews','/ads.txt','/signup','/signin','/client-login','/forgot','/reset','/verify','/pricing','/billing/callback','/api/billing/status','/api/billing/webhook','/api/newsletter','/privacy','/terms','/disclosure','/api/cron/expiry-warnings'): return True
         if p.startswith(('/static/','/preview/','/unsubscribe/','/showcase/','/verify/','/reset/','/forgot')): return True
         # Quick review links a business is invited to answer, and the public AI receptionist.
         if p.startswith(('/r/','/api/r/')): return True
@@ -99,7 +99,7 @@ def install_security(app, db):
         if session.get('client_id') and session.get('role')=='client':
             return 'client'
         return 'none'
-    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),client_logged_in=bool(session.get('client_id')),current_role=current_role(),account_home=('/workspace' if session.get('owner') else '/dashboard'),production_mode=production,support_email=brand_support_email()))
+    app.context_processor(lambda:dict(csrf_token=csrf,owner_logged_in=bool(session.get('owner')),client_logged_in=bool(session.get('client_id')),current_role=current_role(),account_home=('/admin' if session.get('owner') else '/dashboard'),production_mode=production,support_email=brand_support_email()))
     @app.before_request
     def owner_guard():
         if public():return
@@ -152,8 +152,25 @@ def install_security(app, db):
         if check_csrf and request.method in ('POST','PATCH','DELETE','PUT'):
             supplied=request.headers.get('X-CSRF-Token') or request.form.get('csrf_token','')
             if not hmac.compare_digest(supplied,session.get('csrf','')):return jsonify(error=_t('au.sec_csrf', locale_now())),403
+    def owner_ok():
+        """True when this request carries a valid owner session (same rules as owner_guard)."""
+        hashed=_clean_secret(os.getenv('OWNER_PASSWORD_HASH')); legacy=os.getenv('DASHBOARD_PASSWORD','')
+        configured=bool(hashed or legacy)
+        if session.get('owner') and (not configured or session.get('revision')==hashlib.sha256((hashed or legacy).encode()).hexdigest()):
+            return True
+        auth=request.authorization
+        return bool(not production and legacy and auth and auth.username=='admin' and hmac.compare_digest(auth.password or '',legacy))
+    app._owner_ok=owner_ok
+    @app.get('/api/auth/csrf')
+    def csrf_token_json():
+        return jsonify(csrf=csrf())
     @app.route('/login',methods=['GET','POST'])
+    def legacy_login():
+        # The admin console lives only at /admin. /login is the everyday word for
+        # customers, so it opens the user sign-in instead of an owner door.
+        return redirect('/signin')
     def owner_login():
+        """Owner sign-in form for /admin (GET renders, POST verifies)."""
         message=''
         if request.method=='POST':
             if not hmac.compare_digest(request.form.get('csrf_token',''),session.get('csrf','')) or not session.get('csrf'):return _t('au.sec_reload', locale_now()),403
@@ -170,17 +187,18 @@ def install_security(app, db):
             if valid:
                 with db() as c:c.execute('DELETE FROM login_attempts WHERE client=?',(client,))
                 session.clear();session.permanent=True;session['owner']=True;session['revision']=hashlib.sha256((hashed or legacy).encode()).hexdigest();csrf()
-                return redirect('/workspace')
+                return redirect('/admin')
             message=_t('au.sec_badpw', locale_now())
         return render_template('login.html',message=message)
+    app._owner_login=owner_login
     @app.post('/logout')
-    def owner_logout():session.clear();return redirect('/login')
+    def owner_logout():session.clear();return redirect('/admin')
     @app.after_request
     def security_headers(response):
         if production:response.headers['X-Frame-Options']='SAMEORIGIN'
         response.headers['Content-Security-Policy']=_CSP_PROD if production else _CSP_DEV
         if production:response.headers['Strict-Transport-Security']='max-age=31536000'
-        if request.path in ('/login','/logout'):response.headers['Cache-Control']='no-store';response.headers['X-Robots-Tag']='noindex, nofollow'
+        if request.path in ('/login','/logout','/admin'):response.headers['Cache-Control']='no-store';response.headers['X-Robots-Tag']='noindex, nofollow'
         return response
     sentry_dsn=_clean_secret(os.getenv('SENTRY_DSN',''))
     if sentry_dsn.startswith(('http://','https://')):

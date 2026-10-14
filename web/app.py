@@ -177,12 +177,12 @@ def same_origin():
         if origin and urlparse(origin).netloc != request.host: return jsonify(error=_t('api.csrf',loc)),403
 @app.after_request
 def headers(r):
-    if request.path.startswith(('/api/','/preview/','/unsubscribe/','/workspace','/dashboard')): r.headers['X-Robots-Tag']='noindex, nofollow'; r.headers['Cache-Control']='no-store'
+    if request.path.startswith(('/api/','/preview/','/unsubscribe/','/workspace','/dashboard','/admin')): r.headers['X-Robots-Tag']='noindex, nofollow'; r.headers['Cache-Control']='no-store'
     r.headers['X-Content-Type-Options']='nosniff'; r.headers['Referrer-Policy']='strict-origin-when-cross-origin'
     return r
 
 ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-5678865896620902').strip()
-ADSENSE_PATHS = {'/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/workspace',
+ADSENSE_PATHS = {'/about', '/showcase', '/enquire', '/receptionist', '/pricing', '/reviews', '/workspace', '/admin',
                  '/privacy', '/terms', '/disclosure', '/app'}
 # Sample detail pages, unsubscribe confirmations and prospect website mockups (/preview/<token>).
 ADSENSE_PREFIXES = ('/showcase/', '/unsubscribe/', '/preview/')
@@ -202,6 +202,8 @@ def adsense_tags(response):
             return response
         if 'text/html' not in response.headers.get('Content-Type', ''):
             return response
+        if request.path == '/admin' and 'adsense-sidebar' not in response.get_data(as_text=True):
+            return response  # the owner password form never carries ads
         body = response.get_data(as_text=True)
         if 'googlesyndication.com/pagead/js/adsbygoogle.js' in body:
             return response
@@ -244,12 +246,19 @@ def home():
     except Exception:
         pass
     return render_template('home.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
+@app.route('/admin',methods=['GET','POST'])
+def admin():
+    """The owner's admin console. It is reached only by typing /admin: nothing on
+    the public site links here. Signed out, it shows the owner password form."""
+    if request.method=='GET' and app._owner_ok():
+        return render_template('index.html',samples=SAMPLES,admin_console=True)
+    return app._owner_login()
 @app.route('/workspace')
 def workspace():
-    """Owner (admin) workspace. Clients are sent to their own dashboard."""
+    """Old address of the owner workspace, kept so bookmarks still work."""
     from flask import session
     if session.get('owner'):
-        return render_template('index.html',samples=SAMPLES)
+        return redirect('/admin')
     if session.get('client_id') and session.get('role')=='client':
         return redirect('/dashboard')
     return redirect('/signin')
@@ -258,7 +267,7 @@ def client_dashboard():
     """Signed-up users land here; the owner is sent to the admin workspace."""
     from flask import session
     if session.get('owner'):
-        return redirect('/workspace')
+        return redirect('/admin')
     if session.get('client_id') and session.get('role')=='client':
         return render_template('index.html',samples=SAMPLES)
     return redirect('/signin')
@@ -650,6 +659,7 @@ def unsubscribe(token):
     if request.method=='POST':
         with db() as c:
             if l['email']: c.execute('INSERT OR IGNORE INTO suppression VALUES(?,?)',(l['email'].strip().lower(),now()))
+        if l['email']: log('suppression', f"{l['email'].strip().lower()} unsubscribed from outreach")
         done=True
     return render_template('unsubscribe.html',done=done)
 @app.route('/api/leads/<lid>/suppress',methods=['POST'])
@@ -771,6 +781,8 @@ from web.platform import register_platform
 register_platform(app, db, now, log)
 from web.funnel import register_funnel
 register_funnel(app, db, now, log)
+from web.admin_activity import register_admin_activity
+register_admin_activity(app, db)
 from web.public_audit import register_public_audit
 register_public_audit(app, db, now, log)
 from web.tickets import register_tickets

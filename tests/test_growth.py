@@ -235,7 +235,10 @@ class SessionNavTests(SwitchedBase):
         with self.client.session_transaction() as s:
             s.clear()
             s['owner'] = True
-        self.assertIn('/workspace', self.client.get('/').data.decode())
+        # The admin console is reached only by typing /admin; the public site never links it.
+        owner_home = self.client.get('/').data.decode()
+        self.assertNotIn('href="/admin"', owner_home)
+        self.assertNotIn('href="/workspace"', owner_home)
 
     def test_support_email_visible_on_public_pages(self):
         for path in ('/', '/pricing', '/showcase', '/enquire', '/receptionist'):

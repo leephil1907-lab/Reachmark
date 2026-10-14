@@ -859,7 +859,7 @@ def register_network(app, db, now, log, settings):
             if _owner_email and '@' in _owner_email:
                 send_branded(_owner_email, _t('nw.m_bko_sub', _bloc, name=name, slot=_slot),
                              _t('nw.m_bko_body', _bloc, name=name, email=email, slot=_slot),
-                             html_title=_t('nw.m_bko_title', _bloc), cta_url=f'{_base}/workspace',
+                             html_title=_t('nw.m_bko_title', _bloc), cta_url=f'{_base}/admin',
                              cta_label=_t('nw.m_bko_cta', _bloc), db=db)
         except Exception:
             pass

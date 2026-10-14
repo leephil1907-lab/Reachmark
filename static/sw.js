@@ -24,7 +24,7 @@
    ================================================================================ */
 'use strict';
 
-var CACHE = 'reachmark-v2';
+var CACHE = 'reachmark-v3';
 var OFFLINE_URL = '/offline';
 var PRECACHE = [
   '/',
@@ -43,7 +43,7 @@ var PRECACHE = [
 
 /* Never cached, never served from cache — private or stateful by definition. */
 var DENY = [
-  /^\/workspace/, /^\/dashboard/, /^\/login/, /^\/signin/, /^\/signup/, /^\/forgot/, /^\/reset/,
+  /^\/admin/, /^\/workspace/, /^\/dashboard/, /^\/login/, /^\/signin/, /^\/signup/, /^\/forgot/, /^\/reset/,
   /^\/verify/, /^\/preview\//, /^\/unsubscribe\//, /^\/r\//, /^\/api\/auth/, /^\/api\/crew/,
   /^\/api\/state/, /^\/api\/leads/, /^\/api\/settings/, /^\/api\/outbox/, /^\/api\/snapshots/,
   /^\/api\/enquiries/, /^\/api\/contracts/, /^\/api\/projects/, /^\/api\/invoices/, /^\/api\/mcp/, /^\/api\/jobs/,

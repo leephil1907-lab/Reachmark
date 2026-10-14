@@ -169,7 +169,7 @@ def register_accounts(app, db, log):
         if session.get('client_id'):
             return redirect('/dashboard')
         if session.get('owner'):
-            return redirect('/workspace')
+            return redirect('/admin')
         return render_template('signup.html', google_oauth_configured=bool(os.getenv('GOOGLE_CLIENT_ID','').strip() and os.getenv('GOOGLE_CLIENT_SECRET','').strip()))
 
     @app.get('/signin')
@@ -177,7 +177,7 @@ def register_accounts(app, db, log):
         if session.get('client_id'):
             return redirect('/dashboard')
         if session.get('owner'):
-            return redirect('/workspace')
+            return redirect('/admin')
         return render_template('client_login.html', google_oauth_configured=bool(os.getenv('GOOGLE_CLIENT_ID','').strip() and os.getenv('GOOGLE_CLIENT_SECRET','').strip()))
 
     @app.get('/client-login')
@@ -196,7 +196,7 @@ def register_accounts(app, db, log):
 .auth-error{background:#f9e7e1;padding:10px;color:#8b3524;border-radius:6px;font-size:13px;display:none}.auth-ok{background:#eef6d1;padding:12px;border:1px solid #d8e9b8;border-radius:8px;color:#2d4a0a;font-size:13px;display:none}
 </style></head><body class="auth-page"><main class="auth-card"><a href="/" style="text-decoration:none"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:38px"></a><h1>Reset your password.</h1><p>Enter your work email and we'll send a secure link. It expires in 60 minutes.</p><div id="msg" class="auth-error"></div><div id="ok" class="auth-ok"></div><form id="f"><label for="email">Work email</label><input id="email" type="email" required placeholder="you@company.com"><button type="submit">Send reset link →</button></form><p style="font-size:12px;color:#8a9976">Remembered? <a href="/signin">Sign in</a> · <a href="/">About</a></p></main>
 <script>
-let csrf='';(async()=>{try{let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\\"csrf_token\\" value=\\"([^\\"]+)\\"/);csrf=m?m[1]:''}catch(e){}})();
+let csrf='';(async()=>{try{let r=await fetch('/api/auth/csrf');let j=await r.json();csrf=j.csrf||''}catch(e){}})();
 const f=document.getElementById('f'),msg=document.getElementById('msg'),ok=document.getElementById('ok');
 f.onsubmit=async e=>{e.preventDefault();msg.style.display='none';ok.style.display='none';try{let r=await fetch('/api/auth/forgot',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({email:document.getElementById('email').value.trim()})});let j=await r.json();if(!r.ok) throw new Error(j.error||'__NOLINK__');ok.textContent='__SENT__';ok.style.display='block';}catch(err){msg.textContent=err.message;msg.style.display='block';}};
 </script></body></html>""".replace('__LOC__', _fl).replace('<h1>Reset your password.</h1>', '<h1>'+_t('au.f_h', _fl)+'</h1>').replace("<p>Enter your work email and we'll send a secure link. It expires in 60 minutes.</p>", '<p>'+_t('au.f_p', _fl)+'</p>').replace('<label for="email">Work email</label>', '<label for="email">'+_t('au.s_email', _fl)+'</label>').replace('<button type="submit">Send reset link →</button>', '<button type="submit">'+_t('au.f_send', _fl)+'</button>').replace('Remembered? <a href="/signin">Sign in</a> · <a href="/">About</a>', _t('au.f_rem', _fl)+' <a href="/signin">'+_t('au.s_signin', _fl)+'</a> · <a href="/">'+_t('au.f_about', _fl)+'</a>').replace('__NOLINK__', _t('au.f_nolink', _fl)).replace('__SENT__', _t('au.f_sent', _fl))), mimetype='text/html')
@@ -213,7 +213,7 @@ f.onsubmit=async e=>{e.preventDefault();msg.style.display='none';ok.style.displa
 .auth-error{{background:#f9e7e1;padding:10px;color:#8b3524;border-radius:6px;font-size:13px;display:none}}.auth-ok{{background:#eef6d1;padding:12px;border:1px solid #d8e9b8;border-radius:8px;color:#2d4a0a;font-size:13px;display:none}}
 </style></head><body class="auth-page"><main class="auth-card"><a href="/"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:38px"></a><h1>{_t('au.r_h', _rl)}</h1><p>{_t('au.r_p', _rl)}</p><div id="msg" class="auth-error"></div><div id="ok" class="auth-ok"></div><form id="f"><label>{_t('au.r_pw', _rl)}</label><input id="pw" type="password" required minlength="8"><label>{_t('au.r_conf', _rl)}</label><input id="pw2" type="password" required><button type="submit">{_t('au.r_upd', _rl)}</button></form><p style="font-size:12px;color:#8a9976"><a href="/signin">{_t('au.r_back', _rl)}</a></p></main>
 <script>
-let csrf='';(async()=>{{try{{let r=await fetch('/login');let t=await r.text();let m=t.match(/name=\\"csrf_token\\" value=\\"([^\\"]+)\\"/);csrf=m?m[1]:''}}catch(e){{}}}})();
+let csrf='';(async()=>{{try{{let r=await fetch('/api/auth/csrf');let j=await r.json();csrf=j.csrf||''}}catch(e){{}}}})();
 const f=document.getElementById('f'),msg=document.getElementById('msg'),ok=document.getElementById('ok');
 f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=document.getElementById('pw').value, pw2=document.getElementById('pw2').value; if(pw!==pw2){{msg.textContent='{_t('au.js_nomatch', _rl)}';msg.style.display='block';return}}; try{{let r=await fetch('/api/auth/reset',{{method:'POST',headers:{{'Content-Type':'application/json','X-CSRF-Token':csrf}},body:JSON.stringify({{token:"{token}",password:pw}})}});let j=await r.json();if(!r.ok) throw new Error(j.error||'{_t('au.r_noreset', _rl)}'); ok.textContent='{_t('au.r_done', _rl)}';ok.style.display='block'; setTimeout(()=>location.href='/signin',1200);}}catch(err){{msg.textContent=err.message;msg.style.display='block';}} }};
 </script></body></html>"""), mimetype='text/html')

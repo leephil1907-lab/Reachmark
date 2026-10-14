@@ -43,6 +43,7 @@ def register_console(app, db, now, log):
         with db() as c:
             c.execute('INSERT INTO newsletter_subscribers VALUES(?,?,1,?) '
                       'ON CONFLICT(email) DO UPDATE SET active=1', (email, source, now()))
+        log('newsletter', f'Newsletter sign-up: {email}')
         try:
             base = os.getenv('PUBLIC_BASE_URL', '').strip().rstrip('/') or request.host_url.rstrip('/')
             _nl = locale_now()

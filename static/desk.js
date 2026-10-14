@@ -28,7 +28,7 @@
     var options = { method: 'POST', headers: { 'Content-Type': 'application/json' } };
     var meta = document.querySelector('meta[name="csrf-token"]');
     if (meta) options.headers['X-CSRF-Token'] = meta.content;
-    options.body = JSON.stringify({ message: message, desk: true, page: '/workspace' });
+    options.body = JSON.stringify({ message: message, desk: true, page: '/admin' });
     return fetch('/api/receptionist/message', options).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok) throw new Error(data.error || 'request failed');

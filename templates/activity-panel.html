@@ -1,0 +1,63 @@
+{% from '_icons.html' import icon %}
+<section class="page" id="page-activity" aria-labelledby="act-h">
+  <div class="heading-row page-heading">
+    <div>
+      <div class="eyebrow">{{ t('ws.act_k') }}</div>
+      <h1 id="act-h">{{ t('ws.act_h') }}</h1>
+      <p>{{ t('ws.act_p') }}</p>
+    </div>
+    <div class="act-live">
+      <span class="act-pulse" aria-hidden="true"></span>
+      <span id="act-updated" class="small muted">{{ t('ws.act_live') }}</span>
+      <button class="secondary" type="button" onclick="loadActivity(true)">{{ icon('refresh', 16) }} {{ t('ws.cl_ref') }}</button>
+    </div>
+  </div>
+
+  <div class="act-kpis" id="act-kpis">
+    {% for key, label, ic in [
+      ('users.total', t('ws.act_users'), 'users'),
+      ('users.today', t('ws.act_today'), 'user-plus'),
+      ('users.week', t('ws.act_week'), 'calendar'),
+      ('users.verified', t('ws.act_verified'), 'mail-check'),
+      ('users.paying', t('ws.act_paying'), 'tag'),
+      ('week.visits', t('ws.act_visits'), 'eye'),
+      ('week.checks', t('ws.act_checks'), 'scan'),
+      ('week.enquiries', t('ws.act_enquiries'), 'mail'),
+    ] %}
+    <div class="act-kpi">
+      <span class="act-kpi-ic">{{ icon(ic, 18) }}</span>
+      <b data-act-k="{{ key }}">–</b>
+      <small>{{ label }}</small>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="act-grid">
+    <div class="card act-card">
+      <div class="act-card-h">
+        <h2>{{ t('ws.act_signups') }}</h2>
+        <button class="text-link" type="button" onclick="navigate('clients')">{{ t('ws.act_manage') }} {{ icon('arrow-right', 14) }}</button>
+      </div>
+      <div id="act-signups"><div class="sk" aria-hidden="true"><i></i><i></i><i></i></div></div>
+    </div>
+    <div class="card act-card">
+      <div class="act-card-h">
+        <h2>{{ t('ws.act_feed') }}</h2>
+        <div class="act-filters" role="group" aria-label="{{ t('ws.act_filter') }}">
+          <button type="button" class="on" data-act-filter="all">{{ t('ws.act_f_all') }}</button>
+          <button type="button" data-act-filter="account">{{ t('ws.act_f_acct') }}</button>
+          <button type="button" data-act-filter="billing">{{ t('ws.act_f_pay') }}</button>
+          <button type="button" data-act-filter="enquiry">{{ t('ws.act_f_enq') }}</button>
+          <button type="button" data-act-filter="site">{{ t('ws.act_f_site') }}</button>
+        </div>
+      </div>
+      <ol class="act-feed" id="act-feed" aria-live="polite"><li class="sk" aria-hidden="true"><i></i><i></i><i></i></li></ol>
+    </div>
+  </div>
+
+  <template id="act-icons">
+    {% for kind, ic in [('signup','user-plus'),('signin','log-in'),('verified','check-circle'),('password','lock'),('closed','x'),('billing','tag'),('enquiry','mail'),('receptionist','headset'),('review','star'),('ticket','message'),('newsletter','mail-check'),('public-audit','scan'),('suppression','shield-check'),('onboard','compass'),('other','activity')] %}
+    <span data-ic="{{ kind }}">{{ icon(ic, 16) }}</span>
+    {% endfor %}
+  </template>
+</section>

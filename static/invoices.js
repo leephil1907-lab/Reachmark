@@ -89,7 +89,7 @@ async function checkAuth(){
         if(r.ok) location.href='/signin';
         else toast(T_('wsj.iv_signout','Unable to sign out.'),true);
       } else if(origLogout) origLogout();
-      else { const r=await fetch('/logout',{method:'POST',headers:{'X-CSRF-Token':document.querySelector('meta[name="csrf-token"]')?.content||''}}); if(r.ok) location.href='/login'; }
+      else { const r=await fetch('/logout',{method:'POST',headers:{'X-CSRF-Token':document.querySelector('meta[name="csrf-token"]')?.content||''}}); if(r.ok) location.href='/admin'; }
     }catch(e){toast(e.message,true)}
   };
 }

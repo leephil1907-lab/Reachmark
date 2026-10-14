@@ -50,7 +50,7 @@ class AdSenseTests(unittest.TestCase):
         self.assertEqual(webapp.ADSENSE_CLIENT, os.getenv('ADSENSE_CLIENT', CLIENT).strip())
 
     def test_private_pages_and_apis_are_excluded(self):
-        for path in ('/login',):
+        for path in ('/admin',):  # signed-out owner password form
             body = self.client.get(path).get_data(as_text=True)
             self.assertNotIn('adsbygoogle', body, path)
             self.assertNotIn('google-adsense-account', body, path)
@@ -89,7 +89,7 @@ class AdSenseTests(unittest.TestCase):
         with self.client.session_transaction() as session:
             session['owner'] = True
             session['csrf'] = 'test-csrf'
-        desk = self.client.get('/workspace').get_data(as_text=True)
+        desk = self.client.get('/admin').get_data(as_text=True)
         self.assertIn('adsense-sidebar', desk)
         self.assertIn('data-ad-slot="2566903210"', desk)
 

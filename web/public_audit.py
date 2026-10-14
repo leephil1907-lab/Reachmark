@@ -283,6 +283,10 @@ def register_public_audit(app, db, now, log):
             'leak_count': payload.get('leak_count'),
             'blocked': payload.get('blocked'),
         })
+        try:
+            log('public-audit', 'Free website check ran on ' + (url.split('/')[2] if '://' in url else url)[:120])
+        except Exception:
+            pass
         if payload.get('blocked'):
             payload['error'] = payload.get('reason') or 'This site blocked the check. That is inconclusive, not a fault.'
         # Full Digital Opportunity Report stays behind an account.

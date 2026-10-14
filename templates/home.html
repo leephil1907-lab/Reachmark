@@ -37,8 +37,8 @@
       <h1 class="hx-title" data-split><span class="hx-line">{{ t('home.hx_h1a') }}</span> <em class="hx-line">{{ t('home.hx_h1b') }}</em></h1>
       <p class="hx-sub">{{ t('home.hx_sub') }}</p>
       <p class="x-hero-actions">
-        {% if client_logged_in or owner_logged_in %}
-        <a class="x-btn lime" href="{{ account_home }}">{{ icon('dashboard', 18) }}<span>{{ t('home.open_workspace') if owner_logged_in else t('home.open_dashboard') }}</span></a>
+        {% if client_logged_in %}
+        <a class="x-btn lime" href="/dashboard">{{ icon('dashboard', 18) }}<span>{{ t('home.open_dashboard') }}</span></a>
         <a class="x-btn ghost" href="/enquire">{{ icon('pen', 18) }}<span>{{ t('home.cta_project') }}</span></a>
         {% else %}
         <a class="x-btn lime" href="#try-url">{{ icon('scan', 18) }}<span>{{ t('home.hx_cta') }}</span></a>
@@ -50,7 +50,7 @@
         <li>{{ icon('shield-check', 16) }}{{ t('home.hx_t2') }}</li>
         <li>{{ icon('sparkles', 16) }}{{ t('home.hx_t3') }}</li>
       </ul>
-      {% if not client_logged_in and not owner_logged_in %}
+      {% if not client_logged_in %}
       <p class="x-hero-alt hero-signin">{{ t('home.hero_signin') }} <a href="/signin">{{ t('nav.signin') }}</a></p>
       {% endif %}
     </div>
@@ -307,7 +307,7 @@
     <a href="/reviews" data-cmd>{{ t('home.cmd_reviews') }} <span>{{ t('home.cmd_social') }}</span></a>
     <a href="/enquire" data-cmd>{{ t('home.cmd_project') }} <span>{{ t('home.cmd_enquire') }}</span></a>
     <a href="/pricing" data-cmd>{{ t('home.cmd_plans') }} <span>{{ t('home.cmd_pricing') }}</span></a>
-    <a href="{{ account_home if (client_logged_in or owner_logged_in) else '/signin' }}" data-cmd>{{ t('home.cmd_ws') }} <span>{{ t('home.cmd_app') }}</span></a>
+    <a href="{{ '/dashboard' if client_logged_in else '/signin' }}" data-cmd>{{ t('home.cmd_ws') }} <span>{{ t('home.cmd_app') }}</span></a>
     <a href="/signin" data-cmd>{{ t('nav.signin') }} <span>{{ t('home.cmd_account') }}</span></a>
   </div>
 </div>

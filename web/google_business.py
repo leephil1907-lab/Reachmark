@@ -179,10 +179,10 @@ def register_google_business(app, db, now, log):
         expected = session.pop("google_business_oauth_state", "")
         started = session.pop("google_business_oauth_at", 0)
         if not expected or request.args.get("state") != expected or time.time() - started > 600:
-            return redirect("/workspace?google_business=invalid_state")
+            return redirect("/admin?google_business=invalid_state")
         code = request.args.get("code", "")
         if not code:
-            return redirect("/workspace?google_business=denied")
+            return redirect("/admin?google_business=denied")
         actor = _actor()
         if not actor:
             return redirect("/signin?google_business=auth_required")
@@ -227,10 +227,10 @@ def register_google_business(app, db, now, log):
                             (uuid.uuid4().hex, actor, gid, profile.get("email", ""), _seal(access),
                              _seal(refresh) if refresh else "", expires, now(), now()))
             log("google-business", "Google Business Profile account connected")
-            return redirect("/workspace?google_business=connected")
+            return redirect("/admin?google_business=connected")
         except Exception as exc:
             log("google-business", "Google Business connection failed: %s" % exc)
-            return redirect("/workspace?google_business=error")
+            return redirect("/admin?google_business=error")
 
     @app.post("/api/google-business/sync")
     def google_business_sync():

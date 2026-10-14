@@ -1,11 +1,7 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "api/index.py", "use": "@vercel/python" },
-    { "src": "static/**", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/static/(.*)", "dest": "/static/$1" },
-    { "src": "/(.*)", "dest": "api/index.py" }
+  "git": { "deploymentEnabled": false },
+  "redirects": [
+    { "source": "/", "destination": "https://reachmarkdigital.xyz/", "permanent": true },
+    { "source": "/:path*", "destination": "https://reachmarkdigital.xyz/:path*", "permanent": true }
   ]
 }

@@ -46,7 +46,7 @@ class WorkspaceHooksTests(CrewBase):
             sess['owner'] = True
 
     def test_overview_counters_heatmap_tour_and_skeletons(self):
-        page = self.client.get('/workspace')
+        page = self.client.get('/admin')
         self.assertEqual(page.status_code, 200)
         body = page.data.decode('utf-8')
         self.assertEqual(body.count('data-countup'), 8, 'every metric animates')
@@ -61,7 +61,7 @@ class WorkspaceHooksTests(CrewBase):
         self.assertIn("renderHeatmap", body)
 
     def test_directory_columns_are_sortable(self):
-        body = self.client.get('/workspace').data.decode('utf-8')
+        body = self.client.get('/admin').data.decode('utf-8')
         for key in ('name', 'city', 'status', 'stage', 'contact'):
             self.assertIn(f"sortLeads('{key}')", body)
             self.assertIn(f'id="sort-{key}"', body)

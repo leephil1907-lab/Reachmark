@@ -1,9 +1,22 @@
-# Vercel serverless entry — wraps the Flask app
-# Vercel filesystem is read-only except /tmp — use /tmp for SQLite.
-import os
-if os.getenv("VERCEL") and not os.getenv("DATABASE_PATH"):
-    os.environ["DATABASE_PATH"] = "/tmp/reachmark.sqlite3"
-# Ensure required secrets have safe defaults for preview (ephemeral demo)
-os.environ.setdefault("SECRET_KEY", "vercel-preview-not-for-production-please-rotate")
-from web.app import app
-# Vercel expects `app` or `handler`
+"""Vercel is retired: the live site runs on Railway at https://reachmarkdigital.xyz.
+
+vercel.json turns off Git deployments and redirects every path. This tiny WSGI
+app is the fallback for any deployment that still exists: it forwards each
+request to the same path on the real site. It deliberately does not import the
+Flask app, so no second copy of the site, database or secrets runs here.
+"""
+from urllib.parse import quote
+
+CANONICAL = 'https://reachmarkdigital.xyz'
+
+
+def app(environ, start_response):
+    path = quote(environ.get('PATH_INFO') or '/', safe="/:@!$&'()*+,;=-._~")
+    query = environ.get('QUERY_STRING')
+    location = CANONICAL + path + (('?' + query) if query else '')
+    start_response('301 Moved Permanently', [('Location', location), ('Content-Type', 'text/plain; charset=utf-8'),
+                                             ('Cache-Control', 'public, max-age=86400')])
+    return [('Moved to ' + location + '\n').encode()]
+
+
+handler = app

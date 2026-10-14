@@ -119,7 +119,7 @@ A: The workspace Free plan is $0 — samples, enquiry, and your own documents. S
 ## topic: website and domain
 tags: website, domain, url, site, reachmarkdigital, reachmark, address of the site
 Q: what is your website
-A: The public site is https://reachmarkdigital.xyz. That is the brand URL. Create an account at /signup, sign in at /signin, and open the workspace at /workspace after you sign in.
+A: The public site is https://reachmarkdigital.xyz. That is the brand URL. Create an account at /signup, sign in at /signin, and your dashboard opens at /dashboard after you sign in.
 Q: what is reachmark digital
 A: Reachmark Digital is the public name of the studio whose site is https://reachmarkdigital.xyz. The product is website diagnosis: a Digital Opportunity Report of measured observations, then build or repair work you approve.
 
@@ -130,7 +130,7 @@ A: Published workspace plans on /pricing: Free $0 — samples, enquiry, and your
 Q: is there a free plan
 A: Yes. Free is $0 and covers samples, enquiry, and your own documents. Create an account at https://reachmarkdigital.xyz/signup.
 Q: how do i create an account
-A: Open https://reachmarkdigital.xyz/signup. Existing accounts sign in at /signin. After you sign in, the workspace is at /workspace. Unsigned visits to /workspace are sent to /signin.
+A: Open https://reachmarkdigital.xyz/signup. Existing accounts sign in at /signin. After you sign in, your dashboard is at /dashboard. Signed-out visits to /dashboard are sent to /signin.
 Q: how much is starter
 A: Starter is $19 per month (₦30,000). It covers finding businesses, running audits, and exporting your list.
 Q: how much is pro

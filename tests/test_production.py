@@ -142,8 +142,8 @@ class ProductionTests(unittest.TestCase):
             self.assertEqual(self.client.get('/workspace').status_code,302)
             self.assertEqual(self.client.get('/dashboard').status_code,302)
             self.assertEqual(self.client.get('/healthz').status_code,200)
-            page=self.client.get('/login').text;csrf=re.search(r'name="csrf_token" value="([^"]+)"',page).group(1)
-            self.assertEqual(self.client.post('/login',data={'password':'a-test-password','csrf_token':csrf}).status_code,302)
+            page=self.client.get('/admin').text;csrf=re.search(r'name="csrf_token" value="([^"]+)"',page).group(1)
+            self.assertEqual(self.client.post('/admin',data={'password':'a-test-password','csrf_token':csrf}).status_code,302)
             self.assertEqual(self.client.get('/api/state').status_code,200)
             self.assertEqual(self.client.post('/api/leads',json={'name':'Test'}).status_code,403)
             with self.client.session_transaction() as s:token=s['csrf']
@@ -152,9 +152,9 @@ class ProductionTests(unittest.TestCase):
             self.assertEqual(self.client.get('/api/state').status_code,401)
     def test_login_throttles_bad_passwords(self):
         with patch.dict(os.environ,{'OWNER_PASSWORD_HASH':generate_password_hash('test',method='pbkdf2:sha256:1000')}):
-            page=self.client.get('/login').text;csrf=re.search(r'name="csrf_token" value="([^"]+)"',page).group(1)
-            for i in range(5):self.client.post('/login',data={'password':'bad','csrf_token':csrf})
-            self.assertEqual(self.client.post('/login',data={'password':'test','csrf_token':csrf}).status_code,429)
+            page=self.client.get('/admin').text;csrf=re.search(r'name="csrf_token" value="([^"]+)"',page).group(1)
+            for i in range(5):self.client.post('/admin',data={'password':'bad','csrf_token':csrf})
+            self.assertEqual(self.client.post('/admin',data={'password':'test','csrf_token':csrf}).status_code,429)
     def test_production_fails_closed(self):
         env={**os.environ,'APP_ENV':'production','DATABASE_PATH':str(Path(self.tmp.name)/'closed.sqlite3'),'SECRET_KEY':'','OWNER_PASSWORD_HASH':''}
         p=subprocess.run([sys.executable,'-c','import web.app'],env=env,capture_output=True,timeout=20)
@@ -228,7 +228,7 @@ class HomepageAndAuthBrandTests(unittest.TestCase):
         self.assertNotIn('/static/carousel.js',reviews)
         self.assertIn('/static/reviews.js',reviews)
     def test_auth_pages_use_the_visible_inverse_logo(self):
-        for path in ('/signup','/signin','/login'):
+        for path in ('/signup','/signin','/admin'):
             body=self.client.get(path).get_data(as_text=True)
             self.assertIn('logo-inverse.svg',body,path)
             self.assertNotIn('brightness(0) invert(1)',body,path)

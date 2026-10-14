@@ -105,46 +105,7 @@
 </main>
 {% include 'footer-public.html' %}
 
-{% if owner_logged_in %}
-<section class="rx-agent" aria-label="{{ t('rx.ag_aria') }}">
-<style>
-.rx-agent{max-width:920px;margin:34px auto;padding:30px;background:#14210f;color:#e9f2da;border-radius:18px;border:1px solid #2c3d22}
-.rx-agent h2{margin:0 0 4px;font-size:22px}.rx-agent>p{margin:0 0 18px;color:#a9bc93;font-size:13.5px}
-.rx-agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.rx-agent-card{background:#1d2f16;border:1px solid #33482a;border-radius:12px;padding:16px}
-.rx-agent-card h3{margin:0 0 10px;font-size:14px;letter-spacing:.4px;color:#cfe39f}
-.rx-agent-card input,.rx-agent-card select,.rx-agent-card textarea{width:100%;margin:0 0 8px;padding:9px 10px;border-radius:8px;border:1px solid #3d5530;background:#101b0c;color:#eef5e2;font-size:13px}
-.rx-agent-card textarea{min-height:56px;resize:vertical}
-.rx-agent-row{display:flex;gap:8px;flex-wrap:wrap}
-.rx-agent button{background:#a9c93f;color:#16210f;border:0;border-radius:9px;padding:9px 14px;font-weight:800;font-size:13px;cursor:pointer}
-.rx-agent button.ghost{background:transparent;color:#cfe39f;border:1px solid #3d5530}
-.rx-agent button.danger{background:#7d2f22;color:#fff}
-#rx-agent-out{margin:16px 0 0;background:#0d160a;border:1px solid #33482a;border-radius:10px;padding:14px;font:12px/1.65 ui-monospace,Consolas,monospace;color:#cfe39f;white-space:pre-wrap;max-height:320px;overflow:auto;min-height:60px}
-@media(max-width:700px){.rx-agent-grid{grid-template-columns:1fr}}
-</style>
-<h2>{{ t('rx.ag_h') }}</h2>
-<p>{{ t('rx.ag_p') }}</p>
-<div class="rx-agent-grid">
-<div class="rx-agent-card"><h3>{{ t('rx.ag_status') }}</h3><div class="rx-agent-row">
-<button type="button" data-act="stats">{{ t('rx.ag_stats') }}</button>
-<button type="button" class="ghost" data-act="enquiry_list" data-params='{"status":"New"}'>{{ t('rx.ag_new') }}</button>
-<button type="button" class="ghost" data-act="invoice_list">{{ t('rx.ag_inv') }}</button>
-<button type="button" class="ghost" data-act="project_list">{{ t('rx.ag_proj') }}</button>
-</div></div>
-</div>
-<pre id="rx-agent-out">{{ t('rx.ag_out') }}</pre>
-<script>
-(function(){
-  var out=document.getElementById('rx-agent-out');
-  var csrf=(document.querySelector('meta[name=csrf-token]')||{}).content||'';
-  function show(x){out.textContent=typeof x==='string'?x:JSON.stringify(x,null,2);}
-  function act(tool,params){show('…');
-    return fetch('/api/receptionist/act',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrf},body:JSON.stringify({tool:tool,params:params||{}})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j};});}).then(function(o){show(o.j);});}
-  document.querySelectorAll('[data-act]').forEach(function(b){b.onclick=function(){var p={};try{p=JSON.parse(b.dataset.params||'{}');}catch(e){}act(b.dataset.act,p);};});
-})();
-</script>
-</section>
-{% endif %}
+{# Owner tools live in the admin console at /admin, not on public pages. #}
 
 <script src="/static/dropdown.js" defer></script>
 <script src="/static/theme.js" defer></script>

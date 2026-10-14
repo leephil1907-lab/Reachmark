@@ -32,8 +32,8 @@
     </nav>
     <nav class="rm-foot-col" aria-label="{{ t('home.foot_started') }}">
       <h4>{{ t('home.foot_started') }}</h4>
-      {% if client_logged_in or owner_logged_in %}
-      <a href="{{ account_home }}">{{ t('home.open_workspace') if owner_logged_in else t('home.open_dashboard') }}</a>
+      {% if client_logged_in %}
+      <a href="/dashboard">{{ t('home.open_dashboard') }}</a>
       {% else %}
       <a href="/signup">{{ t('nav.signup') }}</a>
       <a href="/signin">{{ t('nav.signin') }}</a>

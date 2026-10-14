@@ -196,7 +196,7 @@ docker build -t reachmark .
 docker run --env-file .env -p 8000:8000 -v sitegap-data:/data reachmark
 ```
 
-- Set a strong `DASHBOARD_PASSWORD` (local/dev Basic auth, username `admin`) and generate the owner login with `scripts/configure_owner.py` (`OWNER_PASSWORD_HASH`, `/login`); use HTTPS — see `PRODUCTION.md`. Without these, the dashboard is open for local/workspace development only.
+- Set a strong `DASHBOARD_PASSWORD` (local/dev Basic auth, username `admin`) and generate the owner login with `scripts/configure_owner.py` (`OWNER_PASSWORD_HASH`, `/admin`); use HTTPS — see `PRODUCTION.md`. Without these, the dashboard is open for local/workspace development only.
 - Use one worker: jobs and public-service throttling are single-process. Do not use multiple workers/replicas without a shared queue and rate limiter.
 - Persist/back up SQLite. Docker defaults to `/data/reachmark.sqlite3`. Mount the data volume with permissions for the container user.
 - `/healthz` is a public minimal database health probe; `/about`, static assets, preview, unsubscribe, robots, and sitemap routes are also public.
@@ -359,7 +359,7 @@ Isolated backend tests cover MCP JSON/SSE/session handling, endpoint restriction
 ### Website signup and client login
 
 - Visitors create a client account at **`/signup`** (name, email, password ≥8 characters) and sign in at **`/signin`** (also reachable via `/client-login`).
-- The studio owner still uses **`/login`** with the single owner password ( `OWNER_PASSWORD_HASH` ). Client accounts are separate and do not gain lead-directory or discovery access.
+- The studio owner signs in at **`/admin`** (typed directly; never linked from the site) with the single owner password ( `OWNER_PASSWORD_HASH` ). Client accounts are separate and do not gain lead-directory or discovery access.
 - Public navigation (`/about`, `/showcase`, `/enquire`) now links to **Create account** and **Client portal** for easy discovery.
 - Sessions are HTTP-only, SameSite=Strict, 8 h lifetime, CSRF-protected. Login throttling (5 failures → 15 min block) applies to both owner and client.
 - `GET /api/auth/me`, `POST /api/auth/signup`, `POST /api/auth/login`, `POST /api/auth/logout`, and `GET /api/clients` (owner only) support the flow. The profile badge shows the signed-in client’s name/email when in portal mode.

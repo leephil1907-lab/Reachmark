@@ -55,7 +55,7 @@ touch .env.backup && chmod 600 .env.backup
 docker compose build --build-arg RELEASE_SHA="$(git rev-parse HEAD)" && docker compose up -d
 ```
 
-Sign in at `/login` (password only, 8 h sessions, 15-min block after 5 failures, no MFA —
+Sign in at `/admin` (password only, 8 h sessions, 15-min block after 5 failures, no MFA —
 add an identity gateway if you need it). No emailed reset: rotate the hash and recreate.
 
 Zero budget? Run local Docker + a Cloudflare Tunnel for real work; Oracle Cloud Always Free

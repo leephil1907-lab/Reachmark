@@ -63,7 +63,7 @@ a message naming the missing ones):
 
 Social buttons appear on **/signup** and **/signin** only when the matching
 variables below exist — with nothing set, the pages stay clean password-only and
-nothing breaks. Owner workspace sign-in (`/login`) stays password-only by design.
+nothing breaks. Owner admin sign-in (`/admin`) stays password-only by design.
 
 Your redirect URIs (register **exactly** these, `https`, no trailing slash).
 `YOUR-DOMAIN` must match `PUBLIC_BASE_URL`. Do not reuse the Google Business
