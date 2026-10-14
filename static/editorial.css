@@ -430,3 +430,15 @@ body.rm-ed .ed-spot>*{position:relative;z-index:1}
   body.rm-ed .ed-stage::after{animation:edGlowDrift 9s ease-in-out infinite alternate}
   @keyframes edGlowDrift{from{transform:translateX(-50%) scaleX(1);opacity:1}to{transform:translateX(-46%) scaleX(1.12);opacity:.72}}
 }
+
+/* ---------- 19. Hover physics on plan + trust cards ---------- */
+body.rm-ed .x-plans-grid article{transition:transform .3s var(--ed-ease),box-shadow .3s var(--ed-ease)}
+body.rm-ed .x-plans-grid article:hover{transform:translateY(-6px)}
+html[data-theme="dark"] body.rm-ed .x-plans-grid article:hover{box-shadow:0 18px 48px -20px rgba(213,242,104,.28)}
+body.rm-ed .x-trust-grid>a{transition:transform .3s var(--ed-ease),border-color .3s}
+body.rm-ed .x-trust-grid>a:hover{transform:translateY(-4px)}
+html[data-theme="dark"] body.rm-ed .x-trust-grid>a:hover{border-color:rgba(213,242,104,.45)!important}
+body.rm-ed .x-trust-grid>a:hover .x-go,body.rm-ed .x-plans-grid article:hover .x-go{color:var(--ed-acc)}
+@media (prefers-reduced-motion:reduce){
+  body.rm-ed .x-plans-grid article:hover,body.rm-ed .x-trust-grid>a:hover{transform:none}
+}

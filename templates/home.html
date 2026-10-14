@@ -207,10 +207,10 @@
       <p class="x-approve">{{ t('home.approve') }}</p>
     </div>
     <div class="x-steps">
-      <div class="x-step"><i>{{ icon('map-pin', 18, 'draw') }}</i><div><b>{{ t('home.d1h') }}</b><span>{{ t('home.d1p') }}</span></div></div>
-      <div class="x-step"><i>{{ icon('scan', 18, 'draw') }}</i><div><b>{{ t('home.d2h') }}</b><span>{{ t('home.d2p') }}</span></div></div>
-      <div class="x-step"><i>{{ icon('file-text', 18, 'draw') }}</i><div><b>{{ t('home.d3h') }}</b><span>{{ t('home.d3p') }}</span></div></div>
-      <div class="x-step"><i>{{ icon('shield-check', 18, 'draw') }}</i><div><b>{{ t('home.d4h') }}</b><span>{{ t('home.d4p') }}</span></div></div>
+      <div class="x-step" data-motion="fade-up"><i>{{ icon('map-pin', 18, 'draw') }}</i><div><b>{{ t('home.d1h') }}</b><span>{{ t('home.d1p') }}</span></div></div>
+      <div class="x-step" data-motion="fade-up" data-delay="90"><i>{{ icon('scan', 18, 'draw') }}</i><div><b>{{ t('home.d2h') }}</b><span>{{ t('home.d2p') }}</span></div></div>
+      <div class="x-step" data-motion="fade-up" data-delay="180"><i>{{ icon('file-text', 18, 'draw') }}</i><div><b>{{ t('home.d3h') }}</b><span>{{ t('home.d3p') }}</span></div></div>
+      <div class="x-step" data-motion="fade-up" data-delay="270"><i>{{ icon('shield-check', 18, 'draw') }}</i><div><b>{{ t('home.d4h') }}</b><span>{{ t('home.d4p') }}</span></div></div>
     </div>
   </section>
 
@@ -219,9 +219,9 @@
     <p class="ed-k"><span class="ed-n">04 /</span> {{ t('foot.trust') }}</p>
     <h2>{{ t('home.trust_h') }}</h2>
     <div class="x-trust-grid">
-      <a href="/sourcing"><span class="x-ic">{{ icon('database', 20, 'draw') }}</span>{{ icon('arrow-up-right', 16, 'x-go') }}<b>{{ t('home.trust_src') }}</b><span>{{ t('home.trust_src_p') }}</span></a>
-      <a href="/sending"><span class="x-ic">{{ icon('mail-check', 20, 'draw') }}</span>{{ icon('arrow-up-right', 16, 'x-go') }}<b>{{ t('home.trust_send') }}</b><span>{{ t('home.trust_send_p') }}</span></a>
-      <a href="/privacy"><span class="x-ic">{{ icon('lock', 20, 'draw') }}</span>{{ icon('arrow-up-right', 16, 'x-go') }}<b>{{ t('home.trust_priv') }}</b><span>{{ t('home.trust_priv_p') }}</span></a>
+      <a href="/sourcing" data-motion="fade-up"><span class="x-ic">{{ icon('database', 20, 'draw') }}</span>{{ icon('arrow-up-right', 16, 'x-go') }}<b>{{ t('home.trust_src') }}</b><span>{{ t('home.trust_src_p') }}</span></a>
+      <a href="/sending" data-motion="fade-up" data-delay="90"><span class="x-ic">{{ icon('mail-check', 20, 'draw') }}</span>{{ icon('arrow-up-right', 16, 'x-go') }}<b>{{ t('home.trust_send') }}</b><span>{{ t('home.trust_send_p') }}</span></a>
+      <a href="/privacy" data-motion="fade-up" data-delay="180"><span class="x-ic">{{ icon('lock', 20, 'draw') }}</span>{{ icon('arrow-up-right', 16, 'x-go') }}<b>{{ t('home.trust_priv') }}</b><span>{{ t('home.trust_priv_p') }}</span></a>
     </div>
   </section>
 
@@ -314,15 +314,15 @@
       <p>{{ t('home.price_p') }}</p>
     </div>
     <div class="x-plans-grid">
-      <article>{{ icon('sparkles', 20, 'x-plan-ic') }}<small>Free</small><b>$0</b><p>{{ t('home.price_free') }}</p><a href="/signup">{{ t('home.price_free_cta') }}</a></article>
-      <article>{{ icon('search', 20, 'x-plan-ic') }}<small>Starter</small><b>$19</b><p>{{ t('home.price_st') }}</p><a href="/pricing">{{ t('home.price_st_cta') }}</a></article>
-      <article class="on">{{ icon('send', 20, 'x-plan-ic') }}<small>Pro</small><b>$59</b><p>{{ t('home.price_pro') }}</p><a href="/pricing">{{ t('home.price_pro_cta') }}</a></article>
+      <article data-motion="fade-up">{{ icon('sparkles', 20, 'x-plan-ic') }}<small>Free</small><b>$0</b><p>{{ t('home.price_free') }}</p><a href="/signup">{{ t('home.price_free_cta') }}</a></article>
+      <article data-motion="fade-up" data-delay="90">{{ icon('search', 20, 'x-plan-ic') }}<small>Starter</small><b>$19</b><p>{{ t('home.price_st') }}</p><a href="/pricing">{{ t('home.price_st_cta') }}</a></article>
+      <article class="on" data-motion="fade-up" data-delay="180">{{ icon('send', 20, 'x-plan-ic') }}<small>Pro</small><b>$59</b><p>{{ t('home.price_pro') }}</p><a href="/pricing">{{ t('home.price_pro_cta') }}</a></article>
     </div>
     <p class="x-plans-note"><a href="/pricing">{{ t('home.price_all') }}</a></p>
   </section>
 
   <!-- 10. Founder -->
-  <section class="x-founder" aria-label="{{ t('home.founder_k') }}">
+  <section class="x-founder" data-motion="fade-up" aria-label="{{ t('home.founder_k') }}">
     <img class="x-founder-photo" src="/static/ernest-micheal.jpg" width="800" height="1296" loading="lazy" alt="{{ t('about.founder_alt') }}">
     <div class="x-founder-copy">
       <p class="x-kicker"><span class="ed-n">09 /</span> {{ t('home.founder_k') }}</p>
