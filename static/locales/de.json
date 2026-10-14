@@ -3022,5 +3022,7 @@
   "ws.act_nofeed_d": "Registrierungen, Anmeldungen, Anfragen, Zahlungen und Übergaben vom Empfang werden hier sofort erfasst.",
   "ws.act_toast": "Neue Registrierung: {who}",
   "ws.act_updated": "Live · aktualisiert {t}",
-  "ws.act_refreshed": "Aktivität ist aktuell."
+  "ws.act_refreshed": "Aktivität ist aktuell.",
+  "wsj.t_t12": "Website-Aktivität",
+  "wsj.t_b12": "Registrierungen, Anmeldungen, Anfragen und Zahlungen erscheinen hier sofort. Die Konsole öffnet sich auf dieser Seite."
 }

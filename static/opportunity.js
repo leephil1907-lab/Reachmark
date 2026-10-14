@@ -155,6 +155,6 @@
   document.addEventListener('DOMContentLoaded', function () {
     hookOpenLead();
     mountDrawer();
-    if (document.getElementById('oe-board')) loadOpportunityEngine();
+    if (document.getElementById('oe-board') && document.body.dataset.view !== 'client') loadOpportunityEngine();
   });
 })();

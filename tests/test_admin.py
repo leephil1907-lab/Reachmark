@@ -71,6 +71,27 @@ class AdminAddressTests(SwitchedBase):
         self.assertNotRegex(theme, r"location[^;\n]*['\"]/(admin|login|workspace)",
                             'hidden keyboard/click shortcut to the owner console')
 
+    def test_verify_banner_help_link_goes_somewhere_real(self):
+        self.make_client()
+        body = self.client.get('/dashboard').get_data(as_text=True)
+        self.assertNotIn('href="/verify"', body)  # only /verify/<token> exists
+        self.assertIn('href="/enquire"', body)
+
+    def test_google_verification_files_are_public(self):
+        with patch.dict(os.environ, STRICT):
+            r = self.client.get('/googled647aceebb4093df.html')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.get_data(as_text=True), 'google-site-verification: googled647aceebb4093df.html')
+
+    def test_customer_dashboard_skips_owner_only_modules(self):
+        self.make_client()
+        body = self.client.get('/dashboard').get_data(as_text=True)
+        self.assertIn('data-view="client"', body)
+        self.assertNotIn('rm-command-center', body)  # owner revenue card
+        for script in ('production.js', 'outreach.js', 'crew.js', 'google-business.js', 'opportunity.js'):
+            src = (ROOT / 'static' / script).read_text()
+            self.assertIn("dataset.view", src, f'{script} must not auto-load owner APIs for customers')
+
     def test_robots_does_not_advertise_admin(self):
         self.assertNotIn('/admin', self.client.get('/robots.txt').get_data(as_text=True))
 

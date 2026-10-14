@@ -1,5 +1,5 @@
 """Single-owner login; production refuses to boot without explicit secure configuration."""
-import os, secrets, time, hmac, hashlib
+import os, re, secrets, time, hmac, hashlib
 from datetime import timedelta
 from flask import request, session, jsonify, redirect, render_template, url_for
 from werkzeug.security import check_password_hash
@@ -80,6 +80,8 @@ def install_security(app, db):
         if p.startswith(('/r/','/api/r/')): return True
         if p.startswith('/o/'): return True
         if p in ('/need','/sourcing','/sending','/sample-report'): return True
+        # Google Search Console HTML-file verification (/google<token>.html) must reach the route, not /signin.
+        if re.fullmatch(r'/google[a-z0-9]+\.html', p): return True
         if p in ('/api/client-reviews',): return True
         if p == '/api/public/audit' and request.method == 'POST': return True
         if p.startswith(('/proposal/','/brief/','/p/')): return True

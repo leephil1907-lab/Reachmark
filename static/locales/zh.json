@@ -3022,5 +3022,7 @@
   "ws.act_nofeed_d": "注册、登录、咨询、付款和前台转接会实时记录在这里。",
   "ws.act_toast": "新注册：{who}",
   "ws.act_updated": "实时 · 更新于 {t}",
-  "ws.act_refreshed": "动态已是最新。"
+  "ws.act_refreshed": "动态已是最新。",
+  "wsj.t_t12": "网站动态",
+  "wsj.t_b12": "注册、登录、咨询和付款会实时显示在这里。控制台默认打开此页面。"
 }

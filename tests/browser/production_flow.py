@@ -1,5 +1,5 @@
 """Complete owner/review/project/PDF workflow on disposable data only."""
-import os,tempfile,threading
+import os,re,tempfile,threading
 from pathlib import Path
 from werkzeug.security import generate_password_hash
 from werkzeug.serving import make_server,WSGIRequestHandler
@@ -15,18 +15,21 @@ with tempfile.TemporaryDirectory() as tmp:
     try:
         with sync_playwright() as p:
             b=p.chromium.launch();page=b.new_page(viewport={'width':1440,'height':1000});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.on('dialog',lambda d:d.accept())
-            page.goto(base);expect(page.locator('body')).to_be_visible();page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();
-            try:page.wait_for_url('**/workspace**',timeout=8000)
-            except Exception:page.goto(base+'/login');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();page.wait_for_url('**/workspace**',timeout=15000)
+            page.goto(base);expect(page.locator('body')).to_be_visible();page.goto(base+'/admin');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();
+            try:page.locator('#page-overview').wait_for(state='attached',timeout=8000)
+            except Exception:page.goto(base+'/admin');page.locator('#password').fill('test-owner-password');page.locator('#login-form button[type=submit], form button[type=submit]').first.click();page.locator('#page-overview').wait_for(state='attached',timeout=15000)
             expect(page.locator('#stat-total')).to_have_text('2');review_handler_source=page.locator('#review-form').evaluate("(form)=>String(form.onsubmit)");assert 'savedReviewLabel' in review_handler_source,'Workspace did not load the updated manual-review handler: '+review_handler_source[:500]
             expect(page.locator('.tour-card')).to_be_visible()
-            expect(page.locator('.tour-step')).to_contain_text('Step 1 of 6')
-            expect(page.locator('#page-overview .analytics-heading')).to_have_attribute('data-tour-active','true')
-            tour_targets=['#page-leads .directory','#page-global .global-grid','#page-health .card','#page-crew .crew-hero','#page-settings .settings-grid']
-            for step_number, selector in enumerate(tour_targets, start=2):
-                page.locator('[data-tour="next"]').click()
-                expect(page.locator('.tour-step')).to_contain_text(f'Step {step_number} of 6')
-                expect(page.locator(selector)).to_have_attribute('data-tour-active','true')
+            # Walk the whole guided tour: every step must open its page and spotlight something on it.
+            tour_pages=['overview','activity','global','leads','health','outreach','enquiries','crew','portfolio','invoices','settings',None]
+            for step_number, tour_page in enumerate(tour_pages, start=1):
+                if step_number>1: page.locator('[data-tour="next"]').click()
+                expect(page.locator('.tour-step')).to_contain_text(f'Step {step_number} of {len(tour_pages)}')
+                if tour_page:
+                    expect(page.locator(f'#page-{tour_page}')).to_have_class(re.compile(r'\bactive\b'))
+                    expect(page.locator(f'#page-{tour_page} [data-tour-active="true"]')).to_have_count(1)
+                else:
+                    expect(page.locator('#tour-btn')).to_have_attribute('data-tour-active','true')
             page.locator('[data-tour="next"]').click()
             expect(page.locator('.tour-card')).to_have_count(0)
             page.locator('#tour-btn').click()
@@ -54,6 +57,6 @@ with tempfile.TemporaryDirectory() as tmp:
             expect(page.locator('.nav-more[open] .nav[data-page="crew"]')).to_be_visible()
             page.locator('.nav-more[open] .nav[data-page="crew"]').click()
             expect(page.locator('#page-crew')).to_be_visible()
-            page.evaluate("navigate('crew')");expect(page.locator('#crew-agent-grid .crew-agent')).to_have_count(8);expect(page.locator('#crew-run-hint')).to_contain_text('Nothing is ever sent');expect(page.locator('#crew-guardrails')).to_contain_text('needs a separate owner approval');expect(page.locator('#page-crew')).to_be_visible();page.evaluate("navigate('settings')");page.get_by_role('button',name='Sign out of owner session').click();expect(page).to_have_url(base+'/login');assert page.request.get(base+'/api/projects').status==401
+            page.evaluate("navigate('crew')");expect(page.locator('#crew-agent-grid .crew-agent')).to_have_count(8);expect(page.locator('#crew-run-hint')).to_contain_text('Nothing is ever sent');expect(page.locator('#crew-guardrails')).to_contain_text('needs a separate owner approval');expect(page.locator('#page-crew')).to_be_visible();page.evaluate("navigate('settings')");page.get_by_role('button',name='Sign out of owner session').click();expect(page).to_have_url(base+'/admin');expect(page.locator('#password')).to_be_visible();assert page.request.get(base+'/api/projects').status==401
             assert not errors,errors;print('PASS: owner login/CSRF, private pages, lead filters, evidence review, PDF downloads, project board, overdue reminders, AI crew console, mobile, logout. Disposable records only.');b.close()
     finally:server.shutdown();thread.join(timeout=5)

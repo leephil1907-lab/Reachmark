@@ -269,7 +269,7 @@ def client_dashboard():
     if session.get('owner'):
         return redirect('/admin')
     if session.get('client_id') and session.get('role')=='client':
-        return render_template('index.html',samples=SAMPLES)
+        return render_template('index.html',samples=SAMPLES,client_view=True)
     return redirect('/signin')
 @app.route('/healthz')
 def healthz():

@@ -506,7 +506,7 @@
   };
 
   // Boot when the page is shown. app.js calls loadCrew() on navigation.
-  document.addEventListener('DOMContentLoaded', function () { loadCrew(); });
+  document.addEventListener('DOMContentLoaded', function () { if (document.body.dataset.view !== 'client') loadCrew(); });
   window.addEventListener('hashchange', function () {
     if (location.hash === '#crew') loadCrew();
   });

@@ -3022,5 +3022,7 @@
   "ws.act_nofeed_d": "Registros, inicios de sesión, consultas, pagos y derivaciones de recepción se registran aquí al momento.",
   "ws.act_toast": "Nuevo registro: {who}",
   "ws.act_updated": "En vivo · actualizado {t}",
-  "ws.act_refreshed": "La actividad está al día."
+  "ws.act_refreshed": "La actividad está al día.",
+  "wsj.t_t12": "Actividad del sitio",
+  "wsj.t_b12": "Registros, inicios de sesión, consultas y pagos aparecen aquí al momento. La consola se abre en esta página."
 }

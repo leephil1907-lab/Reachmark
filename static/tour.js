@@ -12,6 +12,7 @@
   var KEY = 'rm-tour-seen';
   var STEPS = [
     { page: 'overview', sel: ['#page-overview .ws-start', '#page-overview .page-heading'], title: ['wsj.t_t1', 'Your live overview'], body: ['wsj.t_b1', 'Every number here comes from saved records. Nothing is estimated.'] },
+    { page: 'activity', sel: ['#page-activity .act-kpis', '#page-activity .page-heading'], title: ['wsj.t_t12', 'Website activity'], body: ['wsj.t_b12', 'Sign-ups, sign-ins, enquiries and payments appear here as they happen. The console opens on this page.'] },
     { page: 'global', sel: ['#page-global .global-grid', '#page-global .page-heading'], title: ['wsj.t_t3', 'Global finder'], body: ['wsj.t_b3', 'Discover real businesses from OpenStreetMap, one bounded job at a time.'] },
     { page: 'leads', sel: ['#page-leads .directory', '#page-leads .page-heading'], title: ['wsj.t_t2', 'Lead directory'], body: ['wsj.t_b2', 'Search, filter and sort saved businesses. Click a row to open its workspace.'] },
     { page: 'health', sel: ['#page-health .card', '#page-health .page-heading'], title: ['wsj.t_t4', 'Website health'], body: ['wsj.t_b4', 'Evidence-first URL checks. A failure is never called a dead site.'] },

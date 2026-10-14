@@ -42,6 +42,7 @@
     try{await api('/api/outreach/campaigns',{method:'POST',body:JSON.stringify({name,provider})});document.getElementById('rm-campaign-name').value='';await loadCampaigns();}catch(e){alert(e.message)}finally{this.disabled=false;}
   };
   document.getElementById('rm-refresh').onclick=loadCampaigns;
+  if(document.body.dataset.view==='client')return; // owner-only module
   loadProviders().catch(e=>{document.getElementById('provider-state').textContent='Provider check failed';});
   loadCampaigns().catch(()=>{document.getElementById('rm-campaign-list').innerHTML='<p class="muted">Sign in as a Reachmark workspace owner to use Outreach.</p>';});
 })();

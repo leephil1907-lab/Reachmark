@@ -175,8 +175,13 @@
   setInterval(function () { if (state.data && onPage()) { renderSignups(state.data); renderFeed(state.data); } }, 60000);
 
   // The admin console opens on Activity unless a specific page was requested.
+  // On the owner's very first visit the guided tour runs instead: navigate()
+  // writes #activity into the address, and tour.js never starts over a deep link.
+  function tourPending() {
+    try { return !localStorage.getItem('rm-tour-seen'); } catch (e) { return false; }
+  }
   function landing() {
-    if (!location.hash && typeof navigate === 'function') navigate('activity');
+    if (!location.hash && !tourPending() && typeof navigate === 'function') navigate('activity');
     load(false);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', landing); else landing();

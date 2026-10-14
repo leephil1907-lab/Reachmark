@@ -51,5 +51,5 @@
       })();
     }
   });
-  document.addEventListener('DOMContentLoaded', load);
+  document.addEventListener('DOMContentLoaded', function () { if (document.body.dataset.view !== 'client') load(); });
 })();

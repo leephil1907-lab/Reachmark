@@ -3022,5 +3022,7 @@
   "ws.act_nofeed_d": "Inscriptions, connexions, demandes, paiements et transferts de l’accueil sont enregistrés ici en temps réel.",
   "ws.act_toast": "Nouvelle inscription : {who}",
   "ws.act_updated": "En direct · mis à jour {t}",
-  "ws.act_refreshed": "L’activité est à jour."
+  "ws.act_refreshed": "L’activité est à jour.",
+  "wsj.t_t12": "Activité du site",
+  "wsj.t_b12": "Inscriptions, connexions, demandes et paiements s’affichent ici en temps réel. La console s’ouvre sur cette page."
 }

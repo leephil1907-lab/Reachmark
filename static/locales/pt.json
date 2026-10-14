@@ -3022,5 +3022,7 @@
   "ws.act_nofeed_d": "Cadastros, entradas, pedidos, pagamentos e encaminhamentos da recepção são registrados aqui na hora.",
   "ws.act_toast": "Novo cadastro: {who}",
   "ws.act_updated": "Ao vivo · atualizado {t}",
-  "ws.act_refreshed": "A atividade está atualizada."
+  "ws.act_refreshed": "A atividade está atualizada.",
+  "wsj.t_t12": "Atividade do site",
+  "wsj.t_b12": "Cadastros, entradas, pedidos e pagamentos aparecem aqui na hora. O console abre nesta página."
 }
