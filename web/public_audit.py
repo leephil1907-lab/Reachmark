@@ -1,7 +1,7 @@
-"""Unsigned public URL check: three measured leaks, full report gated.
+"""Public website review: up to three findings based on the page check.
 
-Reuses web_probe.observe + gaps_from and opportunity.LEAK_COPY. Does not invent
-a score, a revenue figure, or a diagnosis beyond what was read from the page.
+Reuses web_probe.observe + gaps_from and opportunity.LEAK_COPY. Findings are
+limited to information actually available from the page check.
 """
 from __future__ import annotations
 
@@ -87,46 +87,46 @@ def _plain(text, limit=140):
 
 
 def leak_narrative(url, observations, leaks):
-    """Plain-language account of what this fetch actually read. Not a forecast."""
+    """Explain in plain language what the website check was able to read."""
     target = _plain(url or '', 180)
     if not observations.get('ok'):
         reason = _plain(observations.get('reason') or 'The page did not respond.', 220)
         return (
-            f'We could not finish a public read of {target}. {reason} '
-            'That is a measured miss, not a score and not a revenue forecast.'
+            f'We could not complete a website review of {target}. {reason} '
+            'The website may be restricting access, so this check cannot confirm whether there is an issue.'
         )
     signals = observations.get('signals') or {}
     final = _plain(observations.get('final_url') or url or '', 180)
-    bits = [f'We fetched {final}.']
+    bits = [f'We checked {final}.']
     status = observations.get('status')
     ms = observations.get('ms')
     if status is not None:
         if isinstance(ms, int):
-            bits.append(f'The server answered HTTP {status} in {ms} ms.')
+            bits.append(f'The website responded in {ms} ms (response code {status}).')
         else:
-            bits.append(f'The server answered HTTP {status}.')
+            bits.append(f'The website returned response code {status}.')
     title = _plain(signals.get('title') or '', 120)
     if title:
         bits.append(f'The page title we read was “{title}”.')
     if observations.get('https') is False:
-        bits.append('The response was not over HTTPS.')
+        bits.append('A secure connection was not available for this page.')
     if signals.get('cookie_interstitial'):
-        bits.append('The HTML is a cookie or consent wall, so the working site was not measured.')
+        bits.append('A cookie or consent notice appeared instead of the main page content, so the full page could not be reviewed.')
     elif signals.get('js_shell'):
-        bits.append('The HTML is a script shell; copy that paints later was not in this check.')
+        bits.append('The page content was not available in the response we could access.')
     words = signals.get('visible_words')
     if not isinstance(words, int):
         words = signals.get('word_count')
     if isinstance(words, int) and words >= 0:
-        bits.append(f'The page read contained about {words} visible words.')
+        bits.append(f'The page contained about {words} words of visible text.')
     if leaks:
         titles = ', '.join(_plain(item.get('title') or '', 80) for item in leaks if item.get('title'))
         if titles:
-            bits.append(f'On this check we labelled these gaps: {titles}.')
-        bits.append('Each line below is what the fetch actually showed — not a guess at lost sales.')
+            bits.append(f'This check identified these items for review: {titles}.')
+        bits.append('Each item below is based on information available from the website check.')
     else:
-        bits.append('None of the labelled leak checks fired on the page we read.')
-    bits.append('This is not a revenue forecast. The full Digital Opportunity Report stays behind an account.')
+        bits.append('This check did not identify any of the listed issues on the page we could access.')
+    bits.append('These findings describe the website information available from this check. Create an account to view the full website review.')
     return ' '.join(bits)
 
 
@@ -196,28 +196,29 @@ def preview_leaks(url, observe_fn=None):
         blocked = True
     sig = observations.get('signals') or {}
     facts = []
-    facts.append(f'Title: {(sig.get("title") or "(none)")[:160]}')
+    facts.append(f'Page title: {(sig.get("title") or "Not provided")[:160]}')
     facts.append(
-        f'HTTP {observations.get("status") or "?"} in {observations.get("ms") or "?"} ms · '
-        f'{"HTTPS" if observations.get("https") else "not HTTPS"}'
+        f'{"Website responded" if observations.get("ok") else "Website response unavailable"}' +
+        (f' in {observations.get("ms")} ms' if isinstance(observations.get("ms"), int) else '') +
+        f' · {"Secure connection available" if observations.get("https") else "Secure connection not confirmed"}'
     )
     if observations.get('bytes') is not None:
-        facts.append(f'{observations["bytes"]} bytes of HTML read')
+        facts.append('Page content was received for review')
     words = sig.get('visible_words')
     if not isinstance(words, int):
         words = sig.get('word_count')
     if isinstance(words, int):
-        facts.append(f'{words} visible words')
+        facts.append(f'Visible text: about {words} words')
     forms = sig.get('form_count') or (1 if sig.get('has_form') else 0)
     contact = (
         sig.get('has_contact_link') or sig.get('has_tel_link') or sig.get('has_mailto_link')
         or sig.get('has_tel_or_mailto')
     )
-    facts.append(f'{forms} form(s) · {"contact path found" if contact else "no tel/mailto/contact link"}')
+    facts.append(f'Enquiry forms found: {forms} · {"Contact option found" if contact else "No contact link found on this page"}')
     if sig.get('cookie_interstitial'):
-        facts.append('Cookie or consent wall in the HTML we received')
+        facts.append('A cookie or consent notice appeared before the main page content')
     if sig.get('js_shell'):
-        facts.append('Mostly scripts — the painted page was not in this HTML')
+        facts.append('The page content was not available in the response we could access')
     return {
         'ok': bool(observations.get('ok')) and not blocked,
         'blocked': blocked,
@@ -230,7 +231,7 @@ def preview_leaks(url, observe_fn=None):
         'narrative': leak_narrative(url, observations, top),
         'measured': True,
         'full_report': False,
-        'label': 'Measured observations from this check. Not a revenue forecast.',
+        'label': 'Findings are based on the website information available from this check.',
     }
 
 
