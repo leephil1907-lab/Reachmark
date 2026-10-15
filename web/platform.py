@@ -71,7 +71,7 @@ def ensure_tables(db):
         CREATE TABLE IF NOT EXISTS memory_events(
             id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, kind TEXT NOT NULL, reason TEXT NOT NULL,
             potential TEXT NOT NULL, follow_up_at TEXT, note TEXT NOT NULL,
-            created TEXT NOT NULL, owner_user_id TEXT
+            created TEXT NOT NULL, owner_user_id TEXT, status TEXT NOT NULL DEFAULT 'open'
         );
         CREATE TABLE IF NOT EXISTS delivery_watches(
             id TEXT PRIMARY KEY, project_id TEXT, lead_id TEXT, invoice_id TEXT,
