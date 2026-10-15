@@ -12,9 +12,9 @@ BRAND_PUBLIC_URL = 'https://reachmarkdigital.xyz'
 BRAND_SUPPORT_EMAIL = 'support@reachmarkdigital.xyz'
 SEO_HOME_TITLE = 'Reachmark: Find Businesses Losing Customers Online'
 SEO_HOME_DESCRIPTION = (
-    'Reachmark audits public business websites, records measurable issues, and creates a Digital Opportunity Report. Review every finding and approve each outreach email before sending.'
+    'Reachmark helps designers find businesses, review public websites, and prepare a Digital Opportunity Report with practical next steps. You review each message before it is sent.'
 )
-SEO_HOME_KEYWORDS = 'Reachmark, Reachmark Digital, website diagnosis, Digital Opportunity Report'
+SEO_HOME_KEYWORDS = 'Reachmark, Reachmark Digital, website review, website design proposals, Digital Opportunity Report'
 # Search Console HTML-tag tokens. First token is reachmarkdigital.xyz (2026-10-08).
 GOOGLE_SITE_TOKENS = (
     'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c',
