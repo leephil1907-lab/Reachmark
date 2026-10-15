@@ -31,12 +31,15 @@
     return '<div class="action-center-empty">' + esc(text) + '</div>';
   }
 
-  function renderRows(items, getTitle, getDetail, emptyText, max) {
+  function renderRows(items, getTitle, getDetail, emptyText, max, action) {
     if (!items.length) return empty(emptyText);
-    return '<div class="action-center-list">' + items.slice(0, max || 4).map((item) =>
-      '<div class="action-center-row"><div><strong>' + esc(getTitle(item)) + '</strong><span>' +
-      esc(getDetail(item)) + '</span></div>' + openLeadButton(item.lead_id, 'Open ↗') + '</div>'
-    ).join('') + '</div>';
+    return '<div class="action-center-list">' + items.slice(0, max || 4).map((item) => {
+      const control = action === 'complete-followup'
+        ? '<button type="button" data-followup-complete="' + esc(item.id || '') + '" data-followup-lead="' + esc(item.lead_id || '') + '">Mark done ✓</button>'
+        : openLeadButton(item.lead_id, 'Open ↗');
+      return '<div class="action-center-row"><div><strong>' + esc(getTitle(item)) + '</strong><span>' +
+        esc(getDetail(item)) + '</span></div>' + control + '</div>';
+    }).join('') + '</div>';
   }
 
   function render(root, command, due, metrics) {
@@ -91,7 +94,7 @@
         '<article class="action-center-card"><h3>Follow-ups due</h3>' +
           renderRows(followups, (item) => item.lead_name || 'Business', (item) =>
             [item.kind, item.reason, item.follow_up_at ? 'Due ' + item.follow_up_at : 'Due now'].filter(Boolean).join(' · '),
-            'No follow-ups are due right now.', 4) + '</article>' +
+            'No follow-ups are due right now.', 4, 'complete-followup') + '</article>' +
         '<article class="action-center-card"><h3>Needs your attention</h3>' +
           renderRows(replies, (item) => item.lead_name || 'Business', (item) =>
             'Reply waiting · ' + (item.last_intent || 'intent not classified'),
@@ -117,6 +120,31 @@
     root.querySelectorAll('[data-action-discover]').forEach((button) => {
       button.addEventListener('click', () => {
         if (typeof window.navigate === 'function') window.navigate('global');
+      });
+    });
+    root.querySelectorAll('[data-followup-complete]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const memoryId = button.getAttribute('data-followup-complete');
+        const leadId = button.getAttribute('data-followup-lead');
+        if (!memoryId || !leadId || button.disabled) return;
+        button.disabled = true;
+        button.textContent = 'Saving…';
+        try {
+          const meta = document.querySelector('meta[name="csrf-token"]');
+          const headers = { 'Content-Type': 'application/json', Accept: 'application/json' };
+          if (meta && meta.content) headers['X-CSRF-Token'] = meta.content;
+          const response = await fetch('/api/platform/lead/' + encodeURIComponent(leadId) + '/memory/' + encodeURIComponent(memoryId) + '/complete', {
+            method: 'POST', credentials: 'same-origin', headers, body: JSON.stringify({})
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.error || 'Could not complete this follow-up.');
+          await load(true);
+        } catch (error) {
+          const status = document.getElementById('rm-action-center-status');
+          if (status) status.textContent = error.message || 'Could not complete this follow-up.';
+          button.disabled = false;
+          button.textContent = 'Retry';
+        }
       });
     });
     root.querySelectorAll('[data-pipeline-stage]').forEach((button) => {
