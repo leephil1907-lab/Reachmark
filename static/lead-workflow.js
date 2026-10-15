@@ -44,7 +44,7 @@
     }
     list.innerHTML = items.map((item) => {
       const kind = String(item.kind || 'note').replace(/_/g, ' ');
-      const follow = item.follow_up_at ? '<span>Follow-up · ' + esc(dateLabel(item.follow_up_at)) + '</span>' : '';
+      const follow = item.follow_up_at ? '<span>Follow-up · ' + esc(dateLabel(item.follow_up_at)) + (item.status === 'done' ? ' · completed' : '') + '</span>' : '';
       const potential = item.potential && item.potential !== 'unknown'
         ? '<span>Priority · ' + esc(item.potential) + '</span>' : '';
       return '<article class="lead-activity-item"><span class="lead-activity-marker" aria-hidden="true"></span>' +
