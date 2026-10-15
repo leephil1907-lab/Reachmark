@@ -179,7 +179,7 @@ class ProspectTests(unittest.TestCase):
             os.environ.pop('GOOGLE_TAG_MANAGER_ID', None)
             page = self.client.get('/?locale=en')
         self.assertEqual(page.status_code, 200)
-        self.assertIn(b'<title>Reachmark: Find Businesses Losing Customers Online</title>', page.data)
+        self.assertIn(b'<title>Reachmark Digital | Website Audits and SEO for Business Growth</title>', page.data)
         self.assertNotIn(b'GTM-M3SJZ8S7', page.data)
         self.assertIn(b'G-3T3SXLG2XT', page.data)
         self.assertIn(b'GT-KVHJTVJ2', page.data)
@@ -189,6 +189,70 @@ class ProspectTests(unittest.TestCase):
         self.assertIn(b'G-3T3SXLG2XT', receptionist.data)
         self.assertIn(b'GT-KVHJTVJ2', receptionist.data)
         self.assertNotIn(b'GTM-M3SJZ8S7', receptionist.data)
+
+    def test_lead_followup_can_be_saved_and_completed(self):
+        lead = self.create()
+        saved = self.client.post(
+            '/api/platform/lead/' + lead['id'] + '/memory',
+            json={'kind': 'note', 'reason': 'Follow up about the website audit',
+                  'note': 'Asked to check back next week.', 'follow_up_at': '2000-01-01',
+                  'potential': 'medium'},
+        )
+        self.assertEqual(saved.status_code, 200, saved.get_data(as_text=True))
+        memory_id = saved.json['id']
+        history = self.client.get('/api/platform/lead/' + lead['id'] + '/memory')
+        self.assertEqual(history.status_code, 200)
+        self.assertEqual(history.json['items'][0]['id'], memory_id)
+        self.assertEqual(history.json['items'][0]['status'], 'open')
+        due_before = self.client.get('/api/platform/memory/due').json['items']
+        self.assertIn(memory_id, [item['id'] for item in due_before])
+
+        completed = self.client.post(
+            '/api/platform/lead/' + lead['id'] + '/memory/' + memory_id + '/complete',
+            json={},
+        )
+        self.assertEqual(completed.status_code, 200, completed.get_data(as_text=True))
+        due_after = self.client.get('/api/platform/memory/due').json['items']
+        self.assertNotIn(memory_id, [item['id'] for item in due_after])
+        final_history = self.client.get('/api/platform/lead/' + lead['id'] + '/memory').json['items']
+        self.assertEqual(final_history[0]['status'], 'done')
+
+    def test_receptionist_owner_tools_require_owner_session(self):
+        self.assertEqual(self.client.get('/api/receptionist/threads').status_code, 403)
+        self.assertEqual(self.client.get('/api/receptionist/desk/thread?token=not-a-token').status_code, 403)
+        self.assertEqual(self.client.post('/api/receptionist/act', json={'tool': 'status', 'params': {}}).status_code, 403)
+        self.assertEqual(
+            self.client.post('/api/receptionist/message', json={'message': 'status', 'desk': True}).status_code,
+            403,
+        )
+        self.assertEqual(
+            self.client.post('/api/receptionist/threads/not-a-thread', json={'status': 'closed'}).status_code,
+            403,
+        )
+
+    def test_workspace_receptionist_lists_real_due_followups(self):
+        lead = self.create()
+        saved = self.client.post(
+            '/api/platform/lead/' + lead['id'] + '/memory',
+            json={'kind': 'note', 'reason': 'Discuss the audit', 'follow_up_at': '2000-01-01'},
+        )
+        self.assertEqual(saved.status_code, 200)
+        with self.client.session_transaction() as sess:
+            sess['owner'] = True
+        response = self.client.post(
+            '/api/receptionist/message',
+            json={'message': 'show due follow-ups', 'desk': True},
+        )
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+        self.assertEqual(response.json['intent'], 'desk_followups')
+        self.assertIn('Example Bakery', response.json['reply'])
+
+    def test_not_now_is_a_valid_saved_pipeline_stage(self):
+        lead = self.create()
+        response = self.client.patch('/api/leads/' + lead['id'], json={'stage': 'Not now'})
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+        saved = self.client.get('/api/state').json['leads']
+        self.assertEqual(next(row for row in saved if row['id'] == lead['id'])['stage'], 'Not now')
 
     def test_public_metadata(self):
         response=self.client.get('/about');self.assertIn(b'application/ld+json',response.data)

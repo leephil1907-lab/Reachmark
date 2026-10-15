@@ -397,6 +397,8 @@ class ReceptionistTests(CrewBase):
 
     def test_transcripts_are_stored_for_the_owner(self):
         self.client.post('/api/receptionist/message', json={'message': 'what is included in the price?'})
+        with self.client.session_transaction() as sess:
+            sess['owner'] = True
         rows = threads(module.db)
         self.assertTrue(rows)
         listing = self.client.get('/api/receptionist/threads')

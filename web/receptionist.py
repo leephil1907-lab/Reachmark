@@ -48,8 +48,8 @@ HUMAN_LINE = ('Of course. I have flagged this for the studio owner — they read
 # --------------------------------------------------------------------------- #
 # Storage
 # --------------------------------------------------------------------------- #
-from web.agent_tools import (ACT_TOOLS, ToolError, owner_locked, run_tool, tool_enquiry_list,
-                                 tool_invoice_list, tool_lead_list, tool_project_list, tool_stats)
+from web.agent_tools import (ToolError, run_tool, tool_enquiry_list, tool_invoice_list,
+                                 tool_lead_list, tool_project_list, tool_stats)
 
 
 def ensure_tables(db):
@@ -283,6 +283,7 @@ DESK_HELP = (
     'I am the workspace receptionist. Tell me what to do, in plain words:\n'
     '• find cafes in Lagos — run discovery for that trade and city\n'
     "• what's next — queued businesses from stored listings\n"
+    '• show due follow-ups — reminders that are still open\n'
     '• diagnose next — store reports from saved evidence (not a forecast)\n'
     '• status — pipeline counts\n'
     '• leads [search] — recently saved businesses\n'
@@ -306,6 +307,7 @@ NEXT_RE = re.compile(
     r'\s*[.?!]*\s*$',
     re.I,
 )
+FOLLOWUP_RE = re.compile(r'\b(follow[- ]?ups?|reminders)\b', re.I)
 DIAGNOSE_RE = re.compile(
     r'^\s*(diagnose next|run(?: the)? queue|build reports?)\s*[.?!]*\s*$',
     re.I,
@@ -422,6 +424,28 @@ def desk_next(db):
     return '\n'.join(lines)
 
 
+def desk_followups(db, now):
+    """List saved follow-ups that are due and still open."""
+    today = (now() or '')[:10]
+    with db() as c:
+        rows = c.execute(
+            '''SELECT m.lead_id, m.kind, m.reason, m.follow_up_at, l.name AS lead_name,
+                      l.city AS lead_city
+               FROM memory_events m JOIN leads l ON l.id=m.lead_id
+               WHERE m.follow_up_at IS NOT NULL AND m.follow_up_at<=? AND m.status='open'
+               ORDER BY m.follow_up_at ASC LIMIT 12''',
+            (today,),
+        ).fetchall()
+    if not rows:
+        return 'No follow-ups are due right now. Future reminders stay attached to their lead records.'
+    lines = ['Due follow-ups from saved workspace records:']
+    for row in rows:
+        item = dict(row)
+        lines.append(f"• {item.get('lead_name') or 'Business'} — due {item.get('follow_up_at')} — {item.get('reason') or item.get('kind')}")
+    lines.append('Open a lead and mark the reminder done when the follow-up is complete.')
+    return '\n'.join(lines)
+
+
 def desk_diagnose(db, now, log):
     from web.opportunity import run_queue
     out = run_queue(db, now, log=log, limit=5)
@@ -457,6 +481,9 @@ def owner_desk(app, db, now, log, text, thread_token, visitor_hash):
         found = FIND_RE.match(text)
         reply, intent = desk_find(app, db, now, log, found.group('category'), found.group('city')), 'desk_find'
         actions.append('discover_run')
+    elif FOLLOWUP_RE.search(text):
+        reply, intent = desk_followups(db, now), 'desk_followups'
+        actions.append('show_due_followups')
     elif DIAGNOSE_RE.match(text):
         reply, intent = desk_diagnose(db, now, log), 'desk_diagnose'
         actions.append('diagnose_queue')
@@ -555,7 +582,7 @@ def register_receptionist(app, db, now, log, settings):
             return jsonify(error=_t('rx.e_trap', loc)), 400
         desk_flag = bool(body.get('desk'))
         owner_here = bool(session.get('owner'))
-        if desk_flag and owner_locked() and not owner_here:
+        if desk_flag and not owner_here:
             return jsonify(error=_t('rx.e_owner', loc)), 403
         if desk_flag or owner_here:
             result = owner_desk(app, db, now, log, str(body.get('message', ''))[:2000],
@@ -591,7 +618,7 @@ def register_receptionist(app, db, now, log, settings):
     def receptionist_act():
         """Owner-only agent actions: the front desk doing real work."""
         loc = g.get('locale', 'en')
-        if owner_locked() and not session.get('owner'):
+        if not session.get('owner'):
             return jsonify(error=_t('rx.e_owner', loc)), 403
         body = request.get_json(silent=True)
         if not isinstance(body, dict):
@@ -605,11 +632,27 @@ def register_receptionist(app, db, now, log, settings):
 
     @app.get('/api/receptionist/threads')
     def receptionist_threads_route():
-        if session.get('client_id') and not session.get('owner'):
+        if not session.get('owner'):
             return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
         status = request.args.get('status') or None
         return jsonify({'threads': threads(db, status=status),
                         'knowledge_topics': [t['topic'] for t in load_knowledge()]})
+
+    @app.get('/api/receptionist/desk/thread')
+    def receptionist_desk_thread():
+        if not session.get('owner'):
+            return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
+        token = str(request.args.get('token') or '').strip()[:64]
+        if not token:
+            return jsonify(thread=None, transcript=[])
+        with db() as c:
+            row = c.execute(
+                "SELECT id, token FROM receptionist_threads WHERE token=? AND page='owner-desk'",
+                (token,),
+            ).fetchone()
+        if not row:
+            return jsonify(thread=None, transcript=[])
+        return jsonify(thread=row['token'], transcript=transcript(db, row['id']))
 
     @app.get('/api/receptionist/threads/<thread_id>')
     def receptionist_thread_route(thread_id):
@@ -623,6 +666,8 @@ def register_receptionist(app, db, now, log, settings):
 
     @app.post('/api/receptionist/threads/<thread_id>')
     def receptionist_thread_update(thread_id):
+        if not session.get('owner'):
+            return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
         body = request.get_json(silent=True) or {}
         status = str(body.get('status', 'open'))
         if status not in ('open', 'handled', 'closed'):

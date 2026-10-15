@@ -18,6 +18,7 @@
   var KEY = 'reachmark.receptionist.thread';
   var voiceOn = false;
   var rec = null;
+  var busy = false;
 
   function thread() {
     try { return localStorage.getItem(KEY) || ''; } catch (e) { return ''; }
@@ -72,6 +73,7 @@
       speakBtn.addEventListener('click', function () {
         voiceOn = !voiceOn;
         speakBtn.setAttribute('aria-pressed', voiceOn ? 'true' : 'false');
+        speakBtn.title = voiceOn ? T_('rx.w_speak_on', 'Voice replies on') : T_('rx.w_speak', 'Read replies aloud');
         if (voiceOn) speak(lastAssistant());
         else try { window.speechSynthesis.cancel(); } catch (e) {}
       });
@@ -104,9 +106,13 @@
           rec = null;
           micBtn.setAttribute('aria-pressed', 'false');
         };
-        rec.onerror = function () {
+        rec.onerror = function (event) {
           rec = null;
           micBtn.setAttribute('aria-pressed', 'false');
+          var reason = event && event.error === 'not-allowed'
+            ? T_('rx.js_mic_denied', 'Microphone permission was denied. You can still type your message.')
+            : T_('rx.js_mic_fail', 'Voice input is unavailable right now. You can still type your message.');
+          bubble(reason, 'assistant note');
         };
         micBtn.setAttribute('aria-pressed', 'true');
         try { rec.start(); } catch (e) { rec = null; micBtn.setAttribute('aria-pressed', 'false'); }
@@ -116,39 +122,45 @@
 
   form.addEventListener('submit', function (event) {
     event.preventDefault();
+    if (busy) return;
     var message = (input.value || '').trim();
-    if (message.length < 2) return;
+    if (message.length < 2) { input.focus(); return; }
+    busy = true;
     bubble(message, 'visitor');
     input.value = '';
     send.disabled = true;
     send.textContent = '…';
+    form.setAttribute('aria-busy', 'true');
     var thinking = bubble(T_('rx.js_thinking', 'One moment.'), 'assistant');
     thinking.classList.add('thinking');
+    var controller = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, 25000) : null;
+    var headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    if (csrfMeta && csrfMeta.content) headers['X-CSRF-Token'] = csrfMeta.content;
 
     fetch('/api/receptionist/message', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      headers: headers,
+      signal: controller ? controller.signal : undefined,
       body: JSON.stringify({
         message: message,
         thread: thread(),
         name: (nameField.value || '').trim(),
         email: (emailField.value || '').trim(),
         page: location.pathname,
-        company_url: ''
+        company_url: (document.getElementById('rm-hp') || {}).value || ''
       })
     }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
-        return { ok: response.ok, data: data };
+        if (!response.ok) throw new Error(data.error || ('Request failed (' + response.status + ').'));
+        return data;
       });
-    }).then(function (result) {
+    }).then(function (data) {
       thinking.remove();
-      var data = result.data || {};
-      if (!result.ok) {
-        bubble(data.error || T_('rx.js_fail', 'Something went wrong. Please use the enquiry form.'), 'assistant error');
-        return;
-      }
       if (data.thread) remember(data.thread);
-      bubble(data.reply, 'assistant');
+      bubble(data.reply || T_('rx.js_empty', 'I could not form a reply just now. Please try again or use the enquiry form.'), 'assistant');
       if ((data.actions || []).indexOf('handoff') !== -1 || (data.actions || []).indexOf('enquiry_created') !== -1) {
         nameField.hidden = false;
         emailField.hidden = false;
@@ -157,13 +169,20 @@
           emailField.dataset.asked = '1';
         }
       }
-    }).catch(function () {
+    }).catch(function (err) {
       thinking.remove();
-      bubble(T_('rx.js_drop', 'The connection dropped. Please try again, or use /enquire.'), 'assistant error');
-    }).then(function () {
+      var messageText = err && err.name === 'AbortError'
+        ? T_('rx.js_timeout', 'That took too long. Your message may not have been processed. Please try again.')
+        : ((err && err.message) || T_('rx.js_drop', 'The connection dropped. Please try again, or use /enquire.'));
+      bubble(messageText, 'assistant error');
+      if (!input.value) input.value = message;
+      input.focus();
+    }).finally(function () {
+      if (timer) clearTimeout(timer);
+      busy = false;
       send.disabled = false;
       send.textContent = T_('rx.w_send', 'Send');
+      form.removeAttribute('aria-busy');
       input.focus();
     });
-  });
-})();
+  });})();

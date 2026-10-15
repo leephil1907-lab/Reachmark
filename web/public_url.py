@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 
 BRAND_PUBLIC_URL = 'https://reachmarkdigital.xyz'
 BRAND_SUPPORT_EMAIL = 'support@reachmarkdigital.xyz'
-SEO_HOME_TITLE = 'Reachmark Digital | Website Audits, SEO & Business Growth'
+SEO_HOME_TITLE = 'Reachmark Digital | Website Audits and SEO for Business Growth'
 SEO_HOME_DESCRIPTION = (
     'Reachmark Digital helps designers, freelancers, and agencies uncover website SEO and usability issues, discover business growth opportunities, and create evidence-backed reports with actionable recommendations.'
 )

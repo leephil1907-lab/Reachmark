@@ -71,7 +71,7 @@ def ensure_tables(db):
         CREATE TABLE IF NOT EXISTS memory_events(
             id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, kind TEXT NOT NULL, reason TEXT NOT NULL,
             potential TEXT NOT NULL, follow_up_at TEXT, note TEXT NOT NULL,
-            created TEXT NOT NULL, owner_user_id TEXT
+            created TEXT NOT NULL, owner_user_id TEXT, status TEXT NOT NULL DEFAULT 'open'
         );
         CREATE TABLE IF NOT EXISTS delivery_watches(
             id TEXT PRIMARY KEY, project_id TEXT, lead_id TEXT, invoice_id TEXT,
@@ -91,6 +91,9 @@ def ensure_tables(db):
         CREATE INDEX IF NOT EXISTS memory_follow ON memory_events(follow_up_at);
         CREATE INDEX IF NOT EXISTS signals_lead ON timing_signals(lead_id, created);
         ''')
+        memory_columns = {row[1] for row in c.execute('PRAGMA table_info(memory_events)').fetchall()}
+        if 'status' not in memory_columns:
+            c.execute("ALTER TABLE memory_events ADD COLUMN status TEXT NOT NULL DEFAULT 'open'")
 
 
 def _owner_clause(alias=''):
@@ -552,7 +555,7 @@ def due_memory(db, now_iso):
     cid = session.get('client_id') if session.get('role') == 'client' else None
     sql = '''SELECT m.*, l.name AS lead_name, l.city AS lead_city, l.stage AS lead_stage
              FROM memory_events m JOIN leads l ON l.id=m.lead_id
-             WHERE m.follow_up_at IS NOT NULL AND m.follow_up_at<=?'''
+             WHERE m.follow_up_at IS NOT NULL AND m.follow_up_at<=? AND m.status='open' '''
     args = [today]
     if cid:
         sql += ' AND m.owner_user_id=?'
@@ -659,7 +662,7 @@ def register_platform(app, db, now, log):
             proposals = n(f'SELECT count(*) FROM generated_proposals WHERE {where}') if _table(c, 'generated_proposals') else 0
             briefs = c.execute("SELECT count(*) FROM market_briefs WHERE status!='closed'").fetchone()[0]
             due = c.execute(
-                "SELECT count(*) FROM memory_events WHERE follow_up_at IS NOT NULL AND follow_up_at<=?",
+                "SELECT count(*) FROM memory_events WHERE follow_up_at IS NOT NULL AND follow_up_at<=? AND status='open'",
                 (now()[:10],),
             ).fetchone()[0]
             prototypes = c.execute('SELECT count(*) FROM prototypes').fetchone()[0]
@@ -862,6 +865,20 @@ def register_platform(app, db, now, log):
             pass
         return jsonify(id=pid, token=token, url=f'/proposal/{token}', body=body)
 
+    @app.get('/api/platform/lead/<lid>/memory')
+    def platform_memory_history(lid):
+        lead = _lead(db, lid)
+        if not lead:
+            return jsonify(error='Lead not found.'), 404
+        with db() as c:
+            rows = c.execute(
+                '''SELECT id, kind, reason, potential, follow_up_at, note, created, status
+                   FROM memory_events WHERE lead_id=?
+                   ORDER BY created DESC LIMIT 50''',
+                (lid,),
+            ).fetchall()
+        return jsonify(items=[dict(row) for row in rows], count=len(rows))
+
     @app.post('/api/platform/lead/<lid>/memory')
     def platform_memory(lid):
         lead = _lead(db, lid)
@@ -877,15 +894,40 @@ def register_platform(app, db, now, log):
         reason = str(body.get('reason') or '').strip()[:400]
         note = str(body.get('note') or '').strip()[:2000]
         follow = str(body.get('follow_up_at') or '').strip()[:10] or None
+        if follow:
+            try:
+                datetime.strptime(follow, '%Y-%m-%d')
+            except ValueError:
+                return jsonify(error='Follow-up date must use YYYY-MM-DD.'), 400
         if kind == 'not_now' and not follow:
             follow = (datetime.now(timezone.utc) + timedelta(days=90)).date().isoformat()
         if not reason:
             return jsonify(error='Record why. Empty reasons are not stored.'), 400
         mid = uuid.uuid4().hex
         with db() as c:
-            c.execute('INSERT INTO memory_events VALUES(?,?,?,?,?,?,?,?,?)',
+            c.execute('INSERT INTO memory_events(id,lead_id,kind,reason,potential,follow_up_at,note,created,owner_user_id) VALUES(?,?,?,?,?,?,?,?,?)',
                       (mid, lead['id'], kind, reason, potential, follow, note, now(), lead.get('owner_user_id')))
         return jsonify(id=mid, follow_up_at=follow)
+
+    @app.post('/api/platform/lead/<lid>/memory/<mid>/complete')
+    def platform_memory_complete(lid, mid):
+        lead = _lead(db, lid)
+        if not lead:
+            return jsonify(error='Lead not found.'), 404
+        with db() as c:
+            row = c.execute(
+                'SELECT id, follow_up_at, status FROM memory_events WHERE id=? AND lead_id=?',
+                (mid, lid),
+            ).fetchone()
+            if not row:
+                return jsonify(error='Activity not found.'), 404
+            if not row['follow_up_at']:
+                return jsonify(error='This activity has no scheduled follow-up.'), 400
+            if row['status'] == 'done':
+                return jsonify(ok=True, status='done', unchanged=True)
+            c.execute("UPDATE memory_events SET status='done' WHERE id=? AND lead_id=?", (mid, lid))
+        log('follow_up', f"Follow-up completed for {lead.get('name') or 'lead'}")
+        return jsonify(ok=True, status='done')
 
     @app.post('/api/platform/lead/<lid>/signal')
     def platform_signal(lid):

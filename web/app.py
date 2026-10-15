@@ -452,14 +452,14 @@ def create_lead():
     count=add_lead(v); log('import',f'{count} business added manually'); return jsonify(added=count)
 @app.route('/api/leads/<lid>',methods=['PATCH','DELETE'])
 def update_lead(lid):
-    lead(lid)
+    existing=lead(lid)
     if request.method=='DELETE':
         with db() as c: c.execute('DELETE FROM leads WHERE id=?',(lid,))
         return jsonify(ok=True)
     data=request.get_json() or {}; allowed={'name','email','phone','website','note','stage','subject','body'}
     data={k:str(v)[:10000] for k,v in data.items() if k in allowed}
     if 'name' in data and not data['name'].strip(): return jsonify(error=_t('er_012', locale_now())),400
-    if 'stage' in data and data['stage'] not in ['New','Drafted','Contacted','Replied','Won','Not a fit']: return jsonify(error=_t('er_057', locale_now())),400
+    if 'stage' in data and data['stage'] not in ['New','Drafted','Contacted','Replied','Won','Not now','Not a fit']: return jsonify(error=_t('er_057', locale_now())),400
     if 'website' in data:
         data['status']=classify(data['website'])
         if data['website']!=lead(lid)['website']:
@@ -467,6 +467,8 @@ def update_lead(lid):
             with db() as c:c.execute('DELETE FROM lead_reviews WHERE lead_id=?',(lid,))
     data['updated']=now()
     with db() as c: c.execute('UPDATE leads SET '+','.join(k+'=?' for k in data)+' WHERE id=?',[*data.values(),lid])
+    if 'stage' in data and data['stage'] != existing.get('stage'):
+        log('pipeline', f"{existing.get('name') or 'Lead'} moved from {existing.get('stage') or 'New'} to {data['stage']}")
     return jsonify(ok=True)
 @app.route('/api/import',methods=['POST'])
 def import_csv():
