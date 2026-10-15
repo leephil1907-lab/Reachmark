@@ -24,36 +24,59 @@
     log.scrollTop = log.scrollHeight;
     return div;
   }
+  var busy = false;
   function post(message) {
     var options = { method: 'POST', headers: { 'Content-Type': 'application/json' } };
+    var controller = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, 30000) : null;
+    if (controller) options.signal = controller.signal;
     var meta = document.querySelector('meta[name="csrf-token"]');
     if (meta) options.headers['X-CSRF-Token'] = meta.content;
     options.body = JSON.stringify({ message: message, desk: true, page: '/admin' });
     return fetch('/api/receptionist/message', options).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
-        if (!response.ok) throw new Error(data.error || 'request failed');
+        if (!response.ok) throw new Error(data.error || 'request failed (' + response.status + ')');
         return data;
       });
-    });
+    }).finally(function () { if (timer) clearTimeout(timer); });
   }
   function send(text) {
     text = (text || '').trim();
-    if (!text) return;
+    if (!text || busy) return;
+    busy = true;
+    var form = $('desk-form');
+    var input = $('desk-input');
+    var submit = form && form.querySelector('button[type="submit"]');
+    if (submit) { submit.disabled = true; submit.textContent = 'Working…'; }
+    if (form) form.setAttribute('aria-busy', 'true');
     bubble('user', linkify(text));
     var wait = bubble('assistant', esc(T_('ws.desk_wait', 'On it…')), true);
     post(text).then(function (data) {
       wait.classList.remove('desk-thinking');
-      wait.innerHTML = linkify(data.reply || '');
-      $('desk-log').scrollTop = $('desk-log').scrollHeight;
+      wait.innerHTML = linkify(data.reply || 'I completed the request, but no reply text was returned.');
+      var log = $('desk-log');
+      if (log) log.scrollTop = log.scrollHeight;
       if (typeof window.loadOpportunityEngine === 'function' && data.intent === 'desk_find') {
         window.loadOpportunityEngine();
       }
       if (typeof window.refresh === 'function' && (data.intent === 'desk_find' || data.intent === 'desk_diagnose')) {
         try { window.refresh(); } catch (e) {}
       }
-    }).catch(function () {
+      if (typeof window.loadReachmarkActionCenter === 'function') {
+        try { window.loadReachmarkActionCenter(false); } catch (e) {}
+      }
+    }).catch(function (err) {
       wait.classList.remove('desk-thinking');
-      wait.innerHTML = esc(T_('ws.desk_err', 'Receptionist could not be reached. Try again.'));
+      wait.classList.add('desk-error');
+      wait.textContent = err && err.name === 'AbortError'
+        ? 'That took longer than expected. Your request may not have finished. Please try again.'
+        : ((err && err.message) || T_('ws.desk_err', 'Receptionist could not be reached. Try again.'));
+      if (input && !input.value) input.value = text;
+      if (input) input.focus();
+    }).finally(function () {
+      busy = false;
+      if (submit) { submit.disabled = false; submit.textContent = T_('ws.desk_send', 'Send'); }
+      if (form) form.removeAttribute('aria-busy');
     });
   }
   function init() {
