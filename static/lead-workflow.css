@@ -5,7 +5,7 @@
 .lead-workflow-head p{margin:0;color:#68705f;font-size:12px;line-height:1.6}
 .lead-memory-form{margin-top:15px;padding:14px;border:1px solid #e8ecdf;border-radius:12px;background:#fff}
 .lead-memory-form label{margin:0 0 12px;color:#59634e;font-size:11px;font-weight:650}
-.lead-memory-form input,.lead-memory-form select,.lead-memory-form textarea{margin-top:6px;width:100%;min-height:42px;border:1px solid #dfe5d6;border-radius:9px;background:#fcfdf9;color:#2c3327;font:13px/1.5 inherit;padding:10px 11px}
+.lead-memory-form input,.lead-memory-form select,.lead-memory-form textarea{margin-top:6px;width:100%;min-height:42px;border:1px solid #dfe5d6;border-radius:9px;background:#fcfdf9;color:#2c3327;font-family:inherit;font-size:13px;line-height:1.5;padding:10px 11px}
 .lead-memory-form textarea{resize:vertical;min-height:76px}
 .lead-memory-form input:focus,.lead-memory-form select:focus,.lead-memory-form textarea:focus{outline:2px solid #a9c85b;outline-offset:1px;border-color:#91ad4e;box-shadow:0 0 0 3px rgba(213,242,104,.18)}
 .lead-memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
