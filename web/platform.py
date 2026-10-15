@@ -555,7 +555,7 @@ def due_memory(db, now_iso):
     cid = session.get('client_id') if session.get('role') == 'client' else None
     sql = '''SELECT m.*, l.name AS lead_name, l.city AS lead_city, l.stage AS lead_stage
              FROM memory_events m JOIN leads l ON l.id=m.lead_id
-             WHERE m.follow_up_at IS NOT NULL AND m.follow_up_at<=?'''
+             WHERE m.follow_up_at IS NOT NULL AND m.follow_up_at<=? AND m.status='open' '''
     args = [today]
     if cid:
         sql += ' AND m.owner_user_id=?'
