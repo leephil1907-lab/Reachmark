@@ -8,16 +8,16 @@
 {% if ga_id is defined and ga_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}</title>
-<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">
+<title>{{ seo.title if seo is defined and seo.title else 'Reachmark — Website Reviews and Client Opportunities' }}</title>
+<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses, review their websites, and prepare clear proposals with Reachmark. You review every message before it is sent.' }}">
 {% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}
 <meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">
 {% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
 {% if google_verifications is defined %}{% for token in google_verifications %}<meta name="google-site-verification" content="{{ token }}">{% endfor %}{% elif google_verification is defined and google_verification %}<meta name="google-site-verification" content="{{ google_verification }}">{% endif %}
 <meta name="theme-color" content="#20251f"><meta name="application-name" content="Reachmark">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Reachmark"><meta name="mobile-web-app-capable" content="yes">
-<meta property="og:type" content="website"><meta property="og:site_name" content="Reachmark"><meta property="og:locale" content="en_US"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}"><meta property="og:image:alt" content="Reachmark"><meta name="twitter:image" content="{{ seo.og_image }}">{% endif %}
-<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Reachmark"><meta property="og:locale" content="en_US"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Website Reviews and Client Opportunities' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses, review their websites, and prepare clear proposals with Reachmark. You review every message before it is sent.' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}"><meta property="og:image:alt" content="Reachmark"><meta name="twitter:image" content="{{ seo.og_image }}">{% endif %}
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Website Reviews and Client Opportunities' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses, review their websites, and prepare clear proposals with Reachmark. You review every message before it is sent.' }}">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest">
 <link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css"><link rel="stylesheet" href="/static/home-product.css">
 <script src="/static/i18n.js"></script>
@@ -128,18 +128,18 @@
   <!-- 2. Product: interactive sample report -->
   <section class="rm-workspace-preview" data-motion="fade-up" id="sample-report" aria-labelledby="rm-preview-title">
     <div class="rm-preview-intro">
-      <p class="rm-preview-eyebrow"><span class="ed-n">01 /</span> THE REACHMARK WORKSPACE</p>
-      <h2 id="rm-preview-title">Find the gap. See the evidence. Know what to do next.</h2>
-      <p>Explore a sample Digital Opportunity Report, then run a live check on any public website.</p>
+      <p class="rm-preview-eyebrow"><span class="ed-n">01 /</span> A CLEARER WAY TO FIND WORK</p>
+      <h2 id="rm-preview-title">Understand the website. Find ways to improve it. Plan your next step.</h2>
+      <p>Explore a sample website review, then check a public website yourself.</p>
     </div>
     <div class="rm-preview-window" data-rm-preview>
       <header class="rm-preview-bar">
-        <div class="rm-preview-brand"><span class="rm-preview-mark rm-preview-mark--brand">{{ brand_mark(30) }}</span><span>Reachmark <small>Opportunity desk</small></span></div>
-        <span class="rm-preview-state"><i aria-hidden="true"></i> Interactive preview</span>
+        <div class="rm-preview-brand"><span class="rm-preview-mark rm-preview-mark--brand">{{ brand_mark(30) }}</span><span>Reachmark <small>Your workspace</small></span></div>
+        <span class="rm-preview-state"><i aria-hidden="true"></i> Explore sample report</span>
       </header>
       <div class="rm-preview-workspace">
-        <aside class="rm-preview-list" aria-label="Sample business opportunities">
-          <p class="rm-preview-list-label">EXAMPLE OPPORTUNITIES</p>
+        <aside class="rm-preview-list" aria-label="Sample businesses">
+          <p class="rm-preview-list-label">SAMPLE BUSINESSES</p>
           <button type="button" class="rm-preview-choice is-active" data-preview-select="clinic" aria-pressed="true">
             <span class="rm-preview-choice-type">Healthcare · sample</span>
             <strong>Willow Grove Dental</strong>
@@ -159,30 +159,30 @@
         <div class="rm-preview-report" aria-live="polite" aria-atomic="true">
           <div class="rm-preview-report-head">
             <div>
-              <p class="rm-preview-overline" id="rm-preview-category">SAMPLE DIGITAL OPPORTUNITY REPORT</p>
+              <p class="rm-preview-overline" id="rm-preview-category">SAMPLE WEBSITE REVIEW</p>
               <h3 id="rm-preview-name">Willow Grove Dental</h3>
-              <p class="rm-preview-domain">Explore how findings, evidence and recommendations are organised in a Reachmark report.</p>
+              <p class="rm-preview-domain">See how Reachmark presents website findings and practical recommendations.</p>
             </div>
-            <span class="rm-preview-example-tag">EXAMPLE ONLY</span>
+            <span class="rm-preview-example-tag">SAMPLE</span>
           </div>
-          <div class="rm-preview-findings-head"><span>Key findings</span><span>Sample</span></div>
+          <div class="rm-preview-findings-head"><span>Website findings</span><span>Sample</span></div>
           <ul class="rm-preview-findings" id="rm-preview-findings">
             <li><span class="rm-preview-finding-icon">01</span><div><strong>Make the next step obvious</strong><p>Example: keep a clear appointment or call action easy to find on smaller screens.</p></div></li>
             <li><span class="rm-preview-finding-icon">02</span><div><strong>Answer key questions earlier</strong><p>Example: help visitors quickly find services, opening hours, and what to expect.</p></div></li>
             <li><span class="rm-preview-finding-icon">03</span><div><strong>Reduce contact friction</strong><p>Example: provide a simple, accessible route to ask a question or request an appointment.</p></div></li>
           </ul>
           <div class="rm-preview-next">
-            <span class="rm-preview-next-label">RECOMMENDED NEXT STEP · EXAMPLE</span>
+            <span class="rm-preview-next-label">SUGGESTED NEXT STEP</span>
             <p id="rm-preview-next">Review the mobile appointment path and make the primary contact action easy to spot.</p>
           </div>
           <div class="rm-preview-actions">
-            <a class="x-btn lime" data-magnet href="#try-url">Check a real website {{ icon('arrow-down', 16) }}</a>
-            <a class="rm-preview-report-link" href="/sample-report">Open sample report</a>
+            <a class="x-btn lime" data-magnet href="#try-url">Check a website {{ icon('arrow-down', 16) }}</a>
+            <a class="rm-preview-report-link" href="/sample-report">View sample report</a>
           </div>
         </div>
       </div>
     </div>
-    <p class="rm-preview-disclaimer">{{ icon('info', 15) }} Sample businesses show the report experience. Live reports are generated from the public listing and website checks available for the business you select.</p>
+    <p class="rm-preview-disclaimer">{{ icon('info', 15) }} These examples show how a Reachmark review is presented. Reviews for real businesses use the public listing and website information available for the business you select.</p>
   </section>
 
   <!-- 3. Try it: live URL check -->
