@@ -26,7 +26,7 @@
 </div>
 <label>Reason / activity summary<input name="reason" maxlength="400" required placeholder="What happened, or what should happen next?"></label>
 <label>Additional notes<textarea name="note" maxlength="2000" rows="3" placeholder="Useful context, agreed next steps, or client preferences (optional)"></textarea></label>
-<div class="lead-memory-actions"><label>Opportunity priority<select name="potential"><option value="unknown">Not assessed</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label><button class="primary" id="lead-memory-save" type="submit">Save activity</button></div>
+<p class="lead-memory-status">For “Not now”, leaving the date blank schedules a follow-up in 90 days.</p><div class="lead-memory-actions"><label>Opportunity priority<select name="potential"><option value="unknown">Not assessed</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label><button class="primary" id="lead-memory-save" type="submit">Save activity</button></div>
 <p class="lead-memory-status" id="lead-memory-status" role="status" aria-live="polite"></p>
 </form>
 <div class="lead-history-head"><h4>Recent activity</h4><span id="lead-history-count">Saved history</span></div>
