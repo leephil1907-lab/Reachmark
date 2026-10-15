@@ -27,6 +27,10 @@ class DeskRouteTests(CrewBase):
         body.update(extra)
         return self.client.post('/api/receptionist/message', json=body)
 
+    def _owner(self):
+        with self.client.session_transaction() as sess:
+            sess['owner'] = True
+
     def test_workspace_is_a_pipeline_desk_not_an_operator_room(self):
         with self.client.session_transaction() as sess:
             sess['owner'] = True
@@ -50,6 +54,7 @@ class DeskRouteTests(CrewBase):
         self.assertNotIn('discover_run', res.get_json().get('actions') or [])
 
     def test_desk_find_runs_existing_discovery_tool(self):
+        self._owner()
         with patch('web.receptionist.run_tool') as tool:
             tool.return_value = {'discovery': {'added': 2, 'scanned': 7}}
             res = self._desk('find cafes in Lagos')
@@ -66,6 +71,7 @@ class DeskRouteTests(CrewBase):
         self.assertEqual(tool.call_args[0][5]['category'], 'Café')
 
     def test_desk_refuses_to_send_outreach(self):
+        self._owner()
         res = self._desk('send the email to them')
         self.assertEqual(res.status_code, 200)
         data = res.get_json()
@@ -73,6 +79,7 @@ class DeskRouteTests(CrewBase):
         self.assertIn('approve', data['reply'].lower())
 
     def test_whats_next_uses_saved_listings(self):
+        self._owner()
         with module.db() as c:
             c.execute(
                 'INSERT INTO leads(id,source_key,name,category,city,stage,token,created,updated) '
@@ -87,6 +94,7 @@ class DeskRouteTests(CrewBase):
         self.assertIn('not a forecast', body.lower())
 
     def test_desk_help_lists_find_not_a_new_agent(self):
+        self._owner()
         res = self._desk('help')
         self.assertIn('find cafes in Lagos', res.get_json()['reply'])
         self.assertNotIn('new agent', res.get_json()['reply'].lower())
