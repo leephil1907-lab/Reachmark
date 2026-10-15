@@ -307,11 +307,7 @@ NEXT_RE = re.compile(
     r'\s*[.?!]*\s*$',
     re.I,
 )
-FOLLOWUP_RE = re.compile(
-    r'^\s*(?:(?:show|list|check|what are)\s+)?(?:my\s+)?'
-    r'(?:due\s+|pending\s+)?follow[- ]?ups?(?:\s+(?:due|today|pending))?\s*[.?!]*\s*$',
-    re.I,
-)
+FOLLOWUP_RE = re.compile(r'\b(follow[- ]?ups?|reminders)\b', re.I)
 DIAGNOSE_RE = re.compile(
     r'^\s*(diagnose next|run(?: the)? queue|build reports?)\s*[.?!]*\s*$',
     re.I,
@@ -485,7 +481,7 @@ def owner_desk(app, db, now, log, text, thread_token, visitor_hash):
         found = FIND_RE.match(text)
         reply, intent = desk_find(app, db, now, log, found.group('category'), found.group('city')), 'desk_find'
         actions.append('discover_run')
-    elif FOLLOWUP_RE.match(text):
+    elif FOLLOWUP_RE.search(text):
         reply, intent = desk_followups(db, now), 'desk_followups'
         actions.append('show_due_followups')
     elif DIAGNOSE_RE.match(text):
