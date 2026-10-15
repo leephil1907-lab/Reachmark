@@ -307,7 +307,7 @@ NEXT_RE = re.compile(
     r'\s*[.?!]*\s*$',
     re.I,
 )
-FOLLOWUP_RE = re.compile(r'\\b(follow[- ]?ups?|reminders)\\b', re.I)
+FOLLOWUP_RE = re.compile(r'\b(follow[- ]?ups?|reminders)\b', re.I)
 DIAGNOSE_RE = re.compile(
     r'^\s*(diagnose next|run(?: the)? queue|build reports?)\s*[.?!]*\s*$',
     re.I,
@@ -443,7 +443,7 @@ def desk_followups(db, now):
         item = dict(row)
         lines.append(f"• {item.get('lead_name') or 'Business'} — due {item.get('follow_up_at')} — {item.get('reason') or item.get('kind')}")
     lines.append('Open a lead and mark the reminder done when the follow-up is complete.')
-    return '\\n'.join(lines)
+    return '\n'.join(lines)
 
 
 def desk_diagnose(db, now, log):
