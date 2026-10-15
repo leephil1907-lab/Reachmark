@@ -308,8 +308,12 @@ NEXT_RE = re.compile(
     re.I,
 )
 FOLLOWUP_RE = re.compile(
-    r'^\\s*(?:(?:show|list|check|what are)\\s+)?(?:my\\s+)?'
-    r'(?:due\\s+|pending\\s+)?follow[- ]?ups?(?:\\s+(?:due|today|pending))?\\s*[.?!]*    r'^\s*(diagnose next|run(?: the)? queue|build reports?)\s*[.?!]*\s*$',
+    r'^\s*(?:(?:show|list|check|what are)\s+)?(?:my\s+)?'
+    r'(?:due\s+|pending\s+)?follow[- ]?ups?(?:\s+(?:due|today|pending))?\s*[.?!]*\s*$',
+    re.I,
+)
+DIAGNOSE_RE = re.compile(
+    r'^\s*(diagnose next|run(?: the)? queue|build reports?)\s*[.?!]*\s*$',
     re.I,
 )
 SEND_RE = re.compile(
