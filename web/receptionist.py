@@ -555,7 +555,7 @@ def register_receptionist(app, db, now, log, settings):
             return jsonify(error=_t('rx.e_trap', loc)), 400
         desk_flag = bool(body.get('desk'))
         owner_here = bool(session.get('owner'))
-        if desk_flag and owner_locked() and not owner_here:
+        if desk_flag and not owner_here:
             return jsonify(error=_t('rx.e_owner', loc)), 403
         if desk_flag or owner_here:
             result = owner_desk(app, db, now, log, str(body.get('message', ''))[:2000],
@@ -591,7 +591,7 @@ def register_receptionist(app, db, now, log, settings):
     def receptionist_act():
         """Owner-only agent actions: the front desk doing real work."""
         loc = g.get('locale', 'en')
-        if owner_locked() and not session.get('owner'):
+        if not session.get('owner'):
             return jsonify(error=_t('rx.e_owner', loc)), 403
         body = request.get_json(silent=True)
         if not isinstance(body, dict):
@@ -605,7 +605,7 @@ def register_receptionist(app, db, now, log, settings):
 
     @app.get('/api/receptionist/threads')
     def receptionist_threads_route():
-        if session.get('client_id') and not session.get('owner'):
+        if not session.get('owner'):
             return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
         status = request.args.get('status') or None
         return jsonify({'threads': threads(db, status=status),
@@ -629,7 +629,7 @@ def register_receptionist(app, db, now, log, settings):
 
     @app.get('/api/receptionist/threads/<thread_id>')
     def receptionist_thread_route(thread_id):
-        if session.get('client_id') and not session.get('owner'):
+        if not session.get('owner'):
             return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
         with db() as c:
             row = c.execute('SELECT * FROM receptionist_threads WHERE id=?', (thread_id,)).fetchone()
@@ -639,6 +639,8 @@ def register_receptionist(app, db, now, log, settings):
 
     @app.post('/api/receptionist/threads/<thread_id>')
     def receptionist_thread_update(thread_id):
+        if not session.get('owner'):
+            return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
         body = request.get_json(silent=True) or {}
         status = str(body.get('status', 'open'))
         if status not in ('open', 'handled', 'closed'):
