@@ -13,6 +13,7 @@
   <div class="action-center-head"><div><div class="eyebrow">YOUR WORKDAY</div><h2 id="rm-action-center-title">Today’s next moves</h2><p>Loading your next best action from saved leads, evidence, replies, and follow-ups…</p></div></div>
   <div class="action-center-grid"><article class="action-center-card"><div class="sk" aria-hidden="true"><i></i><i></i><i></i></div></article></div>
 </section>
+{% if owner_logged_in %}{% include 'desk-panel.html' %}{% endif %}
 {% include 'opportunity-panel.html' %}
 <div id="empty-machine" class="empty-machine" hidden></div>
 <div id="work-first" class="work-first" hidden></div>
