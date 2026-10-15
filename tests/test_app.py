@@ -217,6 +217,19 @@ class ProspectTests(unittest.TestCase):
         final_history = self.client.get('/api/platform/lead/' + lead['id'] + '/memory').json['items']
         self.assertEqual(final_history[0]['status'], 'done')
 
+    def test_receptionist_owner_tools_require_owner_session(self):
+        self.assertEqual(self.client.get('/api/receptionist/threads').status_code, 403)
+        self.assertEqual(self.client.get('/api/receptionist/desk/thread?token=not-a-token').status_code, 403)
+        self.assertEqual(self.client.post('/api/receptionist/act', json={'tool': 'status', 'params': {}}).status_code, 403)
+        self.assertEqual(
+            self.client.post('/api/receptionist/message', json={'message': 'status', 'desk': True}).status_code,
+            403,
+        )
+        self.assertEqual(
+            self.client.post('/api/receptionist/threads/not-a-thread', json={'status': 'closed'}).status_code,
+            403,
+        )
+
     def test_not_now_is_a_valid_saved_pipeline_stage(self):
         lead = self.create()
         response = self.client.patch('/api/leads/' + lead['id'], json={'stage': 'Not now'})
