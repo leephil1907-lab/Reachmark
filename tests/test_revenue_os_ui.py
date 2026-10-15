@@ -24,7 +24,7 @@ class RevenueOSWorkspaceTests(unittest.TestCase):
         self.assertIn("'/api/os/metrics'", js)
         self.assertIn("'/api/os/lead/'+encodeURIComponent(id)+'/advance'", js)
         self.assertIn("Nothing will be sent", js)
-        self.assertIn("does not send an email", panel)
+        self.assertIn("never sends an email", panel)
         self.assertIn("does not add unlike currencies", panel)
 
 
