@@ -662,7 +662,7 @@ def register_platform(app, db, now, log):
             proposals = n(f'SELECT count(*) FROM generated_proposals WHERE {where}') if _table(c, 'generated_proposals') else 0
             briefs = c.execute("SELECT count(*) FROM market_briefs WHERE status!='closed'").fetchone()[0]
             due = c.execute(
-                "SELECT count(*) FROM memory_events WHERE follow_up_at IS NOT NULL AND follow_up_at<=?",
+                "SELECT count(*) FROM memory_events WHERE follow_up_at IS NOT NULL AND follow_up_at<=? AND status='open'",
                 (now()[:10],),
             ).fetchone()[0]
             prototypes = c.execute('SELECT count(*) FROM prototypes').fetchone()[0]
