@@ -7,33 +7,33 @@
   var examples = {
     clinic: {
       name: 'Willow Grove Dental',
-      category: 'SAMPLE REPORT · HEALTHCARE',
+      category: 'SAMPLE WEBSITE REVIEW · HEALTHCARE',
       findings: [
-        ['Make the next step obvious', 'Example: keep a clear appointment or call action easy to find on smaller screens.'],
-        ['Answer key questions earlier', 'Example: help visitors quickly find services, opening hours, and what to expect.'],
-        ['Reduce contact friction', 'Example: provide a simple, accessible route to ask a question or request an appointment.']
+        ['Make the next step obvious', 'Make the appointment or phone option easy to find, especially on a mobile screen.'],
+        ['Answer key questions earlier', 'Help visitors find the services, opening hours, and information they need before booking.'],
+        ['Reduce contact friction', 'Give visitors a clear way to ask a question or request an appointment.']
       ],
-      next: 'Review the mobile appointment path and make the primary contact action easy to spot.'
+      next: 'Make the appointment and contact options easy to find on a phone.'
     },
     law: {
       name: 'Northstar Family Law',
-      category: 'SAMPLE REPORT · PROFESSIONAL SERVICES',
+      category: 'SAMPLE WEBSITE REVIEW · PROFESSIONAL SERVICES',
       findings: [
-        ['Clarify the service path', 'Example: help visitors move from a practice area to a relevant next step without hunting.'],
-        ['Write for the client’s first question', 'Example: explain who each service is for and what a first conversation involves.'],
-        ['Make contact feel straightforward', 'Example: show a clear enquiry route and set expectations about the response process.']
+        ['Clarify the service path', 'Help visitors move from a service description to a relevant next step.'],
+        ['Write for the client’s first question', 'Explain who each service is for and what a first conversation involves.'],
+        ['Make contact feel straightforward', 'Make it easy to enquire and explain what happens after someone gets in touch.']
       ],
-      next: 'Map the journey from a service question to an enquiry and remove unnecessary steps.'
+      next: 'Make it straightforward for a visitor to understand a service and send an enquiry.'
     },
     cafe: {
       name: 'Harborlight Café',
-      category: 'SAMPLE REPORT · HOSPITALITY',
+      category: 'SAMPLE WEBSITE REVIEW · HOSPITALITY',
       findings: [
-        ['Put local essentials within reach', 'Example: make hours, menu, location, and directions quick to find.'],
-        ['Keep the visit decision simple', 'Example: surface the information people need before choosing to visit or order.'],
-        ['Support mobile browsing', 'Example: make key details readable and easy to tap on a phone.']
+        ['Put local essentials within reach', 'Make the opening hours, menu, location, and directions easy to find.'],
+        ['Keep the visit decision simple', 'Help visitors find the details they need before deciding to visit or order.'],
+        ['Support mobile browsing', 'Make important information easy to read and use on a phone.']
       ],
-      next: 'Prioritise a mobile-friendly path to the menu, current hours, and directions.'
+      next: 'Make the menu, opening hours, and directions easy to find on a phone.'
     }
   };
 
