@@ -1520,6 +1520,11 @@ def outcome_metrics(db):
                             "SELECT count(*) FROM leads WHERE stage IN ('Replied','Won')", lead_args).fetchone()[0]
         contacted = c.execute("SELECT count(*) FROM leads" + lead_where + " AND stage IN ('Contacted','Replied','Won')" if cid else
                               "SELECT count(*) FROM leads WHERE stage IN ('Contacted','Replied','Won')", lead_args).fetchone()[0]
+        by_stage = rows(
+            "SELECT ifnull(stage,'New') k, count(*) n FROM leads" + lead_where +
+            " GROUP BY ifnull(stage,'New') ORDER BY n DESC",
+            lead_args,
+        )
         by_source = rows(
             "SELECT ifnull(source,'unknown') k, count(*) n, "
             "sum(CASE WHEN stage='Won' THEN 1 ELSE 0 END) won FROM leads GROUP BY ifnull(source,'unknown') ORDER BY n DESC LIMIT 12"
@@ -1571,6 +1576,7 @@ def outcome_metrics(db):
         'win_rate': rate(won, leads),
         'avg_deal_minor': avg_deal,
         'avg_discovery_to_paid_seconds': avg_seconds,
+        'by_stage': by_stage,
         'by_source': by_source,
         'by_city': by_city,
         'by_industry': by_industry,
