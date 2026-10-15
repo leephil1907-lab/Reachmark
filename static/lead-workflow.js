@@ -47,11 +47,33 @@
       const follow = item.follow_up_at ? '<span>Follow-up · ' + esc(dateLabel(item.follow_up_at)) + (item.status === 'done' ? ' · completed' : '') + '</span>' : '';
       const potential = item.potential && item.potential !== 'unknown'
         ? '<span>Priority · ' + esc(item.potential) + '</span>' : '';
+      const complete = item.follow_up_at && item.status !== 'done'
+        ? '<button type="button" class="lead-history-complete" data-memory-complete="' + esc(item.id) + '">Mark follow-up done ✓</button>' : '';
       return '<article class="lead-activity-item"><span class="lead-activity-marker" aria-hidden="true"></span>' +
         '<div><strong>' + esc(item.reason || kind) + '</strong><div class="lead-activity-meta"><span>' +
         esc(kind) + '</span><span>' + esc(dateLabel(item.created)) + '</span>' + follow + potential +
-        '</div>' + (item.note ? '<p>' + esc(item.note) + '</p>' : '') + '</div></article>';
+        '</div>' + (item.note ? '<p>' + esc(item.note) + '</p>' : '') + complete + '</div></article>';
     }).join('');
+    list.querySelectorAll('[data-memory-complete]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const memoryId = button.getAttribute('data-memory-complete');
+        if (!activeLeadId || !memoryId || button.disabled) return;
+        button.disabled = true;
+        button.textContent = 'Saving…';
+        try {
+          await request('/api/platform/lead/' + encodeURIComponent(activeLeadId) + '/memory/' + encodeURIComponent(memoryId) + '/complete', {
+            method: 'POST', body: JSON.stringify({})
+          });
+          await load(activeLeadId);
+          setStatus('Follow-up completed and removed from the due queue.', false);
+          if (typeof window.loadReachmarkActionCenter === 'function') window.loadReachmarkActionCenter(false);
+        } catch (error) {
+          button.disabled = false;
+          button.textContent = 'Retry';
+          setStatus(error.message || 'Could not complete this follow-up.', true);
+        }
+      });
+    });
   }
   async function load(leadId) {
     if (!leadId) return;
