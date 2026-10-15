@@ -43,6 +43,27 @@
       });
     }).finally(function () { if (timer) clearTimeout(timer); });
   }
+  function restoreThread() {
+    var token = thread();
+    if (!token) return Promise.resolve(false);
+    return fetch('/api/receptionist/desk/thread?token=' + encodeURIComponent(token), {
+      credentials: 'same-origin', headers: { 'Accept': 'application/json' }
+    }).then(function (response) {
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        if (!response.ok) throw new Error(data.error || 'Conversation history is unavailable.');
+        return data;
+      });
+    }).then(function (data) {
+      var rows = Array.isArray(data.transcript) ? data.transcript : [];
+      if (!rows.length) return false;
+      rows.forEach(function (row) {
+        var who = row.role === 'visitor' ? 'user' : 'assistant';
+        bubble(who, linkify(row.text || ''));
+      });
+      return true;
+    }).catch(function () { return false; });
+  }
+
   function send(text) {
     text = (text || '').trim();
     if (!text || busy) return;
@@ -89,8 +110,15 @@
     form.dataset.bound = '1';
     if (log && !log.dataset.greeted) {
       log.dataset.greeted = '1';
-      bubble('assistant', linkify(T_('ws.desk_hello',
-        'Start with a city and a trade — “find cafes in Lagos” — or ask what’s next in the pipeline.')));
+      var greeting = T_('ws.desk_hello',
+        'Start with a city and a trade — “find cafes in Lagos” — or ask what’s next in the pipeline.');
+      if (thread()) {
+        restoreThread().then(function (restored) {
+          if (!restored) bubble('assistant', linkify(greeting));
+        });
+      } else {
+        bubble('assistant', linkify(greeting));
+      }
     }
     form.addEventListener('submit', function (e) {
       e.preventDefault();
