@@ -611,6 +611,22 @@ def register_receptionist(app, db, now, log, settings):
         return jsonify({'threads': threads(db, status=status),
                         'knowledge_topics': [t['topic'] for t in load_knowledge()]})
 
+    @app.get('/api/receptionist/desk/thread')
+    def receptionist_desk_thread():
+        if not session.get('owner'):
+            return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
+        token = str(request.args.get('token') or '').strip()[:64]
+        if not token:
+            return jsonify(thread=None, transcript=[])
+        with db() as c:
+            row = c.execute(
+                "SELECT id, token FROM receptionist_threads WHERE token=? AND page='owner-desk'",
+                (token,),
+            ).fetchone()
+        if not row:
+            return jsonify(thread=None, transcript=[])
+        return jsonify(thread=row['token'], transcript=transcript(db, row['id']))
+
     @app.get('/api/receptionist/threads/<thread_id>')
     def receptionist_thread_route(thread_id):
         if session.get('client_id') and not session.get('owner'):
