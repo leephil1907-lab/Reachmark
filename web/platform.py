@@ -862,6 +862,20 @@ def register_platform(app, db, now, log):
             pass
         return jsonify(id=pid, token=token, url=f'/proposal/{token}', body=body)
 
+    @app.get('/api/platform/lead/<lid>/memory')
+    def platform_memory_history(lid):
+        lead = _lead(db, lid)
+        if not lead:
+            return jsonify(error='Lead not found.'), 404
+        with db() as c:
+            rows = c.execute(
+                '''SELECT id, kind, reason, potential, follow_up_at, note, created
+                   FROM memory_events WHERE lead_id=?
+                   ORDER BY created DESC LIMIT 50''',
+                (lid,),
+            ).fetchall()
+        return jsonify(items=[dict(row) for row in rows], count=len(rows))
+
     @app.post('/api/platform/lead/<lid>/memory')
     def platform_memory(lid):
         lead = _lead(db, lid)
@@ -877,6 +891,11 @@ def register_platform(app, db, now, log):
         reason = str(body.get('reason') or '').strip()[:400]
         note = str(body.get('note') or '').strip()[:2000]
         follow = str(body.get('follow_up_at') or '').strip()[:10] or None
+        if follow:
+            try:
+                datetime.strptime(follow, '%Y-%m-%d')
+            except ValueError:
+                return jsonify(error='Follow-up date must use YYYY-MM-DD.'), 400
         if kind == 'not_now' and not follow:
             follow = (datetime.now(timezone.utc) + timedelta(days=90)).date().isoformat()
         if not reason:
