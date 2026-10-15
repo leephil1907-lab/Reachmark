@@ -306,6 +306,385 @@ NEXT_RE = re.compile(
     r'\s*[.?!]*\s*$',
     re.I,
 )
+FOLLOWUP_RE = re.compile(
+    r'^\\s*(?:(?:show|list|check|what are)\\s+)?(?:my\\s+)?'
+    r'(?:due\\s+|pending\\s+)?follow[- ]?ups?(?:\\s+(?:due|today|pending))?\\s*[.?!]*    r'^\s*(diagnose next|run(?: the)? queue|build reports?)\s*[.?!]*\s*$',
+    re.I,
+)
+SEND_RE = re.compile(
+    r'\b(send (the )?(email|outreach|message|sms|whatsapp)|email them|text them)\b',
+    re.I,
+)
+HELP_RE = re.compile(r'^\s*(help|hi|hello|hey|what can you do)\s*[.?!]*\s*$', re.I)
+
+_CATEGORY_ALIASES = {
+    'cafe': 'Café', 'cafés': 'Café', 'cafes': 'Café', 'coffee': 'Café',
+    'coffee shop': 'Café', 'coffee shops': 'Café',
+    'restaurant': 'Restaurant', 'restaurants': 'Restaurant',
+    'dentist': 'Dentist', 'dentists': 'Dentist', 'dental': 'Dentist',
+    'plumber': 'Plumber', 'plumbers': 'Plumber',
+    'electrician': 'Electrician', 'electricians': 'Electrician',
+    'bakery': 'Bakery', 'bakeries': 'Bakery',
+    'salon': 'Hair salon', 'hair salon': 'Hair salon', 'hairdresser': 'Hair salon',
+    'bar': 'Bar', 'bars': 'Bar',
+    'hotel': 'Hotel', 'hotels': 'Hotel',
+    'gym': 'Gym', 'gyms': 'Gym', 'fitness': 'Gym',
+    'lawyer': 'Lawyer', 'lawyers': 'Lawyer', 'attorney': 'Lawyer',
+    'florist': 'Florist', 'florists': 'Florist',
+    'pharmacy': 'Pharmacy', 'pharmacies': 'Pharmacy',
+    'clinic': 'Clinic', 'clinics': 'Clinic',
+    'vet': 'Veterinarian', 'vets': 'Veterinarian', 'veterinarian': 'Veterinarian',
+    'accountant': 'Accountant', 'accountants': 'Accountant',
+    'roofer': 'Roofing contractor', 'roofing': 'Roofing contractor',
+    'hvac': 'HVAC contractor',
+    'auto': 'Auto repair', 'mechanic': 'Auto repair', 'car repair': 'Auto repair',
+    'tattoo': 'Tattoo studio',
+    'beauty': 'Beauty salon', 'beauty salon': 'Beauty salon',
+    'laundry': 'Laundry',
+    'painter': 'Painter', 'painters': 'Painter',
+    'carpenter': 'Carpenter',
+    'photographer': 'Photographer',
+    'estate agent': 'Estate agent', 'realtor': 'Estate agent',
+    'travel': 'Travel agency',
+    'fast food': 'Fast food',
+    'guest house': 'Guest house',
+    'pet groomer': 'Pet groomer', 'groomer': 'Pet groomer',
+    'physio': 'Physiotherapist', 'physiotherapist': 'Physiotherapist',
+    'clothing': 'Clothing shop',
+    'supermarket': 'Supermarket',
+    'convenience': 'Convenience store',
+    'car wash': 'Car wash',
+}
+
+
+def match_category(raw):
+    """Map a spoken trade onto a CATEGORIES key. None if we should ask again."""
+    text = re.sub(r'\s+', ' ', (raw or '').strip().lower())
+    text = text.replace('&', 'and')
+    if not text or text in ('business', 'businesses', 'leads', 'companies', 'shops', 'places'):
+        return None
+    if text in _CATEGORY_ALIASES:
+        return _CATEGORY_ALIASES[text]
+    try:
+        from web.app import CATEGORIES
+        names = list(CATEGORIES)
+    except Exception:
+        names = list(_CATEGORY_ALIASES.values())
+    for name in names:
+        low = name.lower()
+        if text == low or text.rstrip('s') == low.rstrip('s'):
+            return name
+    hits = [name for name in names if text in name.lower() or name.lower() in text]
+    if len(hits) == 1:
+        return hits[0]
+    return None
+
+
+def _desk_payload(thread, reply, intent, actions=None):
+    return {'ok': True, 'reply': reply, 'intent': intent, 'topic': '', 'score': 1.0,
+            'actions': actions or [intent], 'thread': thread['token'], 'handoff': False, 'sources': []}
+
+
+def desk_find(app, db, now, log, category, city):
+    """Run the same discovery the Find page uses. Never invent listings."""
+    mapped = match_category(category)
+    if not mapped:
+        return ('Which trade should I search — cafes, dentists, plumbers, bakeries? '
+                'Say “find cafes in Lagos”.')
+    city = re.sub(r'\s+', ' ', (city or '').strip().rstrip('.'))[:150]
+    if len(city) < 2:
+        return 'Which city should I search? Say “find cafes in Lagos”.'
+    try:
+        result = run_tool(app, db, now, log, 'discover_run', {'city': city, 'category': mapped})
+    except ToolError as e:
+        return str(e)
+    data = (result or {}).get('discovery') or result or {}
+    added = data.get('added')
+    scanned = data.get('scanned')
+    if added is None and scanned is None:
+        return f'Started a search for {mapped} in {city}. Open Find businesses to watch it.'
+    return (f'Searched {mapped} in {city}: {scanned if scanned is not None else "—"} listings checked, '
+            f'{added if added is not None else "—"} new businesses saved. '
+            'Open the lead directory or say “what’s next”.')
+
+
+def desk_next(db):
+    from web.opportunity import queue_leads
+    rows = queue_leads(db, 5)
+    if not rows:
+        return ('No businesses in the queue yet. Say “find cafes in Lagos” '
+                '(or open Find businesses) to add listings.')
+    lines = ['Next in the pipeline (stored listings, not a forecast):']
+    for row in rows:
+        city = row.get('city') or 'no city'
+        stage = row.get('stage') or 'New'
+        lines.append(f"• {row.get('name')} — {city} [{stage}]")
+    lines.append('Say “diagnose next” to store reports from saved evidence, or open a lead to audit.')
+    return '\n'.join(lines)
+
+
+def desk_followups(db, now):
+    """List scheduled follow-ups that are due and still open."""
+    today = (now() or '')[:10]
+    with db() as c:
+        rows = c.execute(
+            '''SELECT m.lead_id, m.kind, m.reason, m.follow_up_at, l.name AS lead_name,
+                      l.city AS lead_city
+               FROM memory_events m JOIN leads l ON l.id=m.lead_id
+               WHERE m.follow_up_at IS NOT NULL AND m.follow_up_at<=? AND m.status='open'
+               ORDER BY m.follow_up_at ASC LIMIT 12''',
+            (today,),
+        ).fetchall()
+    if not rows:
+        return 'No follow-ups are due right now. Future reminders stay attached to their lead records.'
+    lines = ['Due follow-ups from saved workspace records:']
+    for row in rows:
+        item = dict(row)
+        lines.append(f"• {item.get('lead_name') or 'Business'} — due {item.get('follow_up_at')} — {item.get('reason') or item.get('kind')}")
+    lines.append('Open a lead and mark the reminder done when the follow-up is complete.')
+    return '\n'.join(lines)
+
+
+def desk_diagnose(db, now, log):
+    from web.opportunity import run_queue
+    out = run_queue(db, now, log=log, limit=5)
+    ran = out.get('ran') or 0
+    if not ran:
+        return 'Nothing queued to diagnose. Find businesses first, then say “what’s next”.'
+    lines = [f'Stored {ran} report(s) from saved listings and audits. Gap ranking is not revenue.']
+    for row in (out.get('reports') or [])[:5]:
+        score = row.get('score')
+        score_bit = f"{score}/100" if score is not None else 'unscored'
+        lines.append(f"• {row.get('lead_name')} — {score_bit}")
+    return '\n'.join(lines)
+
+
+def owner_desk(app, db, now, log, text, thread_token, visitor_hash):
+    """Owner conversation: the receptionist does pipeline work, never a new agent."""
+    text = re.sub(r'\s+', ' ', (text or '').strip())
+    if not text:
+        return {'ok': False, 'error': 'Say something first — try “find cafes in Lagos”.'}
+    if text.startswith('/'):
+        return owner_command(db, now, text, thread_token, visitor_hash)
+    thread = _thread(db, now, thread_token, visitor_hash, 'owner-desk')
+    _store(db, now, thread['id'], 'visitor', text)
+    intent = 'desk'
+    actions = ['owner_desk']
+    if HELP_RE.match(text):
+        reply, intent = DESK_HELP, 'desk_help'
+    elif SEND_RE.search(text):
+        reply, intent = ('I will not send outreach from chat. Open Outreach, review the draft, '
+                         'and approve it there — unsub, suppression and the daily cap still apply.'), 'desk_send_refused'
+        actions.append('send_refused')
+    elif FIND_RE.match(text):
+        found = FIND_RE.match(text)
+        reply, intent = desk_find(app, db, now, log, found.group('category'), found.group('city')), 'desk_find'
+        actions.append('discover_run')
+    elif FOLLOWUP_RE.match(text):
+        reply, intent = desk_followups(db, now), 'desk_followups'
+        actions.append('show_due_followups')
+    elif DIAGNOSE_RE.match(text):
+        reply, intent = desk_diagnose(db, now, log), 'desk_diagnose'
+        actions.append('diagnose_queue')
+    elif NEXT_RE.match(text):
+        reply, intent = desk_next(db), 'desk_next'
+    else:
+        try:
+            from agents.agent_chief import answer as chief_answer, HELP as CHIEF_HELP
+            reply = chief_answer(db, now, text)
+            if isinstance(reply, str) and (reply.strip() == CHIEF_HELP.strip() or reply.startswith('I run the crew')
+                                           or "I don't follow that yet" in reply):
+                reply = DESK_HELP
+            intent = 'desk_chief'
+            actions.append('chief')
+        except Exception:
+            reply = DESK_HELP
+            intent = 'desk_help'
+    _store(db, now, thread['id'], 'assistant', reply, intent, {'actions': actions})
+    return _desk_payload(thread, reply, intent, actions)
+
+
+def register_receptionist(app, db, now, log, settings):
+    from flask import request, jsonify, session, render_template, g
+    ensure_tables(db)
+
+    def rate_ok(fingerprint, limit=40):
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+        with db() as c:
+            count = c.execute('SELECT count(*) FROM receptionist_threads WHERE visitor_hash=? AND updated>?',
+                              (fingerprint, cutoff)).fetchone()[0]
+            messages = c.execute('SELECT count(*) FROM receptionist_messages WHERE created>? AND thread_id IN '
+                                 '(SELECT id FROM receptionist_threads WHERE visitor_hash=?)', (cutoff, fingerprint)).fetchone()[0]
+        return count < 12 and messages < limit
+
+    @app.route('/receptionist')
+    def receptionist_page():
+        """The public AI-receptionist page: demo, tones, industries and KB-driven FAQ.
+
+        The FAQ is rendered from the same knowledge file the chat answers from, so the
+        page can never promise an answer the front desk would refuse to give.
+        """
+        try:
+            base = (settings().get('public_base_url') or '').rstrip('/') or request.url_root.rstrip('/')
+        except Exception:
+            base = request.url_root.rstrip('/')
+        seo = {
+            'title': 'Front desk — Reachmark',
+            'description': ('Talk to the Reachmark front desk. It greets you, asks what you need, '
+                            'and answers from published facts only — never a guessed price or date.'),
+            'keywords': 'Reachmark front desk, website chat, Reachmark',
+            'canonical': (base + '/receptionist') if base else None,
+            'og_image': (base + '/static/social-card.png') if base else '/static/social-card.png',
+            'noindex': False,
+        }
+        gsv = os.getenv('GOOGLE_SITE_VERIFICATION', 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg').strip() or 'ClnMo7q76egyEoNRIagLZrMmf8G18w1zYFjTxS3QzQg'
+        ga_id = os.getenv('GOOGLE_ANALYTICS_ID', '').strip() or 'G-3T3SXLG2XT'
+        gt_id = os.getenv('GOOGLE_TAG_ID', '').strip() or 'GT-KVHJTVJ2'
+        gtm_id = os.getenv('GOOGLE_TAG_MANAGER_ID', '').strip()
+        faqs = []
+        for topic in load_knowledge():
+            if topic['qa']:
+                faqs.append({'topic': topic['topic'], 'q': topic['qa'][0]['q'], 'a': topic['qa'][0]['a']})
+        structured = [
+            {'@context': 'https://schema.org', '@type': 'WebPage', 'name': 'AI Receptionist — Reachmark',
+             'description': seo['description'], 'url': seo['canonical'] or request.url},
+            {'@context': 'https://schema.org', '@type': 'FAQPage', 'mainEntity': [
+                {'@type': 'Question', 'name': item['q'],
+                 'acceptedAnswer': {'@type': 'Answer', 'text': item['a']}} for item in faqs]},
+        ]
+        brand = brand_public()
+        tiers = {row['id']: row for row in brand['tiers']}
+        loc = g.get('locale', 'en')
+        tier_notes = {'audit': _t('rx.tn_audit', loc),
+                      'build': _t('rx.tn_build', loc),
+                      'care': _t('rx.tn_care', loc),
+                      'outreach': _t('rx.tn_outreach', loc)}
+        return render_template('receptionist-page.html', seo=seo, google_verification=gsv,
+                               structured=structured, ga_id=ga_id, gt_id=gt_id, gtm_id=gtm_id,
+                               faqs=faqs, brand=brand, tiers=tiers, tier_notes=tier_notes)
+
+    @app.get('/api/frontdesk/status')
+    def frontdesk_status():
+        """Live heartbeat for the public page: what the front desk knows right now."""
+        topics = load_knowledge()
+        return jsonify(ok=True, brain=BRAIN_VERSION, receptionist='live', topics=len(topics),
+                       questions=sum(len(topic['qa']) for topic in topics))
+
+    @app.post('/api/receptionist/message')
+    def receptionist_message():
+        body = request.get_json(silent=True)
+        loc = g.get('locale', 'en')
+        if not isinstance(body, dict):
+            return jsonify(error=_t('rx.e_json', loc)), 400
+        fingerprint = hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()[:32]
+        if body.get('company_url'):
+            return jsonify(error=_t('rx.e_trap', loc)), 400
+        desk_flag = bool(body.get('desk'))
+        owner_here = bool(session.get('owner'))
+        if desk_flag and not owner_here:
+            return jsonify(error=_t('rx.e_owner', loc)), 403
+        if desk_flag or owner_here:
+            result = owner_desk(app, db, now, log, str(body.get('message', ''))[:2000],
+                                str(body.get('thread', ''))[:64] or None, fingerprint)
+            if not result.get('ok'):
+                return jsonify(result), 400
+            return jsonify(result)
+        if not rate_ok(fingerprint):
+            return jsonify(error=_t('rx.e_rate', loc)), 429
+        result = answer(db, now, str(body.get('message', ''))[:2000], str(body.get('thread', ''))[:64] or None,
+                        fingerprint, str(body.get('page', ''))[:200], settings,
+                        allow_llm=True, name=str(body.get('name', ''))[:120], email=str(body.get('email', ''))[:200],
+                        business=str(body.get('business', ''))[:200])
+        if not result.get('ok'):
+            return jsonify(result), 400
+        if 'enquiry_created' in result['actions']:
+            log('enquiry', 'The AI receptionist captured a new enquiry')
+        if result['handoff']:
+            log('receptionist', 'A visitor asked for a human — flagged for the owner')
+        return jsonify(result)
+
+    @app.post('/api/receptionist/offer-review-link')
+    def receptionist_offer_link():
+        """Offer the review-link route from the chat, without creating it for a stranger."""
+        body = request.get_json(silent=True) or {}
+        business = str(body.get('business', ''))[:200].strip()
+        loc = g.get('locale', 'en')
+        if len(business) < 2:
+            return jsonify(error=_t('rx.e_biz', loc)), 400
+        return jsonify(ok=True, reply=_t('rx.e_offer', loc, b=business))
+
+    @app.post('/api/receptionist/act')
+    def receptionist_act():
+        """Owner-only agent actions: the front desk doing real work."""
+        loc = g.get('locale', 'en')
+        if not session.get('owner'):
+            return jsonify(error=_t('rx.e_owner', loc)), 403
+        body = request.get_json(silent=True)
+        if not isinstance(body, dict):
+            return jsonify(error=_t('enq.err_json', loc)), 400
+        try:
+            result = run_tool(app, db, now, log, str(body.get('tool', '')), body.get('params') or {})
+        except ToolError as e:
+            return jsonify(error=str(e)), e.code
+        log('receptionist', 'Owner agent ran ' + str(body.get('tool', '')))
+        return jsonify(ok=True, tool=str(body.get('tool', '')), result=result)
+
+    @app.get('/api/receptionist/threads')
+    def receptionist_threads_route():
+        if not session.get('owner'):
+            return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
+        status = request.args.get('status') or None
+        return jsonify({'threads': threads(db, status=status),
+                        'knowledge_topics': [t['topic'] for t in load_knowledge()]})
+
+    @app.get('/api/receptionist/desk/thread')
+    def receptionist_desk_thread():
+        if not session.get('owner'):
+            return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
+        token = str(request.args.get('token') or '').strip()[:64]
+        if not token:
+            return jsonify(thread=None, transcript=[])
+        with db() as c:
+            row = c.execute(
+                "SELECT id, token FROM receptionist_threads WHERE token=? AND page='owner-desk'",
+                (token,),
+            ).fetchone()
+        if not row:
+            return jsonify(thread=None, transcript=[])
+        return jsonify(thread=row['token'], transcript=transcript(db, row['id']))
+
+    @app.get('/api/receptionist/threads/<thread_id>')
+    def receptionist_thread_route(thread_id):
+        if not session.get('owner'):
+            return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
+        with db() as c:
+            row = c.execute('SELECT * FROM receptionist_threads WHERE id=?', (thread_id,)).fetchone()
+        if not row:
+            return jsonify(error=_t('rx.e_thread', g.get('locale', 'en'))), 404
+        return jsonify(thread=dict(row), transcript=transcript(db, thread_id))
+
+    @app.post('/api/receptionist/threads/<thread_id>')
+    def receptionist_thread_update(thread_id):
+        if not session.get('owner'):
+            return jsonify(error=_t('rx.e_owner', g.get('locale', 'en'))), 403
+        body = request.get_json(silent=True) or {}
+        status = str(body.get('status', 'open'))
+        if status not in ('open', 'handled', 'closed'):
+            return jsonify(error=_t('rx.e_status', g.get('locale', 'en'))), 400
+        note = str(body.get('note', ''))[:3000]
+        with db() as c:
+            if not c.execute('SELECT 1 FROM receptionist_threads WHERE id=?', (thread_id,)).fetchone():
+                return jsonify(error=_t('rx.e_thread', g.get('locale', 'en'))), 404
+            c.execute('UPDATE receptionist_threads SET status=?,updated=? WHERE id=?', (status, now(), thread_id))
+        if note:
+            _store(db, now, thread_id, 'owner', note, 'note', {'status': status})
+        log('receptionist', f'Receptionist thread marked {status}')
+        return jsonify(ok=True)
+
+    return {'answer': answer, 'threads': threads, 'transcript': transcript, 'load_knowledge': load_knowledge}
+,
+    re.I,
+)
 DIAGNOSE_RE = re.compile(
     r'^\s*(diagnose next|run(?: the)? queue|build reports?)\s*[.?!]*\s*$',
     re.I,
@@ -419,6 +798,28 @@ def desk_next(db):
         stage = row.get('stage') or 'New'
         lines.append(f"• {row.get('name')} — {city} [{stage}]")
     lines.append('Say “diagnose next” to store reports from saved evidence, or open a lead to audit.')
+    return '\n'.join(lines)
+
+
+def desk_followups(db, now):
+    """List scheduled follow-ups that are due and still open."""
+    today = (now() or '')[:10]
+    with db() as c:
+        rows = c.execute(
+            '''SELECT m.lead_id, m.kind, m.reason, m.follow_up_at, l.name AS lead_name,
+                      l.city AS lead_city
+               FROM memory_events m JOIN leads l ON l.id=m.lead_id
+               WHERE m.follow_up_at IS NOT NULL AND m.follow_up_at<=? AND m.status='open'
+               ORDER BY m.follow_up_at ASC LIMIT 12''',
+            (today,),
+        ).fetchall()
+    if not rows:
+        return 'No follow-ups are due right now. Future reminders stay attached to their lead records.'
+    lines = ['Due follow-ups from saved workspace records:']
+    for row in rows:
+        item = dict(row)
+        lines.append(f"• {item.get('lead_name') or 'Business'} — due {item.get('follow_up_at')} — {item.get('reason') or item.get('kind')}")
+    lines.append('Open a lead and mark the reminder done when the follow-up is complete.')
     return '\n'.join(lines)
 
 
