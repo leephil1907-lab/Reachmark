@@ -687,9 +687,6 @@ def register_receptionist(app, db, now, log, settings):
         return jsonify(ok=True)
 
     return {'answer': answer, 'threads': threads, 'transcript': transcript, 'load_knowledge': load_knowledge}
-,
-    re.I,
-)
 DIAGNOSE_RE = re.compile(
     r'^\s*(diagnose next|run(?: the)? queue|build reports?)\s*[.?!]*\s*$',
     re.I,
