@@ -9,6 +9,10 @@
     <button class="secondary" type="button" onclick="var i=document.getElementById('desk-input'); if(i){i.focus(); i.scrollIntoView({behavior:'smooth',block:'center'});}">{{ t('ws.n_desk') }}</button>
   </div>
 </section>
+<section class="action-center" id="rm-action-center" aria-labelledby="rm-action-center-title" aria-live="polite">
+  <div class="action-center-head"><div><div class="eyebrow">YOUR WORKDAY</div><h2 id="rm-action-center-title">Today’s next moves</h2><p>Loading your next best action from saved leads, evidence, replies, and follow-ups…</p></div></div>
+  <div class="action-center-grid"><article class="action-center-card"><div class="sk" aria-hidden="true"><i></i><i></i><i></i></div></article></div>
+</section>
 {% include 'opportunity-panel.html' %}
 <div id="empty-machine" class="empty-machine" hidden></div>
 <div id="work-first" class="work-first" hidden></div>
