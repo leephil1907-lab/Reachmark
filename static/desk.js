@@ -25,6 +25,9 @@
     return div;
   }
   var busy = false;
+  var THREAD_KEY = 'reachmark.owner-desk.thread';
+  function thread() { try { return localStorage.getItem(THREAD_KEY) || ''; } catch (e) { return ''; } }
+  function rememberThread(token) { try { if (token) localStorage.setItem(THREAD_KEY, token); } catch (e) {} }
   function post(message) {
     var options = { method: 'POST', headers: { 'Content-Type': 'application/json' } };
     var controller = typeof AbortController === 'function' ? new AbortController() : null;
@@ -32,7 +35,7 @@
     if (controller) options.signal = controller.signal;
     var meta = document.querySelector('meta[name="csrf-token"]');
     if (meta) options.headers['X-CSRF-Token'] = meta.content;
-    options.body = JSON.stringify({ message: message, desk: true, page: '/admin' });
+    options.body = JSON.stringify({ message: message, desk: true, page: '/workspace', thread: thread() });
     return fetch('/api/receptionist/message', options).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) {
         if (!response.ok) throw new Error(data.error || 'request failed (' + response.status + ')');
@@ -52,6 +55,7 @@
     bubble('user', linkify(text));
     var wait = bubble('assistant', esc(T_('ws.desk_wait', 'On it…')), true);
     post(text).then(function (data) {
+      rememberThread(data.thread);
       wait.classList.remove('desk-thinking');
       wait.innerHTML = linkify(data.reply || 'I completed the request, but no reply text was returned.');
       var log = $('desk-log');
