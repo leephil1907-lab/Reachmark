@@ -39,7 +39,7 @@
     ).join('') + '</div>';
   }
 
-  function render(root, command, due) {
+  function render(root, command, due, metrics) {
     const next = command.next_to_win;
     const attention = command.attention || {};
     const replies = attention.replies || [];
@@ -48,6 +48,19 @@
     const hot = command.hottest || [];
     const followups = due.items || [];
     const waitingCount = replies.length + approvals.length + followups.length;
+    const rate = (value) => value == null ? '—' : Math.round(Number(value) * 100) + '%';
+    const conversion = metrics ? (
+      '<article class="action-center-card action-center-metrics"><h3>Recorded conversions</h3>' +
+      '<div class="action-metric-grid">' +
+      '<div class="action-metric"><strong>' + esc(metrics.leads ?? 0) + '</strong><span>Leads</span></div>' +
+      '<div class="action-metric"><strong>' + esc(metrics.contacted ?? 0) + '</strong><span>Contacted</span></div>' +
+      '<div class="action-metric"><strong>' + esc(metrics.replies ?? 0) + '</strong><span>Replied</span></div>' +
+      '<div class="action-metric"><strong>' + esc(metrics.won ?? 0) + '</strong><span>Won</span></div>' +
+      '</div><div class="action-rate-row"><span>Contact rate <b>' + rate(metrics.contact_rate) + '</b></span>' +
+      '<span>Reply rate <b>' + rate(metrics.reply_rate) + '</b></span>' +
+      '<span>Win rate <b>' + rate(metrics.win_rate) + '</b></span></div>' +
+      '<p class="action-muted">Calculated from saved lead stages. Rates show “—” when there is no denominator; these are recorded outcomes, not forecasts.</p></article>'
+    ) : '';
     const priorityLead = next && next.lead_id
       ? '<div class="action-center-pill">NEXT BEST MOVE</div><p class="action-center-main">' + esc(next.lead_name || 'Priority business') + '</p>' +
         '<p class="action-muted">' + esc((next.next && next.next.label) || 'Review opportunity') +
@@ -82,7 +95,7 @@
             (item.city ? ' · ' + item.city : '') + (item.why ? ' · ' + item.why : ''),
             'No ranked opportunities yet. Generate a report to start scoring from recorded evidence.', 4) +
           (upsells.length ? '<p class="action-center-status">Post-delivery growth opportunities: ' + esc(upsells.length) + '</p>' : '') +
-        '</article>' +
+        '</article>' + conversion +
       '</div>' +
       '<p class="action-center-status" role="status" aria-live="polite" id="rm-action-center-status">' +
       esc(waitingCount ? (waitingCount + ' follow-up or review item(s) need attention.') : 'Workspace actions refreshed from saved records.') +
@@ -108,17 +121,20 @@
     try {
       const results = await Promise.allSettled([
         get('/api/os/command'),
-        get('/api/platform/memory/due')
+        get('/api/platform/memory/due'),
+        get('/api/os/metrics')
       ]);
       const commandResult = results[0];
       const dueResult = results[1];
+      const metricsResult = results[2];
       if (commandResult.status !== 'fulfilled') throw commandResult.reason;
       const command = commandResult.value;
       const due = dueResult.status === 'fulfilled' ? dueResult.value : { items: [] };
-      render(root, command, due);
-      if (dueResult.status !== 'fulfilled') {
+      const metrics = metricsResult.status === 'fulfilled' ? metricsResult.value : null;
+      render(root, command, due, metrics);
+      if (dueResult.status !== 'fulfilled' || metricsResult.status !== 'fulfilled') {
         const note = document.getElementById('rm-action-center-status');
-        if (note) note.textContent = 'Priority leads and replies loaded. Follow-up reminders could not be loaded.';
+        if (note) note.textContent = dueResult.status !== 'fulfilled' ? 'Priority leads and replies loaded. Follow-up reminders could not be loaded.' : 'Workspace actions loaded. Conversion metrics are temporarily unavailable.';
       }
     } catch (error) {
       root.innerHTML = '<div class="action-center-head"><div><div class="eyebrow">YOUR WORKDAY</div>' +
