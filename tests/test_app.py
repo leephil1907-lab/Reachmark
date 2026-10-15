@@ -230,6 +230,23 @@ class ProspectTests(unittest.TestCase):
             403,
         )
 
+    def test_workspace_receptionist_lists_real_due_followups(self):
+        lead = self.create()
+        saved = self.client.post(
+            '/api/platform/lead/' + lead['id'] + '/memory',
+            json={'kind': 'note', 'reason': 'Discuss the audit', 'follow_up_at': '2000-01-01'},
+        )
+        self.assertEqual(saved.status_code, 200)
+        with self.client.session_transaction() as sess:
+            sess['owner'] = True
+        response = self.client.post(
+            '/api/receptionist/message',
+            json={'message': 'show due follow-ups', 'desk': True},
+        )
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+        self.assertEqual(response.json['intent'], 'desk_followups')
+        self.assertIn('Example Bakery', response.json['reply'])
+
     def test_not_now_is_a_valid_saved_pipeline_stage(self):
         lead = self.create()
         response = self.client.patch('/api/leads/' + lead['id'], json={'stage': 'Not now'})
