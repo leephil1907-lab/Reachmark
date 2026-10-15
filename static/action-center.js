@@ -49,6 +49,16 @@
     const followups = due.items || [];
     const waitingCount = replies.length + approvals.length + followups.length;
     const rate = (value) => value == null ? '—' : Math.round(Number(value) * 100) + '%';
+    const stages = ['New', 'Drafted', 'Contacted', 'Replied', 'Won', 'Not now', 'Not a fit'];
+    const stageCounts = Object.fromEntries(((metrics && metrics.by_stage) || []).map((item) => [item.k || 'New', Number(item.n) || 0]));
+    const pipelineCard = metrics ? (
+      '<article class="action-center-card action-pipeline-board"><div class="action-pipeline-head"><div><h3>Manage your pipeline</h3>' +
+      '<p class="action-muted">Select a stage to open the matching saved leads.</p></div><span class="action-center-pill">LIVE RECORDS</span></div>' +
+      '<div class="action-pipeline-stages">' + stages.map((stage) =>
+        '<button type="button" class="action-pipeline-stage" data-pipeline-stage="' + esc(stage) + '">' +
+        '<span>' + esc(stage) + '</span><strong>' + esc(stageCounts[stage] || 0) + '</strong><small>Open leads</small></button>'
+      ).join('') + '</div></article>'
+    ) : '';
     const conversion = metrics ? (
       '<article class="action-center-card action-center-metrics"><h3>Recorded conversions</h3>' +
       '<div class="action-metric-grid">' +
@@ -95,7 +105,7 @@
             (item.city ? ' · ' + item.city : '') + (item.why ? ' · ' + item.why : ''),
             'No ranked opportunities yet. Generate a report to start scoring from recorded evidence.', 4) +
           (upsells.length ? '<p class="action-center-status">Post-delivery growth opportunities: ' + esc(upsells.length) + '</p>' : '') +
-        '</article>' + conversion +
+        '</article>' + conversion + pipelineCard +
       '</div>' +
       '<p class="action-center-status" role="status" aria-live="polite" id="rm-action-center-status">' +
       esc(waitingCount ? (waitingCount + ' follow-up or review item(s) need attention.') : 'Workspace actions refreshed from saved records.') +
@@ -107,6 +117,14 @@
     root.querySelectorAll('[data-action-discover]').forEach((button) => {
       button.addEventListener('click', () => {
         if (typeof window.navigate === 'function') window.navigate('global');
+      });
+    });
+    root.querySelectorAll('[data-pipeline-stage]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const filter = document.getElementById('filter-stage');
+        if (filter) filter.value = button.getAttribute('data-pipeline-stage') || '';
+        if (typeof window.navigate === 'function') window.navigate('leads');
+        if (typeof window.renderLeads === 'function') window.renderLeads();
       });
     });
     const refreshButton = root.querySelector('[data-action-refresh]');
