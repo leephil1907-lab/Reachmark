@@ -283,6 +283,7 @@ DESK_HELP = (
     'I am the workspace receptionist. Tell me what to do, in plain words:\n'
     '• find cafes in Lagos — run discovery for that trade and city\n'
     "• what's next — queued businesses from stored listings\n"
+    '• show due follow-ups — reminders that are still open\n'
     '• diagnose next — store reports from saved evidence (not a forecast)\n'
     '• status — pipeline counts\n'
     '• leads [search] — recently saved businesses\n'
