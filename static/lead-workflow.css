@@ -1,0 +1,62 @@
+/* Reachmark CRM workflow — mobile-first, evidence-led, and reduced-motion aware. */
+.lead-workflow{margin-top:22px;padding:18px;border:1px solid #e4e8dc;border-radius:16px;background:linear-gradient(145deg,#fff,#fafbf6)}
+.lead-workflow-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.lead-workflow-head h3{margin:0 0 6px;font:700 16px/1.3 Manrope,Arial,sans-serif;color:#252a21}
+.lead-workflow-head p{margin:0;color:#68705f;font-size:12px;line-height:1.6}
+.lead-memory-form{margin-top:15px;padding:14px;border:1px solid #e8ecdf;border-radius:12px;background:#fff}
+.lead-memory-form label{margin:0 0 12px;color:#59634e;font-size:11px;font-weight:650}
+.lead-memory-form input,.lead-memory-form select,.lead-memory-form textarea{margin-top:6px;width:100%;min-height:42px;border:1px solid #dfe5d6;border-radius:9px;background:#fcfdf9;color:#2c3327;font:13px/1.5 inherit;padding:10px 11px}
+.lead-memory-form textarea{resize:vertical;min-height:76px}
+.lead-memory-form input:focus,.lead-memory-form select:focus,.lead-memory-form textarea:focus{outline:2px solid #a9c85b;outline-offset:1px;border-color:#91ad4e;box-shadow:0 0 0 3px rgba(213,242,104,.18)}
+.lead-memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lead-memory-actions{display:flex;align-items:flex-end;gap:12px}
+.lead-memory-actions label{flex:1;min-width:0}
+.lead-memory-actions button{min-height:42px;border-radius:9px;background:#d5f268;color:#20251f;border:1px solid #c5e45c;font-weight:750}
+.lead-memory-actions button:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(48,60,28,.1)}
+.lead-memory-status{min-height:16px;margin:4px 0 0;color:#667254;font-size:11px;line-height:1.5}
+.lead-memory-status.is-error{color:#9c3e32}
+.lead-history-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0 6px}
+.lead-history-head h4{margin:0;font:700 12px/1.4 Manrope,Arial,sans-serif;color:#333a2d}
+.lead-history-head span{color:#737b69;font-size:10px}
+.lead-activity-list{display:grid;gap:0}
+.lead-activity-item{position:relative;display:grid;grid-template-columns:10px minmax(0,1fr);gap:10px;padding:12px 0;border-top:1px solid #e9ede3}
+.lead-activity-marker{width:8px;height:8px;border-radius:50%;background:#b4d15e;margin-top:5px;box-shadow:0 0 0 3px #eff5dc}
+.lead-activity-item strong{display:block;color:#333a2d;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.lead-activity-meta{display:flex;gap:8px;flex-wrap:wrap;margin:3px 0 6px;color:#717a65;font-size:10px}
+.lead-activity-item p{margin:0;color:#59634e;font-size:12px;line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap}
+.lead-history-empty{padding:12px 0;margin:0;color:#727b67;font-size:12px;line-height:1.6}
+.lead-history-empty button{margin-top:8px}
+.lead-workflow [disabled]{opacity:.55;cursor:wait}
+.desk-board{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:20px;margin:20px 0 26px;padding:22px;border:1px solid #333d2d;border-radius:18px;background:radial-gradient(100% 130% at 0% 0%,#2b3525 0%,#20251f 58%,#191d17 100%);color:#eef4e4;box-shadow:0 16px 36px rgba(25,31,21,.12)}
+.desk-copy .eyebrow{color:#d5f268}
+.desk-copy h2{margin:0 0 9px;color:#f3f7eb;font:400 clamp(25px,3vw,34px)/1.1 Instrument Serif,Georgia,serif;letter-spacing:-.02em}
+.desk-copy p{margin:0;color:#c0cbb3;font-size:12px;line-height:1.7;max-width:42ch}
+.desk-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.desk-chips button{border:1px solid #4b5a3c;border-radius:999px;background:#293323;color:#e5efcf;padding:9px 11px;font-size:11px;line-height:1.3;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
+.desk-chips button:hover{background:#37442d;border-color:#849e4c;transform:translateY(-1px)}
+.desk-chat{display:flex;flex-direction:column;min-width:0;min-height:280px;border:1px solid #3b4632;border-radius:14px;background:#181d16;overflow:hidden}
+.desk-log{flex:1;min-height:180px;max-height:340px;overflow:auto;padding:14px;scroll-behavior:smooth}
+.desk-msg{max-width:95%;margin:0 0 10px;padding:10px 12px;border-radius:11px;font-size:12px;line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap}
+.desk-user{margin-left:auto;background:#d5f268;color:#20251f;border-bottom-right-radius:4px}
+.desk-assistant{margin-right:auto;background:#293124;border:1px solid #3b4632;color:#e5ecd9;border-bottom-left-radius:4px}
+.desk-assistant a{color:#d5f268;text-decoration:underline;overflow-wrap:anywhere}
+.desk-thinking{opacity:.75;animation:desk-pulse 1.2s ease-in-out infinite}
+#desk-form{display:flex;gap:8px;padding:11px;border-top:1px solid #343e2c;background:#20251f}
+#desk-form input{min-width:0;flex:1;margin:0;border:1px solid #3e4a32;border-radius:9px;background:#171c15;color:#f3f7eb;font-size:13px}
+#desk-form input::placeholder{color:#a4af96}
+#desk-form button{min-width:74px;min-height:42px;border-radius:9px;background:#d5f268;color:#20251f;border:0;font-weight:750}
+#desk-form button:disabled{opacity:.5;cursor:wait}
+@keyframes desk-pulse{50%{opacity:.45}}
+@media(max-width:760px){
+ .lead-workflow{padding:13px;margin-top:16px;border-radius:13px}
+ .lead-memory-form{padding:11px}
+ .lead-memory-grid{grid-template-columns:minmax(0,1fr)}
+ .lead-memory-actions{align-items:stretch;flex-direction:column;gap:4px}
+ .lead-memory-actions button{width:100%}
+ .desk-board{grid-template-columns:minmax(0,1fr);gap:14px;padding:16px;border-radius:15px}
+ .desk-chat{min-height:300px}
+ .desk-log{max-height:320px}
+}
+@media(prefers-reduced-motion:reduce){
+ .lead-workflow *, .desk-board *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
