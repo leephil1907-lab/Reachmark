@@ -889,7 +889,7 @@ def ingest_reply(db, lead, body, now, channel='email', source='manual'):
                 from datetime import datetime, timezone, timedelta
                 follow = (datetime.now(timezone.utc) + timedelta(days=90)).date().isoformat()
                 c.execute(
-                    'INSERT INTO memory_events VALUES(?,?,?,?,?,?,?,?,?)',
+                    'INSERT INTO memory_events(id,lead_id,kind,reason,potential,follow_up_at,note,created,owner_user_id) VALUES(?,?,?,?,?,?,?,?,?)',
                     (uuid.uuid4().hex, lead['id'], 'not_now', 'Reply classified as not now',
                      'unknown', follow, (body or '')[:400], stamp, lead.get('owner_user_id')),
                 )
