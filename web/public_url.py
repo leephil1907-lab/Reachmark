@@ -10,11 +10,11 @@ from urllib.parse import urlparse
 
 BRAND_PUBLIC_URL = 'https://reachmarkdigital.xyz'
 BRAND_SUPPORT_EMAIL = 'support@reachmarkdigital.xyz'
-SEO_HOME_TITLE = 'Reachmark: Find Businesses Losing Customers Online'
+SEO_HOME_TITLE = 'Reachmark Digital | Website Audits, SEO & Business Growth'
 SEO_HOME_DESCRIPTION = (
-    'Reachmark audits public business websites, records measurable issues, and creates a Digital Opportunity Report. Review every finding and approve each outreach email before sending.'
+    'Reachmark Digital helps designers, freelancers, and agencies uncover website SEO and usability issues, discover business growth opportunities, and create evidence-backed reports with actionable recommendations.'
 )
-SEO_HOME_KEYWORDS = 'Reachmark, Reachmark Digital, website diagnosis, Digital Opportunity Report'
+SEO_HOME_KEYWORDS = 'Reachmark, Reachmark Digital, website audit, SEO analysis, website usability, digital growth opportunities, Digital Opportunity Report'
 # Search Console HTML-tag tokens. First token is reachmarkdigital.xyz (2026-10-08).
 GOOGLE_SITE_TOKENS = (
     'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c',
