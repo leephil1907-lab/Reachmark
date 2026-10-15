@@ -60,7 +60,7 @@
         '<div class="action-center-buttons"><button type="button" class="primary" data-action-discover>Discover businesses ↗</button></div>';
 
     root.innerHTML =
-      '<div class="action-center-head"><div><div class="eyebrow">YOUR WORKDAY</div><h2>Today’s next moves</h2>' +
+      '<div class="action-center-head"><div><div class="eyebrow">YOUR WORKDAY</div><h2 id="rm-action-center-title">Today’s next moves</h2>' +
       '<p>Evidence first. Then one clear action at a time. These lists are based on records in your workspace.</p></div>' +
       '<button class="secondary" type="button" data-action-refresh>Refresh actions ↻</button></div>' +
       '<div class="action-center-grid">' +
