@@ -1,0 +1,35 @@
+/* Reachmark action center — additive layer; preserves the existing workspace visual system. */
+.action-center{margin:18px 0 26px;padding:22px;border:1px solid #dfe5d4;border-radius:18px;background:linear-gradient(135deg,#fff 0%,#f7f9f0 100%);box-shadow:0 12px 30px rgba(32,37,31,.045)}
+.action-center-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+.action-center-head h2{margin:5px 0 6px;font:400 clamp(25px,3vw,32px)/1.1 Instrument Serif,Georgia,serif;letter-spacing:-.025em;color:#20251f}
+.action-center-head p{margin:0;color:#68705f;font-size:13px;line-height:1.6;max-width:54ch}
+.action-center-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+.action-center-card{min-width:0;padding:16px;border:1px solid #e4e8dc;border-radius:14px;background:rgba(255,255,255,.86)}
+.action-center-card.is-primary{background:#20271d;color:#f3f6e9;border-color:#20271d}
+.action-center-card.is-primary .action-muted{color:#bdc8b0}
+.action-center-card h3{margin:0 0 10px;font:700 12px/1.4 Manrope,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:inherit}
+.action-center-card p{margin:0 0 10px;font-size:13px;line-height:1.6}
+.action-center-card .action-muted{color:#66705e}
+.action-center-main{font:400 24px/1.15 Instrument Serif,Georgia,serif;letter-spacing:-.02em;overflow-wrap:anywhere}
+.action-center-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:#eaf3ce;color:#35451f;font:700 10px/1.2 Manrope,Arial,sans-serif;letter-spacing:.04em}
+.action-center-card.is-primary .action-center-pill{background:#d5f268;color:#20251f}
+.action-center-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.action-center-buttons button,.action-center-buttons a{min-height:38px}
+.action-center-list{display:grid;gap:0}
+.action-center-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #e8ecdf}
+.action-center-row:first-child{border-top:0}
+.action-center-row strong{display:block;font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+.action-center-row span{display:block;margin-top:3px;color:#68705f;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+.action-center-row button{border:0;background:transparent;color:#405126;font:700 12px Manrope,Arial,sans-serif;cursor:pointer;padding:8px;border-radius:8px}
+.action-center-row button:hover{background:#edf3df}
+.action-center-empty{padding:14px 0;color:#68705f;font-size:13px;line-height:1.6}
+.action-center-status{min-height:16px;margin:10px 0 0;color:#68705f;font-size:11px}
+@media(max-width:760px){
+ .action-center{padding:16px;margin:14px 0 20px;border-radius:15px}
+ .action-center-head{align-items:flex-start;flex-direction:column}
+ .action-center-head .secondary{width:100%}
+ .action-center-grid{grid-template-columns:minmax(0,1fr)}
+ .action-center-card{padding:14px}
+ .action-center-main{font-size:22px}
+}
+@media(prefers-reduced-motion:reduce){.action-center *{scroll-behavior:auto!important;transition:none!important}}
