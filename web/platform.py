@@ -91,6 +91,9 @@ def ensure_tables(db):
         CREATE INDEX IF NOT EXISTS memory_follow ON memory_events(follow_up_at);
         CREATE INDEX IF NOT EXISTS signals_lead ON timing_signals(lead_id, created);
         ''')
+        memory_columns = {row[1] for row in c.execute('PRAGMA table_info(memory_events)').fetchall()}
+        if 'status' not in memory_columns:
+            c.execute("ALTER TABLE memory_events ADD COLUMN status TEXT NOT NULL DEFAULT 'open'")
 
 
 def _owner_clause(alias=''):
@@ -869,7 +872,7 @@ def register_platform(app, db, now, log):
             return jsonify(error='Lead not found.'), 404
         with db() as c:
             rows = c.execute(
-                '''SELECT id, kind, reason, potential, follow_up_at, note, created
+                '''SELECT id, kind, reason, potential, follow_up_at, note, created, status
                    FROM memory_events WHERE lead_id=?
                    ORDER BY created DESC LIMIT 50''',
                 (lid,),
@@ -902,9 +905,29 @@ def register_platform(app, db, now, log):
             return jsonify(error='Record why. Empty reasons are not stored.'), 400
         mid = uuid.uuid4().hex
         with db() as c:
-            c.execute('INSERT INTO memory_events VALUES(?,?,?,?,?,?,?,?,?)',
+            c.execute('INSERT INTO memory_events(id,lead_id,kind,reason,potential,follow_up_at,note,created,owner_user_id) VALUES(?,?,?,?,?,?,?,?,?)',
                       (mid, lead['id'], kind, reason, potential, follow, note, now(), lead.get('owner_user_id')))
         return jsonify(id=mid, follow_up_at=follow)
+
+    @app.post('/api/platform/lead/<lid>/memory/<mid>/complete')
+    def platform_memory_complete(lid, mid):
+        lead = _lead(db, lid)
+        if not lead:
+            return jsonify(error='Lead not found.'), 404
+        with db() as c:
+            row = c.execute(
+                'SELECT id, follow_up_at, status FROM memory_events WHERE id=? AND lead_id=?',
+                (mid, lid),
+            ).fetchone()
+            if not row:
+                return jsonify(error='Activity not found.'), 404
+            if not row['follow_up_at']:
+                return jsonify(error='This activity has no scheduled follow-up.'), 400
+            if row['status'] == 'done':
+                return jsonify(ok=True, status='done', unchanged=True)
+            c.execute("UPDATE memory_events SET status='done' WHERE id=? AND lead_id=?", (mid, lid))
+        log('follow_up', f"Follow-up completed for {lead.get('name') or 'lead'}")
+        return jsonify(ok=True, status='done')
 
     @app.post('/api/platform/lead/<lid>/signal')
     def platform_signal(lid):
