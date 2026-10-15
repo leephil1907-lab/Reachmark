@@ -15,6 +15,9 @@
 .action-center-card.is-primary .action-center-pill{background:#d5f268;color:#20251f}
 .action-center-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .action-center-buttons button,.action-center-buttons a{min-height:38px}
+.action-center-buttons button{border:1px solid #cbe85b;border-radius:10px;padding:9px 12px;background:#d5f268;color:#20251f;font:700 12px Manrope,Arial,sans-serif;cursor:pointer}
+.action-center-card.is-primary .action-center-buttons [data-action-discover]{background:transparent;color:#d5f268;border-color:rgba(213,242,104,.45)}
+.action-center-buttons button:disabled{opacity:.45;cursor:not-allowed}
 .action-center-list{display:grid;gap:0}
 .action-center-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #e8ecdf}
 .action-center-row:first-child{border-top:0}
