@@ -76,6 +76,7 @@ RULES = [
     (r'^/api/(invoices|projects)(/|$)', 'free'),
     (r'^/api/documents/(invoice|brief|proposal)(/|$)', 'free'),
     (r'^/api/documents/audit', 'starter'),
+    (r'^/api/site-audits(/|$)', 'starter'),  # full browser audits: paying workspaces only
     (r'^/api/state$', 'free'),
     (r'^/api/onboard(/|$)', 'free'),
     (r'^/api/funnel/event$', 'free'),

@@ -81,6 +81,14 @@ class TierGatingTests(BillingBase):
         self.assertEqual(r.status_code, 402)
         self.assertEqual(r.get_json().get('required'), 'starter')
 
+    def test_site_audit_path_is_starter_tier_and_free_is_denied(self):
+        from web.billing import check_client_path
+
+        self.assertEqual(check_client_path('/api/site-audits', 'free'), ('upgrade', 'starter'))
+        self.assertEqual(check_client_path('/api/site-audits/job-123', 'free'), ('upgrade', 'starter'))
+        self.assertEqual(check_client_path('/api/site-audits', 'starter'), ('ok', 'starter'))
+        self.assertEqual(check_client_path('/api/site-audits/job-123/report.json', 'pro'), ('ok', 'starter'))
+
     def test_owner_only_paths_stay_forbidden(self):
         self.make_client()
         r = self.client.get('/api/settings')
