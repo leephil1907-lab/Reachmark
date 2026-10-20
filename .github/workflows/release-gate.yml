@@ -14,8 +14,6 @@ jobs:
   build-and-production-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      CI_OWNER_PASSWORD: Reachmark-CI-only-2026!
     steps:
       - name: Checkout
         uses: actions/checkout@v4
