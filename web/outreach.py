@@ -162,14 +162,6 @@ def register_outreach(app,db,now,log):
                 )
             c.execute("UPDATE outreach_campaigns SET updated=? WHERE id=?",(now(),cid))
         return jsonify(added=len(leads),skipped=len(rows)-len(leads))
-        if not leads:
-            return jsonify(error="No selected leads have usable, non-suppressed email addresses."),400
-        try:provider_for(campaign["provider"]).add_leads(campaign["provider_campaign_id"],leads)
-        except ProviderError as exc:return jsonify(error=str(exc)),502
-        with db() as c:
-            for row in eligible_rows:c.execute("INSERT OR IGNORE INTO outreach_enrollments(id,campaign_id,lead_id,status,created,updated) VALUES(?,?,?,?,?,?)",(uuid.uuid4().hex,cid,row["id"],"queued",now(),now()))
-            c.execute("UPDATE outreach_campaigns SET updated=? WHERE id=?",(now(),cid))
-        return jsonify(added=len(leads),skipped=len(rows)-len(leads))
     def change_status(cid,action,local_status):
         campaign=campaign_row(cid)
         if not campaign:return jsonify(error="Campaign not found."),404
