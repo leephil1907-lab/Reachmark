@@ -94,5 +94,19 @@ class OutreachTenantIsolationTests(unittest.TestCase):
         self.assertEqual(enrolled, {"lead-a"})
 
 
+    def test_provider_transport_errors_do_not_echo_api_keys(self):
+        import requests
+        from web.outreach import ProviderError, SmartleadProvider
+
+        secret = "smartlead-secret-value"
+        with patch("web.outreach.requests.request",
+                   side_effect=requests.ConnectionError(f"request failed with api_key={secret}")):
+            with self.assertRaises(ProviderError) as caught:
+                SmartleadProvider(secret)._request("GET", "/campaigns")
+
+        self.assertNotIn(secret, str(caught.exception))
+        self.assertIn("ConnectionError", str(caught.exception))
+
+
 if __name__ == "__main__":
     unittest.main()
