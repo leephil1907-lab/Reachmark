@@ -132,13 +132,26 @@ def register_outreach(app,db,now,log):
         with db() as c:
             inserted=c.execute("INSERT OR IGNORE INTO outreach_events(id,provider,provider_event_id,event_type,provider_campaign_id,provider_lead_id,email,occurred_at,payload,created) VALUES(?,?,?,?,?,?,?,?,?,?)",(uuid.uuid4().hex,provider,event_id,event_type,campaign_id,lead_id,email,str(body.get("timestamp") or body.get("created_at") or now()),request.get_data(as_text=True),now())).rowcount
             if inserted and email and event_type=="unsubscribed":c.execute("INSERT OR IGNORE INTO suppression(email,created) VALUES(?,?)",(email,now()))
-            if inserted and email and event_type=="replied":
-                c.execute("UPDATE leads SET stage='Replied',updated=? WHERE lower(email)=lower(?)",(now(),email));c.execute("UPDATE outreach_enrollments SET status='replied',updated=? WHERE lead_id IN (SELECT id FROM leads WHERE lower(email)=lower(?))",(now(),email))
-        if inserted and email and event_type=="replied":
+            reply_lead_id=None
+            if inserted and email and event_type=="replied" and campaign_id:
+                # Provider events must be tied to a locally known campaign and its
+                # enrollment records; email alone is not a tenant-safe identifier.
+                campaign=c.execute("SELECT id FROM outreach_campaigns WHERE provider=? AND provider_campaign_id=?",(provider,campaign_id)).fetchone()
+                if campaign:
+                    enrolled=c.execute(
+                        "SELECT l.id FROM outreach_enrollments e JOIN leads l ON l.id=e.lead_id "
+                        "WHERE e.campaign_id=? AND lower(l.email)=lower(?) ORDER BY e.created LIMIT 1",
+                        (campaign["id"],email),
+                    ).fetchone()
+                    if enrolled:
+                        reply_lead_id=enrolled["id"]
+                        c.execute("UPDATE leads SET stage='Replied',updated=? WHERE id=?",(now(),reply_lead_id))
+                        c.execute("UPDATE outreach_enrollments SET status='replied',updated=? WHERE campaign_id=? AND lead_id=?",(now(),campaign["id"],reply_lead_id))
+        if inserted and email and event_type=="replied" and reply_lead_id:
             try:
                 from web.revenue_os import on_outreach_reply
                 reply_body=str(body.get("text") or body.get("reply") or body.get("message") or body.get("body") or "")
-                on_outreach_reply(db, email, now, reply_body)
+                on_outreach_reply(db, email, now, reply_body, lead_id=reply_lead_id)
             except Exception:
                 pass
         return jsonify(ok=True,duplicate=not bool(inserted)),200
