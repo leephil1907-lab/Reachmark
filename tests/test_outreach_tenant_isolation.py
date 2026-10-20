@@ -95,7 +95,98 @@ class OutreachTenantIsolationTests(unittest.TestCase):
         self.assertEqual(enrolled, {"lead-a"})
 
 
-    def test_webhook_rejects_requests_when_secret_is_not_configured(self):
+    def test_repeated_enrollment_does_not_resend_existing_lead(self):
+        with module.db() as c:
+            c.execute(
+                "INSERT INTO outreach_enrollments(id,campaign_id,lead_id,status,created,updated) "
+                "VALUES(?,?,?,?,?,?)",
+                ("enroll-existing", "campaign-a", "lead-a", "queued", module.now(), module.now()),
+            )
+        provider = MagicMock()
+        with patch("web.outreach.provider_for", return_value=provider):
+            response = self.client.post(
+                "/api/outreach/campaigns/campaign-a/leads",
+                json={"lead_ids": ["lead-a"]},
+                headers={"X-CSRF-Token": "test-csrf"},
+            )
+        self.assertEqual(response.status_code, 400, response.get_data(as_text=True))
+        provider.add_leads.assert_not_called()
+
+    def test_unsubscribe_suppresses_email_and_updates_existing_enrollments(self):
+        with module.db() as c:
+            c.execute(
+                "INSERT INTO outreach_enrollments(id,campaign_id,lead_id,status,created,updated) "
+                "VALUES(?,?,?,?,?,?)",
+                ("enroll-unsub", "campaign-a", "lead-a", "queued", module.now(), module.now()),
+            )
+        with patch.dict("os.environ", {"APP_ENV": "test", "INSTANTLY_WEBHOOK_SECRET": "test-webhook-secret"}):
+            response = self.client.post(
+                "/api/webhooks/instantly",
+                json={"event_id": "unsubscribe-event-1", "event_type": "unsubscribe",
+                      "campaign_id": "remote-a", "email": "a-lead@example.test"},
+                headers={"X-Reachmark-Webhook-Secret": "test-webhook-secret"},
+            )
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+        with module.db() as c:
+            suppression = c.execute(
+                "SELECT 1 FROM suppression WHERE lower(email)=?",
+                ("a-lead@example.test",),
+            ).fetchone()
+            enrollment = c.execute(
+                "SELECT status FROM outreach_enrollments WHERE id='enroll-unsub'"
+            ).fetchone()
+        self.assertIsNotNone(suppression)
+        self.assertEqual(enrollment["status"], "unsubscribed")
+
+
+        with patch.dict("os.environ", {}, clear=False):
+            import os
+            os.environ.pop("INSTANTLY_WEBHOOK_SECRET", None)
+            response = self.client.post(
+                "/api/webhooks/instantly",
+                json={"event_id": "unauthenticated-event", "event_type": "reply",
+                      "campaign_id": "remote-a", "email": "a-lead@example.test"},
+            )
+        self.assertEqual(response.status_code, 401)
+
+    def test_suppressed_contact_is_never_sent_to_provider(self):
+        with module.db() as c:
+            c.execute("INSERT OR IGNORE INTO suppression(email,created) VALUES(?,?)",
+                      ("a-lead@example.test", module.now()))
+
+        provider = MagicMock()
+        with patch("web.outreach.provider_for", return_value=provider):
+            response = self.client.post(
+                "/api/outreach/campaigns/campaign-a/leads",
+                json={"lead_ids": ["lead-a"]},
+                headers={"X-CSRF-Token": "test-csrf"},
+            )
+
+        self.assertEqual(response.status_code, 400, response.get_data(as_text=True))
+        provider.add_leads.assert_not_called()
+        with module.db() as c:
+            count = c.execute(
+                "SELECT count(*) FROM outreach_enrollments WHERE campaign_id='campaign-a' AND lead_id='lead-a'"
+            ).fetchone()[0]
+        self.assertEqual(count, 0)
+
+    def test_provider_transport_errors_do_not_echo_api_keys(self):
+        import requests
+        from web.outreach import ProviderError, SmartleadProvider
+
+        secret = "smartlead-secret-value"
+        with patch("web.outreach.requests.request",
+                   side_effect=requests.ConnectionError(f"request failed with api_key={secret}")):
+            with self.assertRaises(ProviderError) as caught:
+                SmartleadProvider(secret)._request("GET", "/campaigns")
+
+        self.assertNotIn(secret, str(caught.exception))
+        self.assertIn("ConnectionError", str(caught.exception))
+
+
+if __name__ == "__main__":
+    unittest.main()
+
         with patch.dict("os.environ", {}, clear=False):
             import os
             os.environ.pop("INSTANTLY_WEBHOOK_SECRET", None)
