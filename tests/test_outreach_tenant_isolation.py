@@ -35,7 +35,7 @@ class OutreachTenantIsolationTests(unittest.TestCase):
         with self.client.session_transaction() as s:
             s.clear()
             s["client_id"] = "client-a"
-            s["role"] = "owner"
+            s["role"] = "client"
             s["tier"] = "pro"
             s["csrf"] = "test-csrf"
 
