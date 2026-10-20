@@ -25,7 +25,7 @@ class OutreachProvider:
         else: params={**(params or {}),"api_key":self.api_key}
         try:r=requests.request(method,url,json=json_body,params=params,headers=headers,timeout=20)
         except requests.RequestException as exc:raise ProviderError(f"{self.name.title()} request failed ({type(exc).__name__}).") from exc
-        if r.status_code>=400:raise ProviderError(f"{self.name.title()} returned HTTP {r.status_code}: {r.text[:600]}")
+        if r.status_code>=400:raise ProviderError(f"{self.name.title()} returned HTTP {r.status_code}.")
         if not r.content:return {}
         try:return r.json()
         except ValueError:return {"raw":r.text[:2000]}
