@@ -104,15 +104,29 @@ def register_outreach(app,db,now,log):
             else:
                 # Owner workspace retains access to its global/legacy lead directory.
                 rows=c.execute(f"SELECT id,name,email,phone,website,city FROM leads WHERE id IN ({ph})",tuple(str(x) for x in lead_ids)).fetchall()
+        # Suppression is global and must be checked before any provider receives
+        # contact data. Normalize addresses identically to webhook ingestion.
+        with db() as c:
+            suppressed = {
+                str(r["email"]).strip().lower()
+                for r in c.execute("SELECT email FROM suppression").fetchall()
+                if r["email"]
+            }
         leads=[]
+        eligible_rows=[]
         for row in rows:
-            if not row["email"]:continue
-            first,_,last=row["name"].partition(" ");leads.append({"email":row["email"],"first_name":first,"last_name":last,"company_name":row["name"],"phone":row["phone"],"website":row["website"],"location":row["city"]})
-        if not leads:return jsonify(error="Selected leads have no usable email addresses."),400
+            email=str(row["email"] or "").strip().lower()
+            if not email or email in suppressed:
+                continue
+            first,_,last=row["name"].partition(" ")
+            leads.append({"email":email,"first_name":first,"last_name":last,"company_name":row["name"],"phone":row["phone"],"website":row["website"],"location":row["city"]})
+            eligible_rows.append(row)
+        if not leads:
+            return jsonify(error="No selected leads have usable, non-suppressed email addresses."),400
         try:provider_for(campaign["provider"]).add_leads(campaign["provider_campaign_id"],leads)
         except ProviderError as exc:return jsonify(error=str(exc)),502
         with db() as c:
-            for row in rows:c.execute("INSERT OR IGNORE INTO outreach_enrollments(id,campaign_id,lead_id,status,created,updated) VALUES(?,?,?,?,?,?)",(uuid.uuid4().hex,cid,row["id"],"queued",now(),now()))
+            for row in eligible_rows:c.execute("INSERT OR IGNORE INTO outreach_enrollments(id,campaign_id,lead_id,status,created,updated) VALUES(?,?,?,?,?,?)",(uuid.uuid4().hex,cid,row["id"],"queued",now(),now()))
             c.execute("UPDATE outreach_campaigns SET updated=? WHERE id=?",(now(),cid))
         return jsonify(added=len(leads),skipped=len(rows)-len(leads))
     def change_status(cid,action,local_status):
