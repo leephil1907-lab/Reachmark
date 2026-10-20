@@ -139,6 +139,7 @@ class OutreachTenantIsolationTests(unittest.TestCase):
         self.assertEqual(enrollment["status"], "unsubscribed")
 
 
+    def test_webhook_rejects_requests_when_secret_is_not_configured(self):
         with patch.dict("os.environ", {}, clear=False):
             import os
             os.environ.pop("INSTANTLY_WEBHOOK_SECRET", None)
@@ -183,53 +184,19 @@ class OutreachTenantIsolationTests(unittest.TestCase):
         self.assertNotIn(secret, str(caught.exception))
         self.assertIn("ConnectionError", str(caught.exception))
 
-
-if __name__ == "__main__":
-    unittest.main()
-
-        with patch.dict("os.environ", {}, clear=False):
-            import os
-            os.environ.pop("INSTANTLY_WEBHOOK_SECRET", None)
-            response = self.client.post(
-                "/api/webhooks/instantly",
-                json={"event_id": "unauthenticated-event", "event_type": "reply",
-                      "campaign_id": "remote-a", "email": "a-lead@example.test"},
-            )
-        self.assertEqual(response.status_code, 401)
-
-    def test_suppressed_contact_is_never_sent_to_provider(self):
-        with module.db() as c:
-            c.execute("INSERT OR IGNORE INTO suppression(email,created) VALUES(?,?)",
-                      ("a-lead@example.test", module.now()))
-
-        provider = MagicMock()
-        with patch("web.outreach.provider_for", return_value=provider):
-            response = self.client.post(
-                "/api/outreach/campaigns/campaign-a/leads",
-                json={"lead_ids": ["lead-a"]},
-                headers={"X-CSRF-Token": "test-csrf"},
-            )
-
-        self.assertEqual(response.status_code, 400, response.get_data(as_text=True))
-        provider.add_leads.assert_not_called()
-        with module.db() as c:
-            count = c.execute(
-                "SELECT count(*) FROM outreach_enrollments WHERE campaign_id='campaign-a' AND lead_id='lead-a'"
-            ).fetchone()[0]
-        self.assertEqual(count, 0)
-
-    def test_provider_transport_errors_do_not_echo_api_keys(self):
-        import requests
+    def test_provider_http_errors_do_not_echo_response_body(self):
+        from types import SimpleNamespace
         from web.outreach import ProviderError, SmartleadProvider
 
         secret = "smartlead-secret-value"
-        with patch("web.outreach.requests.request",
-                   side_effect=requests.ConnectionError(f"request failed with api_key={secret}")):
+        fake_response = SimpleNamespace(status_code=403, content=b"api_key=" + secret.encode(),
+                                        text="api_key=" + secret)
+        with patch("web.outreach.requests.request", return_value=fake_response):
             with self.assertRaises(ProviderError) as caught:
                 SmartleadProvider(secret)._request("GET", "/campaigns")
 
         self.assertNotIn(secret, str(caught.exception))
-        self.assertIn("ConnectionError", str(caught.exception))
+        self.assertIn("HTTP 403", str(caught.exception))
 
 
 if __name__ == "__main__":
