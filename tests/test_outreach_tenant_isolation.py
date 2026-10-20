@@ -11,9 +11,9 @@ class OutreachTenantIsolationTests(unittest.TestCase):
         with module.db() as c:
             for cid, email in (("client-a", "a@example.test"), ("client-b", "b@example.test")):
                 c.execute(
-                    "INSERT OR REPLACE INTO users(id,email,password_hash,name,role,is_active,created,updated) "
-                    "VALUES(?,?,?,?,?,?,?,?)",
-                    (cid, email, "x", cid, "client", 1, module.now(), module.now()),
+                    "INSERT OR REPLACE INTO users(id,email,password_hash,name,role,is_active,created,updated,tier,tier_expires) "
+                    "VALUES(?,?,?,?,?,?,?,?,?,?)",
+                    (cid, email, "x", cid, "client", 1, module.now(), module.now(), "pro", "9999-12-31T23:59:59+00:00"),
                 )
             for lid, owner, email in (
                 ("lead-a", "client-a", "a-lead@example.test"),
