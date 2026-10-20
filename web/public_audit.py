@@ -37,7 +37,11 @@ def _client_ip():
     proxies in front of this app. With no trusted proxies configured, the header
     is ignored so clients cannot spoof their rate-limit identity.
     """
-    remote = (request.remote_addr or '').strip()
+    # ProxyFix rewrites REMOTE_ADDR before Flask sees the request. Recover the
+    # original direct peer when available so trust is checked against the proxy,
+    # not against the client address ProxyFix derived from X-Forwarded-For.
+    original = request.environ.get('werkzeug.proxy_fix.orig') or {}
+    remote = (original.get('REMOTE_ADDR') or request.remote_addr or '').strip()
     trusted = []
     for value in os.getenv('TRUSTED_PROXY_CIDRS', '').split(','):
         value = value.strip()
