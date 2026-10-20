@@ -95,6 +95,27 @@ class OutreachTenantIsolationTests(unittest.TestCase):
         self.assertEqual(enrolled, {"lead-a"})
 
 
+    def test_suppressed_contact_is_never_sent_to_provider(self):
+        with module.db() as c:
+            c.execute("INSERT OR IGNORE INTO suppression(email,created) VALUES(?,?)",
+                      ("a-lead@example.test", module.now()))
+
+        provider = MagicMock()
+        with patch("web.outreach.provider_for", return_value=provider):
+            response = self.client.post(
+                "/api/outreach/campaigns/campaign-a/leads",
+                json={"lead_ids": ["lead-a"]},
+                headers={"X-CSRF-Token": "test-csrf"},
+            )
+
+        self.assertEqual(response.status_code, 400, response.get_data(as_text=True))
+        provider.add_leads.assert_not_called()
+        with module.db() as c:
+            count = c.execute(
+                "SELECT count(*) FROM outreach_enrollments WHERE campaign_id='campaign-a' AND lead_id='lead-a'"
+            ).fetchone()[0]
+        self.assertEqual(count, 0)
+
     def test_provider_transport_errors_do_not_echo_api_keys(self):
         import requests
         from web.outreach import ProviderError, SmartleadProvider
