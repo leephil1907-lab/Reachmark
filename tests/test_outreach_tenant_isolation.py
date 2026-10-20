@@ -51,13 +51,13 @@ class OutreachTenantIsolationTests(unittest.TestCase):
                 ("enroll-a", "campaign-a", "lead-a", "queued", module.now(), module.now()),
             )
 
-        with patch.dict("os.environ", {"APP_ENV": "test"}):
+        with patch.dict("os.environ", {"APP_ENV": "test", "INSTANTLY_WEBHOOK_SECRET": "test-webhook-secret"}):
             response = self.client.post(
                 "/api/webhooks/instantly",
                 json={"event_id": "reply-event-1", "event_type": "reply",
                       "campaign_id": "remote-a", "email": "a-lead@example.test",
                       "text": "Could you send details?"},
-                headers={"X-CSRF-Token": "test-csrf"},
+                headers={"X-CSRF-Token": "test-csrf", "X-Reachmark-Webhook-Secret": "test-webhook-secret"},
             )
 
         self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
