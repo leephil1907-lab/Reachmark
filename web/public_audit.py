@@ -6,6 +6,7 @@ a score, a revenue figure, or a diagnosis beyond what was read from the page.
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 import os
 import re
 import uuid
@@ -30,7 +31,49 @@ def ensure_tables(db):
 
 
 def _client_ip():
-    return (request.headers.get('X-Forwarded-For') or request.remote_addr or '').split(',')[0].strip()
+    """Use forwarding headers only when the direct peer is an explicitly trusted proxy.
+
+    Configure TRUSTED_PROXY_CIDRS as comma-separated IPs/CIDRs for the reverse
+    proxies in front of this app. With no trusted proxies configured, the header
+    is ignored so clients cannot spoof their rate-limit identity.
+    """
+    # ProxyFix rewrites REMOTE_ADDR before Flask sees the request. Recover the
+    # original direct peer when available so trust is checked against the proxy,
+    # not against the client address ProxyFix derived from X-Forwarded-For.
+    original = request.environ.get('werkzeug.proxy_fix.orig') or {}
+    remote = (original.get('REMOTE_ADDR') or request.remote_addr or '').strip()
+    trusted = []
+    for value in os.getenv('TRUSTED_PROXY_CIDRS', '').split(','):
+        value = value.strip()
+        if not value:
+            continue
+        try:
+            trusted.append(ipaddress.ip_network(value, strict=False))
+        except ValueError:
+            continue
+
+    try:
+        peer = ipaddress.ip_address(remote)
+    except ValueError:
+        return remote
+
+    if not any(peer in network for network in trusted):
+        return remote
+
+    forwarded = request.headers.get('X-Forwarded-For', '')
+    chain = []
+    for value in forwarded.split(','):
+        value = value.strip()
+        try:
+            chain.append(ipaddress.ip_address(value))
+        except ValueError:
+            continue
+    # Walk from the trusted edge inward; the first non-trusted address is the
+    # client. Ignore malformed entries instead of treating them as identities.
+    for address in reversed(chain):
+        if not any(address in network for network in trusted):
+            return str(address)
+    return str(chain[0]) if chain else remote
 
 
 def _ip_hash():
