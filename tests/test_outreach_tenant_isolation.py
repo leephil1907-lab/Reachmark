@@ -1,0 +1,68 @@
+"""Regression coverage for cross-workspace outreach enrollment."""
+import unittest
+from unittest.mock import patch, MagicMock
+
+from tests.test_app import ProspectTests, module
+
+
+class OutreachTenantIsolationTests(unittest.TestCase):
+    def setUp(self):
+        ProspectTests.setUp(self)
+        with module.db() as c:
+            for cid, email in (("client-a", "a@example.test"), ("client-b", "b@example.test")):
+                c.execute(
+                    "INSERT OR REPLACE INTO users(id,email,password_hash,name,role,is_active,created,updated) "
+                    "VALUES(?,?,?,?,?,?,?,?)",
+                    (cid, email, "x", cid, "client", 1, module.now(), module.now()),
+                )
+            for lid, owner, email in (
+                ("lead-a", "client-a", "a-lead@example.test"),
+                ("lead-b", "client-b", "b-lead@example.test"),
+            ):
+                c.execute(
+                    "INSERT OR REPLACE INTO leads(id,source_key,name,email,stage,token,created,updated,owner_user_id) "
+                    "VALUES(?,?,?,?,?,?,?,?,?)",
+                    (lid, "source-" + lid, lid.title(), email, "New", "token-" + lid,
+                     module.now(), module.now(), owner),
+                )
+            c.execute(
+                "INSERT OR REPLACE INTO outreach_campaigns "
+                "(id,owner_user_id,name,provider,provider_campaign_id,status,stop_on_reply,stop_on_unsubscribe,created,updated) "
+                "VALUES(?,?,?,?,?,?,?,?,?,?)",
+                ("campaign-a", "client-a", "A campaign", "instantly", "remote-a", "draft", 1, 1,
+                 module.now(), module.now()),
+            )
+        with self.client.session_transaction() as s:
+            s.clear()
+            s["client_id"] = "client-a"
+            s["role"] = "client"
+            s["csrf"] = "test-csrf"
+
+    def tearDown(self):
+        ProspectTests.tearDown(self)
+
+    def test_client_cannot_enroll_another_clients_lead(self):
+        provider = MagicMock()
+        with patch("web.outreach.provider_for", return_value=provider):
+            response = self.client.post(
+                "/api/outreach/campaigns/campaign-a/leads",
+                json={"lead_ids": ["lead-a", "lead-b"]},
+                headers={"X-CSRF-Token": "test-csrf"},
+            )
+
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+        self.assertEqual(response.get_json()["added"], 1)
+        self.assertEqual(response.get_json()["skipped"], 0)
+        provider.add_leads.assert_called_once()
+        sent_leads = provider.add_leads.call_args.args[1]
+        self.assertEqual([lead["email"] for lead in sent_leads], ["a-lead@example.test"])
+
+        with module.db() as c:
+            enrolled = {r["lead_id"] for r in c.execute(
+                "SELECT lead_id FROM outreach_enrollments WHERE campaign_id='campaign-a'"
+            )}
+        self.assertEqual(enrolled, {"lead-a"})
+
+
+if __name__ == "__main__":
+    unittest.main()
