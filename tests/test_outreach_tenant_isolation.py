@@ -41,6 +41,36 @@ class OutreachTenantIsolationTests(unittest.TestCase):
     def tearDown(self):
         ProspectTests.tearDown(self)
 
+    def test_reply_webhook_updates_only_the_campaign_enrolled_lead(self):
+        with module.db() as c:
+            c.execute("UPDATE leads SET email=? WHERE id='lead-b'", ("a-lead@example.test",))
+            c.execute(
+                "INSERT INTO outreach_enrollments(id,campaign_id,lead_id,status,created,updated) "
+                "VALUES(?,?,?,?,?,?)",
+                ("enroll-a", "campaign-a", "lead-a", "queued", module.now(), module.now()),
+            )
+
+        with patch.dict("os.environ", {"APP_ENV": "test"}):
+            response = self.client.post(
+                "/api/webhooks/instantly",
+                json={"event_id": "reply-event-1", "event_type": "reply",
+                      "campaign_id": "remote-a", "email": "a-lead@example.test",
+                      "text": "Could you send details?"},
+                headers={"X-CSRF-Token": "test-csrf"},
+            )
+
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+        with module.db() as c:
+            stages = {r["id"]: r["stage"] for r in c.execute(
+                "SELECT id,stage FROM leads WHERE id IN ('lead-a','lead-b')"
+            )}
+            enrollment = c.execute(
+                "SELECT status FROM outreach_enrollments WHERE id='enroll-a'"
+            ).fetchone()
+        self.assertEqual(stages["lead-a"], "Replied")
+        self.assertEqual(stages["lead-b"], "New")
+        self.assertEqual(enrollment["status"], "replied")
+
     def test_client_cannot_enroll_another_clients_lead(self):
         provider = MagicMock()
         with patch("web.outreach.provider_for", return_value=provider):
