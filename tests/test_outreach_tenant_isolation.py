@@ -95,6 +95,17 @@ class OutreachTenantIsolationTests(unittest.TestCase):
         self.assertEqual(enrolled, {"lead-a"})
 
 
+    def test_webhook_rejects_requests_when_secret_is_not_configured(self):
+        with patch.dict("os.environ", {}, clear=False):
+            import os
+            os.environ.pop("INSTANTLY_WEBHOOK_SECRET", None)
+            response = self.client.post(
+                "/api/webhooks/instantly",
+                json={"event_id": "unauthenticated-event", "event_type": "reply",
+                      "campaign_id": "remote-a", "email": "a-lead@example.test"},
+            )
+        self.assertEqual(response.status_code, 401)
+
     def test_suppressed_contact_is_never_sent_to_provider(self):
         with module.db() as c:
             c.execute("INSERT OR IGNORE INTO suppression(email,created) VALUES(?,?)",
