@@ -105,19 +105,27 @@ def register_outreach(app,db,now,log):
             else:
                 # Owner workspace retains access to its global/legacy lead directory.
                 rows=c.execute(f"SELECT id,name,email,phone,website,city FROM leads WHERE id IN ({ph})",tuple(str(x) for x in lead_ids)).fetchall()
-        # Suppression is global and must be checked before any provider receives
-        # contact data. Normalize addresses identically to webhook ingestion.
+        # Suppression and existing enrollments must be checked before any
+        # provider receives contact data. The local unique enrollment is the
+        # idempotency boundary for repeated requests against the same campaign.
         with db() as c:
             suppressed = {
                 str(r["email"]).strip().lower()
                 for r in c.execute("SELECT email FROM suppression").fetchall()
                 if r["email"]
             }
+            existing_ids = {
+                str(r["lead_id"])
+                for r in c.execute(
+                    "SELECT lead_id FROM outreach_enrollments WHERE campaign_id=?",
+                    (cid,),
+                ).fetchall()
+            }
         leads=[]
         eligible_rows=[]
         for row in rows:
             email=str(row["email"] or "").strip().lower()
-            if not email or email in suppressed:
+            if not email or email in suppressed or str(row["id"]) in existing_ids:
                 continue
             first,_,last=row["name"].partition(" ")
             leads.append({"email":email,"first_name":first,"last_name":last,"company_name":row["name"],"phone":row["phone"],"website":row["website"],"location":row["city"]})
@@ -146,7 +154,15 @@ def register_outreach(app,db,now,log):
         body=request.get_json(silent=True) or {};raw_type=str(body.get("event_type") or body.get("eventType") or body.get("type") or body.get("event") or "").lower();mapping={"email_sent":"sent","sent":"sent","email_reply":"replied","reply":"replied","replied":"replied","email_bounce":"bounced","bounce":"bounced","bounced":"bounced","lead_unsubscribed":"unsubscribed","unsubscribe":"unsubscribed","unsubscribed":"unsubscribed","email_opened":"opened","opened":"opened","email_clicked":"clicked","clicked":"clicked"};event_type=mapping.get(raw_type,raw_type or "unknown");event_id=_event_id(provider,body);email=str(body.get("email") or body.get("lead_email") or "").strip().lower();campaign_id=str(body.get("campaign_id") or body.get("campaignId") or "");lead_id=str(body.get("lead_id") or body.get("leadId") or "")
         with db() as c:
             inserted=c.execute("INSERT OR IGNORE INTO outreach_events(id,provider,provider_event_id,event_type,provider_campaign_id,provider_lead_id,email,occurred_at,payload,created) VALUES(?,?,?,?,?,?,?,?,?,?)",(uuid.uuid4().hex,provider,event_id,event_type,campaign_id,lead_id,email,str(body.get("timestamp") or body.get("created_at") or now()),request.get_data(as_text=True),now())).rowcount
-            if inserted and email and event_type=="unsubscribed":c.execute("INSERT OR IGNORE INTO suppression(email,created) VALUES(?,?)",(email,now()))
+            if inserted and email and event_type=="unsubscribed":
+                c.execute("INSERT OR IGNORE INTO suppression(email,created) VALUES(?,?)",(email,now()))
+                # Reflect the opt-out across every local campaign enrollment.
+                # Suppression remains the authoritative send-prevention record.
+                c.execute(
+                    "UPDATE outreach_enrollments SET status='unsubscribed',updated=? "
+                    "WHERE lead_id IN (SELECT id FROM leads WHERE lower(trim(email))=?)",
+                    (now(), email),
+                )
             reply_lead_id=None
             if inserted and email and event_type=="replied" and campaign_id:
                 # Provider events must be tied to a locally known campaign and its
