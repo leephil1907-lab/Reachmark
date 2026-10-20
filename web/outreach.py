@@ -97,7 +97,13 @@ def register_outreach(app,db,now,log):
         body=request.get_json(silent=True) or {};lead_ids=body.get("lead_ids") or []
         if not isinstance(lead_ids,list) or not lead_ids:return jsonify(error="lead_ids must be a non-empty array."),400
         with db() as c:
-            ph=",".join("?" for _ in lead_ids);rows=c.execute(f"SELECT id,name,email,phone,website,city FROM leads WHERE id IN ({ph})",tuple(str(x) for x in lead_ids)).fetchall()
+            ph=",".join("?" for _ in lead_ids)
+            if owner_id():
+                # A client may enroll only leads belonging to their own workspace.
+                rows=c.execute(f"SELECT id,name,email,phone,website,city FROM leads WHERE owner_user_id=? AND id IN ({ph})",(owner_id(),*tuple(str(x) for x in lead_ids))).fetchall()
+            else:
+                # Owner workspace retains access to its global/legacy lead directory.
+                rows=c.execute(f"SELECT id,name,email,phone,website,city FROM leads WHERE id IN ({ph})",tuple(str(x) for x in lead_ids)).fetchall()
         leads=[]
         for row in rows:
             if not row["email"]:continue
