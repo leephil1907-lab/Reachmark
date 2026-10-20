@@ -69,7 +69,7 @@ def robots_allowed(base_url, path='/', timeout=6):
     try:
         parsed = urllib.parse.urlparse(base_url)
         robots = f'{parsed.scheme}://{parsed.netloc}/robots.txt'
-        response = requests.get(robots, headers={'User-Agent': UA}, timeout=timeout)
+        response = _safe_public_get(robots, headers={'User-Agent': UA}, timeout=timeout)
         if response.status_code != 200 or 'text' not in response.headers.get('Content-Type', 'text'):
             return True, 'no robots.txt served'
         rules, applies = [], False
@@ -114,6 +114,33 @@ def _public_host(url):
     return True, 'public host verified'
 
 
+def _safe_public_get(url, *, headers=None, timeout=9, stream=False, max_redirects=4):
+    """GET a public URL without following an unchecked redirect to a private host."""
+    current = url
+    for _ in range(max_redirects + 1):
+        allowed, reason = _public_host(current)
+        if not allowed:
+            raise requests.RequestException(f"public URL policy rejected destination: {reason}")
+        response = requests.get(
+            current, headers=headers or {}, timeout=timeout,
+            allow_redirects=False, stream=stream,
+        )
+        if response.status_code in (301, 302, 303, 307, 308):
+            location = (response.headers.get("Location") or "").strip()
+            response.close()
+            if not location:
+                raise requests.RequestException("redirect without a location")
+            current = urllib.parse.urljoin(current, location)
+            continue
+        # Defensive check of the final response URL as well as the requested hop.
+        allowed, reason = _public_host(str(response.url) or current)
+        if not allowed:
+            response.close()
+            raise requests.RequestException(f"public URL policy rejected final URL: {reason}")
+        return response
+    raise requests.RequestException("too many redirects")
+
+
 def _strip_html(html):
     text = re.sub(r'(?is)<(script|style|noscript|svg)[^>]*>.*?</\1>', ' ', html)
     text = re.sub(r'(?s)<[^>]+>', ' ', text)
@@ -156,8 +183,8 @@ def read_public_pages(url, max_pages=MAX_PAGES, timeout=9):
     for target in targets[:max_pages]:
         started = time.monotonic()
         try:
-            response = requests.get(target, headers={'User-Agent': UA, 'Accept': 'text/html'},
-                                    timeout=timeout, allow_redirects=True, stream=True)
+            response = _safe_public_get(target, headers={'User-Agent': UA, 'Accept': 'text/html'},
+                                            timeout=timeout, stream=True)
         except requests.RequestException as exc:
             finding['pages'].append({'url': target, 'status': 'unreachable', 'detail': type(exc).__name__})
             continue
