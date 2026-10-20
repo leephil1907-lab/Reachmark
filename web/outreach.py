@@ -60,7 +60,8 @@ def _provider_campaign_id(payload):
     return None
 def _verify_webhook(provider):
     expected=os.getenv(f"{provider.upper()}_WEBHOOK_SECRET","").strip()
-    if not expected:return os.getenv("APP_ENV")!="production"
+    # Webhooks mutate CRM state; missing secrets must fail closed in every environment.
+    if not expected:return False
     supplied=request.headers.get("X-Reachmark-Webhook-Secret") or request.headers.get("X-Webhook-Secret") or ""
     return hmac.compare_digest(supplied,expected)
 def _event_id(provider,body):
