@@ -105,31 +105,63 @@ def register_outreach(app,db,now,log):
             else:
                 # Owner workspace retains access to its global/legacy lead directory.
                 rows=c.execute(f"SELECT id,name,email,phone,website,city FROM leads WHERE id IN ({ph})",tuple(str(x) for x in lead_ids)).fetchall()
-        # Suppression and existing enrollments must be checked before any
-        # provider receives contact data. The local unique enrollment is the
-        # idempotency boundary for repeated requests against the same campaign.
+        # Reserve each enrollment in a short write transaction BEFORE calling the
+        # provider. The UNIQUE(campaign_id, lead_id) constraint is the cross-request
+        # idempotency boundary: concurrent requests can claim a lead only once.
+        # Reservations are deliberately retained after ambiguous provider failures;
+        # retrying blindly could send the same contact twice. Such rows need
+        # provider reconciliation before they can be retried.
+        leads = []
+        eligible_rows = []
         with db() as c:
+            c.execute("BEGIN IMMEDIATE")
             suppressed = {
                 str(r["email"]).strip().lower()
                 for r in c.execute("SELECT email FROM suppression").fetchall()
                 if r["email"]
             }
-            existing_ids = {
-                str(r["lead_id"])
-                for r in c.execute(
-                    "SELECT lead_id FROM outreach_enrollments WHERE campaign_id=?",
-                    (cid,),
-                ).fetchall()
-            }
-        leads=[]
-        eligible_rows=[]
-        for row in rows:
-            email=str(row["email"] or "").strip().lower()
-            if not email or email in suppressed or str(row["id"]) in existing_ids:
-                continue
-            first,_,last=row["name"].partition(" ")
-            leads.append({"email":email,"first_name":first,"last_name":last,"company_name":row["name"],"phone":row["phone"],"website":row["website"],"location":row["city"]})
-            eligible_rows.append(row)
+            for row in rows:
+                email = str(row["email"] or "").strip().lower()
+                if not email or email in suppressed:
+                    continue
+                cur = c.execute(
+                    "INSERT OR IGNORE INTO outreach_enrollments"
+                    "(id,campaign_id,lead_id,status,created,updated) VALUES(?,?,?,?,?,?)",
+                    (uuid.uuid4().hex, cid, row["id"], "sending", now(), now()),
+                )
+                if cur.rowcount != 1:
+                    continue
+                first, _, last = row["name"].partition(" ")
+                leads.append({
+                    "email": email, "first_name": first, "last_name": last,
+                    "company_name": row["name"], "phone": row["phone"],
+                    "website": row["website"], "location": row["city"],
+                })
+                eligible_rows.append(row)
+        if not leads:
+            return jsonify(error="No selected leads are eligible; they may be suppressed or already enrolled."),400
+        try:
+            provider_for(campaign["provider"]).add_leads(campaign["provider_campaign_id"], leads)
+        except ProviderError as exc:
+            # Do not delete reservations on provider errors: a timeout or transport
+            # failure may occur after the remote service accepted the request.
+            with db() as c:
+                for row in eligible_rows:
+                    c.execute(
+                        "UPDATE outreach_enrollments SET status='needs_reconciliation',updated=? "
+                        "WHERE campaign_id=? AND lead_id=? AND status='sending'",
+                        (now(), cid, row["id"]),
+                    )
+            return jsonify(error=str(exc), reconciliation_required=True),502
+        with db() as c:
+            for row in eligible_rows:
+                c.execute(
+                    "UPDATE outreach_enrollments SET status='queued',updated=? "
+                    "WHERE campaign_id=? AND lead_id=? AND status='sending'",
+                    (now(), cid, row["id"]),
+                )
+            c.execute("UPDATE outreach_campaigns SET updated=? WHERE id=?",(now(),cid))
+        return jsonify(added=len(leads),skipped=len(rows)-len(leads))
         if not leads:
             return jsonify(error="No selected leads have usable, non-suppressed email addresses."),400
         try:provider_for(campaign["provider"]).add_leads(campaign["provider_campaign_id"],leads)
