@@ -2,12 +2,13 @@ import unittest
 from unittest.mock import patch
 
 from web import public_audit
+from web.app import app
 
 
 class PublicAuditProxyTrustTests(unittest.TestCase):
     def test_untrusted_peer_cannot_spoof_forwarded_ip(self):
         with patch.dict("os.environ", {"TRUSTED_PROXY_CIDRS": "10.0.0.0/8"}):
-            with public_audit.request.app.test_request_context(
+            with app.test_request_context(
                 "/", environ_base={"REMOTE_ADDR": "203.0.113.9"},
                 headers={"X-Forwarded-For": "198.51.100.77"},
             ):
