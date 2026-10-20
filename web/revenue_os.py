@@ -913,11 +913,14 @@ def ingest_reply(db, lead, body, now, channel='email', source='manual'):
     }
 
 
-def on_outreach_reply(db, email, now, body=''):
+def on_outreach_reply(db, email, now, body='', lead_id=None):
     if not email:
         return None
     with db() as c:
-        row = c.execute('SELECT * FROM leads WHERE lower(email)=lower(?) LIMIT 1', (email,)).fetchone()
+        if lead_id:
+            row = c.execute('SELECT * FROM leads WHERE id=? AND lower(email)=lower(?)', (lead_id, email)).fetchone()
+        else:
+            row = c.execute('SELECT * FROM leads WHERE lower(email)=lower(?) LIMIT 1', (email,)).fetchone()
     if not row:
         return None
     lead = dict(row)

@@ -24,8 +24,8 @@ class OutreachProvider:
         if self.name=="instantly": headers["Authorization"]=f"Bearer {self.api_key}"
         else: params={**(params or {}),"api_key":self.api_key}
         try:r=requests.request(method,url,json=json_body,params=params,headers=headers,timeout=20)
-        except requests.RequestException as exc:raise ProviderError(f"{self.name.title()} request failed: {exc}") from exc
-        if r.status_code>=400:raise ProviderError(f"{self.name.title()} returned HTTP {r.status_code}: {r.text[:600]}")
+        except requests.RequestException as exc:raise ProviderError(f"{self.name.title()} request failed ({type(exc).__name__}).") from exc
+        if r.status_code>=400:raise ProviderError(f"{self.name.title()} returned HTTP {r.status_code}.")
         if not r.content:return {}
         try:return r.json()
         except ValueError:return {"raw":r.text[:2000]}
@@ -60,7 +60,8 @@ def _provider_campaign_id(payload):
     return None
 def _verify_webhook(provider):
     expected=os.getenv(f"{provider.upper()}_WEBHOOK_SECRET","").strip()
-    if not expected:return os.getenv("APP_ENV")!="production"
+    # Webhooks mutate CRM state; missing secrets must fail closed in every environment.
+    if not expected:return False
     supplied=request.headers.get("X-Reachmark-Webhook-Secret") or request.headers.get("X-Webhook-Secret") or ""
     return hmac.compare_digest(supplied,expected)
 def _event_id(provider,body):
@@ -97,16 +98,68 @@ def register_outreach(app,db,now,log):
         body=request.get_json(silent=True) or {};lead_ids=body.get("lead_ids") or []
         if not isinstance(lead_ids,list) or not lead_ids:return jsonify(error="lead_ids must be a non-empty array."),400
         with db() as c:
-            ph=",".join("?" for _ in lead_ids);rows=c.execute(f"SELECT id,name,email,phone,website,city FROM leads WHERE id IN ({ph})",tuple(str(x) for x in lead_ids)).fetchall()
-        leads=[]
-        for row in rows:
-            if not row["email"]:continue
-            first,_,last=row["name"].partition(" ");leads.append({"email":row["email"],"first_name":first,"last_name":last,"company_name":row["name"],"phone":row["phone"],"website":row["website"],"location":row["city"]})
-        if not leads:return jsonify(error="Selected leads have no usable email addresses."),400
-        try:provider_for(campaign["provider"]).add_leads(campaign["provider_campaign_id"],leads)
-        except ProviderError as exc:return jsonify(error=str(exc)),502
+            ph=",".join("?" for _ in lead_ids)
+            if owner_id():
+                # A client may enroll only leads belonging to their own workspace.
+                rows=c.execute(f"SELECT id,name,email,phone,website,city FROM leads WHERE owner_user_id=? AND id IN ({ph})",(owner_id(),*tuple(str(x) for x in lead_ids))).fetchall()
+            else:
+                # Owner workspace retains access to its global/legacy lead directory.
+                rows=c.execute(f"SELECT id,name,email,phone,website,city FROM leads WHERE id IN ({ph})",tuple(str(x) for x in lead_ids)).fetchall()
+        # Reserve each enrollment in a short write transaction BEFORE calling the
+        # provider. The UNIQUE(campaign_id, lead_id) constraint is the cross-request
+        # idempotency boundary: concurrent requests can claim a lead only once.
+        # Reservations are deliberately retained after ambiguous provider failures;
+        # retrying blindly could send the same contact twice. Such rows need
+        # provider reconciliation before they can be retried.
+        leads = []
+        eligible_rows = []
         with db() as c:
-            for row in rows:c.execute("INSERT OR IGNORE INTO outreach_enrollments(id,campaign_id,lead_id,status,created,updated) VALUES(?,?,?,?,?,?)",(uuid.uuid4().hex,cid,row["id"],"queued",now(),now()))
+            c.execute("BEGIN IMMEDIATE")
+            suppressed = {
+                str(r["email"]).strip().lower()
+                for r in c.execute("SELECT email FROM suppression").fetchall()
+                if r["email"]
+            }
+            for row in rows:
+                email = str(row["email"] or "").strip().lower()
+                if not email or email in suppressed:
+                    continue
+                cur = c.execute(
+                    "INSERT OR IGNORE INTO outreach_enrollments"
+                    "(id,campaign_id,lead_id,status,created,updated) VALUES(?,?,?,?,?,?)",
+                    (uuid.uuid4().hex, cid, row["id"], "sending", now(), now()),
+                )
+                if cur.rowcount != 1:
+                    continue
+                first, _, last = row["name"].partition(" ")
+                leads.append({
+                    "email": email, "first_name": first, "last_name": last,
+                    "company_name": row["name"], "phone": row["phone"],
+                    "website": row["website"], "location": row["city"],
+                })
+                eligible_rows.append(row)
+        if not leads:
+            return jsonify(error="No selected leads are eligible; they may be suppressed or already enrolled."),400
+        try:
+            provider_for(campaign["provider"]).add_leads(campaign["provider_campaign_id"], leads)
+        except ProviderError as exc:
+            # Do not delete reservations on provider errors: a timeout or transport
+            # failure may occur after the remote service accepted the request.
+            with db() as c:
+                for row in eligible_rows:
+                    c.execute(
+                        "UPDATE outreach_enrollments SET status='needs_reconciliation',updated=? "
+                        "WHERE campaign_id=? AND lead_id=? AND status='sending'",
+                        (now(), cid, row["id"]),
+                    )
+            return jsonify(error=str(exc), reconciliation_required=True),502
+        with db() as c:
+            for row in eligible_rows:
+                c.execute(
+                    "UPDATE outreach_enrollments SET status='queued',updated=? "
+                    "WHERE campaign_id=? AND lead_id=? AND status='sending'",
+                    (now(), cid, row["id"]),
+                )
             c.execute("UPDATE outreach_campaigns SET updated=? WHERE id=?",(now(),cid))
         return jsonify(added=len(leads),skipped=len(rows)-len(leads))
     def change_status(cid,action,local_status):
@@ -125,14 +178,35 @@ def register_outreach(app,db,now,log):
         body=request.get_json(silent=True) or {};raw_type=str(body.get("event_type") or body.get("eventType") or body.get("type") or body.get("event") or "").lower();mapping={"email_sent":"sent","sent":"sent","email_reply":"replied","reply":"replied","replied":"replied","email_bounce":"bounced","bounce":"bounced","bounced":"bounced","lead_unsubscribed":"unsubscribed","unsubscribe":"unsubscribed","unsubscribed":"unsubscribed","email_opened":"opened","opened":"opened","email_clicked":"clicked","clicked":"clicked"};event_type=mapping.get(raw_type,raw_type or "unknown");event_id=_event_id(provider,body);email=str(body.get("email") or body.get("lead_email") or "").strip().lower();campaign_id=str(body.get("campaign_id") or body.get("campaignId") or "");lead_id=str(body.get("lead_id") or body.get("leadId") or "")
         with db() as c:
             inserted=c.execute("INSERT OR IGNORE INTO outreach_events(id,provider,provider_event_id,event_type,provider_campaign_id,provider_lead_id,email,occurred_at,payload,created) VALUES(?,?,?,?,?,?,?,?,?,?)",(uuid.uuid4().hex,provider,event_id,event_type,campaign_id,lead_id,email,str(body.get("timestamp") or body.get("created_at") or now()),request.get_data(as_text=True),now())).rowcount
-            if inserted and email and event_type=="unsubscribed":c.execute("INSERT OR IGNORE INTO suppression(email,created) VALUES(?,?)",(email,now()))
-            if inserted and email and event_type=="replied":
-                c.execute("UPDATE leads SET stage='Replied',updated=? WHERE lower(email)=lower(?)",(now(),email));c.execute("UPDATE outreach_enrollments SET status='replied',updated=? WHERE lead_id IN (SELECT id FROM leads WHERE lower(email)=lower(?))",(now(),email))
-        if inserted and email and event_type=="replied":
+            if inserted and email and event_type=="unsubscribed":
+                c.execute("INSERT OR IGNORE INTO suppression(email,created) VALUES(?,?)",(email,now()))
+                # Reflect the opt-out across every local campaign enrollment.
+                # Suppression remains the authoritative send-prevention record.
+                c.execute(
+                    "UPDATE outreach_enrollments SET status='unsubscribed',updated=? "
+                    "WHERE lead_id IN (SELECT id FROM leads WHERE lower(trim(email))=?)",
+                    (now(), email),
+                )
+            reply_lead_id=None
+            if inserted and email and event_type=="replied" and campaign_id:
+                # Provider events must be tied to a locally known campaign and its
+                # enrollment records; email alone is not a tenant-safe identifier.
+                campaign=c.execute("SELECT id FROM outreach_campaigns WHERE provider=? AND provider_campaign_id=?",(provider,campaign_id)).fetchone()
+                if campaign:
+                    enrolled=c.execute(
+                        "SELECT l.id FROM outreach_enrollments e JOIN leads l ON l.id=e.lead_id "
+                        "WHERE e.campaign_id=? AND lower(l.email)=lower(?) ORDER BY e.created LIMIT 1",
+                        (campaign["id"],email),
+                    ).fetchone()
+                    if enrolled:
+                        reply_lead_id=enrolled["id"]
+                        c.execute("UPDATE leads SET stage='Replied',updated=? WHERE id=?",(now(),reply_lead_id))
+                        c.execute("UPDATE outreach_enrollments SET status='replied',updated=? WHERE campaign_id=? AND lead_id=?",(now(),campaign["id"],reply_lead_id))
+        if inserted and email and event_type=="replied" and reply_lead_id:
             try:
                 from web.revenue_os import on_outreach_reply
                 reply_body=str(body.get("text") or body.get("reply") or body.get("message") or body.get("body") or "")
-                on_outreach_reply(db, email, now, reply_body)
+                on_outreach_reply(db, email, now, reply_body, lead_id=reply_lead_id)
             except Exception:
                 pass
         return jsonify(ok=True,duplicate=not bool(inserted)),200

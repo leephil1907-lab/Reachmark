@@ -69,6 +69,7 @@ RULES = [
     (r'^/api/leads(/|$)', 'starter'),
     (r'^/api/(import|export|discover|jobs|map)(/|$)', 'starter'),
     (r'^/api/(outbox|mail-templates|crew|review-links)(/|$)', 'pro'),
+    (r'^/api/outreach(/|$)', 'pro'),
     (r'^/api/analytics', 'free'),
     (r'^/api/quality', 'starter'),  # raw directory rows: paying members only
     (r'^/api/auth/(me|logout|export|close|request-verification)', 'free'),
@@ -88,7 +89,8 @@ RULES = [
     (r'^/api/booking(/|$)', 'starter'),
     (r'^/api/book(/|$)', 'free'),
     (r'^/api/bookings(/|$)', 'starter'),
-    (r'^/api/webhooks(/|$)', 'pro'),
+    # Provider callbacks must continue processing replies and opt-outs even if a workspace plan expires.
+    (r'^/api/webhooks(/|$)', 'free'),
     (r'^/api/auth/oauth', 'free'),
 ]
 
