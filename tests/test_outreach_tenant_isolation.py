@@ -199,5 +199,36 @@ class OutreachTenantIsolationTests(unittest.TestCase):
         self.assertIn("HTTP 403", str(caught.exception))
 
 
+    def test_ambiguous_provider_failure_keeps_reservation_and_prevents_duplicate_retry(self):
+        from web.outreach import ProviderError
+
+        provider = MagicMock()
+        provider.add_leads.side_effect = ProviderError("Instantly request failed (Timeout).")
+        with patch("web.outreach.provider_for", return_value=provider):
+            first = self.client.post(
+                "/api/outreach/campaigns/campaign-a/leads",
+                json={"lead_ids": ["lead-a"]},
+                headers={"X-CSRF-Token": "test-csrf"},
+            )
+            self.assertEqual(first.status_code, 502, first.get_data(as_text=True))
+            self.assertTrue(first.get_json()["reconciliation_required"])
+
+            # A second request must not resend the same lead while the first
+            # provider result is ambiguous.
+            second = self.client.post(
+                "/api/outreach/campaigns/campaign-a/leads",
+                json={"lead_ids": ["lead-a"]},
+                headers={"X-CSRF-Token": "test-csrf"},
+            )
+
+        self.assertEqual(second.status_code, 400, second.get_data(as_text=True))
+        provider.add_leads.assert_called_once()
+        with module.db() as c:
+            row = c.execute(
+                "SELECT status FROM outreach_enrollments WHERE campaign_id='campaign-a' AND lead_id='lead-a'"
+            ).fetchone()
+        self.assertEqual(row["status"], "needs_reconciliation")
+
+
 if __name__ == "__main__":
     unittest.main()
