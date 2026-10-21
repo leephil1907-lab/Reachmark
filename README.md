@@ -36,6 +36,10 @@ Reachmark is a Flask app, so **GitHub Pages cannot host it**. The GitHub-native 
 
 That instance is development-only (no production secrets). Railway remains production, with Gmail SMTP and the `/data` volume.
 
+## Agency operations
+
+- [Standardized client onboarding SOP](docs/client-onboarding-sop.md) — contract/payment through intake, access verification, kickoff, baseline audit, technical setup, client approval, launch, and first-month review. Each stage has an evidence-based completion gate.
+
 ## Development
 
 Install dependencies, build the frontend, and run the test suite before making production changes.
