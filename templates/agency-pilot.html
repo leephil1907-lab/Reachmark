@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{{ seo.title }}</title>
+  <meta name="description" content="{{ seo.description }}">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="{{ seo.canonical }}">
+  <meta name="theme-color" content="#101510">
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/fonts.css">
+  <link rel="stylesheet" href="/static/theme.css?v=2">
+  <style>
+    :root{color-scheme:dark;--ap-bg:#101510;--ap-panel:#181f18;--ap-line:rgba(245,246,240,.12);--ap-text:#f5f6f0;--ap-muted:#b5beb0;--ap-lime:#d6f269;--ap-sage:#8a9a78}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 78% 0%,rgba(138,154,120,.15),transparent 38%),var(--ap-bg);color:var(--ap-text);font-family:Inter,Manrope,system-ui,-apple-system,sans-serif;line-height:1.6}
+    a{color:inherit}.wrap{width:min(1120px,calc(100% - 40px));margin:auto}.nav{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ap-line)}.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-weight:750;letter-spacing:-.04em}.brand img{width:32px;height:32px}.nav-link{font-size:14px;color:var(--ap-muted);text-decoration:none}.nav-link:hover{color:var(--ap-lime)}
+    .hero{padding:88px 0 64px;display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center}.eyebrow{display:inline-flex;align-items:center;gap:9px;text-transform:uppercase;letter-spacing:.15em;font-size:11px;font-weight:800;color:var(--ap-lime)}.dot{width:7px;height:7px;border-radius:50%;background:var(--ap-lime);box-shadow:0 0 16px rgba(214,242,105,.55)}h1{font-size:clamp(42px,6vw,72px);line-height:1.02;letter-spacing:-.065em;margin:20px 0 22px;max-width:700px}h1 em{font-style:normal;color:var(--ap-lime)}.lead{font-size:18px;color:var(--ap-muted);max-width:610px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0 18px}.btn{display:inline-flex;justify-content:center;align-items:center;min-height:48px;padding:0 18px;border-radius:10px;font-weight:750;text-decoration:none;border:1px solid var(--ap-line);transition:transform .18s,border-color .18s}.btn:hover{transform:translateY(-2px);border-color:var(--ap-lime)}.btn-primary{background:var(--ap-lime);color:#151a11;border-color:var(--ap-lime)}.micro{font-size:12px;color:var(--ap-muted)}
+    .proof{background:linear-gradient(145deg,rgba(214,242,105,.09),rgba(24,31,24,.9));border:1px solid rgba(214,242,105,.2);border-radius:20px;padding:26px;box-shadow:0 24px 80px rgba(0,0,0,.22)}.proof-top{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:1px solid var(--ap-line);font-size:12px;color:var(--ap-muted)}.proof-top strong{color:var(--ap-text)}.proof-row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:start;padding:18px 0;border-bottom:1px solid var(--ap-line)}.proof-row:last-child{border:0;padding-bottom:0}.num{display:grid;place-items:center;width:30px;height:30px;border:1px solid rgba(214,242,105,.35);border-radius:9px;color:var(--ap-lime);font-size:12px;font-weight:800}.proof-row b{display:block;font-size:14px}.proof-row p{margin:4px 0 0;color:var(--ap-muted);font-size:12px}.tag{font-size:10px;border:1px solid var(--ap-line);border-radius:999px;padding:4px 8px;color:var(--ap-lime);white-space:nowrap}
+    .section{padding:62px 0}.section-head{max-width:700px;margin-bottom:26px}.section h2{font-size:clamp(28px,4vw,42px);line-height:1.1;letter-spacing:-.045em;margin:12px 0}.muted{color:var(--ap-muted)}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{border:1px solid var(--ap-line);background:rgba(24,31,24,.72);border-radius:16px;padding:22px}.card .step{color:var(--ap-lime);font-size:11px;letter-spacing:.12em;font-weight:800}.card h3{margin:10px 0 8px;font-size:18px}.card p{margin:0;color:var(--ap-muted);font-size:14px}
+    .offer{display:grid;grid-template-columns:1fr .9fr;gap:28px;align-items:start}.offer-panel{border:1px solid rgba(214,242,105,.3);background:linear-gradient(145deg,rgba(214,242,105,.08),rgba(24,31,24,.8));border-radius:18px;padding:28px}.price{font-size:48px;letter-spacing:-.06em;font-weight:800;line-height:1.1}.price small{font-size:13px;letter-spacing:0;color:var(--ap-muted);font-weight:500}.included{list-style:none;padding:0;margin:20px 0}.included li{padding:9px 0;border-bottom:1px solid var(--ap-line);font-size:14px}.included li:before{content:"✓";color:var(--ap-lime);font-weight:900;margin-right:10px}.fine{font-size:12px;color:var(--ap-muted)}
+    .form-panel{border:1px solid var(--ap-line);background:var(--ap-panel);border-radius:18px;padding:26px}.form-panel h3{font-size:23px;margin:0 0 6px}.form-panel>p{color:var(--ap-muted);font-size:13px;margin:0 0 18px}.field{display:grid;gap:6px;margin:13px 0}.field label{font-size:12px;font-weight:700;color:#e5eadf}.field input,.field select,.field textarea{width:100%;border:1px solid rgba(245,246,240,.17);border-radius:9px;background:#101510;color:var(--ap-text);font:inherit;font-size:14px;padding:12px;min-height:45px}.field textarea{min-height:90px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--ap-lime);outline-offset:1px}.consent{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--ap-muted);margin:16px 0}.consent input{margin-top:4px;accent-color:var(--ap-lime)}.submit{width:100%;cursor:pointer;font:inherit;font-weight:800}.status{font-size:13px;margin-top:12px;min-height:22px;color:var(--ap-lime)}.honeypot{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}.footer{border-top:1px solid var(--ap-line);padding:26px 0 36px;color:var(--ap-muted);font-size:12px}.footer-inner{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    @media(max-width:820px){.hero,.offer{grid-template-columns:1fr;gap:28px}.hero{padding:58px 0 38px}.grid{grid-template-columns:1fr}.section{padding:44px 0}.proof{padding:20px}.nav{height:64px}}@media(max-width:480px){.wrap{width:min(100% - 28px,1120px)}h1{font-size:43px}.lead{font-size:16px}.tag{display:none}.form-panel,.offer-panel{padding:20px}.actions .btn{width:100%}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}.btn:hover{transform:none}}
+  </style>
+</head>
+<body>
+  <header class="wrap nav">
+    <a class="brand" href="/" aria-label="Reachmark Digital home"><img src="/static/icon.svg" alt=""> <span>Reachmark <span style="color:var(--ap-lime)">Digital</span></span></a>
+    <a class="nav-link" href="/sample-report">View a sample report ↗</a>
+  </header>
+  <main>
+    <section class="wrap hero">
+      <div>
+        <span class="eyebrow"><span class="dot"></span> For independent web designers & small agencies</span>
+        <h1>Find your next web project <em>with proof.</em></h1>
+        <p class="lead">Reachmark helps you find local businesses with verifiable website problems, turn the findings into client-ready opportunity reports, and manage approval-first outreach in one focused workflow.</p>
+        <div class="actions"><a class="btn btn-primary" href="#pilot">Apply for the agency pilot <span aria-hidden="true">&nbsp;→</span></a><a class="btn" href="/sample-report">See the report format</a></div>
+        <p class="micro">No guaranteed-lead claims. No automatic sending. You review every finding and approve every message.</p>
+      </div>
+      <aside class="proof" aria-label="How the workflow works">
+        <div class="proof-top"><strong>Opportunity workflow</strong><span>Evidence first · Human approved</span></div>
+        <div class="proof-row"><span class="num">01</span><div><b>Find a relevant business</b><p>Start with a niche, location, and service fit.</p></div><span class="tag">Discover</span></div>
+        <div class="proof-row"><span class="num">02</span><div><b>Verify the website issue</b><p>Keep the observation, source, and check date visible.</p></div><span class="tag">Verify</span></div>
+        <div class="proof-row"><span class="num">03</span><div><b>Present the opportunity</b><p>Turn evidence into a useful, branded report.</p></div><span class="tag">Report</span></div>
+        <div class="proof-row"><span class="num">04</span><div><b>Manage the conversation</b><p>Track approvals, replies, proposals, and outcomes.</p></div><span class="tag">Convert</span></div>
+      </aside>
+    </section>
+    <section class="wrap section">
+      <div class="section-head"><span class="eyebrow">The problem</span><h2>Good delivery skills don't automatically create a steady pipeline.</h2><p class="muted">Agency owners often spend too much time searching for prospects, preparing one-off audits, and remembering follow-ups. Reachmark makes the work more structured without pretending that a website gap guarantees a sale.</p></div>
+      <div class="grid">
+        <article class="card"><span class="step">01 / DISCOVER</span><h3>Stop starting from a blank page</h3><p>Organize candidate businesses by market and service fit before spending time on a pitch.</p></article>
+        <article class="card"><span class="step">02 / PROVE</span><h3>Show the actual observation</h3><p>Use readable evidence and timestamps. Label unknowns instead of turning guesses into claims.</p></article>
+        <article class="card"><span class="step">03 / FOLLOW THROUGH</span><h3>Track what happened next</h3><p>Move from contacted to replied, meeting, proposal, won, or lost—with human review at each important step.</p></article>
+      </div>
+    </section>
+    <section class="wrap section" id="pilot">
+      <div class="section-head"><span class="eyebrow">Founding agency pilot</span><h2>A small, measurable first engagement.</h2><p class="muted">We are validating the workflow with a limited number of agencies. The pilot is designed to learn whether the reports are useful, whether outreach gets used, and what earns a renewal.</p></div>
+      <div class="offer">
+        <div class="offer-panel">
+          <div class="price">$299 <small>one-time · 14 days</small></div>
+          <p class="muted">One niche. One target market. A bounded set of reviewed opportunities.</p>
+          <ul class="included">
+            <li>One niche and geographic market selected with you</li>
+            <li>Up to 25 candidate businesses reviewed</li>
+            <li>Up to 5 evidence-backed opportunity reports</li>
+            <li>Outreach drafts and a simple follow-up pipeline</li>
+            <li>One 30-minute handoff and feedback session</li>
+          </ul>
+          <p class="fine">This is a proposed founding-pilot offer. Availability and scope are confirmed before payment. Prospect fit, replies, projects, and revenue are not guaranteed. Third-party data, software, and advertising costs are excluded.</p>
+        </div>
+        <form class="form-panel" id="pilot-form">
+          <h3>Request a pilot</h3>
+          <p>Tell us who you serve and where you want to find opportunities. We will review the fit before confirming next steps.</p>
+          <div class="field"><label for="pilot-name">Your name</label><input id="pilot-name" name="name" autocomplete="name" required minlength="2" maxlength="120"></div>
+          <div class="field"><label for="pilot-email">Work email</label><input id="pilot-email" name="email" type="email" autocomplete="email" required maxlength="250"></div>
+          <div class="field"><label for="pilot-agency">Agency or studio</label><input id="pilot-agency" name="business" autocomplete="organization" required maxlength="200"></div>
+          <div class="field"><label for="pilot-niche">Your main niche</label><select id="pilot-niche" name="niche" required><option value="">Choose a niche</option><option>Home services</option><option>Professional services</option><option>Healthcare practices</option><option>Real estate</option><option>Retail and hospitality</option><option>Mixed local businesses</option><option>Other</option></select></div>
+          <div class="field"><label for="pilot-market">Target market</label><input id="pilot-market" name="market" placeholder="City, region, or country" required maxlength="150"></div>
+          <div class="field"><label for="pilot-challenge">What is hardest about finding clients?</label><textarea id="pilot-challenge" name="challenge" required minlength="10" maxlength="2000" placeholder="For example: finding qualified businesses, proving the need, or following up consistently."></textarea></div>
+          <div class="honeypot" aria-hidden="true"><label for="pilot-company-url">Company website</label><input id="pilot-company-url" name="company_url" tabindex="-1" autocomplete="off"></div>
+          <label class="consent"><input id="pilot-consent" type="checkbox" required><span>I agree that Reachmark Digital may use these details to respond to this pilot request. This is not consent to unrelated marketing.</span></label>
+          <button class="btn btn-primary submit" id="pilot-submit" type="submit">Send pilot request →</button>
+          <div class="status" id="pilot-status" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+    </section>
+  </main>
+  <footer class="footer"><div class="wrap footer-inner"><span>© Reachmark Digital · Evidence first. Human approved.</span><span><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/">Main website</a></span></div></footer>
+  <script>
+    (function(){
+      const form=document.getElementById('pilot-form'),status=document.getElementById('pilot-status'),button=document.getElementById('pilot-submit');
+      form.addEventListener('submit',async function(event){
+        event.preventDefault();if(!form.reportValidity())return;
+        const value=id=>document.getElementById(id).value.trim();
+        const data={name:value('pilot-name'),email:value('pilot-email'),business:value('pilot-agency'),kind:'Project question',budget:'$299 founding agency pilot',timeline:'Within 14 days',message:'Agency pilot request. Niche: '+value('pilot-niche')+'. Target market: '+value('pilot-market')+'. Main challenge: '+value('pilot-challenge'),consent:document.getElementById('pilot-consent').checked,company_url:value('pilot-company-url'),request_id:Array.from(crypto.getRandomValues(new Uint8Array(16))).map(x=>x.toString(16).padStart(2,'0')).join('')};
+        button.disabled=true;button.textContent='Sending request…';status.textContent='';
+        try{
+          const response=await fetch('/api/enquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+          const result=await response.json();
+          if(!response.ok)throw new Error(result.error||'The request could not be submitted. Please try again.');
+          status.textContent='Request received. Reference: '+result.reference+'. We will review the fit before confirming the pilot.';
+          form.reset();
+        }catch(error){status.textContent=error.message||'The request could not be submitted. Please try again.';}
+        finally{button.disabled=false;button.textContent='Send pilot request →';}
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -802,6 +802,8 @@ from web.outreach import register_outreach
 register_outreach(app, db, now, log)
 from web.google_business import register_google_business
 register_google_business(app, db, now, log)
+from web.agency_pilot import register_agency_pilot
+register_agency_pilot(app, settings)
 
 
 # Client reviews — leave a review for good job done
