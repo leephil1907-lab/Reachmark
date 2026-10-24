@@ -295,9 +295,9 @@
   <!-- Workspace software subscription plans -->
   <section class="x-plans" id="plans-preview" aria-label="{{ t('home.price_h') }}">
     <div class="x-plans-head">
-      <p class="ed-k"><span class="ed-n">08 /</span> {{ t('nav.plans') }}</p>
+      <p class="ed-k"><span class="ed-n">08 /</span> REACHMARK WORKSPACE SOFTWARE PLANS</p>
       <h2>Software plans for agencies and independent professionals</h2>
-      <p>{{ t('home.price_p') }}</p>
+      <p>These subscriptions are for Reachmark Workspace software—not done-for-you agency services. For website fixes, local visibility, or ongoing growth support, <a href="/services">explore Reachmark Digital services</a>.</p>
     </div>
     <div class="x-plans-grid">
       <article data-motion="fade-up">{{ icon('sparkles', 20, 'x-plan-ic') }}<small>Free</small><b>$0</b><p>{{ t('home.price_free') }}</p><a href="/signup">{{ t('home.price_free_cta') }}</a></article>
@@ -305,6 +305,20 @@
       <article class="on" data-motion="fade-up" data-delay="180">{{ icon('send', 20, 'x-plan-ic') }}<small>Pro</small><b>$59</b><p>Workspace tools for saved audits, reports, and outreach workflows.</p><a href="/pricing">{{ t('home.price_pro_cta') }}</a></article>
     </div>
     <p class="x-plans-note"><a href="/pricing">{{ t('home.price_all') }}</a></p>
+  </section>
+
+  <section class="gp-section" style="padding:64px 24px;background:#fff;color:#101510" aria-labelledby="home-faq-title">
+    <div style="max-width:900px;margin:0 auto">
+      <p class="rm-preview-eyebrow" style="color:#71824e;font-size:12px;font-weight:900;letter-spacing:1.5px">COMMON QUESTIONS</p>
+      <h2 id="home-faq-title" style="font-size:clamp(30px,4vw,42px);letter-spacing:-.04em;margin:12px 0 24px">What to know before you start.</h2>
+      <div style="display:grid;gap:10px">
+        <details style="border:1px solid #e1e5d9;border-radius:12px;padding:18px 20px"><summary style="font-weight:800;cursor:pointer">What does the free website audit check?</summary><p style="color:#697064;line-height:1.7">It checks accessible public website signals such as contact paths, mobile experience, SEO basics, trust elements, and technical responses. Results depend on what the website makes available to the checker.</p></details>
+        <details style="border:1px solid #e1e5d9;border-radius:12px;padding:18px 20px"><summary style="font-weight:800;cursor:pointer">How long does it take?</summary><p style="color:#697064;line-height:1.7">The initial public check runs after submission. Timing depends on the website response and whether it limits automated access; a blocked check is reported as inconclusive rather than a confirmed fault.</p></details>
+        <details style="border:1px solid #e1e5d9;border-radius:12px;padding:18px 20px"><summary style="font-weight:800;cursor:pointer">Is my data private?</summary><p style="color:#697064;line-height:1.7">The initial audit checks public website information. Review our <a href="/privacy">Privacy Policy</a> for details about information handling.</p></details>
+        <details style="border:1px solid #e1e5d9;border-radius:12px;padding:18px 20px"><summary style="font-weight:800;cursor:pointer">Can Reachmark fix the issues?</summary><p style="color:#697064;line-height:1.7">Yes. Reachmark Digital offers scoped website fixes, local visibility setup, and ongoing growth support. Start with an audit, then discuss the fixes you want implemented.</p></details>
+        <details style="border:1px solid #e1e5d9;border-radius:12px;padding:18px 20px"><summary style="font-weight:800;cursor:pointer">Do I need an account?</summary><p style="color:#697064;line-height:1.7">You can run the initial public website check without creating an account. Additional workspace features and saved reports may require an account or paid plan.</p></details>
+      </div>
+    </div>
   </section>
 
   <!-- 10. Founder -->
@@ -321,21 +335,21 @@
   <!-- 11. Final call to action — two clear paths -->
   <section class="x-cta" data-ed="cta" data-motion="fade-up">
     <div class="ed-cta-head">
-      <p class="ed-k">{{ t('home.foot_started') }}</p>
-      <h2>{{ t('home.h1a') }} <em>{{ t('home.h1b') }}</em></h2>
+      <p class="ed-k">YOUR NEXT STEP</p>
+      <h2>Find out what your website may be costing you.</h2>
     </div>
     <div class="ed-paths">
-      <a class="ed-path ed-spot" href="{{ '/dashboard' if client_logged_in else '/signup' }}">
-        <span class="ed-k">{{ t('home.who_design') }}</span>
-        <b>{{ t('home.open_dashboard') if client_logged_in else t('nav.signup') }}</b>
-        <span class="ed-path-p">{{ t('home.sub') }}</span>
-        <span class="ed-go">{{ t('home.open_dashboard') if client_logged_in else t('home.price_free_cta') }}{{ icon('arrow-up-right', 16) }}</span>
+      <a class="ed-path ed-spot" href="/free-website-audit">
+        <span class="ed-k">FOR BUSINESS OWNERS</span>
+        <b>Get my free website audit</b>
+        <span class="ed-path-p">See observable issues affecting mobile experience, contact paths, SEO basics, and trust signals.</span>
+        <span class="ed-go">Audit my website {{ icon('arrow-up-right', 16) }}</span>
       </a>
-      <a class="ed-path ed-spot" href="/enquire">
-        <span class="ed-k">{{ t('home.who_need') }}</span>
-        <b>{{ t('home.band_h1') }} {{ t('home.band_h2') }}</b>
-        <span class="ed-path-p">{{ t('home.band_p') }}</span>
-        <span class="ed-go">{{ t('home.need_cta') }}{{ icon('arrow-up-right', 16) }}</span>
+      <a class="ed-path ed-spot" href="/for-agencies">
+        <span class="ed-k">FOR AGENCIES</span>
+        <b>Explore Reachmark Workspace</b>
+        <span class="ed-path-p">Find local prospects, review website opportunities, and draft outreach with approval before sending.</span>
+        <span class="ed-go">Explore Workspace {{ icon('arrow-up-right', 16) }}</span>
       </a>
     </div>
   </section>
