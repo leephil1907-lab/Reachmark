@@ -89,9 +89,11 @@ def extract_brand(html, base_url, max_images=6):
      'fonts': [...up to 6...], 'site_name': str, 'title': str, 'description': str}
     Empty strings / lists mean "not observed" — never invented.
     """
-    pack = {'colors': [], 'theme_color': '', 'logo': '', 'logo_source': '',
-            'images': [], 'fonts': [], 'site_name': '', 'title': '',
-            'description': ''}
+    pack = {'colors': [], 'theme_color': '', 'background_color': '', 'text_color': '',
+            'logo': '', 'logo_source': '', 'favicon': '', 'images': [], 'fonts': [],
+            'site_name': '', 'title': '', 'description': '', 'navigation': [],
+            'contact_details': [], 'social_links': [], 'service_description': '',
+            'homepage_screenshot': '', 'mobile_screenshot': ''}
     html = html or ''
     if not html.strip():
         return pack
@@ -205,6 +207,70 @@ def extract_brand(html, base_url, max_images=6):
             if len(fonts) >= 6:
                 break
     pack['fonts'] = fonts
+
+    # Keep the favicon distinct from a full logo; it is the explicit fallback
+    # when a larger logo asset is not available.
+    for attrs in links:
+        rel = (attrs.get('rel') or '').lower().split()
+        if 'icon' in rel or ('shortcut' in rel and 'icon' in rel):
+            candidate = _absolute(base_url, attrs.get('href', ''))
+            if candidate:
+                pack['favicon'] = candidate
+                break
+    if not pack['favicon']:
+        pack['favicon'] = _absolute(base_url, '/favicon.ico')
+
+    # Observe declared surface/text colors separately from accent colors.
+    css_text = css_haystack + ' ' + ' '.join(
+        (attrs.get('style') or '') for attrs in [_attrs(t) for t in IMG_TAG_RE.findall(html[:300000])]
+    )
+    for prop, key in (('background(?:-color)?', 'background_color'), ('color', 'text_color')):
+        match = re.search(r'(?i)(?:^|[;{}])\\s*' + prop + r'\\s*:\\s*(#[0-9a-f]{3}(?:[0-9a-f]{3})?)', css_text)
+        if match:
+            pack[key] = _normalise_hex(match.group(1))
+
+    # Navigation is only claimed when an actual <nav> element is present.
+    nav_blocks = re.findall(r'(?is)<nav\\b[^>]*>(.*?)</nav\\s*>', html[:300000])
+    navigation = []
+    for block in nav_blocks:
+        for tag in re.findall(r'(?is)<a\\b[^>]*>', block):
+            attrs = _attrs(tag)
+            href = _absolute(base_url, attrs.get('href', ''))
+            label_match = re.search(r'(?is)<a\\b[^>]*>(.*?)</a\\s*>', block)
+            label = ''
+            if label_match:
+                label = re.sub(r'(?is)<[^>]+>', ' ', label_match.group(1))
+                label = re.sub(r'\\s+', ' ', label).strip()[:80]
+            if href and label and not any(item['url'] == href for item in navigation):
+                navigation.append({'label': label, 'url': href})
+            if len(navigation) >= 20:
+                break
+        if len(navigation) >= 20:
+            break
+    pack['navigation'] = navigation
+
+    # Only include contact endpoints explicitly present in href attributes.
+    contacts, socials = [], []
+    for tag in re.findall(r'(?is)<a\\b[^>]*>', html[:300000]):
+        attrs = _attrs(tag)
+        href = (attrs.get('href') or '').strip()
+        low = href.lower()
+        if low.startswith(('mailto:', 'tel:')):
+            value = href[:200]
+            if value not in contacts:
+                contacts.append(value)
+        absolute = _absolute(base_url, href)
+        if absolute and any(domain in urlparse(absolute).netloc.lower() for domain in
+                            ('facebook.com', 'instagram.com', 'linkedin.com', 'tiktok.com',
+                             'youtube.com', 'x.com', 'twitter.com', 'threads.net')):
+            if absolute not in socials:
+                socials.append(absolute)
+    pack['contact_details'] = contacts[:12]
+    pack['social_links'] = socials[:12]
+    pack['service_description'] = pack['description'] or pack['title']
+    # Empty screenshot paths explicitly mean no screenshot was captured.
+    pack['homepage_screenshot'] = ''
+    pack['mobile_screenshot'] = ''
     return pack
 
 
