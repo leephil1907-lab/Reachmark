@@ -901,9 +901,19 @@ def register_opportunity(app, db, now, log):
         report = serialize_row(row)
         lead = dict(lead_row) if lead_row else {}
         from web.brand import report_theme
-        from web.report_pdf import build_report_pdf
+        from web.report_pdf import build_report_pdf, report_pdf_cache_path, save_report_pdf
         brand_theme = report_theme((report.get('evidence') or {}).get('brand_profile', {}))
-        payload = build_report_pdf(report, lead, brand_theme)
+        cache_path = report_pdf_cache_path(report.get('id'))
+        payload = b''
+        if cache_path:
+            try:
+                with open(cache_path, 'rb') as stream:
+                    payload = stream.read()
+            except OSError:
+                payload = b''
+        if not payload.startswith(b'%PDF-'):
+            payload = build_report_pdf(report, lead, brand_theme)
+            save_report_pdf(report.get('id'), payload)
         name = brand_theme.get('site_name') or lead.get('name') or 'website'
         slug = ''.join(ch.lower() if ch.isalnum() else '-' for ch in str(name))
         slug = '-'.join(part for part in slug.split('-') if part)[:60] or 'website'
