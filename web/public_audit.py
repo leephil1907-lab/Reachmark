@@ -338,7 +338,7 @@ def register_public_audit(app, db, now, log):
                 funnel_record(db, now, 'audit_completed', {
                     'observed': result.get('observed'), 'leak_count': result.get('leak_count'),
                     'blocked': result.get('blocked'),
-                })
+                }, user_id='')
                 log('public-audit', 'Queued free website check completed')
             except Exception:
                 with db() as c:
