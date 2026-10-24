@@ -259,6 +259,10 @@ def free_website_audit():
 def services_page():
     return render_template('growth-page.html', page='services')
 
+@app.route('/growth-system')
+def growth_system_page():
+    return render_template('growth-page.html', page='system')
+
 @app.route('/contact')
 def contact_page():
     return redirect('/enquire')
@@ -397,7 +401,7 @@ def sitemap():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
     now = datetime.now(timezone.utc).date().isoformat()
     # Core public pages + all 10 showcase samples — every indexable route for Google
-    paths = ['/','/about','/services','/free-website-audit','/for-agencies','/contact','/showcase','/enquire','/receptionist','/reviews','/pricing','/need','/sourcing','/sending','/sample-report','/privacy','/terms','/disclosure'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
+    paths = ['/','/about','/services','/growth-system','/free-website-audit','/for-agencies','/contact','/showcase','/enquire','/receptionist','/reviews','/pricing','/need','/sourcing','/sending','/sample-report','/privacy','/terms','/disclosure'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
     urls = []
     for path in paths:
         loc = escape(base+path)
