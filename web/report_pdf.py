@@ -54,7 +54,7 @@ def build_report_pdf(report, lead, brand_theme):
         output, pagesize=A4, rightMargin=18 * mm, leftMargin=18 * mm,
         topMargin=17 * mm, bottomMargin=18 * mm,
         title='Website Growth Audit — Reachmark',
-        author='Reachmark Digital',
+        author='Reachmark Digital', pageCompression=0,
     )
     base = getSampleStyleSheet()
     styles = {
