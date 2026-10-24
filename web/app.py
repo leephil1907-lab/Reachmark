@@ -232,7 +232,7 @@ def home():
     canonical = (base + '/') if base else None
     from web.public_url import SEO_HOME_DESCRIPTION, SEO_HOME_KEYWORDS, SEO_HOME_TITLE, faq_schema, organization_schema, website_schema
     seo = {
-        'title': 'Reachmark Digital | Website Audits & Growth Services',
+        'title': 'Reachmark Digital | Website Audits and Growth Services',
         'description': 'Reachmark Digital helps local businesses turn their websites into stronger sources of enquiries, calls, bookings, and customers. Start with a free website growth audit.',
         'keywords': SEO_HOME_KEYWORDS,
         'canonical': canonical,
