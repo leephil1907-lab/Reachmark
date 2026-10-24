@@ -509,6 +509,8 @@ def build_report(db, lead, now, observe_live=False):
         'disclaimer': packed.get('disclaimer') or (
             'A ranked list of observed gaps at this point in time — not a claim that the business wants a new website.'
         ),
+        'brand_profile': ((audit or {}).get('observations') or {}).get('brand', {})
+            if isinstance((audit or {}).get('observations'), dict) else {},
     }
     return {
         'score': score,
@@ -837,7 +839,10 @@ def register_opportunity(app, db, now, log):
             funnel_record(db, now, 'sample_viewed')
         except Exception:
             pass
-        return render_template('opportunity-report.html', report=report, lead=lead, asset=asset, sample=True)
+        from web.brand import report_theme
+        return render_template('opportunity-report.html', report=report, lead=lead, asset=asset,
+                               brand_theme=report_theme(report.get('evidence', {}).get('brand_profile', {})),
+                               sample=True)
 
     @app.get('/o/<token>')
     def opportunity_public(token):
@@ -880,4 +885,6 @@ def register_opportunity(app, db, now, log):
             if gprow:
                 prop_url = f"/proposal/{gprow['token']}"
         asset = compose_sales_asset(lead, report, prototype_url=proto_url, proposal_url=prop_url, book=book)
-        return render_template('opportunity-report.html', report=report, lead=lead, asset=asset)
+        from web.brand import report_theme
+        return render_template('opportunity-report.html', report=report, lead=lead, asset=asset,
+                               brand_theme=report_theme(report.get('evidence', {}).get('brand_profile', {})))
