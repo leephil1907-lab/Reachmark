@@ -96,21 +96,21 @@
     </div>
   </div>
 
-  <!-- 2. Product: interactive sample report -->
-  <section class="rm-workspace-preview" data-motion="fade-up" id="sample-report" aria-labelledby="rm-preview-title">
+  <!-- 2. Sample audit report: interactive illustrative examples -->
+  <section class="rm-workspace-preview" data-motion="fade-up" id="report-preview" aria-labelledby="rm-preview-title">
     <div class="rm-preview-intro">
-      <p class="rm-preview-eyebrow"><span class="ed-n">01 /</span> THE REACHMARK WORKSPACE</p>
-      <h2 id="rm-preview-title">Find the gap. See the evidence. Know what to do next.</h2>
-      <p>Explore a sample Digital Opportunity Report, then run a live check on any public website.</p>
+      <p class="rm-preview-eyebrow"><span class="ed-n">01 /</span> SAMPLE WEBSITE GROWTH REPORT</p>
+      <h2 id="rm-preview-title">See the issue. Understand the impact. Know what to fix first.</h2>
+      <p>Explore illustrative audit findings, then run a free public website check for your own business.</p>
     </div>
     <div class="rm-preview-window" data-rm-preview>
       <header class="rm-preview-bar">
-        <div class="rm-preview-brand"><span class="rm-preview-mark rm-preview-mark--brand">{{ brand_mark(30) }}</span><span>Reachmark <small>Opportunity desk</small></span></div>
-        <span class="rm-preview-state"><i aria-hidden="true"></i> Interactive preview</span>
+        <div class="rm-preview-brand"><span class="rm-preview-mark rm-preview-mark--brand">{{ brand_mark(30) }}</span><span>Reachmark Digital <small>Growth audit</small></span></div>
+        <span class="rm-preview-state"><i aria-hidden="true"></i> Illustrative report</span>
       </header>
       <div class="rm-preview-workspace">
-        <aside class="rm-preview-list" aria-label="Sample business opportunities">
-          <p class="rm-preview-list-label">EXAMPLE OPPORTUNITIES</p>
+        <aside class="rm-preview-list" aria-label="Sample audit scenarios">
+          <p class="rm-preview-list-label">SAMPLE INDUSTRIES</p>
           <button type="button" class="rm-preview-choice is-active" data-preview-select="clinic" aria-pressed="true">
             <span class="rm-preview-choice-type">Healthcare · sample</span>
             <strong>Willow Grove Dental</strong>
@@ -147,13 +147,13 @@
             <p id="rm-preview-next">Review the mobile appointment path and make the primary contact action easy to spot.</p>
           </div>
           <div class="rm-preview-actions">
-            <a class="x-btn lime" data-magnet href="#try-url">Check a real website {{ icon('arrow-down', 16) }}</a>
+            <a class="x-btn lime" data-magnet href="#try-url">Audit my website {{ icon('arrow-down', 16) }}</a>
             <a class="rm-preview-report-link" href="/sample-report">Open sample report</a>
           </div>
         </div>
       </div>
     </div>
-    <p class="rm-preview-disclaimer">{{ icon('info', 15) }} Sample businesses show the report experience. Live reports are generated from the public listing and website checks available for the business you select.</p>
+    <p class="rm-preview-disclaimer">{{ icon('info', 15) }} This is an illustrative sample, not a real client result. Your free check reports only observations the available public website checks can support.</p>
   </section>
 
   <!-- 3. Try it: live URL check -->
@@ -277,17 +277,32 @@
     <p class="x-concepts-all"><a class="x-btn ghost" href="/showcase">{{ t('home.concepts_all') }}{{ icon('arrow-right', 16) }}</a></p>
   </section>
 
-  <!-- 9. Plans -->
+  <!-- Agency services are distinct from Workspace subscriptions. -->
+  <section class="gp-section" style="padding:72px 24px;background:#f5f6f0;color:#101510" aria-labelledby="home-services-title">
+    <div style="max-width:1120px;margin:0 auto">
+      <p class="rm-preview-eyebrow" style="color:#71824e;font-size:12px;font-weight:900;letter-spacing:1.5px">REACHMARK DIGITAL SERVICES</p>
+      <h2 id="home-services-title" style="font-size:clamp(30px,4vw,44px);letter-spacing:-.04em;max-width:720px;margin:12px 0">A clear path from website audit to ongoing growth.</h2>
+      <p style="max-width:680px;color:#697064;line-height:1.8">Start with evidence, fix the most important barriers, then improve your online customer journey over time.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px;margin-top:28px">
+        <article style="background:#fff;border:1px solid #e1e5d9;border-radius:15px;padding:22px"><h3>Free Growth Audit</h3><p style="color:#697064;line-height:1.7;font-size:14px">Identify observable issues in mobile experience, contact paths, SEO basics, trust, and technical health.</p><a style="font-weight:800;color:#26351d" href="/free-website-audit">Run free audit →</a></article>
+        <article style="background:#fff;border:1px solid #e1e5d9;border-radius:15px;padding:22px"><h3>Website Fix Sprint</h3><p style="color:#697064;line-height:1.7;font-size:14px">Implement agreed high-priority fixes that make your site clearer and easier to use.</p><a style="font-weight:800;color:#26351d" href="/contact">Discuss a fix sprint →</a></article>
+        <article style="background:#fff;border:1px solid #e1e5d9;border-radius:15px;padding:22px"><h3>Local Visibility Setup</h3><p style="color:#697064;line-height:1.7;font-size:14px">Improve local information consistency, service pages, and Google Business Profile foundations.</p><a style="font-weight:800;color:#26351d" href="/contact">Discuss local visibility →</a></article>
+        <article style="background:#fff;border:1px solid #e1e5d9;border-radius:15px;padding:22px"><h3>Monthly Growth Retainer</h3><p style="color:#697064;line-height:1.7;font-size:14px">Ongoing website improvements, conversion optimization, and agreed reporting.</p><a style="font-weight:800;color:#26351d" href="/contact">Discuss monthly support →</a></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Workspace software subscription plans -->
   <section class="x-plans" id="plans-preview" aria-label="{{ t('home.price_h') }}">
     <div class="x-plans-head">
       <p class="ed-k"><span class="ed-n">08 /</span> {{ t('nav.plans') }}</p>
-      <h2>{{ t('home.price_h') }}</h2>
+      <h2>Software plans for agencies and independent professionals</h2>
       <p>{{ t('home.price_p') }}</p>
     </div>
     <div class="x-plans-grid">
       <article data-motion="fade-up">{{ icon('sparkles', 20, 'x-plan-ic') }}<small>Free</small><b>$0</b><p>{{ t('home.price_free') }}</p><a href="/signup">{{ t('home.price_free_cta') }}</a></article>
       <article data-motion="fade-up" data-delay="90">{{ icon('search', 20, 'x-plan-ic') }}<small>Starter</small><b>$19</b><p>{{ t('home.price_st') }}</p><a href="/pricing">{{ t('home.price_st_cta') }}</a></article>
-      <article class="on" data-motion="fade-up" data-delay="180">{{ icon('send', 20, 'x-plan-ic') }}<small>Pro</small><b>$59</b><p>{{ t('home.price_pro') }}</p><a href="/pricing">{{ t('home.price_pro_cta') }}</a></article>
+      <article class="on" data-motion="fade-up" data-delay="180">{{ icon('send', 20, 'x-plan-ic') }}<small>Pro</small><b>$59</b><p>Workspace tools for saved audits, reports, and outreach workflows.</p><a href="/pricing">{{ t('home.price_pro_cta') }}</a></article>
     </div>
     <p class="x-plans-note"><a href="/pricing">{{ t('home.price_all') }}</a></p>
   </section>
