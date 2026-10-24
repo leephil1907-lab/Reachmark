@@ -103,7 +103,7 @@ def test_growth_system_connects_workspace_ai_crew_and_receptionist_without_unver
     page = (ROOT / "templates" / "growth-page.html").read_text(encoding="utf-8")
     assert "@app.route('/growth-system')" in app
     assert "page='system'" in app
-    assert "'/growth-system'" in app.split("def sitemap_xml()", 1)[1]
+    assert "'/growth-system'" in app.split("def sitemap()", 1)[1]
     assert "Reachmark Workspace" in page
     assert "Reachmark AI Crew" in page
     assert "Reachmark AI Receptionist" in page
