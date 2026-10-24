@@ -42,7 +42,7 @@ def test_home_leads_with_the_report_not_designer_praise():
     assert "SEO_HOME_TITLE" in home_fn
     assert "Find potential. Make your mark." in seo
     assert "Digital Opportunity Report" in seo
-    assert "Reachmark Digital | Website Audits and SEO for Business Growth" in seo
+    assert "Reachmark Digital | Website Audits and Growth Services" in seo
     assert 'id="sample-report"' in home
     assert '<ins class="adsbygoogle"' not in home  # verification tag only, no ad units
     assert "adsense-homepage-banner" not in home
