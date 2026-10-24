@@ -10,13 +10,49 @@
 <link rel="stylesheet" href="/static/fonts.css">
 <link rel="stylesheet" href="/static/xdesign.css">
 <link rel="stylesheet" href="/static/opportunity.css">
+<style>
+:root{--client-primary:{{ brand_theme.primary if brand_theme is defined else '#d6f269' }};--client-strong:{{ brand_theme.strong if brand_theme is defined else '#202820' }};--client-on-primary:{{ brand_theme.on_primary if brand_theme is defined else '#101510' }};--report-bg:#f5f6f0;--report-text:#202820;--report-muted:#687064;--reachmark-lime:#d6f269}
+.oe-public{color:var(--report-text);background:var(--report-bg)}
+.oe-top{border-top:5px solid var(--client-primary)}
+.oe-sheet h1,.oe-sheet h2,.oe-sheet h3,.oe-kicker{color:var(--client-strong)}
+.oe-score-row article:first-child{border-top:4px solid var(--client-primary)}
+.oe-score-row article:first-child strong{color:var(--client-strong)}
+.oe-leaks li,.oe-sheet section,.oe-score-row article{border-color:color-mix(in srgb,var(--client-primary) 22%,#e2e5dc)}
+.oe-client-cover{display:flex;align-items:center;gap:18px;border-radius:14px;padding:22px;margin:20px 0 28px;background:linear-gradient(110deg,color-mix(in srgb,var(--client-primary) 13%,white),white 75%);border:1px solid color-mix(in srgb,var(--client-primary) 32%,white)}
+.oe-client-logo{width:76px;height:76px;object-fit:contain;background:white;border-radius:10px;padding:7px;border:1px solid #e4e7df}
+.oe-client-name{font-size:clamp(22px,3vw,32px);font-weight:850;letter-spacing:-.04em;margin:0;color:var(--client-strong)}
+.oe-brand-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--report-muted);font-weight:800}
+.oe-client-meta{font-size:13px;color:var(--report-muted);overflow-wrap:anywhere;margin-top:6px}
+.oe-report-creator{margin-left:auto;min-width:90px;text-align:right;font-size:11px;color:#687064}
+.oe-report-creator img{display:block;width:94px;max-height:28px;object-fit:contain;margin:0 0 8px auto}
+.oe-brand-identity{margin:18px 0 26px;padding:18px;background:#fff;border:1px solid #e2e5dc;border-radius:12px}
+.oe-brand-swatches{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.oe-brand-swatch{display:flex;align-items:center;gap:7px;border:1px solid #e2e5dc;border-radius:999px;padding:5px 10px;font-size:12px;color:#4c5548}
+.oe-brand-dot{display:inline-block;width:15px;height:15px;border-radius:50%;border:1px solid #0002}
+.oe-brand-note{font-size:12px;color:var(--report-muted);line-height:1.6}
+.oe-foot{border-top:3px solid var(--reachmark-lime);margin-top:30px}
+@media(max-width:520px){.oe-client-cover{align-items:flex-start;gap:12px;padding:14px}.oe-client-logo{width:54px;height:54px}.oe-report-creator{min-width:65px}.oe-report-creator img{width:68px}}
+</style>
 <script src="/static/i18n.js"></script>
 {% with theme_init=false %}{% include '_theme_head.html' %}{% endwith %}</head>
-<body class="oe-public">
+<body class="oe-public" style="--client-primary:{{ brand_theme.primary if brand_theme is defined else '#d6f269' }};--client-strong:{{ brand_theme.strong if brand_theme is defined else '#202820' }};--client-on-primary:{{ brand_theme.on_primary if brand_theme is defined else '#101510' }}">
   <header class="oe-top">
     <a href="/" class="oe-logo"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
     <span>{{ t('doc.report_title') }}</span>
   </header>
+  <section class="oe-client-cover" aria-label="Audited business identity">
+    {% if brand_theme is defined and brand_theme.logo %}
+    <img class="oe-client-logo" src="{{ brand_theme.logo }}" alt="{{ lead.name or brand_theme.site_name or 'Audited business' }} logo" loading="lazy" referrerpolicy="no-referrer">
+    {% else %}
+    <div class="oe-client-logo" aria-hidden="true" style="display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--client-strong)">{{ (lead.name or (brand_theme.site_name if brand_theme is defined else '') or 'Business')[:2]|upper }}</div>
+    {% endif %}
+    <div style="min-width:0;flex:1">
+      <div class="oe-brand-label">Website Growth Audit</div>
+      <p class="oe-client-name">{{ lead.name or (brand_theme.site_name if brand_theme is defined else '') or lead.category or 'Business website' }}</p>
+      <div class="oe-client-meta">{% if lead.website %}<a href="{{ lead.website }}" rel="nofollow noopener">{{ lead.website }}</a>{% endif %}{% if report.created %} · {{ report.created[:10] }}{% endif %}</div>
+    </div>
+    <div class="oe-report-creator"><img src="/static/logo-primary.svg" alt="Reachmark"><span>Prepared by Reachmark</span></div>
+  </section>
   <main class="oe-sheet">
     {% if sample %}
     <p class="oe-sample-banner">Sample report · Explore how Reachmark presents findings, supporting evidence and recommended next steps. Live reports use the public listing and website checks available for the business selected.</p>
@@ -28,6 +64,20 @@
       {% if lead.website %} · {{ lead.website }}{% endif %}
     </p>
     <p class="oe-note">{{ asset.disclaimer if asset is defined and asset.disclaimer else (report.evidence.disclaimer if report.evidence is mapping else t('doc.disc_default')) }}</p>
+
+    <section class="oe-brand-identity" aria-label="Observed brand identity">
+      <strong>Brand identity detected from public website data</strong>
+      {% if brand_theme is defined and brand_theme.detected %}
+      <div class="oe-brand-swatches">
+        <span class="oe-brand-swatch"><i class="oe-brand-dot" style="background:{{ brand_theme.primary }}"></i>Primary {{ brand_theme.primary }}</span>
+        {% if brand_theme.secondary %}<span class="oe-brand-swatch"><i class="oe-brand-dot" style="background:{{ brand_theme.secondary }}"></i>Secondary {{ brand_theme.secondary }}</span>{% endif %}
+      </div>
+      {% if brand_theme.fonts %}<p class="oe-brand-note">Observed font family: {{ brand_theme.fonts|join(', ') }}</p>{% endif %}
+      {% else %}
+      <p class="oe-brand-note">Limited brand data detected. This report uses a neutral, readable theme; no logo or brand colour was invented.</p>
+      {% endif %}
+      <p class="oe-brand-note">This report was generated by Reachmark using publicly available website data. Brand details may be incomplete if the site loads them dynamically.</p>
+    </section>
 
     {% if report.evidence is mapping and report.evidence.checked_at %}
     <p class="oe-note">Evidence checked: {{ report.evidence.checked_at }}. This is the time of the saved website check, not a guarantee the page is unchanged now.</p>
@@ -167,6 +217,6 @@
       </li>
     </ol>
   </main>
-  <footer class="oe-foot">{{ t('doc.foot_rep', d=(report.created[:10] if report.created else '')) }}</footer>
+  <footer class="oe-foot"><strong>Prepared by Reachmark</strong> · <a href="https://reachmarkdigital.xyz">reachmarkdigital.xyz</a><p class="oe-brand-note">This report was generated by Reachmark using publicly available website data. Findings reflect the pages and signals observed at the time of the check.</p>{{ t('doc.foot_rep', d=(report.created[:10] if report.created else '')) }}</footer>
 </body>
 </html>
