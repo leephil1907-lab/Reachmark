@@ -8,8 +8,8 @@
 {% if ga_id is defined and ga_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}</title>
-<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">
+<title>{{ seo.title if seo is defined and seo.title else 'Reachmark Digital | Website Audits & Growth Services' }}</title>
+<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Reachmark Digital helps local businesses turn their websites into stronger sources of enquiries, calls, bookings, and customers. Start with a free website growth audit.' }}">
 {% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}
 <meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">
 {% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
@@ -32,24 +32,24 @@
   <!-- 1. Hero — editorial headline, then the live audit console on a full-width stage -->
   <section class="x-hero" data-ed="hero" id="top" data-signal>
     <div class="ed-wrap ed-hero-copy">
-      <h1 class="hx-title ed-title" data-split><span class="hx-line">{{ t('home.hx_h1a') }}</span> <em class="hx-line ed-mark">{{ t('home.hx_h1b') }}</em></h1>
+      <h1 class="hx-title ed-title" data-split><span class="hx-line">Your website should bring you</span> <em class="hx-line ed-mark">customers—not lose them.</em></h1>
       <div class="ed-hero-row">
-        <p class="ed-k ed-proof"><span>{{ t('home.proof_find') }}</span><i aria-hidden="true">→</i><span>{{ t('home.proof_diagnose') }}</span><i aria-hidden="true">→</i><span>{{ t('home.proof_approve') }}</span></p>
+        <p class="ed-k ed-proof"><span>Audit your website</span><i aria-hidden="true">→</i><span>Find what blocks enquiries</span><i aria-hidden="true">→</i><span>Fix what matters</span></p>
         <div class="ed-hero-side">
-          <p class="hx-sub">{{ t('home.hx_sub') }}</p>
+          <p class="hx-sub">Reachmark audits your website, identifies what may be blocking enquiries and sales, and gives you a practical plan to improve it. Get evidence-based recommendations across mobile experience, contact paths, SEO basics, trust signals, and conversion opportunities.</p>
           <p class="x-hero-actions">
             {% if client_logged_in %}
             <a class="x-btn lime" href="/dashboard">{{ icon('dashboard', 18) }}<span>{{ t('home.open_dashboard') }}</span></a>
             <a class="x-btn ghost" href="/enquire">{{ icon('pen', 18) }}<span>{{ t('home.cta_project') }}</span></a>
             {% else %}
-            <a class="x-btn lime" data-magnet href="#try-url">{{ icon('scan', 18) }}<span>{{ t('home.hx_cta') }}</span></a>
-            <a class="x-btn ghost" href="/sample-report">{{ icon('file-text', 18) }}<span>{{ t('home.cta_report') }}</span></a>
+            <a class="x-btn lime" data-magnet href="#try-url">{{ icon('scan', 18) }}<span>Get my free website audit</span></a>
+            <a class="x-btn ghost" href="/sample-report">{{ icon('file-text', 18) }}<span>See sample report</span></a>
             {% endif %}
           </p>
           <ul class="hx-trust">
-            <li>{{ icon('globe', 16) }}{{ t('home.hx_t1') }}</li>
-            <li>{{ icon('shield-check', 16) }}{{ t('home.hx_t2') }}</li>
-            <li>{{ icon('sparkles', 16) }}{{ t('home.hx_t3') }}</li>
+            <li>{{ icon('globe', 16) }}Mobile experience</li>
+            <li>{{ icon('shield-check', 16) }}Contact path checks</li>
+            <li>{{ icon('sparkles', 16) }}SEO and trust signals</li>
           </ul>
           {% if not client_logged_in %}
           <p class="x-hero-alt hero-signin">{{ t('home.hero_signin') }} <a href="/signin">{{ t('nav.signin') }}</a></p>
