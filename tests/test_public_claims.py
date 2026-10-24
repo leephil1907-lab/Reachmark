@@ -95,3 +95,20 @@ def test_sample_and_sending_pages_exist():
     opp = (ROOT / "web" / "opportunity.py").read_text(encoding="utf-8")
     assert "def fictional_sample_report" in opp
     assert "/sample-report" in opp
+
+
+
+def test_growth_system_connects_workspace_ai_crew_and_receptionist_without_unverified_promises():
+    app = (ROOT / "web" / "app.py").read_text(encoding="utf-8")
+    page = (ROOT / "templates" / "growth-page.html").read_text(encoding="utf-8")
+    assert "@app.route('/growth-system')" in app
+    assert "page='system'" in app
+    assert "'/growth-system'" in app.split("def sitemap_xml()", 1)[1]
+    assert "Reachmark Workspace" in page
+    assert "Reachmark AI Crew" in page
+    assert "Reachmark AI Receptionist" in page
+    assert 'href="/free-website-audit"' in page
+    assert 'href="/for-agencies"' in page
+    assert 'href="/receptionist"' in page
+    assert "Complex or uncertain requests are handed to a person." in page
+    assert "Nothing is sent without your approval." in page
