@@ -8,7 +8,7 @@
 {% if ga_id is defined and ga_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>{{ seo.title if seo is defined and seo.title else 'Reachmark Digital | Website Audits & Growth Services' }}</title>
+<title>{{ seo.title if seo is defined and seo.title else 'Reachmark Digital | Website Audits and Growth Services' }}</title>
 <meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Reachmark Digital helps local businesses turn their websites into stronger sources of enquiries, calls, bookings, and customers. Start with a free website growth audit.' }}">
 {% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}
 <meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">
