@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{{ t('doc.report_title') }}{% if lead.name %} — {{ lead.name }}{% endif %} · Reachmark</title>
+<title>{{ t('doc.report_title') }}{% if brand_theme is defined and brand_theme.site_name %} — {{ brand_theme.site_name }}{% elif lead.name %} — {{ lead.name }}{% endif %} · Reachmark</title>
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#fbfbfb">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
@@ -48,7 +48,7 @@
     {% endif %}
     <div style="min-width:0;flex:1">
       <div class="oe-brand-label">Website Growth Audit</div>
-      <p class="oe-client-name">{{ lead.name or (brand_theme.site_name if brand_theme is defined else '') or lead.category or 'Business website' }}</p>
+      <p class="oe-client-name">{{ (brand_theme.site_name if brand_theme is defined else '') or lead.name or lead.category or 'Business website' }}</p>
       <div class="oe-client-meta">{% if lead.website %}<a href="{{ lead.website }}" rel="nofollow noopener">{{ lead.website }}</a>{% endif %}{% if report.created %} · {{ report.created[:10] }}{% endif %}</div>
     </div>
     <div class="oe-report-creator"><img src="/static/logo-primary.svg" alt="Reachmark"><span>Prepared by Reachmark</span></div>
@@ -58,7 +58,7 @@
     <p class="oe-sample-banner">Sample report · Explore how Reachmark presents findings, supporting evidence and recommended next steps. Live reports use the public listing and website checks available for the business selected.</p>
     {% endif %}
     <p class="oe-kicker">{{ t('doc.diag') }}</p>
-    <h1>{{ lead.name or asset.business.name or t('doc.this_biz') }}</h1>
+    <h1>{{ (brand_theme.site_name if brand_theme is defined else '') or lead.name or asset.business.name or t('doc.this_biz') }}</h1>
     <p class="oe-lede">
       {% if lead.category %}{{ lead.category }}{% endif %}{% if lead.city %} · {{ lead.city }}{% endif %}
       {% if lead.website %} · {{ lead.website }}{% endif %}
