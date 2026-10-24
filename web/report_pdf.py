@@ -53,7 +53,7 @@ def _load_observed_logo(url):
             raw = response.raw.read(700001, decode_content=True) or b''
             if len(raw) > 700000:
                 return None
-            if not (raw.startswith(b'\\x89PNG\\r\\n\\x1a\\n') or raw.startswith(b'\\xff\\xd8\\xff')):
+            if not (raw.startswith(bytes((137, 80, 78, 71, 13, 10, 26, 10))) or raw.startswith(bytes((255, 216, 255)))):
                 return None
             reader = ImageReader(BytesIO(raw))
             width, height = reader.getSize()
