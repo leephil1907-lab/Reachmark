@@ -39,6 +39,7 @@
   <header class="oe-top">
     <a href="/" class="oe-logo"><img src="/static/logo-primary.svg" alt="Reachmark"></a>
     <span>{{ t('doc.report_title') }}</span>
+    {% if report.token %}<a class="x-btn lime" href="/o/{{ report.token }}/pdf" style="margin-left:auto">Download PDF</a>{% endif %}
   </header>
   <section class="oe-client-cover" aria-label="Audited business identity">
     {% if brand_theme is defined and brand_theme.logo %}
