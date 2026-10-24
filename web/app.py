@@ -844,6 +844,10 @@ def reviews_page():
     return render_template('reviews.html', base=base, structured=structured, client_reviews=revs, seo=seo)
 
 
+# Register inbound lead qualification before the migration runner.
+from web.lead_qualifier import register_lead_qualifier
+register_lead_qualifier(app, db, log, add_lead)
+
 # Apply all legacy SQLite column upgrades once every feature table exists.
 from web.migrations import run_migrations
 run_migrations(db)
