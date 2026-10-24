@@ -206,3 +206,74 @@ def extract_brand(html, base_url, max_images=6):
                 break
     pack['fonts'] = fonts
     return pack
+
+
+
+def _rgb(hex_colour):
+    value = _normalise_hex(hex_colour or '')
+    if not re.fullmatch(r'#[0-9a-f]{6}', value):
+        return None
+    return tuple(int(value[i:i + 2], 16) for i in (1, 3, 5))
+
+
+def _luminance(rgb):
+    def channel(v):
+        v = v / 255
+        return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+    r, g, b = (channel(v) for v in rgb)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def _contrast(a, b):
+    la, lb = _luminance(a), _luminance(b)
+    return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+
+
+def _mix(hex_colour, target, amount):
+    rgb = _rgb(hex_colour)
+    if not rgb:
+        return '#202820'
+    other = _rgb(target) or (16, 21, 16)
+    vals = [round(v * (1 - amount) + w * amount) for v, w in zip(rgb, other)]
+    return '#' + ''.join(f'{v:02x}' for v in vals)
+
+
+def report_theme(brand):
+    """Build a readable report palette from observed brand data; never invent identity."""
+    brand = brand if isinstance(brand, dict) else {}
+    candidates = [brand.get('theme_color')] + list(brand.get('colors') or [])
+    primary = next((c.lower() for c in candidates if _rgb(c)), '')
+    if not primary:
+        primary = '#d6f269'
+    rgb = _rgb(primary)
+    white, charcoal = (255, 255, 255), (16, 21, 16)
+    # A very light brand colour remains an accent; use a darkened variant for headings.
+    if _contrast(rgb, white) < 4.5:
+        strong = _mix(primary, '#101510', 0.48)
+    else:
+        strong = primary
+    strong_rgb = _rgb(strong) or charcoal
+    on_strong = '#ffffff' if _contrast(strong_rgb, white) >= _contrast(strong_rgb, charcoal) else '#101510'
+    secondary = next((c.lower() for c in (brand.get('colors') or [])
+                      if _rgb(c) and c.lower() != primary), '')
+    return {
+        'primary': primary,
+        'strong': strong,
+        'on_primary': on_strong,
+        'secondary': secondary,
+        'logo': (brand.get('logo') or '').strip(),
+        'logo_source': (brand.get('logo_source') or '').strip(),
+        'site_name': (brand.get('site_name') or '').strip(),
+        'title': (brand.get('title') or '').strip(),
+        'description': (brand.get('description') or '').strip(),
+        'fonts': (brand.get('fonts') or [])[:3],
+        'detected': bool(brand.get('logo') or brand.get('colors') or brand.get('theme_color')
+                         or brand.get('site_name') or brand.get('title')),
+        'background': '#f5f6f0',
+        'text': '#202820',
+        'muted': '#687064',
+        'reachmark': '#d6f269',
+        'severity_critical': '#b42318',
+        'severity_warning': '#b54708',
+        'severity_success': '#247044',
+    }
