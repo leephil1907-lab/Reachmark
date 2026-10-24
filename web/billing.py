@@ -38,7 +38,7 @@ TIERS = {
                      'Website health audits', 'Business discovery & map search', 'CSV exports'],
     },
     'pro': {
-        'name': 'Pro', 'rank': 2, 'usd_minor': 5900, 'ngn_minor': 9000000,
+        'name': 'Starter Pro', 'rank': 2, 'usd_minor': 5900, 'ngn_minor': 9000000,
         'usd': '$59', 'ngn': '₦90,000',
         'usd_minor_annual': 59000, 'ngn_minor_annual': 90000000,
         'usd_annual': '$590', 'ngn_annual': '₦900,000', 'per': '30 days',
@@ -173,7 +173,7 @@ def localized_tiers(locale=None):
     for tid, tier in TIERS.items():
         nk, tk, pk, fks = _TIER_I18N[tid]
         row = dict(tier)
-        row['name'] = _t(nk, loc)
+        row['name'] = 'Starter Pro' if tid == 'pro' else _t(nk, loc)
         row['tag'] = _t(tk, loc)
         row['per'] = _t(pk, loc)
         row['features'] = [_t(fk, loc) for fk in fks]
@@ -186,7 +186,7 @@ def public_prices():
     out = {}
     for k, v in TIERS.items():
         nk, tk, pk, fks = _TIER_I18N[k]
-        out[k] = {'usd': v['usd'], 'ngn': v['ngn'], 'per': _t(pk, loc), 'name': _t(nk, loc),
+        out[k] = {'usd': v['usd'], 'ngn': v['ngn'], 'per': _t(pk, loc), 'name': 'Starter Pro' if k == 'pro' else _t(nk, loc),
                     'usd_annual': v.get('usd_annual', ''), 'ngn_annual': v.get('ngn_annual', '')}
     return out
 
