@@ -6,8 +6,10 @@ a score, a revenue figure, or a diagnosis beyond what was read from the page.
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import re
+import threading
 import uuid
 
 from flask import jsonify, render_template, request, session
@@ -27,6 +29,12 @@ def ensure_tables(db):
             ip_hash TEXT NOT NULL,
             created TEXT NOT NULL)''')
         c.execute('CREATE INDEX IF NOT EXISTS public_audit_ip ON public_audit_log(ip_hash, created)')
+
+        c.execute('''CREATE TABLE IF NOT EXISTS public_audit_jobs(
+            id TEXT PRIMARY KEY, ip_hash TEXT NOT NULL, url TEXT NOT NULL,
+            status TEXT NOT NULL, stage TEXT NOT NULL, result TEXT,
+            error TEXT, created TEXT NOT NULL, updated TEXT NOT NULL)''')
+        c.execute('CREATE INDEX IF NOT EXISTS public_audit_jobs_ip ON public_audit_jobs(ip_hash, created)')
 
 
 def _client_ip():
@@ -291,5 +299,74 @@ def register_public_audit(app, db, now, log):
             payload['error'] = payload.get('reason') or 'This site blocked the check. That is inconclusive, not a fault.'
         # Full Digital Opportunity Report stays behind an account.
         payload['signup'] = '/signup'
+
         payload['gate'] = 'Create an account to run the full Digital Opportunity Report on a saved business.'
         return jsonify(payload)
+
+    @app.post('/api/public/audit/jobs')
+    def create_public_audit_job():
+        body = request.get_json(silent=True) or {}
+        url = _normalize_url(body.get('url') or '')
+        if not url:
+            return jsonify(error='Enter a public website URL.', blocked=False), 400
+        if _rate_limited(db, now):
+            return jsonify(error='This check is limited to a few tries per hour from one network. Try again later.',
+                           blocked=True, rate_limited=True), 429
+        job_id = uuid.uuid4().hex
+        ip_hash = _ip_hash()
+        stamp = now()
+        with db() as c:
+            c.execute('''INSERT INTO public_audit_jobs
+                (id,ip_hash,url,status,stage,result,error,created,updated)
+                VALUES(?,?,?,'queued','queued',NULL,NULL,?,?)''',
+                (job_id, ip_hash, url, stamp, stamp))
+
+        def run_job():
+            from web.funnel import record as funnel_record
+            try:
+                with db() as c:
+                    c.execute("UPDATE public_audit_jobs SET status='running',stage='checking_public_signals',updated=? WHERE id=? AND status='queued'",
+                              (now(), job_id))
+                result = preview_leaks(url)
+                result['signup'] = '/signup'
+                result['gate'] = 'Create an account to run the full Digital Opportunity Report on a saved business.'
+                if result.get('blocked'):
+                    result['error'] = result.get('reason') or 'This site blocked the check. That is inconclusive, not a fault.'
+                with db() as c:
+                    c.execute("UPDATE public_audit_jobs SET status='completed',stage='completed',result=?,updated=? WHERE id=? AND status!='cancelled'",
+                              (json.dumps(result, ensure_ascii=False), now(), job_id))
+                funnel_record(db, now, 'audit_completed', {
+                    'observed': result.get('observed'), 'leak_count': result.get('leak_count'),
+                    'blocked': result.get('blocked'),
+                })
+                log('public-audit', 'Queued free website check completed')
+            except Exception:
+                with db() as c:
+                    c.execute("UPDATE public_audit_jobs SET status='failed',stage='failed',error=?,updated=? WHERE id=? AND status!='cancelled'",
+                              ('This check could not finish. The site may have blocked it.', now(), job_id))
+                log('public-audit', 'queued public audit failed')
+
+        threading.Thread(target=run_job, name='reachmark-public-audit', daemon=True).start()
+        try:
+            from web.funnel import record as funnel_record
+            funnel_record(db, now, 'audit_started', {'url_host': url.split('/')[2] if '://' in url else ''})
+        except Exception:
+            pass
+        return jsonify(job_id=job_id, status='queued', stage='queued',
+                       status_url='/api/public/audit/jobs/' + job_id), 202
+
+    @app.get('/api/public/audit/jobs/<job_id>')
+    def get_public_audit_job(job_id):
+        with db() as c:
+            row = c.execute('SELECT * FROM public_audit_jobs WHERE id=? AND ip_hash=?',
+                            (job_id, _ip_hash())).fetchone()
+        if not row:
+            return jsonify(error='Audit job not found.'), 404
+        result = None
+        if row['result']:
+            try:
+                result = json.loads(row['result'])
+            except (TypeError, ValueError):
+                result = None
+        return jsonify(job_id=row['id'], status=row['status'], stage=row['stage'],
+                       result=result, error=row['error'], created=row['created'], updated=row['updated'])
