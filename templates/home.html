@@ -19,7 +19,9 @@
 <meta property="og:type" content="website"><meta property="og:site_name" content="Reachmark"><meta property="og:locale" content="en_US"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}"><meta property="og:image:alt" content="Reachmark"><meta name="twitter:image" content="{{ seo.og_image }}">{% endif %}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest">
-<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css"><link rel="stylesheet" href="/static/home-product.css"><style>@media(max-width:760px){.rm-home-sticky{position:fixed;z-index:1001;left:14px;right:14px;bottom:12px;display:block;text-align:center;background:#d6f269;color:#101510;text-decoration:none;font:800 14px Manrope,Arial,sans-serif;padding:15px 18px;border-radius:12px;box-shadow:0 8px 28px #10151040}.rm-home-bottom-space{height:74px}}.rm-home-sticky{display:none}@media(max-width:760px){.rm-home-sticky{display:block}}</style>
+<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css"><link rel="stylesheet" href="/static/home-product.css"><style>
+.rm-growth-stage{padding:24px 24px 54px!important;max-width:1120px;margin:auto}.rm-growth-preview{background:#f5f6f0;border:1px solid #444b40;border-radius:20px;overflow:hidden;box-shadow:0 32px 90px #0005;color:#101510;max-width:980px;margin:auto}.rm-preview-top{height:46px;background:#202820;color:#bfc8b8;display:flex;align-items:center;gap:14px;padding:0 18px;font-size:10px;font-weight:800;letter-spacing:1.2px}.rm-preview-dots{display:flex;gap:5px}.rm-preview-dots i{width:7px;height:7px;border-radius:50%;background:#596253}.rm-preview-label{margin-left:auto;background:#d6f269;color:#101510;border-radius:5px;padding:5px 8px}.rm-preview-body{padding:clamp(20px,4vw,38px)}.rm-preview-heading{display:flex;justify-content:space-between;gap:22px;align-items:center}.rm-preview-heading small{font-size:10px;letter-spacing:1.4px;color:#71824e;font-weight:900}.rm-preview-heading h2{font-size:clamp(22px,3.3vw,34px);letter-spacing:-1px;margin:8px 0}.rm-preview-heading p{color:#697064;font-size:13px;line-height:1.6;margin:0}.rm-preview-score{flex:0 0 112px;width:112px;height:112px;border-radius:50%;border:7px solid #d6f269;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff}.rm-preview-score strong{font-size:31px;line-height:1}.rm-preview-score span{font-size:10px;color:#697064}.rm-preview-score small{font-size:9px;margin-top:4px;color:#697064}.rm-preview-checks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:25px}.rm-preview-checks>div{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e1e5d9;border-radius:11px;padding:14px}.rm-preview-icon{width:34px;height:34px;display:grid;place-items:center;background:#eef3df;border-radius:9px;font-weight:900}.rm-preview-checks b,.rm-preview-checks small{display:block}.rm-preview-checks b{font-size:12px}.rm-preview-checks small{font-size:10px;color:#697064;margin-top:4px}.rm-preview-checks em{font-size:10px;font-style:normal;font-weight:800;color:#667a35;margin-left:auto}.rm-preview-checks .rm-preview-good{color:#35714a}.rm-preview-foot{border-top:1px solid #e1e5d9;margin-top:18px;padding-top:16px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:11px}.rm-preview-foot span{color:#697064}.rm-preview-foot span i{display:inline-block;width:7px;height:7px;background:#9ab746;border-radius:50%;margin-right:6px}.rm-preview-foot a{font-weight:900;color:#26351d;text-decoration:none}@media(max-width:600px){.rm-growth-stage{padding:16px 16px 38px!important}.rm-preview-heading{align-items:flex-start}.rm-preview-score{flex-basis:82px;width:82px;height:82px;border-width:5px}.rm-preview-score strong{font-size:24px}.rm-preview-checks{grid-template-columns:1fr}.rm-preview-checks>div{padding:12px}.rm-preview-foot{flex-direction:column}}
+</style><style>@media(max-width:760px){.rm-home-sticky{position:fixed;z-index:1001;left:14px;right:14px;bottom:12px;display:block;text-align:center;background:#d6f269;color:#101510;text-decoration:none;font:800 14px Manrope,Arial,sans-serif;padding:15px 18px;border-radius:12px;box-shadow:0 8px 28px #10151040}.rm-home-bottom-space{height:74px}}.rm-home-sticky{display:none}@media(max-width:760px){.rm-home-sticky{display:block}}</style>
 <script src="/static/i18n.js"></script>
 {% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}
 {% include '_theme_head.html' %}</head>
@@ -58,49 +60,18 @@
       </div>
     </div>
 
-    <div class="ed-stage" aria-hidden="true">
-      <div class="ed-console" data-hx
-           data-demos='[{"name":"Willow Grove Dental","cat":{{ t('home.hx_c1')|tojson }},"url":"willowgrove.example","score":78,"speed":"4.8s"},{"name":"Northstar Family Law","cat":{{ t('home.hx_c2')|tojson }},"url":"northstarlaw.example","score":64,"speed":"3.9s"},{"name":"Ember &amp; Oak","cat":{{ t('home.hx_c3')|tojson }},"url":"emberandoak.example","score":71,"speed":"5.6s"}]'>
-        <div class="ed-chrome">
-          <span class="ed-dots"><i></i><i></i><i></i></span>
-          <span class="ed-url">{{ icon('lock', 12) }}<b data-hx-url>willowgrove.example</b><span class="ed-caret"></span></span>
-          <span class="ed-badge">{{ t('home.hx_demo') }}</span>
-        </div>
-        <div class="ed-app">
-          <nav class="ed-side">
-            <span class="ed-side-brand">{{ brand_mark(26) }}<b>Reachmark</b></span>
-            <span class="ed-nav">{{ icon('compass', 15) }}{{ t('ws.n_global') }}</span>
-            <span class="ed-nav on">{{ icon('gauge', 15) }}{{ t('ws.n_health') }}</span>
-            <span class="ed-nav">{{ icon('file-text', 15) }}{{ t('ws.n_leads') }}</span>
-            <span class="ed-nav">{{ icon('send', 15) }}{{ t('ws.n_outreach') }}</span>
-            <span class="ed-nav">{{ icon('users', 15) }}{{ t('ws.n_crew') }}</span>
-          </nav>
-          <div class="ed-main">
-            <header class="ed-mhead">
-              <div class="ed-biz"><span class="ed-av" data-hx-av>W</span><div><b data-hx-name>Willow Grove Dental</b><small data-hx-cat>{{ t('home.hx_c1') }}</small></div></div>
-              <span class="ed-state"><i></i><span data-hx-state data-scan="{{ t('home.hx_scan') }}" data-done="{{ t('home.hx_panel') }}">{{ t('home.hx_panel') }}</span></span>
-            </header>
-            <div class="ed-progress"><span data-hx-bar></span></div>
-            <div class="ed-kpis">
-              <div class="ed-kpi ed-kpi-score">
-                <div class="ed-ring"><svg viewBox="0 0 48 48"><circle class="ed-ring-bg" cx="24" cy="24" r="20"/><circle class="ed-ring-fg" data-hx-ring cx="24" cy="24" r="20" pathLength="100"/></svg><b data-hx-score>78</b></div>
-                <span><small>{{ t('home.hx_score') }}</small><em>/ 100</em></span>
-              </div>
-              <div class="ed-kpi"><small>{{ t('home.report_iss_l') }}</small><b>{{ t('home.report_iss') }}</b></div>
-              <div class="ed-kpi"><small>{{ t('home.report_rank_l') }}</small><b class="ed-hi">{{ t('home.report_rank') }}</b></div>
-            </div>
-            <ul class="ed-rows">
-              <li class="is-bad" data-hx-row><span class="ed-st">{{ icon('x', 13) }}</span><span class="ed-lbl">{{ icon('mail', 15) }}{{ t('home.hx_f1') }}</span><b>{{ t('home.hx_f1v') }}</b></li>
-              <li class="is-warn" data-hx-row><span class="ed-st">!</span><span class="ed-lbl">{{ icon('smartphone', 15) }}{{ t('home.hx_f2') }}</span><b>{{ t('home.hx_f2v') }}</b></li>
-              <li class="is-warn" data-hx-row><span class="ed-st">!</span><span class="ed-lbl">{{ icon('clock', 15) }}{{ t('home.hx_f3') }}</span><b data-hx-speed>4.8s</b></li>
-              <li class="is-ok" data-hx-row><span class="ed-st">{{ icon('check', 13) }}</span><span class="ed-lbl">{{ icon('lock', 15) }}{{ t('home.hx_f4') }}</span><b>{{ t('home.hx_f4v') }}</b></li>
-            </ul>
-            <div class="ed-out" data-hx-out>
-              <span class="ed-out-ic">{{ icon('mail-check', 18) }}</span>
-              <span class="ed-out-txt"><b>{{ t('home.hx_ready') }}</b><small>{{ t('home.hx_draft') }}</small></span>
-              <span class="ed-out-btn">{{ t('home.hx_approve') }}{{ icon('arrow-right', 14) }}</span>
-            </div>
+    <div class="ed-stage rm-growth-stage">
+      <div class="rm-growth-preview">
+        <div class="rm-preview-top"><span class="rm-preview-dots"><i></i><i></i><i></i></span><span>REACHMARK DIGITAL / GROWTH AUDIT</span><span class="rm-preview-label">SAMPLE</span></div>
+        <div class="rm-preview-body">
+          <div class="rm-preview-heading"><div><small>ILLUSTRATIVE REPORT PREVIEW</small><h2>Website growth opportunities</h2><p>See what a visitor may experience—and what to improve first.</p></div><div class="rm-preview-score"><strong>72</strong><span>/ 100</span><small>Sample score</small></div></div>
+          <div class="rm-preview-checks">
+            <div><span class="rm-preview-icon">↗</span><span><b>Conversion path</b><small>Contact and booking actions</small></span><em>Review</em></div>
+            <div><span class="rm-preview-icon">▣</span><span><b>Mobile experience</b><small>Layout and tap-friendly actions</small></span><em>Review</em></div>
+            <div><span class="rm-preview-icon">⌕</span><span><b>SEO foundations</b><small>Titles, headings and crawl signals</small></span><em>Check</em></div>
+            <div><span class="rm-preview-icon">✓</span><span><b>Trust signals</b><small>Security and business information</small></span><em class="rm-preview-good">Observed</em></div>
           </div>
+          <div class="rm-preview-foot"><span><i></i> Evidence-based observations</span><a href="/sample-report">Explore sample report →</a></div>
         </div>
       </div>
     </div>
