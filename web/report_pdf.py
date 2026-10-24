@@ -12,9 +12,10 @@ from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable,
-    KeepTogether,
+    KeepTogether, Image as ReportImage,
 )
 
 
@@ -34,6 +35,37 @@ def _text(value, limit=3000):
 def _safe_url(value):
     value = str(value or '').strip()
     return value if value.startswith(('https://', 'http://', 'mailto:', 'tel:')) else ''
+
+
+def _load_observed_logo(url):
+    """Fetch only a small, public raster logo through the audit's SSRF-checked fetcher."""
+    if not _safe_url(url):
+        return None
+    try:
+        from web.web_probe import _fetch_public
+        response, reason = _fetch_public(url, timeout=4, max_bytes=700000)
+        if response is None:
+            return None
+        try:
+            content_type = (response.headers.get('content-type') or '').split(';', 1)[0].strip().lower()
+            if content_type not in ('image/png', 'image/jpeg'):
+                return None
+            raw = response.raw.read(700001, decode_content=True) or b''
+            if len(raw) > 700000:
+                return None
+            if not (raw.startswith(b'\\x89PNG\\r\\n\\x1a\\n') or raw.startswith(b'\\xff\\xd8\\xff')):
+                return None
+            reader = ImageReader(BytesIO(raw))
+            width, height = reader.getSize()
+            if not width or not height:
+                return None
+            scale = min((25 * mm) / width, (18 * mm) / height)
+            return ReportImage(BytesIO(raw), width=width * scale, height=height * scale)
+        finally:
+            response.close()
+    except Exception:
+        # Missing or unsupported logo assets never prevent a report being generated.
+        return None
 
 
 def build_report_pdf(report, lead, brand_theme):
@@ -83,8 +115,9 @@ def build_report_pdf(report, lead, brand_theme):
     logo_url = _safe_url(theme.get('logo'))
     favicon_url = _safe_url(theme.get('favicon'))
     logo_source = logo_url or favicon_url
+    logo_flow = _load_observed_logo(logo_source) if logo_source else None
     top = Table([
-        [Paragraph('<b>WEBSITE GROWTH AUDIT</b>', styles['small']),
+        [logo_flow or Paragraph('<b>WEBSITE GROWTH AUDIT</b>', styles['small']),
          Paragraph('<b>PREPARED BY REACHMARK</b>', styles['small'])],
         [Paragraph(_text(name, 180), styles['title']),
          Paragraph('Reachmark Digital<br/>reachmarkdigital.xyz', styles['small'])],
