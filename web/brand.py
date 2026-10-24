@@ -217,9 +217,6 @@ def extract_brand(html, base_url, max_images=6):
             if candidate:
                 pack['favicon'] = candidate
                 break
-    if not pack['favicon']:
-        pack['favicon'] = _absolute(base_url, '/favicon.ico')
-
     # Observe declared surface/text colors separately from accent colors.
     css_text = css_haystack + ' ' + ' '.join(
         (attrs.get('style') or '') for attrs in [_attrs(t) for t in IMG_TAG_RE.findall(html[:300000])]
