@@ -7,7 +7,8 @@ invented: if a signal was not observed, the report says so.
 from __future__ import annotations
 
 import json, secrets, uuid
-from flask import jsonify, render_template, request, abort, session
+from flask import jsonify, render_template, request, abort, session, send_file
+from io import BytesIO
 
 from web.web_probe import gaps_from
 from web.intelligence import _fit
@@ -888,3 +889,23 @@ def register_opportunity(app, db, now, log):
         from web.brand import report_theme
         return render_template('opportunity-report.html', report=report, lead=lead, asset=asset,
                                brand_theme=report_theme(report.get('evidence', {}).get('brand_profile', {})))
+
+    @app.get('/o/<token>/pdf')
+    def opportunity_public_pdf(token):
+        """Export the saved public report; the unguessable report token is the access key."""
+        with db() as c:
+            row = c.execute('SELECT * FROM opportunity_reports WHERE token=?', (token,)).fetchone()
+            if not row:
+                abort(404)
+            lead_row = c.execute('SELECT * FROM leads WHERE id=?', (row['lead_id'],)).fetchone()
+        report = serialize_row(row)
+        lead = dict(lead_row) if lead_row else {}
+        from web.brand import report_theme
+        from web.report_pdf import build_report_pdf
+        brand_theme = report_theme((report.get('evidence') or {}).get('brand_profile', {}))
+        payload = build_report_pdf(report, lead, brand_theme)
+        name = brand_theme.get('site_name') or lead.get('name') or 'website'
+        slug = ''.join(ch.lower() if ch.isalnum() else '-' for ch in str(name))
+        slug = '-'.join(part for part in slug.split('-') if part)[:60] or 'website'
+        return send_file(BytesIO(payload), mimetype='application/pdf', as_attachment=True,
+                         download_name=f'reachmark-{slug}-growth-audit.pdf')
