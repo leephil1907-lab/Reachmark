@@ -14,7 +14,7 @@ def test_homepage_leads_with_interactive_product_preview():
     assert 'id="x-audit-form"' in home
     assert '/api/public/audit' in home
     assert 'sample digital opportunity report' in home.lower()
-    assert 'sample businesses show the report experience' in home.lower()
+    assert 'this is an illustrative sample, not a real client result' in home.lower()
     assert 'fictional' not in home.lower()
     assert 'not measured' not in home.lower()
 
