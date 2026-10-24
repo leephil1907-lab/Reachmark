@@ -7,7 +7,8 @@ invented: if a signal was not observed, the report says so.
 from __future__ import annotations
 
 import json, secrets, uuid
-from flask import jsonify, render_template, request, abort, session
+from flask import jsonify, render_template, request, abort, session, send_file
+from io import BytesIO
 
 from web.web_probe import gaps_from
 from web.intelligence import _fit
@@ -509,6 +510,8 @@ def build_report(db, lead, now, observe_live=False):
         'disclaimer': packed.get('disclaimer') or (
             'A ranked list of observed gaps at this point in time — not a claim that the business wants a new website.'
         ),
+        'brand_profile': ((audit or {}).get('observations') or {}).get('brand', {})
+            if isinstance((audit or {}).get('observations'), dict) else {},
     }
     return {
         'score': score,
@@ -837,7 +840,10 @@ def register_opportunity(app, db, now, log):
             funnel_record(db, now, 'sample_viewed')
         except Exception:
             pass
-        return render_template('opportunity-report.html', report=report, lead=lead, asset=asset, sample=True)
+        from web.brand import report_theme
+        return render_template('opportunity-report.html', report=report, lead=lead, asset=asset,
+                               brand_theme=report_theme(report.get('evidence', {}).get('brand_profile', {})),
+                               sample=True)
 
     @app.get('/o/<token>')
     def opportunity_public(token):
@@ -880,4 +886,36 @@ def register_opportunity(app, db, now, log):
             if gprow:
                 prop_url = f"/proposal/{gprow['token']}"
         asset = compose_sales_asset(lead, report, prototype_url=proto_url, proposal_url=prop_url, book=book)
-        return render_template('opportunity-report.html', report=report, lead=lead, asset=asset)
+        from web.brand import report_theme
+        return render_template('opportunity-report.html', report=report, lead=lead, asset=asset,
+                               brand_theme=report_theme(report.get('evidence', {}).get('brand_profile', {})))
+
+    @app.get('/o/<token>/pdf')
+    def opportunity_public_pdf(token):
+        """Export the saved public report; the unguessable report token is the access key."""
+        with db() as c:
+            row = c.execute('SELECT * FROM opportunity_reports WHERE token=?', (token,)).fetchone()
+            if not row:
+                abort(404)
+            lead_row = c.execute('SELECT * FROM leads WHERE id=?', (row['lead_id'],)).fetchone()
+        report = serialize_row(row)
+        lead = dict(lead_row) if lead_row else {}
+        from web.brand import report_theme
+        from web.report_pdf import build_report_pdf, report_pdf_cache_path, save_report_pdf
+        brand_theme = report_theme((report.get('evidence') or {}).get('brand_profile', {}))
+        cache_path = report_pdf_cache_path(report.get('id'))
+        payload = b''
+        if cache_path:
+            try:
+                with open(cache_path, 'rb') as stream:
+                    payload = stream.read()
+            except OSError:
+                payload = b''
+        if not payload.startswith(b'%PDF-'):
+            payload = build_report_pdf(report, lead, brand_theme)
+            save_report_pdf(report.get('id'), payload)
+        name = brand_theme.get('site_name') or lead.get('name') or 'website'
+        slug = ''.join(ch.lower() if ch.isalnum() else '-' for ch in str(name))
+        slug = '-'.join(part for part in slug.split('-') if part)[:60] or 'website'
+        return send_file(BytesIO(payload), mimetype='application/pdf', as_attachment=True,
+                         download_name=f'reachmark-{slug}-growth-audit.pdf')

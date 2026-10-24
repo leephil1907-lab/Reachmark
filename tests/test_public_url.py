@@ -29,7 +29,9 @@ class PublicUrlTests(unittest.TestCase):
         self.assertEqual(faq['@type'], 'FAQPage')
         blob = str(faq)
         self.assertIn('support@reachmarkdigital.xyz', blob)
-        self.assertIn('$0', blob)
+        self.assertIn('Starter Pro', blob)
+        self.assertIn('$19', blob)
+        self.assertIn('$59', blob)
         self.assertNotIn('4.8', blob)
         self.assertNotIn('127 reviews', blob)
 

@@ -89,9 +89,11 @@ def extract_brand(html, base_url, max_images=6):
      'fonts': [...up to 6...], 'site_name': str, 'title': str, 'description': str}
     Empty strings / lists mean "not observed" — never invented.
     """
-    pack = {'colors': [], 'theme_color': '', 'logo': '', 'logo_source': '',
-            'images': [], 'fonts': [], 'site_name': '', 'title': '',
-            'description': ''}
+    pack = {'colors': [], 'theme_color': '', 'background_color': '', 'text_color': '',
+            'logo': '', 'logo_source': '', 'favicon': '', 'images': [], 'fonts': [],
+            'site_name': '', 'title': '', 'description': '', 'navigation': [],
+            'contact_details': [], 'social_links': [], 'service_description': '',
+            'homepage_screenshot': '', 'mobile_screenshot': ''}
     html = html or ''
     if not html.strip():
         return pack
@@ -205,4 +207,143 @@ def extract_brand(html, base_url, max_images=6):
             if len(fonts) >= 6:
                 break
     pack['fonts'] = fonts
+
+    # Keep the favicon distinct from a full logo; it is the explicit fallback
+    # when a larger logo asset is not available.
+    for attrs in links:
+        rel = (attrs.get('rel') or '').lower().split()
+        if 'icon' in rel or ('shortcut' in rel and 'icon' in rel):
+            candidate = _absolute(base_url, attrs.get('href', ''))
+            if candidate:
+                pack['favicon'] = candidate
+                break
+    # Observe declared surface/text colors separately from accent colors.
+    css_text = css_haystack + ' ' + ' '.join(
+        (attrs.get('style') or '') for attrs in [_attrs(t) for t in IMG_TAG_RE.findall(html[:300000])]
+    )
+    for prop, key in (('background(?:-color)?', 'background_color'), ('color', 'text_color')):
+        match = re.search(r'(?i)(?:^|[;{}])\s*' + prop + r'\s*:\s*(#[0-9a-f]{3}(?:[0-9a-f]{3})?)', css_text)
+        if match:
+            pack[key] = _normalise_hex(match.group(1))
+
+    # Navigation is only claimed when an actual <nav> element is present.
+    nav_blocks = re.findall(r'(?is)<nav\b[^>]*>(.*?)</nav\s*>', html[:300000])
+    navigation = []
+    for block in nav_blocks:
+        for anchor in re.findall(r'(?is)<a\b[^>]*>.*?</a\s*>', block):
+            tag_match = re.match(r'(?is)<a\b[^>]*>', anchor)
+            attrs = _attrs(tag_match.group(0)) if tag_match else {}
+            href = _absolute(base_url, attrs.get('href', ''))
+            label = re.sub(r'(?is)<[^>]+>', ' ', anchor)
+            label = re.sub(r'\s+', ' ', label).strip()[:80]
+            if href and label and not any(item['url'] == href for item in navigation):
+                navigation.append({'label': label, 'url': href})
+            if len(navigation) >= 20:
+                break
+        if len(navigation) >= 20:
+            break
+    pack['navigation'] = navigation
+
+    # Only include contact endpoints explicitly present in href attributes.
+    contacts, socials = [], []
+    for tag in re.findall(r'(?is)<a\b[^>]*>', html[:300000]):
+        attrs = _attrs(tag)
+        href = (attrs.get('href') or '').strip()
+        low = href.lower()
+        if low.startswith(('mailto:', 'tel:')):
+            value = href[:200]
+            if value not in contacts:
+                contacts.append(value)
+        absolute = _absolute(base_url, href)
+        if absolute and any(domain in urlparse(absolute).netloc.lower() for domain in
+                            ('facebook.com', 'instagram.com', 'linkedin.com', 'tiktok.com',
+                             'youtube.com', 'x.com', 'twitter.com', 'threads.net')):
+            if absolute not in socials:
+                socials.append(absolute)
+    pack['contact_details'] = contacts[:12]
+    pack['social_links'] = socials[:12]
+    pack['service_description'] = pack['description'] or pack['title']
+    # Empty screenshot paths explicitly mean no screenshot was captured.
+    pack['homepage_screenshot'] = ''
+    pack['mobile_screenshot'] = ''
     return pack
+
+
+
+def _rgb(hex_colour):
+    value = _normalise_hex(hex_colour or '')
+    if not re.fullmatch(r'#[0-9a-f]{6}', value):
+        return None
+    return tuple(int(value[i:i + 2], 16) for i in (1, 3, 5))
+
+
+def _luminance(rgb):
+    def channel(v):
+        v = v / 255
+        return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+    r, g, b = (channel(v) for v in rgb)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def _contrast(a, b):
+    la, lb = _luminance(a), _luminance(b)
+    return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+
+
+def _mix(hex_colour, target, amount):
+    rgb = _rgb(hex_colour)
+    if not rgb:
+        return '#202820'
+    other = _rgb(target) or (16, 21, 16)
+    vals = [round(v * (1 - amount) + w * amount) for v, w in zip(rgb, other)]
+    return '#' + ''.join(f'{v:02x}' for v in vals)
+
+
+def report_theme(brand):
+    """Build a readable report palette from observed brand data; never invent identity."""
+    brand = brand if isinstance(brand, dict) else {}
+    candidates = [brand.get('theme_color')] + list(brand.get('colors') or [])
+    primary = next((c.lower() for c in candidates if _rgb(c)), '')
+    if not primary:
+        primary = '#d6f269'
+    rgb = _rgb(primary)
+    white, charcoal = (255, 255, 255), (16, 21, 16)
+    # A very light brand colour remains an accent; use a darkened variant for headings.
+    if _contrast(rgb, white) < 4.5:
+        strong = _mix(primary, '#101510', 0.48)
+    else:
+        strong = primary
+    strong_rgb = _rgb(strong) or charcoal
+    on_strong = '#ffffff' if _contrast(strong_rgb, white) >= _contrast(strong_rgb, charcoal) else '#101510'
+    secondary = next((c.lower() for c in (brand.get('colors') or [])
+                      if _rgb(c) and c.lower() != primary), '')
+    return {
+        'primary': primary,
+        'strong': strong,
+        'on_primary': on_strong,
+        'secondary': secondary,
+        'logo': (brand.get('logo') or brand.get('favicon') or '').strip(),
+        'logo_source': (brand.get('logo_source') or ('favicon' if not brand.get('logo') and brand.get('favicon') else '')).strip(),
+        'favicon': (brand.get('favicon') or '').strip(),
+        'background_color': (brand.get('background_color') or '').strip(),
+        'text_color': (brand.get('text_color') or '').strip(),
+        'navigation': (brand.get('navigation') or [])[:20],
+        'contact_details': (brand.get('contact_details') or [])[:12],
+        'social_links': (brand.get('social_links') or [])[:12],
+        'service_description': (brand.get('service_description') or '').strip(),
+        'homepage_screenshot': (brand.get('homepage_screenshot') or '').strip(),
+        'mobile_screenshot': (brand.get('mobile_screenshot') or '').strip(),
+        'site_name': (brand.get('site_name') or '').strip(),
+        'title': (brand.get('title') or '').strip(),
+        'description': (brand.get('description') or '').strip(),
+        'fonts': (brand.get('fonts') or [])[:3],
+        'detected': bool(brand.get('logo') or brand.get('colors') or brand.get('theme_color')
+                         or brand.get('favicon') or brand.get('site_name') or brand.get('title')),
+        'background': '#f5f6f0',
+        'text': '#202820',
+        'muted': '#687064',
+        'reachmark': '#d6f269',
+        'severity_critical': '#b42318',
+        'severity_warning': '#b54708',
+        'severity_success': '#247044',
+    }

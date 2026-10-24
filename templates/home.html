@@ -8,8 +8,8 @@
 {% if ga_id is defined and ga_id %}<script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','{{ ga_id }}');{% if gt_id is defined and gt_id %}gtag('config','{{ gt_id }}');{% endif %}</script>{% endif %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}</title>
-<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">
+<title>{{ seo.title if seo is defined and seo.title else 'Reachmark Digital | Website Audits and Growth Services' }}</title>
+<meta name="description" content="{{ seo.description if seo is defined and seo.description else 'Reachmark Digital helps local businesses turn their websites into stronger sources of enquiries, calls, bookings, and customers. Start with a free website growth audit.' }}">
 {% if seo is defined and seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}
 <meta name="robots" content="{{ 'noindex,follow' if seo is defined and seo.noindex else 'index,follow' }}">
 {% if seo is defined and seo.canonical %}<link rel="canonical" href="{{ seo.canonical }}">{% endif %}
@@ -19,7 +19,9 @@
 <meta property="og:type" content="website"><meta property="og:site_name" content="Reachmark"><meta property="og:locale" content="en_US"><meta property="og:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}"><meta property="og:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">{% if seo is defined and seo.canonical %}<meta property="og:url" content="{{ seo.canonical }}">{% endif %}{% if seo is defined and seo.og_image %}<meta property="og:image" content="{{ seo.og_image }}"><meta property="og:image:alt" content="Reachmark"><meta name="twitter:image" content="{{ seo.og_image }}">{% endif %}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{{ seo.title if seo is defined and seo.title else 'Reachmark — Find potential. Make your mark.' }}"><meta name="twitter:description" content="{{ seo.description if seo is defined and seo.description else 'Find businesses with weak websites, audit them with evidence, and send proposals backed by a Digital Opportunity Report. You approve every send.' }}">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/static/apple-touch-icon-180.png" sizes="180x180"><link rel="manifest" href="/static/manifest.webmanifest">
-<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css"><link rel="stylesheet" href="/static/home-product.css">
+<link rel="stylesheet" href="/static/fonts.css"><link rel="stylesheet" href="/static/header.css"><link rel="stylesheet" href="/static/motion.css"><link rel="stylesheet" href="/static/xdesign.css"><link rel="stylesheet" href="/static/home-product.css"><style>
+.rm-growth-stage{padding:24px 24px 54px!important;max-width:1120px;margin:auto}.rm-growth-preview{background:#f5f6f0;border:1px solid #444b40;border-radius:20px;overflow:hidden;box-shadow:0 32px 90px #0005;color:#101510;max-width:980px;margin:auto}.rm-preview-top{height:46px;background:#202820;color:#bfc8b8;display:flex;align-items:center;gap:14px;padding:0 18px;font-size:10px;font-weight:800;letter-spacing:1.2px}.rm-preview-dots{display:flex;gap:5px}.rm-preview-dots i{width:7px;height:7px;border-radius:50%;background:#596253}.rm-preview-label{margin-left:auto;background:#d6f269;color:#101510;border-radius:5px;padding:5px 8px}.rm-preview-body{padding:clamp(20px,4vw,38px)}.rm-preview-heading{display:flex;justify-content:space-between;gap:22px;align-items:center}.rm-preview-heading small{font-size:10px;letter-spacing:1.4px;color:#71824e;font-weight:900}.rm-preview-heading h2{font-size:clamp(22px,3.3vw,34px);letter-spacing:-1px;margin:8px 0}.rm-preview-heading p{color:#697064;font-size:13px;line-height:1.6;margin:0}.rm-preview-score{flex:0 0 112px;width:112px;height:112px;border-radius:50%;border:7px solid #d6f269;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff}.rm-preview-score strong{font-size:31px;line-height:1}.rm-preview-score span{font-size:10px;color:#697064}.rm-preview-score small{font-size:9px;margin-top:4px;color:#697064}.rm-preview-checks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:25px}.rm-preview-checks>div{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e1e5d9;border-radius:11px;padding:14px}.rm-preview-icon{width:34px;height:34px;display:grid;place-items:center;background:#eef3df;border-radius:9px;font-weight:900}.rm-preview-checks b,.rm-preview-checks small{display:block}.rm-preview-checks b{font-size:12px}.rm-preview-checks small{font-size:10px;color:#697064;margin-top:4px}.rm-preview-checks em{font-size:10px;font-style:normal;font-weight:800;color:#667a35;margin-left:auto}.rm-preview-checks .rm-preview-good{color:#35714a}.rm-preview-foot{border-top:1px solid #e1e5d9;margin-top:18px;padding-top:16px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:11px}.rm-preview-foot span{color:#697064}.rm-preview-foot span i{display:inline-block;width:7px;height:7px;background:#9ab746;border-radius:50%;margin-right:6px}.rm-preview-foot a{font-weight:900;color:#26351d;text-decoration:none}@media(max-width:600px){.rm-growth-stage{padding:16px 16px 38px!important}.rm-preview-heading{align-items:flex-start}.rm-preview-score{flex-basis:82px;width:82px;height:82px;border-width:5px}.rm-preview-score strong{font-size:24px}.rm-preview-checks{grid-template-columns:1fr}.rm-preview-checks>div{padding:12px}.rm-preview-foot{flex-direction:column}}
+</style><style>@media(max-width:760px){.rm-home-sticky{position:fixed;z-index:1001;left:14px;right:14px;bottom:12px;display:block;text-align:center;background:#d6f269;color:#101510;text-decoration:none;font:800 14px Manrope,Arial,sans-serif;padding:15px 18px;border-radius:12px;box-shadow:0 8px 28px #10151040}.rm-home-bottom-space{height:74px}}.rm-home-sticky{display:none}@media(max-width:760px){.rm-home-sticky{display:block}}</style>
 <script src="/static/i18n.js"></script>
 {% if structured is defined %}<script type="application/ld+json">{{ structured|tojson }}</script>{% endif %}
 {% include '_theme_head.html' %}</head>
@@ -32,24 +34,24 @@
   <!-- 1. Hero — editorial headline, then the live audit console on a full-width stage -->
   <section class="x-hero" data-ed="hero" id="top" data-signal>
     <div class="ed-wrap ed-hero-copy">
-      <h1 class="hx-title ed-title" data-split><span class="hx-line">{{ t('home.hx_h1a') }}</span> <em class="hx-line ed-mark">{{ t('home.hx_h1b') }}</em></h1>
+      <h1 class="hx-title ed-title" data-split><span class="hx-line">Your website should bring you</span> <em class="hx-line ed-mark">customers—not lose them.</em></h1>
       <div class="ed-hero-row">
-        <p class="ed-k ed-proof"><span>{{ t('home.proof_find') }}</span><i aria-hidden="true">→</i><span>{{ t('home.proof_diagnose') }}</span><i aria-hidden="true">→</i><span>{{ t('home.proof_approve') }}</span></p>
+        <p class="ed-k ed-proof"><span>Audit your website</span><i aria-hidden="true">→</i><span>Find what blocks enquiries</span><i aria-hidden="true">→</i><span>Fix what matters</span></p>
         <div class="ed-hero-side">
-          <p class="hx-sub">{{ t('home.hx_sub') }}</p>
+          <p class="hx-sub">Reachmark audits your website, identifies what may be blocking enquiries and sales, and gives you a practical plan to improve it. Get evidence-based recommendations across mobile experience, contact paths, SEO basics, trust signals, and conversion opportunities.</p>
           <p class="x-hero-actions">
             {% if client_logged_in %}
             <a class="x-btn lime" href="/dashboard">{{ icon('dashboard', 18) }}<span>{{ t('home.open_dashboard') }}</span></a>
             <a class="x-btn ghost" href="/enquire">{{ icon('pen', 18) }}<span>{{ t('home.cta_project') }}</span></a>
             {% else %}
-            <a class="x-btn lime" data-magnet href="#try-url">{{ icon('scan', 18) }}<span>{{ t('home.hx_cta') }}</span></a>
-            <a class="x-btn ghost" href="/sample-report">{{ icon('file-text', 18) }}<span>{{ t('home.cta_report') }}</span></a>
+            <a class="x-btn lime" data-magnet href="#try-url">{{ icon('scan', 18) }}<span>Get my free website audit</span></a>
+            <a class="x-btn ghost" href="/sample-report">{{ icon('file-text', 18) }}<span>See sample report</span></a>
             {% endif %}
           </p>
           <ul class="hx-trust">
-            <li>{{ icon('globe', 16) }}{{ t('home.hx_t1') }}</li>
-            <li>{{ icon('shield-check', 16) }}{{ t('home.hx_t2') }}</li>
-            <li>{{ icon('sparkles', 16) }}{{ t('home.hx_t3') }}</li>
+            <li>{{ icon('globe', 16) }}Mobile experience</li>
+            <li>{{ icon('shield-check', 16) }}Contact path checks</li>
+            <li>{{ icon('sparkles', 16) }}SEO and trust signals</li>
           </ul>
           {% if not client_logged_in %}
           <p class="x-hero-alt hero-signin">{{ t('home.hero_signin') }} <a href="/signin">{{ t('nav.signin') }}</a></p>
@@ -58,49 +60,18 @@
       </div>
     </div>
 
-    <div class="ed-stage" aria-hidden="true">
-      <div class="ed-console" data-hx
-           data-demos='[{"name":"Willow Grove Dental","cat":{{ t('home.hx_c1')|tojson }},"url":"willowgrove.example","score":78,"speed":"4.8s"},{"name":"Northstar Family Law","cat":{{ t('home.hx_c2')|tojson }},"url":"northstarlaw.example","score":64,"speed":"3.9s"},{"name":"Ember &amp; Oak","cat":{{ t('home.hx_c3')|tojson }},"url":"emberandoak.example","score":71,"speed":"5.6s"}]'>
-        <div class="ed-chrome">
-          <span class="ed-dots"><i></i><i></i><i></i></span>
-          <span class="ed-url">{{ icon('lock', 12) }}<b data-hx-url>willowgrove.example</b><span class="ed-caret"></span></span>
-          <span class="ed-badge">{{ t('home.hx_demo') }}</span>
-        </div>
-        <div class="ed-app">
-          <nav class="ed-side">
-            <span class="ed-side-brand">{{ brand_mark(26) }}<b>Reachmark</b></span>
-            <span class="ed-nav">{{ icon('compass', 15) }}{{ t('ws.n_global') }}</span>
-            <span class="ed-nav on">{{ icon('gauge', 15) }}{{ t('ws.n_health') }}</span>
-            <span class="ed-nav">{{ icon('file-text', 15) }}{{ t('ws.n_leads') }}</span>
-            <span class="ed-nav">{{ icon('send', 15) }}{{ t('ws.n_outreach') }}</span>
-            <span class="ed-nav">{{ icon('users', 15) }}{{ t('ws.n_crew') }}</span>
-          </nav>
-          <div class="ed-main">
-            <header class="ed-mhead">
-              <div class="ed-biz"><span class="ed-av" data-hx-av>W</span><div><b data-hx-name>Willow Grove Dental</b><small data-hx-cat>{{ t('home.hx_c1') }}</small></div></div>
-              <span class="ed-state"><i></i><span data-hx-state data-scan="{{ t('home.hx_scan') }}" data-done="{{ t('home.hx_panel') }}">{{ t('home.hx_panel') }}</span></span>
-            </header>
-            <div class="ed-progress"><span data-hx-bar></span></div>
-            <div class="ed-kpis">
-              <div class="ed-kpi ed-kpi-score">
-                <div class="ed-ring"><svg viewBox="0 0 48 48"><circle class="ed-ring-bg" cx="24" cy="24" r="20"/><circle class="ed-ring-fg" data-hx-ring cx="24" cy="24" r="20" pathLength="100"/></svg><b data-hx-score>78</b></div>
-                <span><small>{{ t('home.hx_score') }}</small><em>/ 100</em></span>
-              </div>
-              <div class="ed-kpi"><small>{{ t('home.report_iss_l') }}</small><b>{{ t('home.report_iss') }}</b></div>
-              <div class="ed-kpi"><small>{{ t('home.report_rank_l') }}</small><b class="ed-hi">{{ t('home.report_rank') }}</b></div>
-            </div>
-            <ul class="ed-rows">
-              <li class="is-bad" data-hx-row><span class="ed-st">{{ icon('x', 13) }}</span><span class="ed-lbl">{{ icon('mail', 15) }}{{ t('home.hx_f1') }}</span><b>{{ t('home.hx_f1v') }}</b></li>
-              <li class="is-warn" data-hx-row><span class="ed-st">!</span><span class="ed-lbl">{{ icon('smartphone', 15) }}{{ t('home.hx_f2') }}</span><b>{{ t('home.hx_f2v') }}</b></li>
-              <li class="is-warn" data-hx-row><span class="ed-st">!</span><span class="ed-lbl">{{ icon('clock', 15) }}{{ t('home.hx_f3') }}</span><b data-hx-speed>4.8s</b></li>
-              <li class="is-ok" data-hx-row><span class="ed-st">{{ icon('check', 13) }}</span><span class="ed-lbl">{{ icon('lock', 15) }}{{ t('home.hx_f4') }}</span><b>{{ t('home.hx_f4v') }}</b></li>
-            </ul>
-            <div class="ed-out" data-hx-out>
-              <span class="ed-out-ic">{{ icon('mail-check', 18) }}</span>
-              <span class="ed-out-txt"><b>{{ t('home.hx_ready') }}</b><small>{{ t('home.hx_draft') }}</small></span>
-              <span class="ed-out-btn">{{ t('home.hx_approve') }}{{ icon('arrow-right', 14) }}</span>
-            </div>
+    <div class="ed-stage rm-growth-stage">
+      <div class="rm-growth-preview">
+        <div class="rm-preview-top"><span class="rm-preview-dots"><i></i><i></i><i></i></span><span>REACHMARK DIGITAL / GROWTH AUDIT</span><span class="rm-preview-label">SAMPLE</span></div>
+        <div class="rm-preview-body">
+          <div class="rm-preview-heading"><div><small>ILLUSTRATIVE REPORT PREVIEW</small><h2>Website growth opportunities</h2><p>See what a visitor may experience—and what to improve first.</p></div><div class="rm-preview-score"><strong>72</strong><span>/ 100</span><small>Sample score</small></div></div>
+          <div class="rm-preview-checks">
+            <div><span class="rm-preview-icon">↗</span><span><b>Conversion path</b><small>Contact and booking actions</small></span><em>Review</em></div>
+            <div><span class="rm-preview-icon">▣</span><span><b>Mobile experience</b><small>Layout and tap-friendly actions</small></span><em>Review</em></div>
+            <div><span class="rm-preview-icon">⌕</span><span><b>SEO foundations</b><small>Titles, headings and crawl signals</small></span><em>Check</em></div>
+            <div><span class="rm-preview-icon">✓</span><span><b>Trust signals</b><small>Security and business information</small></span><em class="rm-preview-good">Observed</em></div>
           </div>
+          <div class="rm-preview-foot"><span><i></i> Evidence-based observations</span><a href="/sample-report">Explore sample report →</a></div>
         </div>
       </div>
     </div>
@@ -125,21 +96,21 @@
     </div>
   </div>
 
-  <!-- 2. Product: interactive sample report -->
+  <!-- 2. Sample audit report: interactive illustrative examples -->
   <section class="rm-workspace-preview" data-motion="fade-up" id="sample-report" aria-labelledby="rm-preview-title">
     <div class="rm-preview-intro">
-      <p class="rm-preview-eyebrow"><span class="ed-n">01 /</span> THE REACHMARK WORKSPACE</p>
-      <h2 id="rm-preview-title">Find the gap. See the evidence. Know what to do next.</h2>
-      <p>Explore a sample Digital Opportunity Report, then run a live check on any public website.</p>
+      <p class="rm-preview-eyebrow"><span class="ed-n">01 /</span> SAMPLE WEBSITE GROWTH REPORT</p>
+      <h2 id="rm-preview-title">See the issue. Understand the impact. Know what to fix first.</h2>
+      <p>Explore illustrative audit findings, then run a free public website check for your own business.</p>
     </div>
     <div class="rm-preview-window" data-rm-preview>
       <header class="rm-preview-bar">
-        <div class="rm-preview-brand"><span class="rm-preview-mark rm-preview-mark--brand">{{ brand_mark(30) }}</span><span>Reachmark <small>Opportunity desk</small></span></div>
-        <span class="rm-preview-state"><i aria-hidden="true"></i> Interactive preview</span>
+        <div class="rm-preview-brand"><span class="rm-preview-mark rm-preview-mark--brand">{{ brand_mark(30) }}</span><span>Reachmark Digital <small>Growth audit</small></span></div>
+        <span class="rm-preview-state"><i aria-hidden="true"></i> Illustrative report</span>
       </header>
       <div class="rm-preview-workspace">
-        <aside class="rm-preview-list" aria-label="Sample business opportunities">
-          <p class="rm-preview-list-label">EXAMPLE OPPORTUNITIES</p>
+        <aside class="rm-preview-list" aria-label="Sample audit scenarios">
+          <p class="rm-preview-list-label">SAMPLE INDUSTRIES</p>
           <button type="button" class="rm-preview-choice is-active" data-preview-select="clinic" aria-pressed="true">
             <span class="rm-preview-choice-type">Healthcare · sample</span>
             <strong>Willow Grove Dental</strong>
@@ -176,13 +147,13 @@
             <p id="rm-preview-next">Review the mobile appointment path and make the primary contact action easy to spot.</p>
           </div>
           <div class="rm-preview-actions">
-            <a class="x-btn lime" data-magnet href="#try-url">Check a real website {{ icon('arrow-down', 16) }}</a>
+            <a class="x-btn lime" data-magnet href="#try-url">Audit my website {{ icon('arrow-down', 16) }}</a>
             <a class="rm-preview-report-link" href="/sample-report">Open sample report</a>
           </div>
         </div>
       </div>
     </div>
-    <p class="rm-preview-disclaimer">{{ icon('info', 15) }} Sample businesses show the report experience. Live reports are generated from the public listing and website checks available for the business you select.</p>
+    <p class="rm-preview-disclaimer">{{ icon('info', 15) }} This is an illustrative sample, not a real client result. Your free check reports only observations the available public website checks can support.</p>
   </section>
 
   <!-- 3. Try it: live URL check -->
@@ -306,19 +277,48 @@
     <p class="x-concepts-all"><a class="x-btn ghost" href="/showcase">{{ t('home.concepts_all') }}{{ icon('arrow-right', 16) }}</a></p>
   </section>
 
-  <!-- 9. Plans -->
+  <!-- Agency services are distinct from Workspace subscriptions. -->
+  <section class="gp-section" style="padding:72px 24px;background:#f5f6f0;color:#101510" aria-labelledby="home-services-title">
+    <div style="max-width:1120px;margin:0 auto">
+      <p class="rm-preview-eyebrow" style="color:#71824e;font-size:12px;font-weight:900;letter-spacing:1.5px">REACHMARK DIGITAL SERVICES</p>
+      <h2 id="home-services-title" style="font-size:clamp(30px,4vw,44px);letter-spacing:-.04em;max-width:720px;margin:12px 0">A clear path from website audit to ongoing growth.</h2>
+      <p style="max-width:680px;color:#697064;line-height:1.8">Start with evidence, fix the most important barriers, then improve your online customer journey over time.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px;margin-top:28px">
+        <article style="background:#fff;border:1px solid #e1e5d9;border-radius:15px;padding:22px"><h3>Free Growth Audit</h3><p style="color:#697064;line-height:1.7;font-size:14px">Identify observable issues in mobile experience, contact paths, SEO basics, trust, and technical health.</p><a style="font-weight:800;color:#26351d" href="/free-website-audit">Run free audit →</a></article>
+        <article style="background:#fff;border:1px solid #e1e5d9;border-radius:15px;padding:22px"><h3>Website Fix Sprint</h3><p style="color:#697064;line-height:1.7;font-size:14px">Implement agreed high-priority fixes that make your site clearer and easier to use.</p><a style="font-weight:800;color:#26351d" href="/contact">Discuss a fix sprint →</a></article>
+        <article style="background:#fff;border:1px solid #e1e5d9;border-radius:15px;padding:22px"><h3>Local Visibility Setup</h3><p style="color:#697064;line-height:1.7;font-size:14px">Improve local information consistency, service pages, and Google Business Profile foundations.</p><a style="font-weight:800;color:#26351d" href="/contact">Discuss local visibility →</a></article>
+        <article style="background:#fff;border:1px solid #e1e5d9;border-radius:15px;padding:22px"><h3>Monthly Growth Retainer</h3><p style="color:#697064;line-height:1.7;font-size:14px">Ongoing website improvements, conversion optimization, and agreed reporting.</p><a style="font-weight:800;color:#26351d" href="/contact">Discuss monthly support →</a></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Workspace software subscription plans -->
   <section class="x-plans" id="plans-preview" aria-label="{{ t('home.price_h') }}">
     <div class="x-plans-head">
-      <p class="ed-k"><span class="ed-n">08 /</span> {{ t('nav.plans') }}</p>
-      <h2>{{ t('home.price_h') }}</h2>
-      <p>{{ t('home.price_p') }}</p>
+      <p class="ed-k"><span class="ed-n">08 /</span> REACHMARK WORKSPACE SOFTWARE PLANS</p>
+      <h2>Software plans for agencies and independent professionals</h2>
+      <p>These subscriptions are for Reachmark Workspace software—not done-for-you agency services. For website fixes, local visibility, or ongoing growth support, <a href="/services">explore Reachmark Digital services</a>.</p>
     </div>
     <div class="x-plans-grid">
       <article data-motion="fade-up">{{ icon('sparkles', 20, 'x-plan-ic') }}<small>Free</small><b>$0</b><p>{{ t('home.price_free') }}</p><a href="/signup">{{ t('home.price_free_cta') }}</a></article>
       <article data-motion="fade-up" data-delay="90">{{ icon('search', 20, 'x-plan-ic') }}<small>Starter</small><b>$19</b><p>{{ t('home.price_st') }}</p><a href="/pricing">{{ t('home.price_st_cta') }}</a></article>
-      <article class="on" data-motion="fade-up" data-delay="180">{{ icon('send', 20, 'x-plan-ic') }}<small>Pro</small><b>$59</b><p>{{ t('home.price_pro') }}</p><a href="/pricing">{{ t('home.price_pro_cta') }}</a></article>
+      <article class="on" data-motion="fade-up" data-delay="180">{{ icon('send', 20, 'x-plan-ic') }}<small>Starter Pro</small><b>$59</b><p>Workspace tools for saved audits, reports, and outreach workflows.</p><a href="/pricing">See Starter Pro</a></article>
     </div>
     <p class="x-plans-note"><a href="/pricing">{{ t('home.price_all') }}</a></p>
+  </section>
+
+  <section class="gp-section" style="padding:64px 24px;background:#fff;color:#101510" aria-labelledby="home-faq-title">
+    <div style="max-width:900px;margin:0 auto">
+      <p class="rm-preview-eyebrow" style="color:#71824e;font-size:12px;font-weight:900;letter-spacing:1.5px">COMMON QUESTIONS</p>
+      <h2 id="home-faq-title" style="font-size:clamp(30px,4vw,42px);letter-spacing:-.04em;margin:12px 0 24px">What to know before you start.</h2>
+      <div style="display:grid;gap:10px">
+        <details style="border:1px solid #e1e5d9;border-radius:12px;padding:18px 20px"><summary style="font-weight:800;cursor:pointer">What does the free website audit check?</summary><p style="color:#697064;line-height:1.7">It checks accessible public website signals such as contact paths, mobile experience, SEO basics, trust elements, and technical responses. Results depend on what the website makes available to the checker.</p></details>
+        <details style="border:1px solid #e1e5d9;border-radius:12px;padding:18px 20px"><summary style="font-weight:800;cursor:pointer">How long does it take?</summary><p style="color:#697064;line-height:1.7">The initial public check runs after submission. Timing depends on the website response and whether it limits automated access; a blocked check is reported as inconclusive rather than a confirmed fault.</p></details>
+        <details style="border:1px solid #e1e5d9;border-radius:12px;padding:18px 20px"><summary style="font-weight:800;cursor:pointer">Is my data private?</summary><p style="color:#697064;line-height:1.7">The initial audit checks public website information. Review our <a href="/privacy">Privacy Policy</a> for details about information handling.</p></details>
+        <details style="border:1px solid #e1e5d9;border-radius:12px;padding:18px 20px"><summary style="font-weight:800;cursor:pointer">Can Reachmark fix the issues?</summary><p style="color:#697064;line-height:1.7">Yes. Reachmark Digital offers scoped website fixes, local visibility setup, and ongoing growth support. Start with an audit, then discuss the fixes you want implemented.</p></details>
+        <details style="border:1px solid #e1e5d9;border-radius:12px;padding:18px 20px"><summary style="font-weight:800;cursor:pointer">Do I need an account?</summary><p style="color:#697064;line-height:1.7">You can run the initial public website check without creating an account. Additional workspace features and saved reports may require an account or paid plan.</p></details>
+      </div>
+    </div>
   </section>
 
   <!-- 10. Founder -->
@@ -335,21 +335,21 @@
   <!-- 11. Final call to action — two clear paths -->
   <section class="x-cta" data-ed="cta" data-motion="fade-up">
     <div class="ed-cta-head">
-      <p class="ed-k">{{ t('home.foot_started') }}</p>
-      <h2>{{ t('home.h1a') }} <em>{{ t('home.h1b') }}</em></h2>
+      <p class="ed-k">YOUR NEXT STEP</p>
+      <h2>Find out what your website may be costing you.</h2>
     </div>
     <div class="ed-paths">
-      <a class="ed-path ed-spot" href="{{ '/dashboard' if client_logged_in else '/signup' }}">
-        <span class="ed-k">{{ t('home.who_design') }}</span>
-        <b>{{ t('home.open_dashboard') if client_logged_in else t('nav.signup') }}</b>
-        <span class="ed-path-p">{{ t('home.sub') }}</span>
-        <span class="ed-go">{{ t('home.open_dashboard') if client_logged_in else t('home.price_free_cta') }}{{ icon('arrow-up-right', 16) }}</span>
+      <a class="ed-path ed-spot" href="/free-website-audit">
+        <span class="ed-k">FOR BUSINESS OWNERS</span>
+        <b>Get my free website audit</b>
+        <span class="ed-path-p">See observable issues affecting mobile experience, contact paths, SEO basics, and trust signals.</span>
+        <span class="ed-go">Audit my website {{ icon('arrow-up-right', 16) }}</span>
       </a>
-      <a class="ed-path ed-spot" href="/enquire">
-        <span class="ed-k">{{ t('home.who_need') }}</span>
-        <b>{{ t('home.band_h1') }} {{ t('home.band_h2') }}</b>
-        <span class="ed-path-p">{{ t('home.band_p') }}</span>
-        <span class="ed-go">{{ t('home.need_cta') }}{{ icon('arrow-up-right', 16) }}</span>
+      <a class="ed-path ed-spot" href="/for-agencies">
+        <span class="ed-k">FOR AGENCIES</span>
+        <b>Explore Reachmark Workspace</b>
+        <span class="ed-path-p">Find local prospects, review website opportunities, and draft outreach with approval before sending.</span>
+        <span class="ed-go">Explore Workspace {{ icon('arrow-up-right', 16) }}</span>
       </a>
     </div>
   </section>
@@ -488,6 +488,7 @@ document.querySelectorAll('a[href="#try-url"]').forEach(function(a){a.addEventLi
   });
 })();
 </script>
+<div class="rm-home-bottom-space" aria-hidden="true"></div><a class="rm-home-sticky" href="#try-url">Audit my website</a>
 <script src="/static/home-product.js" defer></script>
 <script src="/static/pwa.js" defer></script>
 </body>

@@ -232,8 +232,8 @@ def home():
     canonical = (base + '/') if base else None
     from web.public_url import SEO_HOME_DESCRIPTION, SEO_HOME_KEYWORDS, SEO_HOME_TITLE, faq_schema, organization_schema, website_schema
     seo = {
-        'title': SEO_HOME_TITLE,
-        'description': SEO_HOME_DESCRIPTION,
+        'title': 'Reachmark Digital | Website Audits and Growth Services',
+        'description': 'Reachmark Digital helps local businesses turn their websites into stronger sources of enquiries, calls, bookings, and customers. Start with a free website growth audit.',
         'keywords': SEO_HOME_KEYWORDS,
         'canonical': canonical,
         'og_image': (base + '/static/social-card-v2.png') if base else '/static/social-card-v2.png',
@@ -251,6 +251,26 @@ def home():
     except Exception:
         pass
     return render_template('home.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
+@app.route('/free-website-audit')
+def free_website_audit():
+    return render_template('growth-page.html', page='audit')
+
+@app.route('/services')
+def services_page():
+    return render_template('growth-page.html', page='services')
+
+@app.route('/growth-system')
+def growth_system_page():
+    return render_template('growth-page.html', page='system')
+
+@app.route('/contact')
+def contact_page():
+    return redirect('/enquire')
+
+@app.route('/for-agencies')
+def for_agencies_page():
+    return render_template('for-agencies.html')
+
 @app.route('/admin',methods=['GET','POST'])
 def admin():
     """The owner's admin console. It is reached only by typing /admin: nothing on
@@ -373,7 +393,7 @@ is not.</p>
 @app.route('/robots.txt')
 def robots():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
-    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /showcase\nAllow: /enquire\nAllow: /receptionist\nAllow: /reviews\nAllow: /pricing\nAllow: /need\nAllow: /sourcing\nAllow: /sending\nAllow: /sample-report\nAllow: /app\nAllow: /signup\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
+    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /services\nAllow: /growth-system\nAllow: /free-website-audit\nAllow: /for-agencies\nAllow: /contact\nAllow: /showcase\nAllow: /enquire\nAllow: /receptionist\nAllow: /reviews\nAllow: /pricing\nAllow: /need\nAllow: /sourcing\nAllow: /sending\nAllow: /sample-report\nAllow: /app\nAllow: /signup\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
 @app.route('/sitemap.xml')
 def sitemap():
     from xml.sax.saxutils import escape
@@ -381,7 +401,7 @@ def sitemap():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
     now = datetime.now(timezone.utc).date().isoformat()
     # Core public pages + all 10 showcase samples — every indexable route for Google
-    paths = ['/','/about','/showcase','/enquire','/receptionist','/reviews','/pricing','/need','/sourcing','/sending','/sample-report','/privacy','/terms','/disclosure'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
+    paths = ['/','/about','/services','/growth-system','/free-website-audit','/for-agencies','/contact','/showcase','/enquire','/receptionist','/reviews','/pricing','/need','/sourcing','/sending','/sample-report','/privacy','/terms','/disclosure'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
     urls = []
     for path in paths:
         loc = escape(base+path)

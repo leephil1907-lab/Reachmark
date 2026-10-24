@@ -10,11 +10,11 @@ from urllib.parse import urlparse
 
 BRAND_PUBLIC_URL = 'https://reachmarkdigital.xyz'
 BRAND_SUPPORT_EMAIL = 'support@reachmarkdigital.xyz'
-SEO_HOME_TITLE = 'Reachmark Digital | Website Audits and SEO for Business Growth'
+SEO_HOME_TITLE = 'Reachmark Digital | Website Audits and Growth Services'
 SEO_HOME_DESCRIPTION = (
-    'Reachmark Digital helps designers, freelancers, and agencies uncover website SEO and usability issues, discover business growth opportunities, and create evidence-backed reports with actionable recommendations.'
+    'Reachmark Digital helps local businesses identify website barriers, improve mobile experience and contact paths, and turn more online interest into enquiries. Start with a free website growth audit.'
 )
-SEO_HOME_KEYWORDS = 'Reachmark, Reachmark Digital, website audit, SEO analysis, website usability, digital growth opportunities, Digital Opportunity Report'
+SEO_HOME_KEYWORDS = 'Reachmark Digital, free website audit, website conversion optimization, local SEO, lead generation, website fixes, local business growth, Reachmark Workspace'
 # Search Console HTML-tag tokens. First token is reachmarkdigital.xyz (2026-10-08).
 GOOGLE_SITE_TOKENS = (
     'zVYthfXOcAda_Sxphe3f8dYmVrRZ66cogYgTHWeaq7c',
@@ -111,15 +111,14 @@ def faq_schema():
     pairs = [
         (
             'What is Reachmark?',
-            'Reachmark is a website diagnosis studio at https://reachmarkdigital.xyz. '
-            'We read a public site, write a Digital Opportunity Report of measured observations, '
-            'then build or repair the pages that lose enquiries. You approve every send.',
+            'Reachmark Digital helps local businesses identify website barriers and improve the path from visitor to enquiry. '
+            'Start with a free website growth audit, then discuss practical fixes or ongoing growth support. '
+            'Reachmark Workspace is a separate software product for agencies.',
         ),
         (
             'What does Reachmark cost?',
-            'Workspace plans: Free $0, Starter $19 per month, Pro $59 per month. '
-            'Studio work: Audit $497 one-time, Build $3,500, Care $1,800 per year, '
-            'Outreach $6,000 per campaign. Nothing is charged until you approve scope.',
+            'Reachmark Workspace software plans are Free, Starter at $19 per month, and Starter Pro at $59 per month. '
+            'Reachmark Digital services—website fixes, local visibility setup, and monthly growth retainers—are scoped separately. Contact us for a project quote.',
         ),
         (
             'How do I contact Reachmark?',
@@ -127,9 +126,8 @@ def faq_schema():
         ),
         (
             'What is a Digital Opportunity Report?',
-            'A dated write-up of what a public page fetch actually showed — status, HTTPS, '
-            'viewport, contact paths, and similar signals. The public leak check returns up to '
-            'three measured observations and is not a revenue forecast. The full report stays behind an account.',
+            'A practical summary of accessible public website signals, such as response status, HTTPS, mobile presentation, contact paths, and SEO basics. '
+            'The free check reports observations it can support; it is not a revenue forecast.',
         ),
         (
             'Do you send email without approval?',

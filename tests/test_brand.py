@@ -4,7 +4,7 @@ extract_brand is pure (no network) so every test runs on fixture HTML.
 """
 import unittest
 
-from web.brand import extract_brand
+from web.brand import extract_brand, report_theme
 
 FIXTURE = """<!DOCTYPE html><html><head><title>Sunrise Bakery — Fresh Daily</title>
 <meta name="theme-color" content="#7a2f1b">
@@ -68,6 +68,47 @@ class ExtractBrandTests(unittest.TestCase):
         brand = extract_brand(html, 'https://x.test/')
         self.assertEqual(brand['logo'], '')
         self.assertEqual(brand['images'], [])
+
+    def test_extracts_favicon_navigation_contact_and_social_links(self):
+        html = """<html><head><title>Northside Clinic</title>
+        <link rel="icon" href="/icons/site.png">
+        <style>body{background-color:#fafafa;color:#222222}.cta{background:#1464a5}</style>
+        </head><body><nav><a href="/services">Services</a><a href="/contact">Contact</a></nav>
+        <a href="tel:+2348012345678">Call</a><a href="mailto:hello@clinic.test">Email</a>
+        <a href="https://www.instagram.com/northsideclinic/">Instagram</a></body></html>"""
+        brand = extract_brand(html, 'https://clinic.test/')
+        self.assertEqual(brand['favicon'], 'https://clinic.test/icons/site.png')
+        self.assertEqual([item['label'] for item in brand['navigation']], ['Services', 'Contact'])
+        self.assertIn('tel:+2348012345678', brand['contact_details'])
+        self.assertIn('mailto:hello@clinic.test', brand['contact_details'])
+        self.assertIn('https://www.instagram.com/northsideclinic/', brand['social_links'])
+        self.assertEqual(brand['background_color'], '#fafafa')
+        self.assertEqual(brand['text_color'], '#222222')
+
+    def test_report_theme_uses_observed_client_brand(self):
+        theme = report_theme({'theme_color': '#7a2f1b', 'colors': ['#7a2f1b', '#e0a020'],
+                              'logo': 'https://cdn.test/logo.svg', 'site_name': 'Sunrise Bakery',
+                              'fonts': ['Fraunces']})
+        self.assertEqual(theme['primary'], '#7a2f1b')
+        self.assertEqual(theme['logo'], 'https://cdn.test/logo.svg')
+        self.assertEqual(theme['site_name'], 'Sunrise Bakery')
+        self.assertTrue(theme['detected'])
+        self.assertEqual(theme['reachmark'], '#d6f269')
+        self.assertEqual(theme['severity_critical'], '#b42318')
+
+    def test_light_brand_colour_gets_darker_readable_heading_colour(self):
+        theme = report_theme({'theme_color': '#fff29a', 'colors': ['#fff29a']})
+        self.assertEqual(theme['primary'], '#fff29a')
+        self.assertNotEqual(theme['strong'], '#fff29a')
+        self.assertTrue(theme['detected'])
+
+    def test_missing_brand_uses_neutral_fallback_and_does_not_invent_logo(self):
+        theme = report_theme({})
+        self.assertFalse(theme['detected'])
+        self.assertEqual(theme['logo'], '')
+        self.assertEqual(theme['primary'], '#d6f269')
+        self.assertEqual(theme['background'], '#f5f6f0')
+        self.assertEqual(theme['text'], '#202820')
 
     def test_empty_and_junk_never_crash(self):
         for html, base in (('', ''), ('not html at all', 'notaurl'),
