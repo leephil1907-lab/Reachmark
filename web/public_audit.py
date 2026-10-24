@@ -332,19 +332,29 @@ def register_public_audit(app, db, now, log):
                 result['gate'] = 'Create an account to run the full Digital Opportunity Report on a saved business.'
                 if result.get('blocked'):
                     result['error'] = result.get('reason') or 'This site blocked the check. That is inconclusive, not a fault.'
+                try:
+                    funnel_record(db, now, 'audit_completed', {
+                        'observed': result.get('observed'), 'leak_count': result.get('leak_count'),
+                        'blocked': result.get('blocked'),
+                    }, user_id='')
+                except Exception:
+                    pass
+                try:
+                    log('public-audit', 'Queued free website check completed')
+                except Exception:
+                    pass
+                # Mark complete last so a poller never races the worker's cleanup/logging.
                 with db() as c:
                     c.execute("UPDATE public_audit_jobs SET status='completed',stage='completed',result=?,updated=? WHERE id=? AND status!='cancelled'",
                               (json.dumps(result, ensure_ascii=False), now(), job_id))
-                funnel_record(db, now, 'audit_completed', {
-                    'observed': result.get('observed'), 'leak_count': result.get('leak_count'),
-                    'blocked': result.get('blocked'),
-                }, user_id='')
-                log('public-audit', 'Queued free website check completed')
             except Exception:
                 with db() as c:
                     c.execute("UPDATE public_audit_jobs SET status='failed',stage='failed',error=?,updated=? WHERE id=? AND status!='cancelled'",
                               ('This check could not finish. The site may have blocked it.', now(), job_id))
-                log('public-audit', 'queued public audit failed')
+                try:
+                    log('public-audit', 'queued public audit failed')
+                except Exception:
+                    pass
 
         threading.Thread(target=run_job, name='reachmark-public-audit', daemon=True).start()
         try:
