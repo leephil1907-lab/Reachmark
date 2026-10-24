@@ -179,7 +179,7 @@ class ProspectTests(unittest.TestCase):
             os.environ.pop('GOOGLE_TAG_MANAGER_ID', None)
             page = self.client.get('/?locale=en')
         self.assertEqual(page.status_code, 200)
-        self.assertIn(b'<title>Reachmark Digital | Website Audits and SEO for Business Growth</title>', page.data)
+        self.assertIn(b'<title>Reachmark Digital | Website Audits and Growth Services</title>', page.data)
         self.assertNotIn(b'GTM-M3SJZ8S7', page.data)
         self.assertIn(b'G-3T3SXLG2XT', page.data)
         self.assertIn(b'GT-KVHJTVJ2', page.data)
