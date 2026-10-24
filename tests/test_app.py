@@ -417,4 +417,31 @@ class ProspectTests(unittest.TestCase):
         tickets = listed.json.get('tickets') or []
         self.assertTrue(any(t.get('subject') == 'Invoice question' for t in tickets))
 
+    def test_public_audit_job_returns_saved_result_from_background_worker(self):
+        import time
+        expected = {
+            'ok': True, 'blocked': False, 'observed': True, 'url': 'https://example.test',
+            'leaks': [{'title': 'Missing contact path', 'leak': 'No contact link was observed.',
+                       'evidence': 'No tel or mailto href found.'}],
+            'leak_count': 1, 'facts': ['HTTP 200'], 'narrative': 'Fetched public page.',
+            'label': 'Measured observations from this check. Not a revenue forecast.',
+        }
+        with patch('web.public_audit.preview_leaks', return_value=expected):
+            response = self.client.post('/api/public/audit/jobs', json={'url': 'https://example.test'})
+            self.assertEqual(response.status_code, 202)
+            job_id = response.json['job_id']
+            self.assertEqual(response.json['status'], 'queued')
+            final = None
+            for _ in range(40):
+                poll = self.client.get('/api/public/audit/jobs/' + job_id)
+                self.assertEqual(poll.status_code, 200)
+                if poll.json['status'] in ('completed', 'failed'):
+                    final = poll.json
+                    break
+                time.sleep(0.05)
+            self.assertIsNotNone(final)
+            self.assertEqual(final['status'], 'completed')
+            self.assertEqual(final['result']['leaks'][0]['title'], 'Missing contact path')
+            self.assertEqual(final['result']['signup'], '/signup')
+
 if __name__=='__main__':unittest.main(verbosity=2)
