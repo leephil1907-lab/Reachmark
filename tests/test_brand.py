@@ -69,6 +69,22 @@ class ExtractBrandTests(unittest.TestCase):
         self.assertEqual(brand['logo'], '')
         self.assertEqual(brand['images'], [])
 
+    def test_extracts_favicon_navigation_contact_and_social_links(self):
+        html = """<html><head><title>Northside Clinic</title>
+        <link rel="icon" href="/icons/site.png">
+        <style>body{background-color:#fafafa;color:#222222}.cta{background:#1464a5}</style>
+        </head><body><nav><a href="/services">Services</a><a href="/contact">Contact</a></nav>
+        <a href="tel:+2348012345678">Call</a><a href="mailto:hello@clinic.test">Email</a>
+        <a href="https://www.instagram.com/northsideclinic/">Instagram</a></body></html>"""
+        brand = extract_brand(html, 'https://clinic.test/')
+        self.assertEqual(brand['favicon'], 'https://clinic.test/icons/site.png')
+        self.assertEqual([item['label'] for item in brand['navigation']], ['Services', 'Contact'])
+        self.assertIn('tel:+2348012345678', brand['contact_details'])
+        self.assertIn('mailto:hello@clinic.test', brand['contact_details'])
+        self.assertIn('https://www.instagram.com/northsideclinic/', brand['social_links'])
+        self.assertEqual(brand['background_color'], '#fafafa')
+        self.assertEqual(brand['text_color'], '#222222')
+
     def test_report_theme_uses_observed_client_brand(self):
         theme = report_theme({'theme_color': '#7a2f1b', 'colors': ['#7a2f1b', '#e0a020'],
                               'logo': 'https://cdn.test/logo.svg', 'site_name': 'Sunrise Bakery',
