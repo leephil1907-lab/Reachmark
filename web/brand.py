@@ -225,20 +225,20 @@ def extract_brand(html, base_url, max_images=6):
         (attrs.get('style') or '') for attrs in [_attrs(t) for t in IMG_TAG_RE.findall(html[:300000])]
     )
     for prop, key in (('background(?:-color)?', 'background_color'), ('color', 'text_color')):
-        match = re.search(r'(?i)(?:^|[;{}])\s*' + prop + r'\\s*:\\s*(#[0-9a-f]{3}(?:[0-9a-f]{3})?)', css_text)
+        match = re.search(r'(?i)(?:^|[;{}])\s*' + prop + r'\s*:\s*(#[0-9a-f]{3}(?:[0-9a-f]{3})?)', css_text)
         if match:
             pack[key] = _normalise_hex(match.group(1))
 
     # Navigation is only claimed when an actual <nav> element is present.
-    nav_blocks = re.findall(r'(?is)<nav\\b[^>]*>(.*?)</nav\\s*>', html[:300000])
+    nav_blocks = re.findall(r'(?is)<nav\b[^>]*>(.*?)</nav\s*>', html[:300000])
     navigation = []
     for block in nav_blocks:
-        for anchor in re.findall(r'(?is)<a\\b[^>]*>.*?</a\\s*>', block):
-            tag_match = re.match(r'(?is)<a\\b[^>]*>', anchor)
+        for anchor in re.findall(r'(?is)<a\b[^>]*>.*?</a\s*>', block):
+            tag_match = re.match(r'(?is)<a\b[^>]*>', anchor)
             attrs = _attrs(tag_match.group(0)) if tag_match else {}
             href = _absolute(base_url, attrs.get('href', ''))
             label = re.sub(r'(?is)<[^>]+>', ' ', anchor)
-            label = re.sub(r'\\s+', ' ', label).strip()[:80]
+            label = re.sub(r'\s+', ' ', label).strip()[:80]
             if href and label and not any(item['url'] == href for item in navigation):
                 navigation.append({'label': label, 'url': href})
             if len(navigation) >= 20:
@@ -249,7 +249,7 @@ def extract_brand(html, base_url, max_images=6):
 
     # Only include contact endpoints explicitly present in href attributes.
     contacts, socials = [], []
-    for tag in re.findall(r'(?is)<a\\b[^>]*>', html[:300000]):
+    for tag in re.findall(r'(?is)<a\b[^>]*>', html[:300000]):
         attrs = _attrs(tag)
         href = (attrs.get('href') or '').strip()
         low = href.lower()
