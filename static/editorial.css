@@ -442,3 +442,34 @@ body.rm-ed .x-trust-grid>a:hover .x-go,body.rm-ed .x-plans-grid article:hover .x
 @media (prefers-reduced-motion:reduce){
   body.rm-ed .x-plans-grid article:hover,body.rm-ed .x-trust-grid>a:hover{transform:none}
 }
+
+
+/* Precision Meets Motion — restrained depth for the live audit stage.
+   Keep the existing Reachmark palette and console content; motion is decorative only. */
+body.rm-ed .ed-stage::before{
+  background-image:
+    radial-gradient(ellipse at 14% 26%,rgba(213,242,104,.12),transparent 28%),
+    radial-gradient(ellipse at 88% 18%,rgba(138,154,120,.13),transparent 30%),
+    linear-gradient(rgba(213,242,104,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(213,242,104,.055) 1px,transparent 1px);
+  background-size:auto,auto,56px 56px,56px 56px;
+}
+body.rm-ed .ed-console{
+  transform:perspective(1800px) rotateX(.45deg);
+  transform-origin:50% 0;
+  transition:transform .65s cubic-bezier(.16,1,.3,1),box-shadow .65s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 1px 0 rgba(255,255,255,.65) inset,0 64px 130px -54px rgba(0,0,0,.62),0 28px 58px -28px rgba(0,0,0,.38),0 0 0 1px rgba(213,242,104,.08);
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  body.rm-ed .ed-stage:hover .ed-console{
+    transform:perspective(1800px) rotateX(0deg) translateY(-2px);
+    box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 70px 138px -54px rgba(0,0,0,.64),0 30px 64px -28px rgba(0,0,0,.4),0 0 0 1px rgba(213,242,104,.15);
+  }
+}
+@media(max-width:760px){
+  body.rm-ed .ed-console{transform:none;transition:box-shadow .3s ease}
+  body.rm-ed .ed-stage:hover .ed-console{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  body.rm-ed .ed-console{transform:none!important;transition:none!important}
+}
