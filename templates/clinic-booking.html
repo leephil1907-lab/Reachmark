@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#101510">
+  <title>Request an appointment | Reachmark</title>
+  <style>
+    :root{color-scheme:light;--ink:#101510;--muted:#697366;--line:#dfe5d8;--lime:#d6f269;--paper:#f5f6f0}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+    main{width:min(760px,100%);margin:0 auto;padding:28px 18px 56px}
+    .brand{display:inline-flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.04em;margin-bottom:24px}
+    .mark{display:grid;place-items:center;width:34px;height:34px;border:1.5px solid var(--ink);border-radius:10px;font-weight:900}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:22px;padding:clamp(20px,5vw,38px);box-shadow:0 20px 55px #18240d0a}
+    .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#66765a;font-weight:800}
+    h1{font-size:clamp(28px,6vw,42px);letter-spacing:-.055em;line-height:1.08;margin:10px 0}
+    .intro{color:var(--muted);max-width:55ch;margin:0 0 26px}
+    label{display:block;font-weight:700;font-size:13px;margin:16px 0 7px}
+    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;padding:13px 14px;font:inherit;color:var(--ink)}
+    input:focus,select:focus,textarea:focus{outline:3px solid #d6f26980;border-color:#81934b}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+    .slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:10px}
+    .slot{padding:11px;border:1px solid var(--line);border-radius:12px;background:#fff;text-align:left;font:inherit;font-weight:700;cursor:pointer}
+    .slot[aria-pressed=true]{background:var(--ink);color:var(--lime);border-color:var(--ink)}
+    .hint{font-size:12px;color:var(--muted);margin:8px 0}
+    .consent{display:flex;align-items:flex-start;gap:10px;font-weight:500;line-height:1.45;margin:20px 0}
+    .consent input{width:18px;height:18px;margin-top:2px;flex:none}
+    button.submit{width:100%;border:0;border-radius:13px;background:var(--ink);color:var(--lime);padding:15px;font:800 14px inherit;cursor:pointer}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    [role=status]{margin-top:14px;padding:12px;border-radius:12px;background:#f2f5e9;color:#34402b;white-space:pre-wrap}
+    [hidden]{display:none!important}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}.panel{border-radius:17px}}
+  </style>
+</head>
+<body>
+<main>
+  <div class="brand"><span class="mark">R</span><span>Reachmark <span style="font-weight:500;color:var(--muted)">/ Clinic booking</span></span></div>
+  <section class="panel">
+    <div class="eyebrow">Appointment request</div>
+    <h1>Find a time that works.</h1>
+    <p class="intro">Choose a time the clinic has configured, then send your request. Your appointment is not confirmed until clinic staff confirm it.</p>
+    <form id="clinic-booking-form">
+      <label>Available appointment times</label>
+      <div id="clinic-slots" class="slots" aria-live="polite"><p class="hint">Checking configured availability…</p></div>
+      <p class="hint">Times are shown only when the clinic has configured a future slot.</p>
+      <div class="grid">
+        <div><label for="patient-name">Your name *</label><input id="patient-name" name="name" required minlength="2" maxlength="120" autocomplete="name"></div>
+        <div><label for="patient-email">Email address *</label><input id="patient-email" name="email" required type="email" maxlength="250" autocomplete="email"></div>
+      </div>
+      <label for="patient-phone">Phone (optional)</label><input id="patient-phone" name="phone" maxlength="40" autocomplete="tel">
+      <label for="patient-service">Service or visit type *</label><input id="patient-service" name="service" required maxlength="160" placeholder="e.g. dental check-up">
+      <label for="patient-note">Anything the scheduling team should know? (optional)</label><textarea id="patient-note" name="note" rows="3" maxlength="1000"></textarea>
+      <label class="consent"><input type="checkbox" name="consent" required><span>I agree that the clinic may use the contact details I provide to respond to this appointment request. I understand this is a request, not a confirmed booking.</span></label>
+      <button class="submit" id="clinic-submit" type="submit" disabled>Request appointment</button>
+      <div id="clinic-status" role="status" hidden></div>
+    </form>
+  </section>
+</main>
+<script src="/static/clinic-booking.js" defer></script>
+</body></html>
