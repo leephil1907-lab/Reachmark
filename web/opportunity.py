@@ -324,6 +324,7 @@ def compose_sales_asset(lead, report, prototype_url=None, proposal_url=None, boo
             'source': item.get('source') or 'observation',
             'url': website,
             'reason': item.get('reason') or '',
+            'fix': item.get('fix') or '',
         })
     packs = []
     for pack in ((book or {}).get('packages') or []):

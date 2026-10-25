@@ -91,7 +91,13 @@
           <li>
             <h3>{{ item.title }}</h3>
             <p>{{ item.claim }}</p>
-            <small>{{ item.source }}{% if item.url %} · {{ item.url }}{% endif %}</small>
+            {% if item.reason and item.reason != item.claim %}
+            <p class="oe-evidence"><span>Evidence detail</span>{{ item.reason }}</p>
+            {% endif %}
+            {% if item.fix %}
+            <p class="oe-fix"><span>Recommended fix</span>{{ item.fix }}</p>
+            {% endif %}
+            <small>Source: {{ item.source }}{% if item.url %} · {{ item.url }}{% endif %}</small>
           </li>
           {% endfor %}
         </ol>
@@ -101,7 +107,13 @@
           <li>
             <h3>{{ leak.title }}</h3>
             <p>{{ leak.leak }}</p>
-            <small>{{ leak.source }}</small>
+            {% if leak.reason and leak.reason != leak.leak %}
+            <p class="oe-evidence"><span>Evidence detail</span>{{ leak.reason }}</p>
+            {% endif %}
+            {% if leak.fix %}
+            <p class="oe-fix"><span>Recommended fix</span>{{ leak.fix }}</p>
+            {% endif %}
+            <small>Source: {{ leak.source }}</small>
           </li>
           {% endfor %}
         </ol>
