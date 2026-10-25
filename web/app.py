@@ -254,11 +254,11 @@ def home():
 
 @app.route('/lead-setup')
 def lead_setup_sales_page():
-    """Public landing page for Reachmark Digital's done-for-you lead capture setup."""
+    """Public landing page for Reachmark Digital's clinic patient-enquiry setup."""
     base = settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
     seo = {
-        'title': 'Lead Capture Setup for Small Businesses | Reachmark Digital',
-        'description': 'A practical lead capture setup for small businesses: enquiry form, organized lead records, booking link and follow-up templates from ₦25,000.',
+        'title': 'Patient Enquiry Setup for Clinics | Reachmark Digital',
+        'description': 'A practical patient-enquiry setup for clinics: appointment request form, organized enquiry records, booking handoff and follow-up templates. Introductory setup from $25.',
         'canonical': base + '/lead-setup',
         'noindex': False,
     }
