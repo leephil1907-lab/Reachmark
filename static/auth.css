@@ -131,6 +131,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
   .auth-panel-foot span::before{content:'';width:5px;height:5px;border-radius:50%;background:#91ad49}
 }
 @media (min-width:980px) and (max-height:850px){
+  .auth-float{display:block}
   .auth-aside-copy{padding-top:300px}
   .auth-float{top:15%;width:min(490px,calc(100% - 90px))}
   .auth-report-metrics{margin:11px 0}
