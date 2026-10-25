@@ -36,9 +36,10 @@
     if(!selectedSlot||!loadedSlots.some(s=>s.id===selectedSlot)){status('Choose a currently available time first.');return;}
     if(!form.elements.consent.checked){status('Please agree to the contact consent before submitting.');return;}
     submit.disabled=true;submit.textContent='Sending request…';
-    const payload={slot_id:selectedSlot,name:form.elements.name.value,email:form.elements.email.value,
-      phone:form.elements.phone.value,service:form.elements.service.value,note:form.elements.note.value,
-      consent:form.elements.consent.checked};
+    const field=(name)=>form.elements.namedItem(name);
+    const payload={slot_id:selectedSlot,name:field('name').value,email:field('email').value,
+      phone:field('phone').value,service:field('service').value,note:field('note').value,
+      consent:field('consent').checked};
     try{
       const response=await fetch('/api/clinic/appointments',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(payload)});
       const data=await response.json();
@@ -52,6 +53,6 @@
       status(data.message||'Request received. The clinic will confirm your appointment.');
       form.reset();selectedSlot=null;await fetch('/api/clinic/availability').then(r=>r.json()).then(data=>renderSlots(data.slots||[]));
     }catch(error){status(error.message||'A network error occurred. Please try again.');}
-    finally{submit.textContent='Request appointment';if(!selectedSlot)submit.disabled=true;}
+    finally{submit.textContent='Request appointment';submit.disabled=!selectedSlot||!loadedSlots.some(s=>s.id===selectedSlot);}
   });
 })();
