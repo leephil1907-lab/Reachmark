@@ -8,7 +8,7 @@ import hashlib
 import re
 import uuid
 from datetime import datetime, timezone
-from flask import jsonify, request, session
+from flask import jsonify, request, session, render_template
 
 
 def _parse_time(value):
@@ -42,6 +42,10 @@ def register_clinic_bookings(app, db, now, log):
             status TEXT NOT NULL DEFAULT 'open', created TEXT NOT NULL)""")
         c.execute("CREATE INDEX IF NOT EXISTS clinic_handoff_status_created ON clinic_handoffs(status,created)")
 
+    @app.route('/clinic/book', methods=['GET'])
+    def clinic_booking_page():
+        return render_template('clinic-booking.html')
+
     @app.route('/api/clinic/availability', methods=['GET'])
     def clinic_availability():
         start = datetime.now(timezone.utc).isoformat()
@@ -65,7 +69,7 @@ def register_clinic_bookings(app, db, now, log):
         stamp = now()
         with db() as c:
             clash = c.execute("""SELECT 1 FROM clinic_slots
-                WHERE status='available' AND start < ? AND end > ? LIMIT 1""",
+                WHERE status IN ('available','reserved') AND start < ? AND end > ? LIMIT 1""",
                 (end.isoformat(), start.isoformat())).fetchone()
             if clash:
                 return jsonify(error="This time overlaps an available slot."), 409
