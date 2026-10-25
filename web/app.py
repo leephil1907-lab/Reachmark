@@ -251,6 +251,19 @@ def home():
     except Exception:
         pass
     return render_template('home.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
+
+@app.route('/lead-setup')
+def lead_setup_sales_page():
+    """Public landing page for Reachmark Digital's clinic patient-enquiry setup."""
+    base = settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
+    seo = {
+        'title': 'Patient Enquiry Setup for Clinics | Reachmark Digital',
+        'description': 'A practical patient-enquiry setup for clinics: appointment request form, organized enquiry records, booking handoff and follow-up templates. Introductory setup from $25.',
+        'canonical': base + '/lead-setup',
+        'noindex': False,
+    }
+    return render_template('lead-setup.html', base=base, seo=seo)
+
 @app.route('/admin',methods=['GET','POST'])
 def admin():
     """The owner's admin console. It is reached only by typing /admin: nothing on
@@ -373,7 +386,7 @@ is not.</p>
 @app.route('/robots.txt')
 def robots():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
-    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /showcase\nAllow: /enquire\nAllow: /receptionist\nAllow: /reviews\nAllow: /pricing\nAllow: /need\nAllow: /sourcing\nAllow: /sending\nAllow: /sample-report\nAllow: /app\nAllow: /signup\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
+    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /lead-setup\nAllow: /showcase\nAllow: /enquire\nAllow: /receptionist\nAllow: /reviews\nAllow: /pricing\nAllow: /need\nAllow: /sourcing\nAllow: /sending\nAllow: /sample-report\nAllow: /app\nAllow: /signup\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
 @app.route('/sitemap.xml')
 def sitemap():
     from xml.sax.saxutils import escape
@@ -381,7 +394,7 @@ def sitemap():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
     now = datetime.now(timezone.utc).date().isoformat()
     # Core public pages + all 10 showcase samples — every indexable route for Google
-    paths = ['/','/about','/showcase','/enquire','/receptionist','/reviews','/pricing','/need','/sourcing','/sending','/sample-report','/privacy','/terms','/disclosure'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
+    paths = ['/','/about','/lead-setup','/showcase','/enquire','/receptionist','/reviews','/pricing','/need','/sourcing','/sending','/sample-report','/privacy','/terms','/disclosure'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
     urls = []
     for path in paths:
         loc = escape(base+path)

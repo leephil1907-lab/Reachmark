@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>{{ seo.title }}</title>
+  <meta name="description" content="{{ seo.description }}">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="{{ seo.canonical }}">
+  <meta name="theme-color" content="#101510">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ seo.title }}">
+  <meta property="og:description" content="{{ seo.description }}">
+  <meta property="og:url" content="{{ seo.canonical }}">
+  <style>
+    :root{color-scheme:dark;--bg:#101510;--panel:#182019;--line:#303b30;--text:#f5f6f0;--muted:#b6c0b0;--lime:#d6f269;--sage:#8a9a78}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#293525 0,transparent 35%),var(--bg);color:var(--text);font:16px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    a{color:inherit}.wrap{width:min(1120px,calc(100% - 40px));margin:auto}.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0;border-bottom:1px solid #ffffff18}.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;letter-spacing:-.04em}.mark{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--lime);border-radius:10px;color:var(--lime);font-weight:900}.navlinks{display:flex;align-items:center;gap:20px;font-size:14px;color:var(--muted)}.navlinks a{text-decoration:none}.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:0 18px;border-radius:10px;background:var(--lime);color:#151a12;font-weight:800;text-decoration:none;border:1px solid var(--lime);transition:transform .2s,filter .2s}.btn:hover{transform:translateY(-2px);filter:brightness(1.04)}.btn.secondary{background:transparent;color:var(--text);border-color:#687563}.hero{padding:76px 0 54px;display:grid;grid-template-columns:1.05fr .95fr;gap:42px;align-items:center}.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--lime);font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}.dot{width:7px;height:7px;background:var(--lime);border-radius:50%}h1,h2,h3,p{margin-top:0}h1{font-size:clamp(42px,6.2vw,72px);line-height:1.01;letter-spacing:-.065em;margin:18px 0 22px;max-width:720px}h1 em{color:var(--lime);font-style:normal}.lead{font-size:19px;line-height:1.65;color:#c4cec0;max-width:610px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin:28px 0 16px}.micro{color:#98a492;font-size:13px}.preview{padding:24px;border:1px solid #475343;border-radius:20px;background:linear-gradient(145deg,#202a20,#151c16);box-shadow:0 25px 80px #0005;position:relative;overflow:hidden}.preview:before{content:"";position:absolute;right:-55px;top:-65px;width:190px;height:190px;border-radius:50%;background:#d6f26914;filter:blur(2px)}.preview-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:18px;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}.live{color:var(--lime);font-size:11px;text-transform:uppercase;letter-spacing:.08em}.mock-label{font-size:12px;color:#98a492;margin:22px 0 8px}.mock-input{padding:13px 14px;border:1px solid #3a4838;border-radius:9px;background:#111711;color:#dce5d7;font-size:14px}.mock-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mock-button{margin-top:13px;background:var(--lime);color:#151a12;text-align:center;padding:12px;border-radius:9px;font-size:13px;font-weight:800}.notify{display:flex;align-items:flex-start;gap:12px;padding:14px;margin-top:18px;background:#111711;border:1px solid #354333;border-radius:12px}.notify-icon{display:grid;place-items:center;flex:0 0 32px;height:32px;background:#d6f2691a;border-radius:9px;color:var(--lime)}.notify strong{display:block;font-size:13px}.notify span{font-size:12px;color:#9eac99}.section{padding:64px 0;border-top:1px solid #ffffff15}.section-head{max-width:680px;margin-bottom:28px}.section h2{font-size:clamp(29px,4vw,43px);letter-spacing:-.05em;line-height:1.1;margin:12px 0}.section-intro{color:var(--muted);font-size:17px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{padding:22px;border:1px solid var(--line);border-radius:15px;background:#171e17}.num{color:var(--lime);font-size:12px;font-weight:800;letter-spacing:.1em}.card h3{font-size:18px;margin:17px 0 8px}.card p{color:var(--muted);font-size:14px;margin-bottom:0}.offer{display:grid;grid-template-columns:1fr .72fr;gap:30px;align-items:center;border:1px solid #536044;border-radius:20px;padding:clamp(22px,4vw,40px);background:linear-gradient(130deg,#1d281b,#151b15)}.offer h2{margin:12px 0;font-size:clamp(30px,4vw,45px);letter-spacing:-.05em}.checklist{list-style:none;padding:0;margin:22px 0}.checklist li{margin:11px 0;color:#d4ddcf}.checklist li:before{content:"✓";color:var(--lime);font-weight:900;margin-right:10px}.pricebox{border:1px solid #46543c;background:#101710;border-radius:16px;padding:24px}.price{font-size:44px;letter-spacing:-.06em;font-weight:850;line-height:1.1}.price small{font-size:13px;color:var(--muted);letter-spacing:0;font-weight:500}.pricebox p{font-size:13px;color:var(--muted);margin:12px 0 20px}.pricebox .btn{width:100%}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.step{border-top:2px solid var(--sage);padding-top:16px}.step b{display:block;margin:8px 0}.step p{font-size:14px;color:var(--muted)}.faq{display:grid;grid-template-columns:1fr 1fr;gap:12px}.faq article{padding:20px;border:1px solid var(--line);border-radius:13px;background:#171e17}.faq h3{font-size:16px;margin-bottom:8px}.faq p{font-size:14px;color:var(--muted);margin-bottom:0}.final-cta{padding:42px 22px;text-align:center;border:1px solid #4b5b3d;border-radius:20px;background:radial-gradient(ellipse at 50% 0%,#d6f26912,transparent 65%),#171e17}.final-cta h2{margin:12px auto;max-width:650px}.final-cta p{color:var(--muted);max-width:570px;margin:0 auto 22px}.footer{padding:25px 0 38px;display:flex;justify-content:space-between;gap:16px;color:#9eaa99;font-size:13px}.footer a{text-decoration:none}.footer-links{display:flex;gap:18px}
+    @media(max-width:760px){.wrap{width:min(100% - 30px,600px)}.nav{padding:16px 0}.navlinks a:not(.btn){display:none}.hero{padding:48px 0 38px;grid-template-columns:1fr;gap:26px}.lead{font-size:17px}h1{font-size:clamp(43px,12vw,60px)}.preview{padding:18px}.section{padding:48px 0}.cards{grid-template-columns:1fr}.offer{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.faq{grid-template-columns:1fr}.footer{flex-direction:column}.pricebox{max-width:100%}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+  </style>
+</head>
+<body>
+  <header class="wrap nav">
+    <a class="brand" href="/" aria-label="Reachmark Digital home"><span class="mark">R</span><span>eachmark <span style="color:var(--sage)">Digital</span></span></a>
+    <nav class="navlinks" aria-label="Main navigation"><a href="/#services">Services</a><a href="/about">About</a><a href="/enquire" class="btn">Talk to us ↗</a></nav>
+  </header>
+  <main>
+    <section class="wrap hero">
+      <div>
+        <span class="eyebrow"><span class="dot"></span> Clinic enquiry setup</span>
+        <h1>Help more patients take the next step.</h1>
+        <p class="lead">A practical patient-enquiry setup for clinics that want appointment requests captured, staff notified, and follow-up kept organized.</p>
+        <div class="actions"><a class="btn" href="/enquire?service=lead-setup">Get started — $25 ↗</a><a class="btn secondary" href="#included">See what’s included</a></div>
+        <p class="micro">One-time starter setup · Clinic staff retain control of care and appointment confirmation</p>
+      </div>
+      <div class="preview" aria-label="Illustration of an enquiry form and new lead notification">
+        <div class="preview-head"><strong>Reachmark · Patient enquiry flow</strong><span class="live">● Example preview</span></div>
+        <div class="mock-label">APPOINTMENT ENQUIRY FORM</div>
+        <div class="mock-input">Patient name</div><div style="height:9px"></div><div class="mock-row"><div class="mock-input">Phone or email</div><div class="mock-input">Service requested</div></div><div class="mock-button">Request appointment</div>
+        <div class="notify"><div class="notify-icon">↗</div><div><strong>New appointment enquiry</strong><span>Enquiry saved for clinic follow-up</span></div></div>
+        <p class="micro" style="margin:13px 0 0">Illustrative preview only. The actual form, storage and notification channel must be configured and tested before handover.</p>
+      </div>
+    </section>
+    <section class="section" id="included"><div class="wrap">
+      <div class="section-head"><span class="eyebrow">What you get</span><h2>A simpler way to manage appointment enquiries.</h2><p class="section-intro">We agree on what your clinic needs first, then configure and test the included workflow. Your staff remain responsible for clinical decisions and confirming appointments.</p></div>
+      <div class="cards">
+        <article class="card"><span class="num">01 / CAPTURE</span><h3>Patient-friendly enquiry form</h3><p>Collect contact details, service requested, preferred date or time, and a safe way for staff to follow up. Avoid requesting detailed medical information in the enquiry form.</p></article>
+        <article class="card"><span class="num">02 / ORGANIZE</span><h3>Enquiry records in one place</h3><p>Keep appointment requests in an agreed, access-controlled destination so authorized clinic staff can follow up.</p></article>
+        <article class="card"><span class="num">03 / RESPOND</span><h3>Staff alerts and booking handoff</h3><p>Configure an agreed notification channel where supported, add the clinic’s approved booking link, and prepare a follow-up message for people who have not booked. Alerts are only described as live after a successful test.</p></article>
+      </div>
+    </div></section>
+    <section class="section"><div class="wrap offer">
+      <div><span class="eyebrow">Introductory offer</span><h2>Get the essentials working first.</h2><p class="section-intro">A focused starter for clinics handling appointment requests manually or needing a clearer follow-up process.</p>
+        <ul class="checklist"><li>Appointment enquiry form tailored to your clinic</li><li>Enquiry details saved to an agreed destination</li><li>Clinic-approved booking link and follow-up template</li><li>Test submission and handover</li><li>Notification setup where supported, subject to access and a successful delivery test</li></ul>
+        <p class="micro">Paid third-party tools, hosting, messaging fees and out-of-scope integrations are discussed separately before work starts.</p>
+      </div>
+      <aside class="pricebox"><div class="num">STARTER SETUP</div><div class="price">$25 <small>/ one-time</small></div><p>Target turnaround: within 24 hours after payment, agreed requirements and necessary access are received. Timing depends on integrations and third-party services.</p><a class="btn" href="/enquire?service=lead-setup">Request your setup ↗</a></aside>
+    </div></section>
+    <section class="section"><div class="wrap">
+      <div class="section-head"><span class="eyebrow">How it works</span><h2>Clear steps. No surprises.</h2></div>
+      <div class="steps">
+        <article class="step"><span class="num">STEP 01</span><b>Tell us how patients contact your clinic</b><p>We confirm your clinic’s current enquiry channels, the minimum details needed, and who should receive each enquiry.</p></article>
+        <article class="step"><span class="num">STEP 02</span><b>Agree scope and payment</b><p>You approve the scope, privacy approach, price and any external service costs before setup begins.</p></article>
+        <article class="step"><span class="num">STEP 03</span><b>Configure and test</b><p>We run a test enquiry and verify the agreed handoff, alert and saved record before handover.</p></article>
+        <article class="step"><span class="num">STEP 04</span><b>Receive the handover</b><p>You get the links, setup notes and follow-up template for everyday use.</p></article>
+      </div>
+    </div></section>
+    <section class="section"><div class="wrap">
+      <div class="section-head"><span class="eyebrow">Good to know</span><h2>Questions, answered.</h2></div>
+      <div class="faq">
+        <article><h3>Will this guarantee more patient bookings?</h3><p>No system can guarantee bookings or patient numbers. This setup organizes enquiry capture and follow-up; results depend on demand, availability, staff response and the clinic’s booking process.</p></article>
+        <article><h3>Do I need a new website?</h3><p>Not necessarily. We confirm the best fit during intake. The starter setup may use a standalone form or connect to an existing workflow, depending on access and requirements.</p></article>
+        <article><h3>Are WhatsApp or Telegram alerts included automatically?</h3><p>No. The channel depends on the clinic’s existing tools, access and provider requirements. We confirm the option and costs first, and only call it working after a successful delivery test.</p></article>
+        <article><h3>How is patient information handled?</h3><p>We collect only the details needed for the enquiry workflow and agree who can access them. The clinic remains responsible for its patient privacy, retention and clinical record obligations.</p></article>
+      </div>
+    </div></section>
+    <section class="wrap final-cta"><span class="eyebrow">Start with a clear workflow</span><h2>Make appointment enquiries easier to manage.</h2><p>Tell us how patients currently contact your clinic and we’ll confirm the scope before work begins. This is an enquiry workflow, not a medical advice or patient-record system.</p><a class="btn" href="/enquire?service=lead-setup">Discuss your setup ↗</a></section>
+  </main>
+  <footer class="wrap footer"><span>© {{ 2026 }} Reachmark Digital · Practical enquiry workflows for clinics.</span><div class="footer-links"><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/enquire">Contact</a><a href="/">Reachmark home</a></div></footer>
+</body>
+</html>
