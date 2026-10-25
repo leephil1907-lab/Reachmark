@@ -40,6 +40,7 @@
           <p class="x-hero-actions">
             {% if client_logged_in %}
             <a class="x-btn lime" href="/dashboard">{{ icon('dashboard', 18) }}<span>{{ t('home.open_dashboard') }}</span></a>
+            <a class="x-btn ghost" href="/lead-setup"><span>Lead setup · ₦25k</span></a>
             <a class="x-btn ghost" href="/enquire">{{ icon('pen', 18) }}<span>{{ t('home.cta_project') }}</span></a>
             {% else %}
             <a class="x-btn lime" data-magnet href="#try-url">{{ icon('scan', 18) }}<span>{{ t('home.hx_cta') }}</span></a>
