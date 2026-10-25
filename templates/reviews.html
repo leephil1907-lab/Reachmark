@@ -31,6 +31,14 @@
 .review-toast{display:none;padding:10px;border-radius:10px}
 .review-toast.ok{display:block;background:#eef6d1}
 .review-toast.err{display:block;background:#f9e7e1}
+.google-review-panel{display:grid;gap:10px;margin:0 0 24px;padding:22px;border:1px solid #dce5cb;border-radius:16px;background:linear-gradient(135deg,#f8faef,#eef5d9)}
+.google-review-panel h2{margin:0;font:400 clamp(25px,4vw,34px)/1.2 'Instrument Serif',Georgia,serif;color:#20251f}
+.google-review-panel p{margin:0;color:#59634d;line-height:1.65}
+.google-review-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.google-review-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 14px;border-radius:10px;border:1px solid #cbd8b4;text-decoration:none;font-weight:700;font-size:13px}
+.google-review-actions a:first-child{background:#d5f268;border-color:#c9e65d;color:#20251f}
+.google-review-actions a:focus-visible{outline:3px solid #718b36;outline-offset:3px}
+@media(max-width:480px){.google-review-actions{display:grid;grid-template-columns:1fr}.google-review-actions a{width:auto}}
 </style>
 {% include '_theme_head.html' %}</head>
 <body class="x-site">
@@ -42,6 +50,14 @@
     <p class="x-lead">{{ t('rev.sub') }}</p>
   </section>
   <div class="rev-wrap">
+    <section class="google-review-panel" aria-labelledby="google-review-heading">
+      <h2 id="google-review-heading">Find Reachmark Digital on Google</h2>
+      <p>Already worked with us? Read our public Google Business Profile reviews, or share your own honest experience. Reviews are hosted by Google.</p>
+      <div class="google-review-actions">
+        <a href="https://share.google/Nt8yNTpGW2DX4ExQH" target="_blank" rel="noopener noreferrer">Read Google reviews <span aria-hidden="true">↗</span></a>
+        <a href="https://g.page/r/CXusIeRomK7WEBM/review" target="_blank" rel="noopener noreferrer">Leave a Google review <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
     <div id="client-review-list" class="rev-list">
       {% for r in client_reviews or [] %}
       <article class="client-review-card">
