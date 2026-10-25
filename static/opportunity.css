@@ -97,3 +97,18 @@
 .analytics-stats,.feature-grid,.bottom-grid,.breakdown-grid,.analytics-top-grid{gap:16px}
 .analytics-heading,.rm-section-intro{margin-top:8px}
 .workflow-strip{flex-wrap:wrap}
+
+
+/* Separate observed evidence from proposed work in client-facing reports. */
+.oe-evidence,.oe-fix{
+  margin:12px 0 0!important;padding:11px 12px;border-radius:10px;
+  font-size:13px;line-height:1.6;
+}
+.oe-evidence{background:#f5f7f0;border:1px solid #e4e8dc;color:#414b3d}
+.oe-evidence span,.oe-fix span{
+  display:block;margin:0 0 4px;font:750 10px/1.35 Manrope,sans-serif;
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.oe-evidence span{color:#68745e}
+.oe-fix{background:#f1f6e5;border:1px solid #dce8c2;color:#28351f}
+.oe-fix span{color:#4b6c20}
