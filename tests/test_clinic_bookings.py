@@ -97,3 +97,11 @@ class ClinicBookingTests(test_app.ProspectTests):
         with test_app.module.db() as c:
             assert c.execute("SELECT count(*) FROM clinic_appointments").fetchone()[0] == 0
             assert c.execute("SELECT count(*) FROM clinic_handoffs WHERE route='clinic_staff'").fetchone()[0] == 1
+
+    def test_public_booking_page_renders(self):
+        response = self.client.get('/clinic/book')
+        assert response.status_code == 200
+        html = response.get_data(as_text=True)
+        assert 'clinic-booking.js' in html
+        assert 'not a confirmed booking' in html
+        assert 'name="consent"' in html
