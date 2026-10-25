@@ -758,6 +758,8 @@ from web.maps import register_maps
 register_maps(app, db, now, add_lead, CATEGORIES)
 from web.enquiries import register_enquiries
 register_enquiries(app, db, now, log)
+from web.clinic_bookings import register_clinic_bookings
+register_clinic_bookings(app, db, now, log)
 from web.operations import register_operations
 register_operations(app, db, now, log)
 from web.standard import register_standard
