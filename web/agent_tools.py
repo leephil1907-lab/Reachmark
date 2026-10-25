@@ -52,6 +52,23 @@ def _raise_for_status(code, data):
         raise ToolError((data or {}).get('error') or 'That action failed.', code)
 
 
+def tool_clinic_lead_qualify(db, now, log, p, ctx):
+    """Qualify a clinic appointment enquiry; this is routing, not medical triage."""
+    from web.clinic_qualifier import qualify_clinic_enquiry
+    message = str(p.get('message', '') or '')[:2000]
+    service = str(p.get('service', '') or '')[:160]
+    preferred_time = str(p.get('preferred_time', '') or '')[:160]
+    contact = str(p.get('contact', '') or '')[:250]
+    urgency = str(p.get('urgency', '') or '')[:160]
+    permission = p.get('contact_permission', False)
+    result = qualify_clinic_enquiry(
+        message=message, service=service, preferred_time=preferred_time,
+        contact=contact, contact_permission=permission, urgency=urgency,
+    )
+    log('agent', f"Clinic enquiry qualified: {result['tier']} → {result['route']}")
+    return result
+
+
 def tool_stats(db, now, log, p, ctx):
     with db() as c:
         leads = c.execute('SELECT COUNT(*) FROM leads').fetchone()[0]
@@ -296,6 +313,7 @@ def tool_project_update(db, now, log, p, ctx):
 
 
 ACT_TOOLS = {
+    'clinic_lead_qualify': (tool_clinic_lead_qualify, 'Qualify a clinic appointment enquiry and route next steps without diagnosis. Params: message, service, preferred_time, contact, contact_permission, urgency.'),
     'stats': (tool_stats, 'Workspace counts: leads, new enquiries, invoices, projects, open chats.'),
     'lead_list': (tool_lead_list, 'Search leads. Params: q, limit.'),
     'lead_get': (tool_lead_get, 'One lead. Params: id.'),
