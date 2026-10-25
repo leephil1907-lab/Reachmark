@@ -103,5 +103,5 @@ class ClinicBookingTests(test_app.ProspectTests):
         assert response.status_code == 200
         html = response.get_data(as_text=True)
         assert 'clinic-booking.js' in html
-        assert 'not a confirmed booking' in html
+        assert 'not confirmed until clinic staff confirm it' in html
         assert 'name="consent"' in html
