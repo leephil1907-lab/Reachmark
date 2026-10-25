@@ -83,3 +83,17 @@ class ClinicBookingTests(test_app.ProspectTests):
         assert result.json['handoff'] is True
         with test_app.module.db() as c:
             assert c.execute("SELECT count(*) FROM clinic_appointments").fetchone()[0] == 0
+
+
+    def test_urgent_request_is_saved_for_staff_not_auto_booked(self):
+        self._future_slot()
+        result = self.client.post('/api/clinic/appointments', json={
+            'slot_id':'test-slot','name':'Test Patient','email':'patient@example.test',
+            'service':'Dental consultation','note':'I need this today',
+            'consent':True})
+        assert result.status_code == 202
+        assert result.json['handoff'] is True
+        assert result.json['route'] == 'clinic_staff'
+        with test_app.module.db() as c:
+            assert c.execute("SELECT count(*) FROM clinic_appointments").fetchone()[0] == 0
+            assert c.execute("SELECT count(*) FROM clinic_handoffs WHERE route='clinic_staff'").fetchone()[0] == 1
