@@ -116,7 +116,7 @@ def register_clinic_bookings(app, db, now, log):
                     return jsonify(error="That slot was just taken. Refresh availability.", code="slot_unavailable"), 409
                 c.execute("""INSERT INTO clinic_appointments
                     (id,slot_id,name,email,phone,service,note,consent,consent_at,status,route,fingerprint,created,updated)
-                    VALUES(?,?,?,?,?,?,?,?,?,'pending',?,?,?,?,?)""",
+                    VALUES(?,?,?,?,?,?,?,?,?,'pending',?,?,?,?)""",
                     (appointment_id, slot_id, name, email, phone, service, note, 1, stamp,
                      'booking_team', fingerprint, stamp, stamp))
                 c.commit()
