@@ -35,6 +35,12 @@ def register_clinic_bookings(app, db, now, log):
             updated TEXT NOT NULL, FOREIGN KEY(slot_id) REFERENCES clinic_slots(id))""")
         c.execute("CREATE INDEX IF NOT EXISTS clinic_appt_email_created ON clinic_appointments(email,created)")
         c.execute("CREATE INDEX IF NOT EXISTS clinic_appt_status_created ON clinic_appointments(status,created)")
+        c.execute("""CREATE TABLE IF NOT EXISTS clinic_handoffs(
+            id TEXT PRIMARY KEY, name TEXT DEFAULT '', email TEXT DEFAULT '',
+            service TEXT DEFAULT '', tier TEXT NOT NULL, route TEXT NOT NULL,
+            consent INTEGER NOT NULL DEFAULT 0, fingerprint TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'open', created TEXT NOT NULL)""")
+        c.execute("CREATE INDEX IF NOT EXISTS clinic_handoff_status_created ON clinic_handoffs(status,created)")
 
     @app.route('/api/clinic/availability', methods=['GET'])
     def clinic_availability():
@@ -87,12 +93,25 @@ def register_clinic_bookings(app, db, now, log):
         result = qualify_clinic_enquiry(message=message, service=service, contact=email,
                                         contact_permission=True)
         # Safety handoff is never silently turned into a normal booking.
-        if result['route'] == 'emergency_protocol':
-            return jsonify(ok=False, handoff=True, route=result['route'],
-                           next_action=result['next_action'], clinical_assessment=False), 202
-
         stamp = now()
         fingerprint = hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()[:32]
+        if result['route'] == 'emergency_protocol':
+            # Record a minimal safety event only; do not persist the free-text symptom description.
+            with db() as c:
+                c.execute("""INSERT INTO clinic_handoffs
+                    (id,name,email,service,tier,route,consent,fingerprint,status,created)
+                    VALUES(?,?,?,?,?,?,0,?,'open',?)""",
+                    (uuid.uuid4().hex, '', '', '', result['tier'], result['route'], fingerprint, stamp))
+            return jsonify(ok=False, handoff=True, route=result['route'],
+                           next_action=result['next_action'], clinical_assessment=False), 202
+        if result['route'] == 'clinic_staff':
+            with db() as c:
+                c.execute("""INSERT INTO clinic_handoffs
+                    (id,name,email,service,tier,route,consent,fingerprint,status,created)
+                    VALUES(?,?,?,?,?,?,1,?,'open',?)""",
+                    (uuid.uuid4().hex, name, email, service, result['tier'], result['route'], fingerprint, stamp))
+            return jsonify(ok=True, handoff=True, route=result['route'],
+                           message="Your request has been sent for staff review. It is not a confirmed booking."), 202
         appointment_id = uuid.uuid4().hex
         try:
             with db() as c:
@@ -138,7 +157,9 @@ def register_clinic_bookings(app, db, now, log):
             rows = [dict(r) for r in c.execute("""SELECT id,slot_id,name,email,phone,service,note,
                 consent,consent_at,status,route,created,updated FROM clinic_appointments
                 ORDER BY created DESC LIMIT 100""")]
-        return jsonify(appointments=rows)
+            handoffs = [dict(r) for r in c.execute("""SELECT id,name,email,service,tier,route,
+                consent,status,created FROM clinic_handoffs ORDER BY created DESC LIMIT 100""")]
+        return jsonify(appointments=rows, handoffs=handoffs)
 
     @app.route('/api/clinic/appointments/<appointment_id>', methods=['PATCH'])
     def clinic_update_appointment(appointment_id):
