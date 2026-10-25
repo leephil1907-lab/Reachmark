@@ -1,27 +1,45 @@
 {% from '_icons.html' import icon %}
-{# Brand panel for sign-in / sign-up (desktop). Decorative layers are aria-hidden. #}
+{# Brand panel for sign-in / sign-up. The product preview is illustrative, not a live audit. #}
 <aside class="auth-aside" aria-label="Reachmark">
   <div class="auth-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
   <div class="auth-grid" aria-hidden="true"></div>
   <a href="/" class="auth-aside-logo" aria-label="{{ t('common.home_aria') }}"><img src="/static/logo-inverse.svg" alt="Reachmark" width="290" height="80"></a>
   <div class="auth-aside-copy">
     <p class="auth-kicker">{{ t('home.kicker') }}</p>
-    <h2>{{ t('home.hero_h1a') }} <em>{{ t('home.hero_h1b') }}</em></h2>
-    <p>{{ t('home.sub') }}</p>
+    <h2>Turn website gaps into <em>real opportunities.</em></h2>
+    <p>Find the friction, understand what matters, and prepare a clear next step — all in one focused workspace.</p>
     <ol class="auth-steps">
-      <li><span>01</span>{{ t('home.proof_find') }}</li>
-      <li><span>02</span>{{ t('home.proof_diagnose') }}</li>
-      <li><span>03</span>{{ t('home.proof_approve') }}</li>
+      <li><span>01</span>Discover</li>
+      <li><span>02</span>Diagnose</li>
+      <li><span>03</span>Decide what to do</li>
     </ol>
   </div>
   <div class="auth-float" aria-hidden="true">
-    <div class="auth-chip a"><b>3</b> observations</div>
+    <div class="auth-chip a"><b>01</b> · FIND THE SIGNAL</div>
     <div class="auth-report">
-      <small>Digital Opportunity Report</small>
-      <strong>Harbour Street Bakery</strong>
-      <div class="bar"><span style="width:78%"></span></div>
-      <ul><li>Mobile menu hides the call button</li><li>No booking path on the homepage</li><li>Contact form returns an error</li></ul>
+      <div class="auth-report-head">
+        <div>
+          <small>Digital Opportunity Report</small>
+          <strong>From findings to next steps</strong>
+        </div>
+        <span class="auth-report-status">Evidence first</span>
+      </div>
+      <div class="auth-report-metrics">
+        <div class="auth-report-metric"><b>01</b><span>Observe</span></div>
+        <div class="auth-report-metric"><b>02</b><span>Prioritise</span></div>
+        <div class="auth-report-metric"><b>03</b><span>Recommend</span></div>
+      </div>
+      <div class="bar"><span style="width:72%"></span></div>
+      <ul>
+        <li>Spot friction in the customer journey</li>
+        <li>Connect findings to practical fixes</li>
+        <li>Keep recommendations clear and reviewable</li>
+      </ul>
     </div>
-    <div class="auth-chip b">{{ icon('shield-check',14) }} You approve every send</div>
+    <div class="auth-chip b">{{ icon('shield-check',14) }} You stay in control</div>
+  </div>
+  <div class="auth-panel-foot" aria-hidden="true">
+    <span>Research with purpose</span>
+    <span>Recommendations you can review</span>
   </div>
 </aside>
