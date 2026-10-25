@@ -105,3 +105,26 @@ class ClinicBookingTests(test_app.ProspectTests):
         assert 'clinic-booking.js' in html
         assert 'not confirmed until clinic staff confirm it' in html
         assert 'name="consent"' in html
+
+
+    def test_owner_configures_slot_and_public_availability_reads_it(self):
+        start = datetime.now(timezone.utc) + timedelta(days=5)
+        end = start + timedelta(minutes=30)
+        with self.client.session_transaction() as sess:
+            sess['owner'] = True
+        created = self.client.post('/api/clinic/slots', json={
+            'start':start.isoformat(),'end':end.isoformat()})
+        assert created.status_code == 201
+        availability = self.client.get('/api/clinic/availability')
+        assert availability.status_code == 200
+        assert len(availability.json['slots']) == 1
+        assert availability.json['slots'][0]['id'] == created.json['slot']['id']
+
+    def test_slot_configuration_rejects_overlapping_open_times(self):
+        start, end = self._future_slot()
+        with self.client.session_transaction() as sess:
+            sess['owner'] = True
+        result = self.client.post('/api/clinic/slots', json={
+            'start':(start + timedelta(minutes=10)).isoformat(),
+            'end':(end + timedelta(minutes=10)).isoformat()})
+        assert result.status_code == 409
