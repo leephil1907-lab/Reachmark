@@ -186,5 +186,30 @@ def register_video_studio(app, db, now):
             row = c.execute("SELECT * FROM video_jobs WHERE id=? AND owner_id=?", (jid, owner)).fetchone()
         if not row:
             abort(404)
-        return jsonify(job=dict(row))
+        job = dict(row)
+        worker = os.getenv("VIDEO_STUDIO_WORKER_URL", "").strip().rstrip("/")
+        if worker and job["status"] in ("queued", "running"):
+            try:
+                payload = json.loads(job.get("payload") or "{}")
+                remote = payload.get("worker_job") or {}
+                remote_id = str(remote.get("worker_job_id") or remote.get("id") or jid)
+                response = requests.get(worker + "/jobs/" + remote_id, timeout=8)
+                response.raise_for_status()
+                state = response.json()
+                status = str(state.get("status") or job["status"])
+                if status not in ("queued", "running", "completed", "failed"):
+                    status = job["status"]
+                output_url = str(state.get("output_url") or job["output_url"] or "")
+                error = str(state.get("error") or "")[:500]
+                stamp = now()
+                with db() as c:
+                    c.execute("UPDATE video_jobs SET status=?,output_url=?,error=?,updated=? WHERE id=? AND owner_id=?",
+                              (status, output_url, error, stamp, jid, owner))
+                    c.execute("UPDATE video_projects SET status=?,updated=? WHERE id=? AND owner_id=?",
+                              (status, stamp, job["project_id"], owner))
+                job.update(status=status, output_url=output_url, error=error, updated=stamp)
+            except (requests.RequestException, ValueError):
+                # Keep the last known state; a transient status endpoint failure is not a failed render.
+                pass
+        return jsonify(job=job)
 
