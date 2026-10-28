@@ -798,6 +798,8 @@ from web.onboard import register_onboard
 register_onboard(app, db, now, log, search_save, CATEGORIES)
 from web.revenue_os import register_revenue_os
 register_revenue_os(app, db, now, log)
+from web.video_studio import register_video_studio
+register_video_studio(app, db, now)
 from web.outreach import register_outreach
 register_outreach(app, db, now, log)
 from web.google_business import register_google_business
