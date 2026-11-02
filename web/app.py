@@ -388,10 +388,10 @@ def robots():
     policy_path = os.path.join(ROOT, 'robots.txt')
     try:
         with open(policy_path, encoding='utf-8') as policy:
-            body = policy.read().rstrip() + '\\n'
+            body = policy.read().rstrip() + '\n'
     except OSError:
-        body = 'User-agent: *\\n'
-    body += 'Sitemap: ' + base + '/sitemap.xml\\n'
+        body = 'User-agent: *\n'
+    body += 'Sitemap: ' + base + '/sitemap.xml\n'
     return Response(body, mimetype='text/plain', headers={'Cache-Control': 'public, max-age=3600'})
 @app.route('/sitemap.xml')
 def sitemap():
