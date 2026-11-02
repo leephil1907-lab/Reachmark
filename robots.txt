@@ -1,17 +1,23 @@
 # Reachmark crawler policy
-# Private application pages remain crawlable only so search engines can read
-# their existing X-Robots-Tag: noindex, nofollow response header.
-# Do not disallow /admin, /dashboard or /workspace here: Google must be able
-# to crawl them to discover the noindex directive and remove indexed URLs.
+# Private application routes return X-Robots-Tag: noindex, nofollow, noarchive.
+# They are intentionally NOT disallowed here: search engines must be able to
+# crawl an already-indexed URL and read that header to remove it from results.
+# robots.txt is not access control. Private data must remain behind authentication.
 
 User-agent: *
-Disallow: /api/admin/
-Disallow: /api/internal/
-Disallow: /api/private/
-Disallow: /data/
+Disallow: /.env
+Disallow: /.git/
 Disallow: /backups/
+Disallow: /config/
+Disallow: /data/
 Disallow: /exports/
+Disallow: /internal/
+Disallow: /private/
 Disallow: /uploads/private/
+Disallow: /*.env$
+Disallow: /*.sqlite$
 Disallow: /*.sqlite3$
 Disallow: /*.db$
 Disallow: /*.log$
+Disallow: /*.bak$
+Disallow: /*.sql$
