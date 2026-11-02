@@ -180,16 +180,21 @@ def same_origin():
     if request.method in ('POST','PATCH','DELETE'):
         origin=request.headers.get('Origin')
         if origin and urlparse(origin).netloc != request.host: return jsonify(error=_t('api.csrf',loc)),403
-@app.get('/robots.txt')
-def robots_txt():
-    """Serve the repository crawler policy at the required site-root URL."""
-    return send_from_directory(ROOT, 'robots.txt', mimetype='text/plain')
-
-
 @app.after_request
 def headers(r):
-    if request.path.startswith(('/api/','/preview/','/unsubscribe/','/workspace','/dashboard','/admin')): r.headers['X-Robots-Tag']='noindex, nofollow'; r.headers['Cache-Control']='no-store'
-    r.headers['X-Content-Type-Options']='nosniff'; r.headers['Referrer-Policy']='strict-origin-when-cross-origin'
+    # Private application responses must not appear in search results. Keep
+    # these routes crawlable so Google can read this header and de-index them.
+    private_paths = (
+        '/api/', '/preview/', '/unsubscribe/', '/workspace', '/dashboard',
+        '/admin', '/signin', '/signup', '/client-login', '/forgot', '/reset',
+        '/verify', '/login', '/logout',
+    )
+    if request.path.startswith(private_paths):
+        r.headers['X-Robots-Tag'] = 'noindex, nofollow, noarchive, nosnippet'
+        r.headers['Cache-Control'] = 'private, no-store, max-age=0'
+        r.headers['Pragma'] = 'no-cache'
+    r.headers['X-Content-Type-Options'] = 'nosniff'
+    r.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
     return r
 
 ADSENSE_CLIENT = os.getenv('ADSENSE_CLIENT', 'ca-pub-5678865896620902').strip()
@@ -378,8 +383,16 @@ is not.</p>
 
 @app.route('/robots.txt')
 def robots():
-    base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
-    return Response('User-agent: *\nAllow: /\nAllow: /about\nAllow: /showcase\nAllow: /enquire\nAllow: /receptionist\nAllow: /reviews\nAllow: /pricing\nAllow: /need\nAllow: /sourcing\nAllow: /sending\nAllow: /sample-report\nAllow: /app\nAllow: /signup\nAllow: /static/\nAllow: /showcase/\nDisallow: /api/\nDisallow: /preview/\nDisallow: /unsubscribe/\nDisallow: /workspace\nDisallow: /dashboard\nDisallow: /*?*\nSitemap: '+base+'/sitemap.xml\n',mimetype='text/plain')
+    """Serve the reviewed root crawler policy and advertise the public sitemap."""
+    base = settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
+    policy_path = os.path.join(ROOT, 'robots.txt')
+    try:
+        with open(policy_path, encoding='utf-8') as policy:
+            body = policy.read().rstrip() + '\\n'
+    except OSError:
+        body = 'User-agent: *\\n'
+    body += 'Sitemap: ' + base + '/sitemap.xml\\n'
+    return Response(body, mimetype='text/plain', headers={'Cache-Control': 'public, max-age=3600'})
 @app.route('/sitemap.xml')
 def sitemap():
     from xml.sax.saxutils import escape
