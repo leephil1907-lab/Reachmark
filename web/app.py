@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from urllib.parse import urlparse
 from email.message import EmailMessage
 import requests
-from flask import Flask, g, request, jsonify, render_template, Response, abort, redirect
+from flask import Flask, g, request, jsonify, render_template, Response, abort, redirect, send_from_directory
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['MAX_CONTENT_LENGTH'] = 3 * 1024 * 1024
@@ -180,6 +180,12 @@ def same_origin():
     if request.method in ('POST','PATCH','DELETE'):
         origin=request.headers.get('Origin')
         if origin and urlparse(origin).netloc != request.host: return jsonify(error=_t('api.csrf',loc)),403
+@app.get('/robots.txt')
+def robots_txt():
+    """Serve the repository crawler policy at the required site-root URL."""
+    return send_from_directory(ROOT, 'robots.txt', mimetype='text/plain')
+
+
 @app.after_request
 def headers(r):
     if request.path.startswith(('/api/','/preview/','/unsubscribe/','/workspace','/dashboard','/admin')): r.headers['X-Robots-Tag']='noindex, nofollow'; r.headers['Cache-Control']='no-store'
