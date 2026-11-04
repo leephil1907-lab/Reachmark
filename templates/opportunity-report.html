@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ t('doc.report_title') }}{% if lead.name %} — {{ lead.name }}{% endif %} · Reachmark</title>
-<meta name="robots" content="noindex,nofollow">
+{% if sample %}
+<meta name="description" content="Explore a sample Reachmark Digital Opportunity Report. See how website observations, supporting evidence and practical recommendations are presented. This is an illustrative example, not a live business audit.">
+<link rel="canonical" href="https://reachmarkdigital.xyz/sample-report">
+<meta property="og:type" content="article"><meta property="og:site_name" content="Reachmark"><meta property="og:title" content="Sample Digital Opportunity Report — Reachmark"><meta property="og:description" content="An illustrative example of website observations, supporting evidence and practical recommendations."><meta property="og:url" content="https://reachmarkdigital.xyz/sample-report"><meta property="og:image" content="https://reachmarkdigital.xyz/static/social-card-v2.png">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Sample Digital Opportunity Report — Reachmark"><meta name="twitter:description" content="An illustrative example of website observations and recommendations."><meta name="twitter:image" content="https://reachmarkdigital.xyz/static/social-card-v2.png">
+{% else %}<meta name="robots" content="noindex,nofollow">{% endif %}
 <meta name="theme-color" content="#fbfbfb">
 <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/static/fonts.css">
