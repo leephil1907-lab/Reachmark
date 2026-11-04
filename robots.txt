@@ -5,6 +5,10 @@
 # robots.txt is not access control. Private data must remain behind authentication.
 
 User-agent: *
+Allow: /about
+Allow: /reviews
+Allow: /receptionist
+Disallow: /preview/
 Disallow: /.env
 Disallow: /.git/
 Disallow: /backups/
