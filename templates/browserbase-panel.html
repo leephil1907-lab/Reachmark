@@ -1,0 +1,24 @@
+<section class="card" id="browserbase-agent-panel" style="margin:18px 0;padding:22px">
+  <div class="section-top" style="align-items:flex-start;gap:18px;flex-wrap:wrap">
+    <div>
+      <div class="eyebrow">BROWSERBASE AGENT</div>
+      <h2 style="margin:4px 0 6px">Website Opportunity Report</h2>
+      <p class="small muted" style="margin:0;max-width:650px">Run your Browserbase agent against a public website. Runs are saved here so you can return later to view their status and report.</p>
+    </div>
+    <span class="small muted" id="bb-config-status" role="status">Checking agent connection…</span>
+  </div>
+  <form id="bb-run-form" style="display:grid;gap:12px;margin-top:18px">
+    <label for="bb-task" class="small">Report task</label>
+    <textarea id="bb-task" rows="4" maxlength="4000" required style="width:100%;min-height:105px;padding:12px;border:1px solid var(--line,#3b4734);border-radius:10px;background:var(--surface,#171d16);color:inherit;resize:vertical">Analyze https://reachmarkdigital.xyz and produce a detailed Website Opportunity Report. Inspect the public website, identify verifiable conversion, usability, technical SEO and performance opportunities, cite the exact page and evidence for each finding, separate observed facts from recommendations, and prioritize fixes by impact and effort. Do not invent traffic, revenue, rankings or performance measurements.</textarea>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <button class="primary" id="bb-run-button" type="submit">Run Website Opportunity Report</button>
+      <button class="secondary" id="bb-refresh-button" type="button">Refresh history</button>
+      <span class="small muted" id="bb-run-message" role="status" aria-live="polite"></span>
+    </div>
+  </form>
+  <div style="margin-top:22px">
+    <div class="section-top"><h3 style="margin:0">Recent agent runs</h3><span class="small muted">Latest 12</span></div>
+    <div id="bb-run-history" style="display:grid;gap:12px;margin-top:12px"><p class="small muted">Loading saved runs…</p></div>
+  </div>
+</section>
+<script defer src="/static/browserbase-agent.js"></script>

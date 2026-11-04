@@ -1,7 +1,7 @@
 """Single-source SQLite migrations for Reachmark."""
 from datetime import datetime, timezone
 
-MIGRATION_VERSION=5
+MIGRATION_VERSION=6
 
 def _tables(c):
     return {r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
@@ -69,11 +69,18 @@ def _apply_v5(c):
       CREATE INDEX IF NOT EXISTS idx_google_locations_owner ON google_locations(owner_user_id);
       CREATE INDEX IF NOT EXISTS idx_google_reviews_location ON google_reviews(google_location_id);""")
 
+def _apply_v6(c):
+    c.executescript("""CREATE TABLE IF NOT EXISTS browserbase_runs(
+      id TEXT PRIMARY KEY, browserbase_run_id TEXT NOT NULL UNIQUE,
+      agent_id TEXT NOT NULL, task TEXT NOT NULL, status TEXT NOT NULL,
+      result_json TEXT, error TEXT, created TEXT NOT NULL, updated TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS idx_browserbase_runs_created ON browserbase_runs(created DESC);""")
+
 def run_migrations(db):
     with db() as c:
         c.execute("CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY,applied_at TEXT NOT NULL)")
         applied={r[0] for r in c.execute("SELECT version FROM schema_migrations ORDER BY version")}
-        for version,migration in ((1,_apply_v1),(2,_apply_v2),(3,_apply_v3),(4,_apply_v4),(5,_apply_v5)):
+        for version,migration in ((1,_apply_v1),(2,_apply_v2),(3,_apply_v3),(4,_apply_v4),(5,_apply_v5),(6,_apply_v6)):
             if version not in applied:
                 migration(c)
                 c.execute("INSERT INTO schema_migrations(version,applied_at) VALUES(?,?)",(version,datetime.now(timezone.utc).isoformat()))
