@@ -21,7 +21,9 @@
 .rm-msg.error{background:#FFF3F1;border-color:#f3cdc6;color:#8a3226}
 .rm-msg.thinking{opacity:.72;font-style:italic}
 .rm-form{display:flex;flex-wrap:wrap;gap:8px;padding:12px;border-top:1px solid #eef2e6;background:#FFFFFF;align-items:center}
-.rm-form input{flex:1;min-width:120px;border:1px solid #dfe5d2;border-radius:11px;padding:11px 13px;font:inherit;background:#fbfcf7}
+.rm-form input:not(.rm-hp){flex:1;min-width:120px;border:1px solid #dfe5d2;border-radius:11px;padding:11px 13px;font:inherit;background:#fbfcf7!important;color:#20251F!important;-webkit-text-fill-color:#20251F!important;caret-color:#20251F}
+.rm-form input:not(.rm-hp)::placeholder{color:#68745f!important;opacity:1}
+.rm-form input:not(.rm-hp):-webkit-autofill{-webkit-text-fill-color:#20251F!important;box-shadow:0 0 0 1000px #fbfcf7 inset}
 .rm-form input:focus{outline:2px solid #D5F268;outline-offset:1px;background:#fff}
 .rm-form .rm-hp{position:absolute;left:-9999px;width:1px;height:1px}
 #rm-send{background:#D5F268;color:#1b201a;border:0;border-radius:11px;padding:11px 18px;font:700 13px 'Manrope','DM Sans',sans-serif;cursor:pointer}
