@@ -10,6 +10,7 @@ COPY web ./web
 COPY agents ./agents
 COPY crew ./crew
 COPY scripts ./scripts
+COPY robots.txt ./
 COPY templates ./templates
 COPY static ./static
 # AI crew assets: vendored playbooks (attributed, unmodified), the facts-only
