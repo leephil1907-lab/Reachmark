@@ -447,7 +447,7 @@ class PaystackVerificationHardeningTests(BillingBase):
         def fake(method, path, payload=None):
             return init if path == '/transaction/initialize' else verify
 
-        with patch('web.billing.paystack_request', side_effect=fake), \\
+        with patch('web.billing.paystack_request', side_effect=fake), \
                 patch.dict('os.environ', {'PAYSTACK_SECRET_KEY': 'sk_test_x'}):
             self.client.post('/api/billing/checkout',
                              json={'tier': 'starter', 'currency': 'USD'}, headers=self.csrf())
@@ -463,7 +463,7 @@ class PaystackVerificationHardeningTests(BillingBase):
         def fake(method, path, payload=None):
             return init if path == '/transaction/initialize' else verify
 
-        with patch('web.billing.paystack_request', side_effect=fake), \\
+        with patch('web.billing.paystack_request', side_effect=fake), \
                 patch.dict('os.environ', {'PAYSTACK_SECRET_KEY': 'sk_test_x'}):
             self.client.post('/api/billing/checkout',
                              json={'tier': 'starter', 'currency': 'USD'}, headers=self.csrf())
@@ -474,7 +474,7 @@ class PaystackVerificationHardeningTests(BillingBase):
     def test_checkout_uses_configured_callback_url(self):
         self.make_client()
         fake = {'authorization_url': 'https://pay.test/abc', 'reference': 'rm-callback1'}
-        with patch('web.billing.paystack_request', return_value=fake) as m, \\
+        with patch('web.billing.paystack_request', return_value=fake) as m, \
                 patch.dict('os.environ', {
                     'PAYSTACK_SECRET_KEY': 'sk_test_x',
                     'PAYSTACK_CALLBACK_URL': 'https://reachmarkdigital.xyz/billing/callback',
