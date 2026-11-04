@@ -293,7 +293,7 @@ body.public-page::before, body.x-public::before{
   mask-image:linear-gradient(180deg,#000 40%,transparent);
   -webkit-mask-image:linear-gradient(180deg,#000 40%,transparent);
 }
-.public-heading h1, .wrap h1, .enquiry-intro h2{
+.public-heading h1, .wrap h1, .enquiry-intro h1,.enquiry-intro h2{
   font-family:var(--x-serif)!important;font-weight:400!important;letter-spacing:-.03em!important;
 }
 .public-heading{padding-top:64px!important}

@@ -265,8 +265,8 @@ class ProspectTests(unittest.TestCase):
         self.assertIn(b'/preview/',self.client.get('/robots.txt').data)
         self.assertIn(b'/about',self.client.get('/robots.txt').data)
         self.assertIsNone(self.client.get('/').headers.get('X-Robots-Tag'))
-        self.assertEqual(self.client.get('/workspace').headers['X-Robots-Tag'],'noindex, nofollow')
-        self.assertEqual(self.client.get('/dashboard').headers['X-Robots-Tag'],'noindex, nofollow')
+        self.assertEqual(self.client.get('/workspace').headers['X-Robots-Tag'],'noindex, nofollow, noarchive, nosnippet')
+        self.assertEqual(self.client.get('/dashboard').headers['X-Robots-Tag'],'noindex, nofollow, noarchive, nosnippet')
     def test_invalid_audit_scheme(self):
         from web.services import audit_website
         self.assertEqual(audit_website('file:///etc/passwd')['status'],'CHECK_FAILED')
