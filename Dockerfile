@@ -12,6 +12,7 @@ COPY crew ./crew
 COPY scripts ./scripts
 COPY templates ./templates
 COPY static ./static
+COPY robots.txt ./robots.txt
 # AI crew assets: vendored playbooks (attributed, unmodified), the facts-only
 # knowledge base the receptionist answers from, and the offline demo fixtures.
 COPY skills ./skills
