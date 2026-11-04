@@ -222,34 +222,63 @@ def register_billing(app, db, now, log):
             p = dict(row)
             if p['status'] == 'paid':
                 return p
-            if (verify_data or {}).get('status') != 'success':
-                c.execute('UPDATE payments SET status=?,raw=? WHERE reference=?',
-                          ('failed', json.dumps(verify_data or {})[:4000], reference))
-                try:
-                    from web.accounts import get_base_url, send_branded
-                    _fbase = get_base_url()
-                    _floc = locale_now()
-                    _ftier = localized_tiers(_floc).get(p['tier'], {}).get('name', p['tier'])
-                    send_branded(p['email'], _t('au.m_f_sub', _floc),
-                                 _t('au.m_f_body', _floc, tier=_ftier, ref=reference),
-                                 html_title=_t('au.m_f_title', _floc), cta_url=f'{_fbase}/pricing',
-                                 cta_label=_t('au.m_f_cta', _floc), db=db)
-                except Exception:
-                    pass
+            payment_status = str((verify_data or {}).get('status') or '').lower()
+            if payment_status != 'success':
+                # Redirect callbacks can arrive while an asynchronous payment is
+                # still pending. Keep it pending so a later charge.success webhook
+                # can complete the activation; only terminal failures are final.
+                if payment_status in ('failed', 'abandoned', 'reversed'):
+                    c.execute('UPDATE payments SET status=?,raw=? WHERE reference=? AND status=?',
+                              ('failed', json.dumps(verify_data or {})[:4000], reference, 'pending'))
+                    try:
+                        from web.accounts import get_base_url, send_branded
+                        _fbase = get_base_url()
+                        _floc = locale_now()
+                        _ftier = localized_tiers(_floc).get(p['tier'], {}).get('name', p['tier'])
+                        send_branded(p['email'], _t('au.m_f_sub', _floc),
+                                     _t('au.m_f_body', _floc, tier=_ftier, ref=reference),
+                                     html_title=_t('au.m_f_title', _floc), cta_url=f'{_fbase}/pricing',
+                                     cta_label=_t('au.m_f_cta', _floc), db=db)
+                    except Exception:
+                        pass
                 return None
             try:
                 paid_amount = int((verify_data or {}).get('amount') or 0)
             except (TypeError, ValueError):
                 paid_amount = 0
-            if paid_amount != (p['amount_minor'] or 0):
-                c.execute('UPDATE payments SET status=?,raw=? WHERE reference=?',
-                          ('mismatch', json.dumps(verify_data or {})[:4000], reference))
+            verified_reference = str((verify_data or {}).get('reference') or '')
+            verified_currency = str((verify_data or {}).get('currency') or '').upper()
+            if (paid_amount != (p['amount_minor'] or 0)
+                    or verified_reference != reference
+                    or verified_currency != str(p['currency'] or '').upper()):
+                c.execute('UPDATE payments SET status=?,raw=? WHERE reference=? AND status=?',
+                          ('mismatch', json.dumps(verify_data or {})[:4000], reference, 'pending'))
                 return None
+
+            # Commit payment settlement and tier extension in one SQLite transaction.
+            # The conditional status update makes concurrent callback/webhook deliveries
+            # idempotent: only the request that changes pending -> paid grants access.
             stamp = now()
-            c.execute('UPDATE payments SET status=?,paid_at=?,raw=? WHERE reference=?',
-                      ('paid', stamp, json.dumps(verify_data or {})[:4000], reference))
-        days = ANNUAL_DAYS if (p.get('period') or 'monthly') == 'annual' else PERIOD_DAYS
-        grant_tier(db, now, log, p['user_id'], p['tier'], days)
+            days = ANNUAL_DAYS if (p.get('period') or 'monthly') == 'annual' else PERIOD_DAYS
+            user = c.execute('SELECT tier_expires FROM users WHERE id=?', (p['user_id'],)).fetchone()
+            if not user:
+                return None
+            current = (user['tier_expires'] or '')
+            base = current if current and current > stamp else stamp
+            try:
+                base_dt = datetime.fromisoformat(base)
+            except ValueError:
+                base_dt = datetime.now(timezone.utc)
+            if base_dt.tzinfo is None:
+                base_dt = base_dt.replace(tzinfo=timezone.utc)
+            new_exp = (base_dt + timedelta(days=days)).isoformat()
+            updated = c.execute(
+                'UPDATE payments SET status=?,paid_at=?,raw=? WHERE reference=? AND status=?',
+                ('paid', stamp, json.dumps(verify_data or {})[:4000], reference, 'pending'))
+            if updated.rowcount != 1:
+                return None
+            c.execute('UPDATE users SET tier=?,tier_expires=? WHERE id=?',
+                      (p['tier'], new_exp, p['user_id']))
         log('billing', f"{p['email']} upgraded to {p['tier']} ({p['currency']}).")
         try:
             from web.accounts import get_base_url, send_branded
@@ -316,7 +345,8 @@ def register_billing(app, db, now, log):
             data = paystack_request('POST', '/transaction/initialize', {
                 'email': user['email'], 'amount': amount, 'currency': currency,
                 'reference': 'rm-' + uuid.uuid4().hex[:24],
-                'callback_url': request.url_root.rstrip('/') + '/billing/callback',
+                'callback_url': (os.getenv('PAYSTACK_CALLBACK_URL', '').strip()
+                                 or request.url_root.rstrip('/') + '/billing/callback'),
                 'metadata': {'user_id': cid, 'tier': tier, 'period': period, 'purpose': 'workspace-plan'}})
         except BillingError as e:
             return jsonify(error=str(e)), 503

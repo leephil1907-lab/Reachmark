@@ -436,3 +436,83 @@ class DropdownStandardTests(BillingBase):
         s = _repo('templates/enquiry-form.html')
         self.assertIn('<select', s)
         self.assertNotIn('data-native', s)
+
+
+class PaystackVerificationHardeningTests(BillingBase):
+    def test_callback_rejects_currency_mismatch(self):
+        self.make_client()
+        init = {'authorization_url': 'https://pay.test/abc', 'reference': 'rm-currency1'}
+        verify = {'status': 'success', 'amount': 1900, 'currency': 'NGN', 'reference': 'rm-currency1'}
+
+        def fake(method, path, payload=None):
+            return init if path == '/transaction/initialize' else verify
+
+        with patch('web.billing.paystack_request', side_effect=fake), \
+                patch.dict('os.environ', {'PAYSTACK_SECRET_KEY': 'sk_test_x'}):
+            self.client.post('/api/billing/checkout',
+                             json={'tier': 'starter', 'currency': 'USD'}, headers=self.csrf())
+            r = self.client.get('/billing/callback?reference=rm-currency1')
+        self.assertIn('/pricing?error=payment', r.headers['Location'])
+        self.assertEqual(self.client.get('/api/auth/me').get_json()['tier'], 'free')
+
+    def test_callback_rejects_reference_mismatch(self):
+        self.make_client()
+        init = {'authorization_url': 'https://pay.test/abc', 'reference': 'rm-reference1'}
+        verify = {'status': 'success', 'amount': 1900, 'currency': 'USD', 'reference': 'some-other-ref'}
+
+        def fake(method, path, payload=None):
+            return init if path == '/transaction/initialize' else verify
+
+        with patch('web.billing.paystack_request', side_effect=fake), \
+                patch.dict('os.environ', {'PAYSTACK_SECRET_KEY': 'sk_test_x'}):
+            self.client.post('/api/billing/checkout',
+                             json={'tier': 'starter', 'currency': 'USD'}, headers=self.csrf())
+            r = self.client.get('/billing/callback?reference=rm-reference1')
+        self.assertIn('/pricing?error=payment', r.headers['Location'])
+        self.assertEqual(self.client.get('/api/auth/me').get_json()['tier'], 'free')
+
+    def test_checkout_uses_configured_callback_url(self):
+        self.make_client()
+        fake = {'authorization_url': 'https://pay.test/abc', 'reference': 'rm-callback1'}
+        with patch('web.billing.paystack_request', return_value=fake) as m, \
+                patch.dict('os.environ', {
+                    'PAYSTACK_SECRET_KEY': 'sk_test_x',
+                    'PAYSTACK_CALLBACK_URL': 'https://reachmarkdigital.xyz/billing/callback',
+                }):
+            self.client.post('/api/billing/checkout',
+                             json={'tier': 'starter', 'currency': 'USD'}, headers=self.csrf())
+        self.assertEqual(m.call_args[0][2]['callback_url'],
+                         'https://reachmarkdigital.xyz/billing/callback')
+
+
+class PaystackPendingPaymentTests(BillingBase):
+    def test_pending_callback_can_be_completed_by_success_webhook(self):
+        self.make_client()
+        init = {'authorization_url': 'https://pay.test/abc', 'reference': 'rm-pending1'}
+        pending = {'status': 'pending', 'amount': 1900, 'currency': 'USD', 'reference': 'rm-pending1'}
+
+        def fake(method, path, payload=None):
+            return init if path == '/transaction/initialize' else pending
+
+        with patch('web.billing.paystack_request', side_effect=fake), \
+                patch.dict('os.environ', {'PAYSTACK_SECRET_KEY': 'whsec-test'}):
+            self.client.post('/api/billing/checkout',
+                             json={'tier': 'starter', 'currency': 'USD'}, headers=self.csrf())
+            self.client.get('/billing/callback?reference=rm-pending1')
+            me = self.client.get('/api/auth/me').get_json()
+            self.assertEqual(me['tier'], 'free')
+            with module.db() as c:
+                row = c.execute('SELECT status FROM payments WHERE reference=?',
+                                ('rm-pending1',)).fetchone()
+            self.assertEqual(row['status'], 'pending')
+
+            event = {'event': 'charge.success',
+                     'data': {'status': 'success', 'amount': 1900,
+                              'currency': 'USD', 'reference': 'rm-pending1'}}
+            raw = json.dumps(event)
+            sig = hmac.new(b'whsec-test', raw.encode(), hashlib.sha512).hexdigest()
+            r = self.client.post('/api/billing/webhook', data=raw,
+                                 content_type='application/json',
+                                 headers={'x-paystack-signature': sig})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(self.client.get('/api/auth/me').get_json()['tier'], 'starter')
