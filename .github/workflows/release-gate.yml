@@ -58,6 +58,12 @@ jobs:
           done
           test -s /tmp/healthz.json
           grep -q '"status":"ok"' /tmp/healthz.json
+          # Ensure the production image includes the reviewed crawler policy.
+          curl -fsS http://127.0.0.1:18000/robots.txt >/tmp/robots.txt
+          grep -q 'Allow: /about' /tmp/robots.txt
+          grep -q 'Allow: /reviews' /tmp/robots.txt
+          grep -q 'Allow: /receptionist' /tmp/robots.txt
+          grep -q 'Disallow: /preview/' /tmp/robots.txt
           # The runner has no "reachmark" user, so compare numeric owner IDs: the
           # bind-mounted data folder must be owned by the container's reachmark user.
           test "$(stat -c %u "$RUNNER_TEMP/reachmark-data")" = "$(docker exec reachmark-release-gate id -u reachmark)"
