@@ -494,7 +494,7 @@ class PaystackPendingPaymentTests(BillingBase):
         def fake(method, path, payload=None):
             return init if path == '/transaction/initialize' else pending
 
-        with patch('web.billing.paystack_request', side_effect=fake), \\
+        with patch('web.billing.paystack_request', side_effect=fake), \
                 patch.dict('os.environ', {'PAYSTACK_SECRET_KEY': 'whsec-test'}):
             self.client.post('/api/billing/checkout',
                              json={'tier': 'starter', 'currency': 'USD'}, headers=self.csrf())
