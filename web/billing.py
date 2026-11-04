@@ -222,20 +222,25 @@ def register_billing(app, db, now, log):
             p = dict(row)
             if p['status'] == 'paid':
                 return p
-            if (verify_data or {}).get('status') != 'success':
-                c.execute('UPDATE payments SET status=?,raw=? WHERE reference=?',
-                          ('failed', json.dumps(verify_data or {})[:4000], reference))
-                try:
-                    from web.accounts import get_base_url, send_branded
-                    _fbase = get_base_url()
-                    _floc = locale_now()
-                    _ftier = localized_tiers(_floc).get(p['tier'], {}).get('name', p['tier'])
-                    send_branded(p['email'], _t('au.m_f_sub', _floc),
-                                 _t('au.m_f_body', _floc, tier=_ftier, ref=reference),
-                                 html_title=_t('au.m_f_title', _floc), cta_url=f'{_fbase}/pricing',
-                                 cta_label=_t('au.m_f_cta', _floc), db=db)
-                except Exception:
-                    pass
+            payment_status = str((verify_data or {}).get('status') or '').lower()
+            if payment_status != 'success':
+                # Redirect callbacks can arrive while an asynchronous payment is
+                # still pending. Keep it pending so a later charge.success webhook
+                # can complete the activation; only terminal failures are final.
+                if payment_status in ('failed', 'abandoned', 'reversed'):
+                    c.execute('UPDATE payments SET status=?,raw=? WHERE reference=? AND status=?',
+                              ('failed', json.dumps(verify_data or {})[:4000], reference, 'pending'))
+                    try:
+                        from web.accounts import get_base_url, send_branded
+                        _fbase = get_base_url()
+                        _floc = locale_now()
+                        _ftier = localized_tiers(_floc).get(p['tier'], {}).get('name', p['tier'])
+                        send_branded(p['email'], _t('au.m_f_sub', _floc),
+                                     _t('au.m_f_body', _floc, tier=_ftier, ref=reference),
+                                     html_title=_t('au.m_f_title', _floc), cta_url=f'{_fbase}/pricing',
+                                     cta_label=_t('au.m_f_cta', _floc), db=db)
+                    except Exception:
+                        pass
                 return None
             try:
                 paid_amount = int((verify_data or {}).get('amount') or 0)
