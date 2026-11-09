@@ -106,6 +106,13 @@
     </div>
   </section>
 
+  <section class="lg-proof" id="trust-details" aria-label="How Reachmark works">
+    <div class="lg-proof-item"><b>Live checks</b>Public website observations</div>
+    <div class="lg-proof-item"><b>Evidence first</b>Findings tied to page signals</div>
+    <div class="lg-proof-item"><b>Human approval</b>You approve every outreach send</div>
+    <div class="lg-proof-item"><b>Persistent records</b>Audits and enquiries saved</div>
+  </section>
+
   <!-- 1b. Kinetic ticker — what a Reachmark pass measures, on loop -->
   <div class="ed-ticker" aria-hidden="true">
     <div class="ed-ticker-track">
@@ -185,6 +192,16 @@
     <p class="rm-preview-disclaimer">{{ icon('info', 15) }} Sample businesses show the report experience. Live reports are generated from the public listing and website checks available for the business you select.</p>
   </section>
 
+  <section class="lg-lens-wrap" aria-labelledby="lg-lens-title">
+    <div class="lg-lens-head"><p class="ed-k">THE REACHMARK LENS</p><h2 id="lg-lens-title">Look closer. Find the friction.</h2><p>An illustrative view of how a page review separates what a visitor sees from the issues worth investigating. This is an explanation of the review process, not a live audit result.</p></div>
+    <div class="lg-lens" aria-label="Illustrative website review lens">
+      <div class="lg-lens-base"><div class="lg-lens-card"><small>Visitor experience · example</small><h3>Can a customer find the next step?</h3><ul><li>Contact action is hard to spot</li><li>Key service information is buried</li><li>Mobile path needs a closer look</li></ul></div><div class="lg-lens-card"><small>What Reachmark investigates</small><h3>Signals, evidence, next steps.</h3><ul><li>Page structure and links</li><li>Public technical signals</li><li>Measured observations, not guesses</li></ul></div></div>
+      <div class="lg-lens-reveal" id="lg-lens-reveal"><div class="lg-lens-card"><small>Clearer view · example recommendations</small><h3>Make the next action obvious.</h3><ul><li>Give the primary contact action a clear place</li><li>Bring essential information forward</li><li>Test the journey on a small screen</li></ul></div><div class="lg-lens-card"><small>Evidence-led output</small><h3>Know what to fix first.</h3><ul><li>Findings grouped by impact</li><li>Supporting evidence included</li><li>Practical next steps</li></ul></div></div>
+      <span class="lg-lens-label">Page signals</span><span class="lg-lens-label" style="left:auto;right:20px">Clear next steps</span>
+    </div>
+    <label class="sr-only" for="lg-lens-range">Move the lens to compare the example</label><input class="lg-lens-range" id="lg-lens-range" type="range" min="0" max="100" value="50" data-reveal="#lg-lens-reveal" aria-label="Move the glass lens across the example">
+  </section>
+
   <!-- 3. Try it: live URL check -->
   <section class="x-try" id="try-url">
     <p class="ed-k"><span class="ed-n">02 /</span> {{ t('foot.check') }}</p>
@@ -199,7 +216,7 @@
   </section>
 
   <!-- 4. How it works -->
-  <section class="x-pipe" id="how-it-works">
+  <section class="x-pipe" id="process">
     <div>
       <div class="kicker"><span class="ed-n">03 /</span> {{ t('home.offer_k') }}</div>
       <h2>{{ t('home.offer_h') }}</h2>
@@ -215,7 +232,7 @@
   </section>
 
   <!-- 5. Trust: sourcing, sending, privacy -->
-  <section class="x-trust" aria-label="{{ t('home.trust_h') }}">
+  <section class="x-trust" id="proof" aria-label="{{ t('home.trust_h') }}">
     <p class="ed-k"><span class="ed-n">04 /</span> {{ t('foot.trust') }}</p>
     <h2>{{ t('home.trust_h') }}</h2>
     <div class="x-trust-grid">
@@ -266,7 +283,7 @@
   </section>
 
   <!-- 8. Concept gallery -->
-  <section class="x-concepts" data-motion="fade-up" aria-labelledby="x-concepts-h">
+  <section class="x-concepts" id="work" data-motion="fade-up" aria-labelledby="x-concepts-h">
     <div class="x-concepts-head">
       <p class="ed-k"><span class="ed-n">07 /</span> {{ t('foot.samples') }}</p>
       <h2 id="x-concepts-h">{{ t('home.concepts_h') }}</h2>
@@ -304,6 +321,15 @@
       {% endfor %}
     </section>
     <p class="x-concepts-all"><a class="x-btn ghost" href="/showcase">{{ t('home.concepts_all') }}{{ icon('arrow-right', 16) }}</a></p>
+  </section>
+
+  <section class="lg-services" id="services" aria-labelledby="lg-services-title">
+    <div class="x-plans-head"><p class="ed-k">SERVICES</p><h2 id="lg-services-title">From finding the leak to fixing it.</h2><p>Choose the level of support that fits the work ahead. Every engagement starts with understanding the evidence.</p></div>
+    <div class="x-plans-grid">
+      <article><small>01 · DISCOVER</small><h3>Website review</h3><p>Run a free public-page check, identify observable friction and understand where a deeper review may help.</p><a href="#try-url">Run a free review →</a></article>
+      <article class="on"><small>02 · IMPROVE</small><h3>Website fix plan</h3><p>Turn verified findings into a practical improvement plan, prioritised around clarity, performance and enquiries.</p><a href="/enquire">Request a fix plan →</a></article>
+      <article><small>03 · GROW</small><h3>Growth support</h3><p>Ongoing help to improve the website experience, monitor important signals and keep improvements moving.</p><a href="/enquire">Discuss ongoing support →</a></article>
+    </div>
   </section>
 
   <!-- 9. Plans -->
@@ -353,9 +379,34 @@
       </a>
     </div>
   </section>
+  <section class="lg-faq" id="faq" aria-labelledby="lg-faq-title">
+    <p class="ed-k" style="text-align:center">GOOD QUESTIONS</p><h2 id="lg-faq-title">A clearer way to improve your website.</h2>
+    <details><summary>What does a free website review check?</summary><p>It checks the public page signals available to Reachmark and returns observable findings. A blocked or unavailable check is reported as inconclusive rather than presented as a fault.</p></details>
+    <details><summary>Does Reachmark make changes to my website automatically?</summary><p>No. The review explains what was observed and what could be improved. Any website work is scoped and approved with you before implementation.</p></details>
+    <details><summary>Are the examples and sample reports real client results?</summary><p>Sample businesses and reports are clearly labelled as examples. They demonstrate how findings are organised and are not presented as customer testimonials or measured client outcomes.</p></details>
+    <details><summary>Can I use Reachmark if I already have a website team?</summary><p>Yes. The review and fix plan can help your existing developer, agency or internal team prioritise issues using documented observations.</p></details>
+  </section>
+
+  <section class="lg-contact" id="contact" aria-labelledby="lg-contact-title">
+    <div class="lg-contact-copy"><p class="ed-k">START A CONVERSATION</p><h2 id="lg-contact-title">Let's find what is costing you customers.</h2><p>Tell us a little about your business and what you want to improve. Your enquiry is sent to Reachmark's existing enquiry system for follow-up.</p><p><a href="/enquire">Prefer the full project brief? Open the project enquiry page →</a></p>{% if whatsapp_url %}<p><a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer">Talk to us on WhatsApp →</a></p>{% endif %}{% if telegram_url %}<p><a href="{{ telegram_url }}" target="_blank" rel="noopener noreferrer">Talk to us on Telegram →</a></p>{% endif %}</div>
+    <form class="lg-contact-form" id="lg-inquiry-form"><input class="lg-honeypot" type="text" name="company_url" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="lg-form-grid">
+        <label class="lg-field">Your name<input name="name" autocomplete="name" maxlength="120" required minlength="2" placeholder="Full name"></label>
+        <label class="lg-field">Email address<input name="email" type="email" autocomplete="email" maxlength="250" required placeholder="you@company.com"></label>
+        <label class="lg-field full">Business or website<input name="business" maxlength="200" placeholder="Business name or website URL"></label>
+        <label class="lg-field full">What would you like to improve?<textarea name="message" minlength="15" maxlength="5000" required placeholder="Tell us what is not working, or what you want to achieve."></textarea></label>
+      </div>
+      <label class="lg-consent"><input type="checkbox" name="consent" required><span>I agree that Reachmark may use these details to respond to this enquiry. See the <a href="/privacy">privacy policy</a>.</span></label>
+      <button class="lg-submit" type="submit">Send project enquiry</button>
+      <p style="font-size:11px;color:#718096;margin:12px 0 0">Your message is submitted securely through Reachmark. We do not display a success message unless the server confirms receipt.</p>
+    </form>
+  </section>
+  <div class="lg-toast" id="lg-toast" role="status" aria-live="polite"></div>
 </main>
 
 {% include 'footer-public.html' %}
+<nav class="lg-mobile-dock" aria-label="Quick navigation"><a href="#top" aria-current="page"><span>⌂</span>Home</a><a href="#work"><span>▦</span>Work</a><a href="#services"><span>◇</span>Services</a><a href="#contact"><span>✉</span>Contact</a></nav>
+<a class="lg-sticky-cta" href="#try-url">Start a project</a>
 
 <div class="x-cmd" id="x-cmd" hidden>
   <div class="x-cmd-box" role="dialog" aria-modal="true" aria-label="{{ t('home.cmd_aria') }}">
@@ -445,7 +496,7 @@ document.querySelectorAll('a[href="#try-url"]').forEach(function(a){a.addEventLi
     e.preventDefault();
     var url=(document.getElementById('x-audit-url')||{}).value||'';
     out.hidden=false;
-    out.innerHTML='<p class="x-audit-wait">Checking the public page…</p>';
+    out.innerHTML='<div class="lg-audit-skeleton" role="status" aria-label="Checking the public page"><span class="lg-skeleton-line" style="width:42%"></span><span class="lg-skeleton-line"></span><span class="lg-skeleton-line"></span><span class="lg-skeleton-line"></span></div>';
     try{
       var r=await fetch('/api/public/audit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url})});
       var j=await r.json();

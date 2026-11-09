@@ -1,17 +1,27 @@
-{# Shared public header — include once per marketing page with:
-   {% include 'header-public.html' %}. Slim nav everywhere (never Samples or
-   Receptionist up top — the footer sitemap carries the full map). #}
+{# Shared Liquid Glass public navigation. #}
+<link rel="stylesheet" href="/static/liquid-glass.css">
 <script>(function(){try{var t=localStorage.getItem('reachmark-theme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
 {% from '_icons.html' import icon %}
 <div id="rm-progress" aria-hidden="true"></div>
-<div class="x-depth" aria-hidden="true"><canvas class="x-field" id="x-field"></canvas><span class="x-orb x-orb-a"></span><span class="x-orb x-orb-b"></span><span class="x-orb x-orb-c"></span></div>
 <header class="pub-head" id="pub-head">
   <div class="pub-head-in">
     <a href="/" class="pub-logo" aria-label="{{ t('common.home_aria') }}"><img class="logo-on-light" src="/static/logo-primary.svg" alt="Reachmark"><img class="logo-on-dark" src="/static/logo-inverse.svg" alt=""></a>
-    <nav class="main" aria-label="{{ t('common.nav_primary') }}"><a href="/about"{% if request.path == '/about' %} aria-current="page"{% endif %}>{{ t('nav.about') }}</a><a href="/enquire"{% if request.path == '/enquire' %} aria-current="page"{% endif %}>{{ t('nav.enquire') }}</a><a href="/pricing"{% if request.path == '/pricing' %} aria-current="page"{% endif %}>{{ t('nav.plans') }}</a><a href="/app"{% if request.path == '/app' %} aria-current="page"{% endif %}>{{ t('nav.app') }}</a></nav>
-    <div class="head-cta">{% include 'locale-switcher.html' %}<button id="theme-toggle-public" type="button" aria-label="{{ t('common.theme') }}" title="{{ t('common.theme') }}">{{ icon('sun', 18, 'ic-sun') }}{{ icon('moon', 18, 'ic-moon') }}</button>{% if client_logged_in %}<a class="btn primary" href="/dashboard">{{ t('home.open_dashboard') }}</a>{% else %}<a class="btn ghost" href="/signin">{{ t('nav.signin') }}</a><a class="btn primary" href="/signup">{{ t('nav.signup') }}</a>{% endif %}<button id="pub-menu-btn" type="button" aria-label="{{ t('common.menu') }}" aria-expanded="false" aria-controls="pub-menu">{{ icon('menu', 20, 'ic-open') }}{{ icon('x', 20, 'ic-close') }}</button></div>
+    <nav class="main" aria-label="Primary navigation"><span class="lg-nav-glider" aria-hidden="true"></span>
+      <a href="/#work">Work</a><a href="/#services">Services</a><a href="/#process">Process</a><a href="/#proof">Proof</a><a href="/#contact">Contact</a>
+      <span class="sr-only"><a href="/about"{% if request.path == '/about' %} aria-current="page"{% endif %}>About</a><a href="/enquire"{% if request.path == '/enquire' %} aria-current="page"{% endif %}>Enquire</a><a href="/pricing"{% if request.path == '/pricing' %} aria-current="page"{% endif %}>Plans</a></span>
+    </nav>
+    <div class="head-cta">
+      {% include 'locale-switcher.html' %}
+      <button id="theme-toggle-public" type="button" aria-label="{{ t('common.theme') }}" title="{{ t('common.theme') }}">{{ icon('sun', 18, 'ic-sun') }}{{ icon('moon', 18, 'ic-moon') }}</button>
+      {% if client_logged_in %}<a class="btn primary" href="/dashboard">Open dashboard</a>{% else %}<a class="btn primary" data-magnet href="/#try-url">Get a free review</a>{% endif %}
+      <button id="pub-menu-btn" type="button" aria-label="{{ t('common.menu') }}" aria-expanded="false" aria-controls="pub-menu">{{ icon('menu', 20, 'ic-open') }}{{ icon('x', 20, 'ic-close') }}</button>
+    </div>
   </div>
-  <div class="pub-menu" id="pub-menu"><a href="/about">{{ t('nav.about') }}</a><a href="/enquire">{{ t('nav.enquire') }}</a><a href="/pricing">{{ t('nav.plans') }}</a><a href="/app">{{ t('nav.app') }}</a>{% if client_logged_in %}<a href="/dashboard">{{ t('home.open_dashboard') }}</a>{% else %}<a href="/signin">{{ t('nav.signin') }}</a><a href="/signup">{{ t('nav.signup') }}</a>{% endif %}</div>
+  <div class="pub-menu" id="pub-menu" aria-label="Site menu">
+    <a href="/#work">Work</a><a href="/#services">Services</a><a href="/#process">Process</a><a href="/#proof">Proof</a><a href="/#contact">Contact</a>
+    <a href="/about">About Reachmark</a><a href="/pricing">Plans</a>
+    {% if client_logged_in %}<a href="/dashboard">Open dashboard</a>{% else %}<a href="/signin">Sign in</a><a href="/signup">Create an account</a>{% endif %}
+  </div>
 </header>
 <div class="page-veil" aria-hidden="true"></div>
-<script src="/static/field.js" defer></script>
+<script src="/static/field.js" defer></script><script src="/static/liquid-glass.js" defer></script>

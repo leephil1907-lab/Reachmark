@@ -95,3 +95,17 @@
 [data-theme="dark"] .crew-selection{background:rgba(213,242,104,.08);border-color:rgba(213,242,104,.25);color:#e6eedc}
 [data-theme="dark"] .crew-selection .text-link{color:#d5f268}
 .crew-approval .actions a.button{display:inline-flex;align-items:center;padding:8px 14px;border-radius:10px;border:1px solid #25d366;color:#0f5132;background:#eafaf0;font:700 12.5px 'Manrope',sans-serif;text-decoration:none}
+
+/* Per-agent live execution states are derived from saved run steps. */
+.crew-agent-status{display:inline-flex;align-items:center;gap:7px;margin:0 0 10px;padding:6px 9px;border-radius:999px;background:rgba(128,145,170,.1);border:1px solid var(--line);font:600 10px/1.2 var(--mono);color:var(--muted)}
+.crew-status-dot{width:7px;height:7px;border-radius:50%;background:#91a0b5;box-shadow:0 0 0 3px rgba(145,160,181,.12)}
+.crew-agent.working{border-color:rgba(59,130,246,.55);box-shadow:0 0 0 1px rgba(59,130,246,.14),var(--shadow)}
+.crew-agent.working .crew-agent-status{color:#8bb8ff;border-color:rgba(59,130,246,.35);background:rgba(59,130,246,.1)}
+.crew-agent.working .crew-status-dot{background:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,.16);animation:crew-pulse 1.4s ease-in-out infinite}
+.crew-agent.completed .crew-status-dot{background:#5cf2c0;box-shadow:0 0 0 3px rgba(92,242,192,.13)}
+.crew-agent.completed .crew-agent-status{color:#5cf2c0}
+.crew-agent.attention .crew-status-dot{background:#f2b45c;box-shadow:0 0 0 3px rgba(242,180,92,.14)}
+.crew-agent.attention .crew-agent-status{color:#f2c47e}
+.crew-agent-latest{padding:9px 10px;border-radius:10px;background:rgba(59,130,246,.07);border:1px solid var(--line);font-size:11px;color:var(--muted)}
+@keyframes crew-pulse{50%{box-shadow:0 0 0 7px rgba(59,130,246,0)}}
+@media(prefers-reduced-motion:reduce){.crew-agent.working .crew-status-dot{animation:none}}

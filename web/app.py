@@ -150,7 +150,7 @@ def inject_adsense():
             'adsense_display_slot': os.getenv('ADSENSE_DISPLAY_SLOT','').strip()}
 @app.before_request
 def custom_domain_redirect():
-    """Railway hostname → custom domain only. Never redirect a host to itself (that 301-loops the site)."""
+    """Railway hostname → canonical domain only. Keep Render service URLs available for pre-DNS smoke tests."""
     try:
         if request.path.startswith(('/healthz','/static/')):
             return None
@@ -237,6 +237,11 @@ def adsense_tags(response):
     return response
 @app.errorhandler(413)
 def too_big(e): return jsonify(error=_t('er_051', locale_now())),413
+@app.errorhandler(404)
+def not_found(e):
+    if request.path.startswith('/api/'):
+        return jsonify(error='Not found'), 404
+    return render_template('404.html'), 404
 @app.route('/')
 def home():
     base=settings()['public_base_url'].rstrip('/')
@@ -261,7 +266,32 @@ def home():
         funnel_record(db, now, 'visit', {'path': '/'})
     except Exception:
         pass
-    return render_template('home.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
+    return send_from_directory(os.path.join(ROOT, 'dist'), 'index.html')
+@app.route('/assets/<path:filename>')
+def vite_asset(filename):
+    response = send_from_directory(os.path.join(ROOT, 'dist', 'assets'), filename)
+    response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    return response
+
+@app.route('/favicon.svg')
+def vite_favicon():
+    return send_from_directory(os.path.join(ROOT, 'dist'), 'favicon.svg')
+
+@app.route('/og-image.svg')
+def vite_og_image():
+    return send_from_directory(os.path.join(ROOT, 'dist'), 'og-image.svg')
+
+@app.route('/manifest.webmanifest')
+def vite_manifest():
+    return send_from_directory(os.path.join(ROOT, 'dist'), 'manifest.webmanifest', mimetype='application/manifest+json')
+
+@app.route('/work')
+@app.route('/work/<path:slug>')
+@app.route('/services')
+@app.route('/process')
+def react_public_page(slug=None):
+    return send_from_directory(os.path.join(ROOT, 'dist'), 'index.html')
+
 @app.route('/admin',methods=['GET','POST'])
 def admin():
     """The owner's admin console. It is reached only by typing /admin: nothing on
@@ -400,7 +430,7 @@ def sitemap():
     base=settings()['public_base_url'].rstrip('/') or request.url_root.rstrip('/')
     now = datetime.now(timezone.utc).date().isoformat()
     # Core public pages + all 10 showcase samples — every indexable route for Google
-    paths = ['/','/about','/showcase','/enquire','/receptionist','/reviews','/pricing','/need','/sourcing','/sending','/sample-report','/privacy','/terms','/disclosure'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
+    paths = ['/','/work','/services','/process','/about','/showcase','/enquire','/receptionist','/reviews','/pricing','/need','/sourcing','/sending','/sample-report','/privacy','/terms','/disclosure'] + [f'/showcase/{s["slug"]}' for s in SAMPLES]
     urls = []
     for path in paths:
         loc = escape(base+path)
