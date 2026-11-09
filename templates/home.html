@@ -496,7 +496,7 @@ document.querySelectorAll('a[href="#try-url"]').forEach(function(a){a.addEventLi
     e.preventDefault();
     var url=(document.getElementById('x-audit-url')||{}).value||'';
     out.hidden=false;
-    out.innerHTML='<p class="x-audit-wait">Checking the public page…</p>';
+    out.innerHTML='<div class="lg-audit-skeleton" role="status" aria-label="Checking the public page"><span class="lg-skeleton-line" style="width:42%"></span><span class="lg-skeleton-line"></span><span class="lg-skeleton-line"></span><span class="lg-skeleton-line"></span></div>';
     try{
       var r=await fetch('/api/public/audit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url})});
       var j=await r.json();
