@@ -2,11 +2,10 @@ import {useEffect,useRef,useState} from 'react';
 import {Link,useLocation} from 'react-router-dom';
 import {AnimatePresence,motion,useReducedMotion} from 'framer-motion';
 import {ArrowUpRight,ChevronDown,Menu,Sun,Moon,X,Globe2,Code2,ScanSearch,MessageCircle} from 'lucide-react';
-import {useToast} from './Toast';
 const links=[['Work','/work'],['Process','/process'],['Proof','/#proof'],['Contact','/#contact']];
 const serviceItems=[{title:'Business websites',desc:'Websites for ambitious businesses',icon:Globe2,href:'/services#business'},{title:'Web3 product builds',desc:'Product sites and dApp interfaces',icon:Code2,href:'/services#web3'},{title:'Website gap reviews',desc:'Find the friction with evidence',icon:ScanSearch,href:'/services#audits'}];
 export default function Navbar({theme,toggle}:{theme:'dark'|'light';toggle:()=>void}){
- const [scrolled,setScrolled]=useState(false),[hidden,setHidden]=useState(false),[menu,setMenu]=useState(false),[services,setServices]=useState(false),[active,setActive]=useState(''),[y,setY]=useState(0);const loc=useLocation();const reduced=useReducedMotion();const {push}=useToast();
+ const [scrolled,setScrolled]=useState(false),[hidden,setHidden]=useState(false),[menu,setMenu]=useState(false),[services,setServices]=useState(false),[active,setActive]=useState(''),[y,setY]=useState(0);const loc=useLocation();const reduced=useReducedMotion();
  useEffect(()=>{let last=window.scrollY;const f=()=>{const now=window.scrollY;setScrolled(now>40);setHidden(now>140&&now>last+5);if(now<last-4)setHidden(false);last=now;};window.addEventListener('scroll',f,{passive:true});return()=>window.removeEventListener('scroll',f)},[]);
  useEffect(()=>{setMenu(false);setServices(false);document.body.classList.remove('menu-open')},[loc.pathname]);
  useEffect(()=>{document.body.classList.toggle('menu-open',menu);const old=document.body.style.overflow;document.body.style.overflow=menu?'hidden':'';return()=>{document.body.classList.remove('menu-open');document.body.style.overflow=old}},[menu]);
