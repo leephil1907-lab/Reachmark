@@ -1,0 +1,61 @@
+# Reachmark production service — Render Pro, Frankfurt.
+# The existing Flask backend and React/Vite public site ship together.
+# Keep exactly one web instance while the SQLite database is on the persistent disk.
+services:
+  - type: web
+    name: reachmark
+    runtime: docker
+    plan: pro
+    region: frankfurt
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /healthz
+    disk:
+      name: reachmark-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PUBLIC_BASE_URL
+        value: https://reachmarkdigital.xyz
+      - key: DOMAIN
+        value: reachmarkdigital.xyz
+      - key: DATABASE_PATH
+        value: /data/reachmark.sqlite3
+      - key: BACKUP_DIR
+        value: /backups
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURITY
+        value: starttls
+      - key: SMTP_USER
+        value: reachmarkofficial@gmail.com
+      - key: SMTP_FROM
+        value: reachmarkofficial@gmail.com
+      - key: SUPPORT_EMAIL
+        value: support@reachmarkdigital.xyz
+      - key: GOOGLE_OAUTH_REDIRECT_URI
+        value: https://reachmarkdigital.xyz/api/auth/oauth/google/callback
+      - key: GOOGLE_BUSINESS_REDIRECT_URI
+        value: https://reachmarkdigital.xyz/api/google-business/oauth/callback
+      - key: CREW_LLM_PROVIDER
+        value: none
+      - key: SECRET_KEY
+        sync: false
+      - key: OWNER_PASSWORD_HASH
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: CRON_SECRET
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_BUSINESS_TOKEN_KEY
+        sync: false
