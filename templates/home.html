@@ -28,339 +28,85 @@
 {% if gtm_id is defined and gtm_id %}<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtm_id }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>{% endif %}
 {% include 'header-public.html' %}
 <div class="x-aurora" aria-hidden="true"></div>
-<main>
-  <!-- 1. Hero — editorial headline, then the live audit console on a full-width stage -->
-  <section class="x-hero" data-ed="hero" id="top" data-signal>
-    <div class="ed-wrap ed-hero-copy">
-      <h1 class="hx-title ed-title" data-split><span class="hx-line">{{ t('home.hx_h1a') }}</span> <em class="hx-line ed-mark">{{ t('home.hx_h1b') }}</em></h1>
-      <div class="ed-hero-row">
-        <p class="ed-k ed-proof"><span>{{ t('home.proof_find') }}</span><i aria-hidden="true">→</i><span>{{ t('home.proof_diagnose') }}</span><i aria-hidden="true">→</i><span>{{ t('home.proof_approve') }}</span></p>
-        <div class="ed-hero-side">
-          <p class="hx-sub">{{ t('home.hx_sub') }}</p>
-          <p class="x-hero-actions">
-            {% if client_logged_in %}
-            <a class="x-btn lime" href="/dashboard">{{ icon('dashboard', 18) }}<span>{{ t('home.open_dashboard') }}</span></a>
-            <a class="x-btn ghost" href="/enquire">{{ icon('pen', 18) }}<span>{{ t('home.cta_project') }}</span></a>
-            {% else %}
-            <a class="x-btn lime" data-magnet href="#try-url">{{ icon('scan', 18) }}<span>{{ t('home.hx_cta') }}</span></a>
-            <a class="x-btn ghost" href="/sample-report">{{ icon('file-text', 18) }}<span>{{ t('home.cta_report') }}</span></a>
-            {% endif %}
-          </p>
-          <ul class="hx-trust">
-            <li>{{ icon('globe', 16) }}{{ t('home.hx_t1') }}</li>
-            <li>{{ icon('shield-check', 16) }}{{ t('home.hx_t2') }}</li>
-            <li>{{ icon('sparkles', 16) }}{{ t('home.hx_t3') }}</li>
-          </ul>
-          {% if not client_logged_in %}
-          <p class="x-hero-alt hero-signin">{{ t('home.hero_signin') }} <a href="/signin">{{ t('nav.signin') }}</a></p>
-          {% endif %}
-        </div>
+<main class="rm-home">
+  <section class="rm-home-hero" id="top">
+    <div class="rm-home-copy">
+      <p class="rm-home-eyebrow"><span></span> REACHMARK DIGITAL · BUSINESS GROWTH STUDIO</p>
+      <h1>Make your digital presence <em>work harder.</em></h1>
+      <p class="rm-home-lede">We help businesses understand what is holding their online presence back, improve the experience customers see, and build practical systems that support growth.</p>
+      <div class="rm-home-actions">
+        <a class="rm-home-btn rm-home-btn-primary" href="/enquire">Explore our services {{ icon('arrow-up-right', 16) }}</a>
+        <a class="rm-home-text-link" href="/showcase">View selected work {{ icon('arrow-right', 15) }}</a>
+      </div>
+      <div class="rm-home-audit">
+        <div class="rm-home-audit-heading"><span class="rm-home-audit-icon">{{ icon('scan-search', 18) }}</span><div><strong>Start with your website</strong><small>Run a public website check and see measured observations.</small></div></div>
+        <form class="rm-home-audit-form" id="x-audit-form">
+          <label class="sr-only" for="x-audit-url">Website address</label>
+          <input id="x-audit-url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="Enter your website address" required>
+          <button type="submit" aria-label="Check website">{{ icon('arrow-up-right', 18) }}</button>
+        </form>
+        <div id="x-audit-out" class="x-audit-out" hidden></div>
       </div>
     </div>
-
-    <div class="ed-stage" aria-hidden="true">
-      <div class="ed-console" data-hx
-           data-demos='[{"name":"Willow Grove Dental","cat":{{ t('home.hx_c1')|tojson }},"url":"willowgrove.example","score":78,"speed":"4.8s"},{"name":"Northstar Family Law","cat":{{ t('home.hx_c2')|tojson }},"url":"northstarlaw.example","score":64,"speed":"3.9s"},{"name":"Ember &amp; Oak","cat":{{ t('home.hx_c3')|tojson }},"url":"emberandoak.example","score":71,"speed":"5.6s"}]'>
-        <div class="ed-chrome">
-          <span class="ed-dots"><i></i><i></i><i></i></span>
-          <span class="ed-url">{{ icon('lock', 12) }}<b data-hx-url>willowgrove.example</b><span class="ed-caret"></span></span>
-          <span class="ed-badge">{{ t('home.hx_demo') }}</span>
-        </div>
-        <div class="ed-app">
-          <nav class="ed-side">
-            <span class="ed-side-brand">{{ brand_mark(26) }}<b>Reachmark</b></span>
-            <span class="ed-nav">{{ icon('compass', 15) }}{{ t('ws.n_global') }}</span>
-            <span class="ed-nav on">{{ icon('gauge', 15) }}{{ t('ws.n_health') }}</span>
-            <span class="ed-nav">{{ icon('file-text', 15) }}{{ t('ws.n_leads') }}</span>
-            <span class="ed-nav">{{ icon('send', 15) }}{{ t('ws.n_outreach') }}</span>
-            <span class="ed-nav">{{ icon('users', 15) }}{{ t('ws.n_crew') }}</span>
-          </nav>
-          <div class="ed-main">
-            <header class="ed-mhead">
-              <div class="ed-biz"><span class="ed-av" data-hx-av>W</span><div><b data-hx-name>Willow Grove Dental</b><small data-hx-cat>{{ t('home.hx_c1') }}</small></div></div>
-              <span class="ed-state"><i></i><span data-hx-state data-scan="{{ t('home.hx_scan') }}" data-done="{{ t('home.hx_panel') }}">{{ t('home.hx_panel') }}</span></span>
-            </header>
-            <div class="ed-progress"><span data-hx-bar></span></div>
-            <div class="ed-kpis">
-              <div class="ed-kpi ed-kpi-score">
-                <div class="ed-ring"><svg viewBox="0 0 48 48"><circle class="ed-ring-bg" cx="24" cy="24" r="20"/><circle class="ed-ring-fg" data-hx-ring cx="24" cy="24" r="20" pathLength="100"/></svg><b data-hx-score>78</b></div>
-                <span><small>{{ t('home.hx_score') }}</small><em>/ 100</em></span>
-              </div>
-              <div class="ed-kpi"><small>{{ t('home.report_iss_l') }}</small><b>{{ t('home.report_iss') }}</b></div>
-              <div class="ed-kpi"><small>{{ t('home.report_rank_l') }}</small><b class="ed-hi">{{ t('home.report_rank') }}</b></div>
-            </div>
-            <ul class="ed-rows">
-              <li class="is-bad" data-hx-row><span class="ed-st">{{ icon('x', 13) }}</span><span class="ed-lbl">{{ icon('mail', 15) }}{{ t('home.hx_f1') }}</span><b>{{ t('home.hx_f1v') }}</b></li>
-              <li class="is-warn" data-hx-row><span class="ed-st">!</span><span class="ed-lbl">{{ icon('smartphone', 15) }}{{ t('home.hx_f2') }}</span><b>{{ t('home.hx_f2v') }}</b></li>
-              <li class="is-warn" data-hx-row><span class="ed-st">!</span><span class="ed-lbl">{{ icon('clock', 15) }}{{ t('home.hx_f3') }}</span><b data-hx-speed>4.8s</b></li>
-              <li class="is-ok" data-hx-row><span class="ed-st">{{ icon('check', 13) }}</span><span class="ed-lbl">{{ icon('lock', 15) }}{{ t('home.hx_f4') }}</span><b>{{ t('home.hx_f4v') }}</b></li>
-            </ul>
-            <div class="ed-out" data-hx-out>
-              <span class="ed-out-ic">{{ icon('mail-check', 18) }}</span>
-              <span class="ed-out-txt"><b>{{ t('home.hx_ready') }}</b><small>{{ t('home.hx_draft') }}</small></span>
-              <span class="ed-out-btn">{{ t('home.hx_approve') }}{{ icon('arrow-right', 14) }}</span>
-            </div>
-          </div>
-        </div>
+    <div class="rm-home-visual">
+      <div class="rm-home-visual-glow"></div>
+      <div class="rm-home-visual-card">
+        <div class="rm-home-visual-top"><span><i></i><i></i><i></i></span><b>REACHMARK WORKSPACE</b><span class="rm-home-live">PRODUCT VIEW</span></div>
+        <img src="/static/product/ws-report.png" alt="Reachmark website opportunity report interface" width="1280" height="720" fetchpriority="high">
+        <div class="rm-home-float-card"><span class="rm-home-float-icon">{{ icon('clipboard-check', 17) }}</span><span><strong>Evidence before action</strong><small>Clear findings. Practical next steps.</small></span></div>
       </div>
+      <p class="rm-home-visual-caption">A connected approach to discovery, diagnosis and improvement.</p>
     </div>
   </section>
 
-  <!-- 1b. Kinetic ticker — what a Reachmark pass measures, on loop -->
-  <div class="ed-ticker" aria-hidden="true">
-    <div class="ed-ticker-track">
-      {% for i in range(2) %}
-      <div class="ed-ticker-run">
-        <span class="ed-tick-k">{{ t('home.hx_panel') }}</span>
-        <span class="ed-tick">willowgrove.example <b>78<span>/100</span></b></span>
-        <span class="ed-tick">{{ t('home.hx_f1') }} <b class="ed-tick-miss">{{ t('home.hx_f1v') }}</b></span>
-        <span class="ed-tick">{{ t('home.hx_f3') }} <b>4.8s</b></span>
-        <span class="ed-tick">northstarlaw.example <b>64<span>/100</span></b></span>
-        <span class="ed-tick">{{ t('home.hx_f2') }} <b class="ed-tick-miss">{{ t('home.hx_f2v') }}</b></span>
-        <span class="ed-tick">{{ t('home.hx_f4') }} <b class="ed-tick-ok">{{ t('home.hx_f4v') }}</b></span>
-        <span class="ed-tick">emberandoak.example <b>71<span>/100</span></b></span>
-        <span class="ed-tick">{{ t('home.hx_ready') }} <i class="ed-tick-dot"></i></span>
-      </div>
+  <section class="rm-home-directory" aria-label="Explore Reachmark">
+    <div class="rm-home-directory-heading"><small>EXPLORE REACHMARK</small><h2>One studio. Multiple ways to grow.</h2></div>
+    <a href="/app"><span>{{ icon('layers', 18) }}</span><strong>Platform</strong><small>Discover the Reachmark workspace</small>{{ icon('arrow-up-right', 15) }}</a>
+    <a href="/enquire"><span>{{ icon('workflow', 18) }}</span><strong>Services</strong><small>Website fixes and growth support</small>{{ icon('arrow-up-right', 15) }}</a>
+    <a href="/showcase"><span>{{ icon('gallery-horizontal', 18) }}</span><strong>Selected work</strong><small>Browse projects and concepts</small>{{ icon('arrow-up-right', 15) }}</a>
+    <a href="/about"><span>{{ icon('building-2', 18) }}</span><strong>Our studio</strong><small>People, approach and principles</small>{{ icon('arrow-up-right', 15) }}</a>
+  </section>
+
+  <section class="rm-home-services" id="services">
+    <div class="rm-home-section-heading">
+      <div><small>WHAT WE DO</small><h2>Good digital work starts with clarity.</h2></div>
+      <p>From understanding the problem to putting the right improvements in place, we focus on work that makes a practical difference.</p>
+    </div>
+    <div class="rm-home-service-grid">
+      <a href="/enquire" class="rm-home-service-card"><span class="rm-home-service-number">01</span><span class="rm-home-service-icon">{{ icon('scan-search', 21) }}</span><h3>Website diagnosis</h3><p>Identify usability, performance, content and conversion issues using observable evidence.</p><span class="rm-home-card-link">Explore diagnosis {{ icon('arrow-up-right', 15) }}</span></a>
+      <a href="/enquire" class="rm-home-service-card"><span class="rm-home-service-number">02</span><span class="rm-home-service-icon">{{ icon('panels-top-left', 21) }}</span><h3>Website improvement</h3><p>Make important pages clearer, easier to use and better equipped to turn visits into enquiries.</p><span class="rm-home-card-link">Explore improvements {{ icon('arrow-up-right', 15) }}</span></a>
+      <a href="/enquire" class="rm-home-service-card"><span class="rm-home-service-number">03</span><span class="rm-home-service-icon">{{ icon('workflow', 21) }}</span><h3>Growth systems</h3><p>Connect lead capture, qualification and follow-up into a more consistent customer journey.</p><span class="rm-home-card-link">Explore growth systems {{ icon('arrow-up-right', 15) }}</span></a>
+    </div>
+  </section>
+
+  <section class="rm-home-work" id="work">
+    <div class="rm-home-section-heading">
+      <div><small>SELECTED WORK</small><h2>Ideas made tangible.</h2></div>
+      <a class="rm-home-text-link" href="/showcase">Explore the work archive {{ icon('arrow-right', 15) }}</a>
+    </div>
+    <div class="rm-home-work-grid">
+      {% for sample in samples[:3] %}
+      <a class="rm-home-work-card" href="/showcase/{{ sample.slug }}">
+        <div class="rm-home-work-image"><img src="/static/samples/{{ sample.slug }}-preview.jpg" alt="{{ sample.name }} — {{ sample.category }}" loading="{{ 'eager' if loop.index == 1 else 'lazy' }}" decoding="async"><span>{{ sample.category }}</span></div>
+        <div class="rm-home-work-meta"><div><strong>{{ sample.name }}</strong><small>{{ sample.style }}</small></div>{{ icon('arrow-up-right', 17) }}</div>
+      </a>
       {% endfor %}
     </div>
-  </div>
-
-  <!-- Multi-page studio directory -->
-  <section class="rm-site-directory" aria-label="Explore Reachmark">
-    <div class="rm-site-directory-intro"><small>Explore Reachmark</small><strong>One studio. Multiple ways to grow.</strong></div>
-    <a class="rm-site-link" href="/app"><span class="rm-site-icon">{{ icon('layers', 18) }}</span><strong>Platform</strong><span>Explore the Reachmark product</span></a>
-    <a class="rm-site-link" href="/enquire"><span class="rm-site-icon">{{ icon('workflow', 18) }}</span><strong>Services</strong><span>Website fixes and growth support</span></a>
-    <a class="rm-site-link" href="/showcase"><span class="rm-site-icon">{{ icon('gallery-horizontal', 18) }}</span><strong>Selected work</strong><span>Browse projects and concepts</span></a>
-    <a class="rm-site-link" href="/about"><span class="rm-site-icon">{{ icon('building-2', 18) }}</span><strong>Our studio</strong><span>People, approach and principles</span></a>
   </section>
 
-  <!-- 2. Product: interactive sample report -->
-  <section class="rm-workspace-preview" data-motion="fade-up" id="sample-report" aria-labelledby="rm-preview-title">
-    <div class="rm-preview-intro">
-      <p class="rm-preview-eyebrow"><span class="ed-n">01 /</span> THE REACHMARK WORKSPACE</p>
-      <h2 id="rm-preview-title">Find the gap. See the evidence. Know what to do next.</h2>
-      <p>Explore a sample Digital Opportunity Report, then run a live check on any public website.</p>
-    </div>
-    <div class="rm-preview-window" data-rm-preview>
-      <header class="rm-preview-bar">
-        <div class="rm-preview-brand"><span class="rm-preview-mark rm-preview-mark--brand">{{ brand_mark(30) }}</span><span>Reachmark <small>Opportunity desk</small></span></div>
-        <span class="rm-preview-state"><i aria-hidden="true"></i> Interactive preview</span>
-      </header>
-      <div class="rm-preview-workspace">
-        <aside class="rm-preview-list" aria-label="Sample business opportunities">
-          <p class="rm-preview-list-label">EXAMPLE OPPORTUNITIES</p>
-          <button type="button" class="rm-preview-choice is-active" data-preview-select="clinic" aria-pressed="true">
-            <span class="rm-preview-choice-type">Healthcare · sample</span>
-            <strong>Willow Grove Dental</strong>
-            <span class="rm-preview-choice-note">Appointment path</span>
-          </button>
-          <button type="button" class="rm-preview-choice" data-preview-select="law" aria-pressed="false">
-            <span class="rm-preview-choice-type">Professional services · sample</span>
-            <strong>Northstar Family Law</strong>
-            <span class="rm-preview-choice-note">Service clarity</span>
-          </button>
-          <button type="button" class="rm-preview-choice" data-preview-select="cafe" aria-pressed="false">
-            <span class="rm-preview-choice-type">Hospitality · sample</span>
-            <strong>Harborlight Café</strong>
-            <span class="rm-preview-choice-note">Local essentials</span>
-          </button>
-        </aside>
-        <div class="rm-preview-report" aria-live="polite" aria-atomic="true">
-          <div class="rm-preview-report-head">
-            <div>
-              <p class="rm-preview-overline" id="rm-preview-category">SAMPLE DIGITAL OPPORTUNITY REPORT</p>
-              <h3 id="rm-preview-name">Willow Grove Dental</h3>
-              <p class="rm-preview-domain">Explore how findings, evidence and recommendations are organised in a Reachmark report.</p>
-            </div>
-            <span class="rm-preview-example-tag">EXAMPLE ONLY</span>
-          </div>
-          <div class="rm-preview-findings-head"><span>Key findings</span><span>Sample</span></div>
-          <ul class="rm-preview-findings" id="rm-preview-findings">
-            <li><span class="rm-preview-finding-icon">01</span><div><strong>Make the next step obvious</strong><p>Example: keep a clear appointment or call action easy to find on smaller screens.</p></div></li>
-            <li><span class="rm-preview-finding-icon">02</span><div><strong>Answer key questions earlier</strong><p>Example: help visitors quickly find services, opening hours, and what to expect.</p></div></li>
-            <li><span class="rm-preview-finding-icon">03</span><div><strong>Reduce contact friction</strong><p>Example: provide a simple, accessible route to ask a question or request an appointment.</p></div></li>
-          </ul>
-          <div class="rm-preview-next">
-            <span class="rm-preview-next-label">RECOMMENDED NEXT STEP · EXAMPLE</span>
-            <p id="rm-preview-next">Review the mobile appointment path and make the primary contact action easy to spot.</p>
-          </div>
-          <div class="rm-preview-actions">
-            <a class="x-btn lime" data-magnet href="#try-url">Check a real website {{ icon('arrow-down', 16) }}</a>
-            <a class="rm-preview-report-link" href="/sample-report">Open sample report</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <p class="rm-preview-disclaimer">{{ icon('info', 15) }} Sample businesses show the report experience. Live reports are generated from the public listing and website checks available for the business you select.</p>
+  <section class="rm-home-platform">
+    <div class="rm-home-platform-visual"><img src="/static/product/ws-leads.png" alt="Reachmark business discovery and lead management interface" width="1280" height="720" loading="lazy" decoding="async"></div>
+    <div class="rm-home-platform-copy"><small>THE REACHMARK PLATFORM</small><h2>From business discovery to a better first conversation.</h2><p>Reachmark brings business discovery, website analysis, lead management and thoughtful follow-up into one connected workflow.</p><ul><li>{{ icon('check-circle-2', 16) }} Business discovery and lead management</li><li>{{ icon('check-circle-2', 16) }} Website analysis and opportunity reports</li><li>{{ icon('check-circle-2', 16) }} Outreach preparation and follow-up</li></ul><a class="rm-home-btn rm-home-btn-dark" href="/app">Explore the platform {{ icon('arrow-up-right', 16) }}</a></div>
   </section>
 
-  <!-- 3. Try it: live URL check -->
-  <section class="x-try" id="try-url">
-    <p class="ed-k"><span class="ed-n">02 /</span> {{ t('foot.check') }}</p>
-    <h2>{{ t('home.try_h') }}</h2>
-    <p>{{ t('home.try_p') }}</p>
-    <form class="x-audit" id="x-audit-form">
-      <label class="sr-only" for="x-audit-url">{{ t('home.audit_label') }}</label>
-      <input id="x-audit-url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="{{ t('home.audit_ph') }}" required>
-      <button class="x-btn lime" type="submit">{{ t('home.audit_go') }}</button>
-    </form>
-    <div id="x-audit-out" class="x-audit-out" hidden></div>
+  <section class="rm-home-studio">
+    <div class="rm-home-studio-image"><img src="/static/ernest-micheal.jpg" alt="Reachmark studio founder" width="800" height="1296" loading="lazy"></div>
+    <div class="rm-home-studio-copy"><small>ABOUT THE STUDIO</small><h2>Thoughtful digital work. Built around real business needs.</h2><p>Reachmark is an independent digital growth studio focused on helping businesses make better use of their online presence — with clear thinking, useful technology and practical execution.</p><a class="rm-home-text-link" href="/about">Get to know Reachmark {{ icon('arrow-right', 15) }}</a></div>
   </section>
 
-  <!-- 4. How it works -->
-  <section class="x-pipe" id="how-it-works">
-    <div>
-      <div class="kicker"><span class="ed-n">03 /</span> {{ t('home.offer_k') }}</div>
-      <h2>{{ t('home.offer_h') }}</h2>
-      <p>{{ t('home.offer_p') }}</p>
-      <p class="x-approve">{{ t('home.approve') }}</p>
-    </div>
-    <div class="x-steps">
-      <div class="x-step" data-motion="fade-up"><i>{{ icon('map-pin', 18, 'draw') }}</i><div><b>{{ t('home.d1h') }}</b><span>{{ t('home.d1p') }}</span></div></div>
-      <div class="x-step" data-motion="fade-up" data-delay="90"><i>{{ icon('scan', 18, 'draw') }}</i><div><b>{{ t('home.d2h') }}</b><span>{{ t('home.d2p') }}</span></div></div>
-      <div class="x-step" data-motion="fade-up" data-delay="180"><i>{{ icon('file-text', 18, 'draw') }}</i><div><b>{{ t('home.d3h') }}</b><span>{{ t('home.d3p') }}</span></div></div>
-      <div class="x-step" data-motion="fade-up" data-delay="270"><i>{{ icon('shield-check', 18, 'draw') }}</i><div><b>{{ t('home.d4h') }}</b><span>{{ t('home.d4p') }}</span></div></div>
-    </div>
-  </section>
-
-  <!-- 5. Trust: sourcing, sending, privacy -->
-  <section class="x-trust" aria-label="{{ t('home.trust_h') }}">
-    <p class="ed-k"><span class="ed-n">04 /</span> {{ t('foot.trust') }}</p>
-    <h2>{{ t('home.trust_h') }}</h2>
-    <div class="x-trust-grid">
-      <a href="/sourcing" data-motion="fade-up"><span class="x-ic">{{ icon('database', 20, 'draw') }}</span>{{ icon('arrow-up-right', 16, 'x-go') }}<b>{{ t('home.trust_src') }}</b><span>{{ t('home.trust_src_p') }}</span></a>
-      <a href="/sending" data-motion="fade-up" data-delay="90"><span class="x-ic">{{ icon('mail-check', 20, 'draw') }}</span>{{ icon('arrow-up-right', 16, 'x-go') }}<b>{{ t('home.trust_send') }}</b><span>{{ t('home.trust_send_p') }}</span></a>
-      <a href="/privacy" data-motion="fade-up" data-delay="180"><span class="x-ic">{{ icon('lock', 20, 'draw') }}</span>{{ icon('arrow-up-right', 16, 'x-go') }}<b>{{ t('home.trust_priv') }}</b><span>{{ t('home.trust_priv_p') }}</span></a>
-    </div>
-  </section>
-
-  <!-- 6. Screenshots -->
-  <section class="x-shots" aria-label="{{ t('home.shots_h') }}">
-    <div class="x-shots-head">
-      <p class="ed-k"><span class="ed-n">05 /</span> {{ t('foot.product') }}</p>
-      <h2>{{ t('home.shots_h') }}</h2>
-      <p>{{ t('home.shots_p') }}</p>
-    </div>
-    <div class="x-shots-grid">
-      <figure>
-        <img src="/static/product/ws-leads.png" alt="{{ t('home.shot_leads') }}" width="1280" height="720" loading="lazy" decoding="async">
-        <figcaption>{{ t('home.shot_leads') }}</figcaption>
-      </figure>
-      <figure>
-        <img src="/static/product/ws-report.png" alt="{{ t('home.shot_report') }}" width="1280" height="720" loading="lazy" decoding="async">
-        <figcaption>{{ t('home.shot_report') }}</figcaption>
-      </figure>
-      <figure>
-        <img src="/static/product/ws-approve.png" alt="{{ t('home.shot_approve') }}" width="1280" height="720" loading="lazy" decoding="async">
-        <figcaption>{{ t('home.shot_approve') }}</figcaption>
-      </figure>
-      <figure>
-        <img src="/static/product/ws-queue.png" alt="{{ t('home.shot_queue') }}" width="1280" height="720" loading="lazy" decoding="async">
-        <figcaption>{{ t('home.shot_queue') }}</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <!-- 7. Why Reachmark -->
-  <section class="x-plain" data-motion="fade-up" aria-label="{{ t('home.moat_h') }}">
-    <div class="ed-plain-head">
-      <p class="ed-k"><span class="ed-n">06 /</span> {{ t('home.moat_k') }}</p>
-      <h2>{{ t('home.moat_h') }}</h2>
-      <p>{{ t('home.moat_p') }}</p>
-    </div>
-    <div class="x-plain-item"><span class="x-ic">{{ icon('target', 20, 'draw') }}</span><b>{{ t('home.q_h') }}</b><span>{{ t('home.q_p') }}</span></div>
-    <div class="x-plain-item"><span class="x-ic">{{ icon('file-text', 20, 'draw') }}</span><b>{{ t('home.p_h') }}</b><span>{{ t('home.p_p') }}</span></div>
-    <div class="x-plain-item"><span class="x-ic">{{ icon('activity', 20, 'draw') }}</span><b>{{ t('home.m_h') }}</b><span>{{ t('home.m_p') }}</span></div>
-    <div class="x-plain-item"><span class="x-ic">{{ icon('message', 20, 'draw') }}</span><b>{{ t('home.n_h') }}</b><span>{{ t('home.n_p') }}</span></div>
-  </section>
-
-  <!-- 8. Concept gallery -->
-  <section class="x-concepts" data-motion="fade-up" aria-labelledby="x-concepts-h">
-    <div class="x-concepts-head">
-      <p class="ed-k"><span class="ed-n">07 /</span> {{ t('foot.samples') }}</p>
-      <h2 id="x-concepts-h">{{ t('home.concepts_h') }}</h2>
-      <p>{{ t('home.concepts_p') }}</p>
-    </div>
-    <div class="x-toolbar">
-      <div class="x-tabs" role="group" aria-label="{{ t('home.tabs_aria') }}">
-        <span class="x-tab-pill" aria-hidden="true"></span>
-        <button type="button" class="on" data-filter="all">{{ t('home.tab_all') }}</button>
-        <button type="button" data-filter="sample">{{ t('home.tab_samples') }}</button>
-        <button type="button" data-filter="hospitality">{{ t('home.tab_hosp') }}</button>
-        <button type="button" data-filter="professional">{{ t('home.tab_pro') }}</button>
-        <button type="button" data-filter="digital">{{ t('home.tab_digital') }}</button>
-      </div>
-      <form class="x-search x-search-inline" id="x-search-form" action="/showcase" method="get" role="search">
-        <input id="x-q" name="q" type="search" autocomplete="off" placeholder="{{ t('home.search_ph') }}" aria-label="{{ t('home.search_aria') }}">
-        <button type="submit" class="x-search-go">{{ t('home.search') }}</button>
-      </form>
-    </div>
-    <div class="x-count"><b id="x-shown">{{ [samples|length, 6]|min if samples is defined else 6 }}</b> {{ t('home.live_concepts') }}</div>
-    <section class="x-masonry" id="x-masonry" aria-label="{{ t('home.grid_aria') }}">
-      {% for sample in samples[:6] %}
-      <article class="x-card" data-name="{{ sample.name|lower }} {{ sample.category|lower }} {{ sample.style|lower }} {{ sample.slug }}" data-kind="sample {% if sample.slug in ['ember-coffee','stillwell-studio','bloom-market'] %}hospitality{% elif sample.slug in ['astra-clinic','novera-law','forma-homes'] %}professional{% else %}digital{% endif %}">
-        <a href="/showcase/{{ sample.slug }}">
-          <img class="shot" src="/static/samples/{{ sample.slug }}-preview.jpg" alt="{{ sample.name }} — {{ sample.category }}" loading="{{ 'eager' if loop.index < 3 else 'lazy' }}" decoding="async">
-          <div class="x-card-foot">
-            <img class="av" src="/static/icon.svg" alt="">
-            <div>
-              <strong>{{ sample.name }}</strong>
-              <span>{{ sample.category }} · {{ sample.style }}</span>
-            </div>
-          </div>
-        </a>
-      </article>
-      {% endfor %}
-    </section>
-    <p class="x-concepts-all"><a class="x-btn ghost" href="/showcase">{{ t('home.concepts_all') }}{{ icon('arrow-right', 16) }}</a></p>
-  </section>
-
-  <!-- 9. Plans -->
-  <section class="x-plans" id="plans-preview" aria-label="{{ t('home.price_h') }}">
-    <div class="x-plans-head">
-      <p class="ed-k"><span class="ed-n">08 /</span> {{ t('nav.plans') }}</p>
-      <h2>{{ t('home.price_h') }}</h2>
-      <p>{{ t('home.price_p') }}</p>
-    </div>
-    <div class="x-plans-grid">
-      <article data-motion="fade-up">{{ icon('sparkles', 20, 'x-plan-ic') }}<small>Free</small><b>$0</b><p>{{ t('home.price_free') }}</p><a href="/signup">{{ t('home.price_free_cta') }}</a></article>
-      <article data-motion="fade-up" data-delay="90">{{ icon('search', 20, 'x-plan-ic') }}<small>Starter</small><b>$19</b><p>{{ t('home.price_st') }}</p><a href="/pricing">{{ t('home.price_st_cta') }}</a></article>
-      <article class="on" data-motion="fade-up" data-delay="180">{{ icon('send', 20, 'x-plan-ic') }}<small>Pro</small><b>$59</b><p>{{ t('home.price_pro') }}</p><a href="/pricing">{{ t('home.price_pro_cta') }}</a></article>
-    </div>
-    <p class="x-plans-note"><a href="/pricing">{{ t('home.price_all') }}</a></p>
-  </section>
-
-  <!-- 10. Founder -->
-  <section class="x-founder" data-motion="fade-up" aria-label="{{ t('home.founder_k') }}">
-    <img class="x-founder-photo" src="/static/ernest-micheal.jpg" width="800" height="1296" loading="lazy" alt="{{ t('about.founder_alt') }}">
-    <div class="x-founder-copy">
-      <p class="x-kicker"><span class="ed-n">09 /</span> {{ t('home.founder_k') }}</p>
-      <blockquote><p>{{ t('home.founder_q') }}</p></blockquote>
-      <p class="x-founder-by"><b>Ernest Micheal</b> · {{ t('about.founder_role') }}</p>
-      <a class="x-btn ghost" href="/about#founder">{{ t('home.founder_link') }}{{ icon('arrow-right', 16) }}</a>
-    </div>
-  </section>
-
-  <!-- 11. Final call to action — two clear paths -->
-  <section class="x-cta" data-ed="cta" data-motion="fade-up">
-    <div class="ed-cta-head">
-      <p class="ed-k">{{ t('home.foot_started') }}</p>
-      <h2>{{ t('home.h1a') }} <em>{{ t('home.h1b') }}</em></h2>
-    </div>
-    <div class="ed-paths">
-      <a class="ed-path ed-spot" href="{{ '/dashboard' if client_logged_in else '/signup' }}">
-        <span class="ed-k">{{ t('home.who_design') }}</span>
-        <b>{{ t('home.open_dashboard') if client_logged_in else t('nav.signup') }}</b>
-        <span class="ed-path-p">{{ t('home.sub') }}</span>
-        <span class="ed-go">{{ t('home.open_dashboard') if client_logged_in else t('home.price_free_cta') }}{{ icon('arrow-up-right', 16) }}</span>
-      </a>
-      <a class="ed-path ed-spot" href="/enquire">
-        <span class="ed-k">{{ t('home.who_need') }}</span>
-        <b>{{ t('home.band_h1') }} {{ t('home.band_h2') }}</b>
-        <span class="ed-path-p">{{ t('home.band_p') }}</span>
-        <span class="ed-go">{{ t('home.need_cta') }}{{ icon('arrow-up-right', 16) }}</span>
-      </a>
-    </div>
+  <section class="rm-home-contact">
+    <div><small>HAVE A PROJECT IN MIND?</small><h2>Let's make the next step clearer.</h2><p>Tell us what your business needs. We'll help you identify a sensible way forward.</p></div>
+    <a class="rm-home-btn rm-home-btn-primary" href="/enquire">Start a conversation {{ icon('arrow-up-right', 16) }}</a>
   </section>
 </main>
 
