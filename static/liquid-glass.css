@@ -237,3 +237,9 @@ nav.main .sr-only{position:absolute!important;width:1px!important;height:1px!imp
 .lg-toast[data-type=error]:after{background:#dc2626}
 .lg-toast.paused:after{animation-play-state:paused}
 @keyframes lgToastProgress{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+.lg-honeypot{position:absolute!important;left:-10000px!important;top:auto!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important}
+@media(max-width:700px){
+  .x-try,.lg-lens-wrap,.lg-contact-form{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(255,255,255,.92)}
+  html[data-theme=dark] .x-try,html[data-theme=dark] .lg-lens-wrap,html[data-theme=dark] .lg-contact-form{background:rgba(20,34,56,.92)}
+}
