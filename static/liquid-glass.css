@@ -211,3 +211,8 @@ nav.main a[aria-current=location]{color:#174fc5}
 .lg-404-panel:after{width:60px;height:90px;top:auto;left:auto;bottom:12%;right:6%;transform:rotate(-18deg)}
 html[data-theme=dark] .lg-nav-glider{background:rgba(96,165,250,.16)}
 @media(prefers-reduced-motion:reduce){.pub-menu.open a{animation:none}.lg-nav-glider{transition:none}}
+
+.x-card,.x-trust-grid a,.x-plans-grid article,.lg-contact-form{position:relative;isolation:isolate}
+.x-card:before,.x-trust-grid a:before,.x-plans-grid article:before,.lg-contact-form:before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:0;background:radial-gradient(260px circle at var(--spot-x,50%) var(--spot-y,50%),rgba(96,165,250,.16),transparent 72%);transition:opacity .25s}
+.x-card:hover:before,.x-trust-grid a:hover:before,.x-plans-grid article:hover:before,.lg-contact-form:hover:before{opacity:1}
+.ed-console,.lg-lens-wrap{transform:translateY(var(--lg-parallax,0px));will-change:transform}
