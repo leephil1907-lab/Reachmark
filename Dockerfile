@@ -28,4 +28,4 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s CMD python -c "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:'+os.getenv('PORT','8000')+'/healthz',timeout=4)"
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["sh", "/app/scripts/railway-start.sh"]
+CMD ["sh", "/app/scripts/start.sh"]
