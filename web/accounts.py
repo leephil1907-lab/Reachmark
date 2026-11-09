@@ -143,6 +143,7 @@ def register_accounts(app, db, log):
             state TEXT
         );
         CREATE TABLE IF NOT EXISTS login_attempts(client TEXT PRIMARY KEY,failures INTEGER,blocked_until REAL);
+        CREATE TABLE IF NOT EXISTS login_links(token_hash TEXT PRIMARY KEY,email TEXT NOT NULL,expires REAL NOT NULL,created REAL NOT NULL);
         ''')
 
     def get_user_by_email(email):
@@ -268,6 +269,69 @@ f.onsubmit=async e=>{{e.preventDefault();msg.style.display='none';const pw=docum
         text = _t('au.m_c_body', _cl, email=email, link=link, host=host)
         send_branded(email, _t('au.m_c_sub', _cl), text, html_title=_t('au.m_c_title', _cl), cta_url=link, cta_label=_t('au.m_c_cta', _cl), db=db)
         return token
+
+    @app.post('/api/auth/magic-link')
+    def request_magic_link():
+        data = request.get_json(silent=True) or {}
+        email = normalize_email(str(data.get('email', '')))
+        if not valid_email(email):
+            return jsonify(error='Enter a valid email address.'), 400
+        # A generic response prevents account enumeration. Tokens are stored hashed,
+        # expire quickly, and are single-use.
+        raw_token = secrets.token_urlsafe(36)
+        token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+        created = time.time()
+        with db() as c:
+            c.execute('DELETE FROM login_links WHERE expires < ?', (created,))
+            c.execute('DELETE FROM login_links WHERE lower(email)=lower(?)', (email,))
+            c.execute('INSERT INTO login_links(token_hash,email,expires,created) VALUES(?,?,?,?)',
+                      (token_hash, email, created + 900, created))
+        base = get_base_url()
+        link = f'{base}/auth/magic/{raw_token}'
+        sent, _outbox_id = send_branded(
+            email, 'Your secure Reachmark sign-in link',
+            'Use this one-time link to sign in to Reachmark. It expires in 15 minutes.\n\n' + link +
+            '\n\nIf you did not request this link, you can ignore this email.',
+            html_title='Sign in to Reachmark', cta_url=link,
+            cta_label='Continue to Reachmark', db=db)
+        if not sent:
+            with db() as c:
+                c.execute('DELETE FROM login_links WHERE token_hash=?', (token_hash,))
+            return jsonify(error='The sign-in email could not be sent. Please use your password or try again later.'), 503
+        log('account', f'Passwordless sign-in link requested for {email}')
+        return jsonify(ok=True, message='If this address can receive Reachmark sign-in links, an email is on its way.')
+
+    @app.get('/auth/magic/<token>')
+    def consume_magic_link(token):
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
+        stamp = time.time()
+        with db() as c:
+            row = c.execute('SELECT email FROM login_links WHERE token_hash=? AND expires>?', (token_hash, stamp)).fetchone()
+            if not row:
+                return Response('<!doctype html><html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Link expired · Reachmark</title><body style="font-family:Arial,sans-serif;background:#20251f;color:#f3f6f1;min-height:100vh;display:grid;place-items:center"><main style="background:white;color:#20251f;padding:32px;border-radius:20px;max-width:420px"><h1>This sign-in link has expired</h1><p>Request a new link to continue securely.</p><a href="/signin">Return to sign in</a></main></body></html>', mimetype='text/html'), 400
+            email = row['email']
+            c.execute('DELETE FROM login_links WHERE token_hash=?', (token_hash,))
+            user = c.execute('SELECT * FROM users WHERE lower(email)=lower(?)', (email,)).fetchone()
+            if user and not user['is_active']:
+                return redirect('/signin?magic=inactive', 302)
+            if user:
+                uid = user['id']
+                c.execute('UPDATE users SET email_verified=1, updated=? WHERE id=?', (now_iso(), uid))
+                fresh = False
+            else:
+                uid = uuid.uuid4().hex
+                created_at = now_iso()
+                display_name = email.split('@', 1)[0][:120]
+                c.execute('INSERT INTO users(id,email,name,password_hash,role,created,updated,is_active,email_verified) VALUES(?,?,?,?,?,?,?,1,1)',
+                          (uid, email, display_name, '!magic!' + secrets.token_hex(24), 'client', created_at, created_at))
+                fresh = True
+        session.clear()
+        session.permanent = True
+        session['client_id'] = uid
+        session['role'] = 'client'
+        session['csrf'] = secrets.token_urlsafe(32)
+        log('account', f"Client {'created' if fresh else 'signed in'} via email link: {email}")
+        return redirect('/dashboard' + ('?new=1' if fresh else ''), 302)
 
     @app.post('/api/auth/signup')
     def signup():
