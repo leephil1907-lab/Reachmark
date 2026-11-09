@@ -891,7 +891,7 @@ def public_robots():
 @app.route('/sitemap.xml')
 def public_sitemap():
     base = (settings().get('public_base_url') or request.url_root).rstrip('/')
-    urls = ['/', '/#work', '/#services', '/#process', '/#proof', '/#faq', '/#contact']
+    urls = ['/', '/about', '/showcase', '/privacy', '/terms'] + ['/work/' + slug for slug in ('forma-homes','astra-clinic','nova-exchange','novera-law','bloom-market','orbit-web3')]
     entries = ''.join('<url><loc>%s%s</loc></url>' % (base, path) for path in urls)
     return Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">%s</urlset>' % entries, mimetype='application/xml')
 
