@@ -3,10 +3,10 @@
 html{scroll-behavior:smooth;scroll-padding-top:100px}
 body.x-site{background:radial-gradient(ellipse at 12% 2%,rgba(96,165,250,.16),transparent 34%),radial-gradient(ellipse at 90% 25%,rgba(37,99,235,.08),transparent 32%),linear-gradient(180deg,#f8faff 0%,#eef3fb 56%,#f7f9fd 100%);color:var(--lg-ink)}
 .x-site .x-aurora,.x-site .x-depth{opacity:.16;filter:saturate(.7)}
-.pub-head{position:fixed;top:16px;left:50%;transform:translateX(-50%);width:min(1160px,calc(100% - 40px));border:1px solid rgba(255,255,255,.76);border-radius:999px;background:rgba(248,251,255,.68);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);box-shadow:0 14px 44px rgba(28,49,83,.1),inset 0 1px rgba(255,255,255,.9);transition:transform .35s ease,opacity .25s ease,width .35s ease,background .25s ease;z-index:100}
+.pub-head{position:fixed;top:16px;left:50%;transform:translateX(-50%);width:min(1160px,calc(100% - 40px));left:0;right:0;margin:0 auto;transform:none;border:1px solid rgba(255,255,255,.76);border-radius:999px;background:rgba(248,251,255,.68);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);box-shadow:0 14px 44px rgba(28,49,83,.1),inset 0 1px rgba(255,255,255,.9);transition:transform .35s ease,opacity .25s ease,width .35s ease,background .25s ease;z-index:100}
 .pub-head.scrolled{background:rgba(248,251,255,.86);box-shadow:0 12px 36px rgba(28,49,83,.13),inset 0 1px rgba(255,255,255,.9)}
 .pub-head.is-compact{width:min(1000px,calc(100% - 64px))}
-.pub-head.is-hidden{transform:translate(-50%,-130%);opacity:0;pointer-events:none}
+.pub-head.is-hidden{transform:translateY(-130%);opacity:0;pointer-events:none}
 .pub-head-in{max-width:none;min-height:62px;padding:8px 12px 8px 20px;gap:16px}
 .pub-logo img{height:34px}
 nav.main{gap:4px;margin:0 auto}
