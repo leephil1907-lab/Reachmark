@@ -1,25 +1,7 @@
 {
-  "name": "reachmark",
-  "version": "1.0.0",
-  "description": "Reachmark — discover business potential and make a thoughtful first impression",
-  "scripts": {
-    "build": "npm run build:menu && npm run build:intelligence",
-    "build:menu": "esbuild frontend/menu.jsx --bundle --minify --outfile=static/motion-menu.js --define:process.env.NODE_ENV=\\\"production\\\"",
-    "build:intelligence": "esbuild frontend/intelligence.jsx --bundle --minify --outfile=static/intelligence.js --define:process.env.NODE_ENV=\\\"production\\\""
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "framer-motion": "^13.4.0",
-    "leaflet": "^1.9.4",
-    "leaflet.markercluster": "^1.5.3",
-    "lucide-react": "^1.47.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
-  },
-  "devDependencies": {
-    "esbuild": "^0.28.2"
-  },
-  "private": true
+  "name":"reachmark","version":"2.0.0","private":true,
+  "description":"Reachmark Digital — evidence-led websites and digital experiences",
+  "scripts":{"build":"npm run build:menu && npm run build:intelligence && npm run build:site","build:menu":"esbuild frontend/menu.jsx --bundle --minify --outfile=static/motion-menu.js --define:process.env.NODE_ENV=\\"production\\"","build:intelligence":"esbuild frontend/intelligence.jsx --bundle --minify --outfile=static/intelligence.js --define:process.env.NODE_ENV=\\"production\\"","build:site":"vite build --config frontend/site/vite.config.ts","dev:site":"vite --config frontend/site/vite.config.ts","typecheck":"tsc --noEmit -p frontend/site/tsconfig.json"},
+  "dependencies":{"@vitejs/plugin-react":"^4.3.4","framer-motion":"^11.18.2","lenis":"^1.1.20","lucide-react":"^0.468.0","react":"^18.3.1","react-dom":"^18.3.1","react-router-dom":"^6.28.1"},
+  "devDependencies":{"autoprefixer":"^10.4.20","esbuild":"^0.28.2","postcss":"^8.4.49","tailwindcss":"^3.4.17","typescript":"^5.7.2","vite":"^6.0.7"}
 }
