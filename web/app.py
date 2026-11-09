@@ -103,6 +103,8 @@ from web.security import install_security
 install_security(app,db)
 from web.accounts import register_accounts
 register_accounts(app,db,log)
+from web.lead_qualifier import register_lead_qualifier
+register_lead_qualifier(app,db,log,add_lead)
 @app.context_processor
 def inject_branding():
     try: s=settings()
