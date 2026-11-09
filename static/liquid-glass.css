@@ -222,3 +222,8 @@ html[data-theme=dark] .lg-nav-glider{background:rgba(96,165,250,.16)}
 #pub-menu-btn[aria-expanded=true] .ic-close{display:block}
 .lg-404-panel:before{transform:translate(var(--shard-x,0px),var(--shard-y,0px)) rotate(24deg)}
 .lg-404-panel:after{transform:translate(calc(var(--shard-x,0px)*-.7),calc(var(--shard-y,0px)*-.7)) rotate(-18deg)}
+
+/* The shared pill is fixed over the editorial home/404 canvas and sticky on deeper pages. */
+body:not(.x-site) .pub-head{position:sticky;top:8px;left:auto;transform:none;margin:8px auto;width:min(1160px,calc(100% - 40px))}
+body:not(.x-site) .pub-head.is-hidden{transform:none;opacity:1;pointer-events:auto}
+nav.main .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
