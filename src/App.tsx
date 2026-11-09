@@ -1,6 +1,6 @@
 import {useEffect,useState,type FormEvent,Component,type ErrorInfo,type ReactNode} from 'react';
 import {AnimatePresence,motion,useReducedMotion} from 'framer-motion';
-import {ArrowDown,ArrowRight,ArrowUpRight,Check,CheckCircle2,ChevronDown,Clock3,Globe2,Layers3,Menu,MessageCircle,MoveUpRight,ScanSearch,ShieldCheck,Sparkles,Target,Zap} from 'lucide-react';
+import {ArrowDown,ArrowRight,ArrowUpRight,Check,CheckCircle2,ChevronDown,Globe2,Layers3,MessageCircle,MoveUpRight,ScanSearch,ShieldCheck,Sparkles} from 'lucide-react';
 import {Link,Route,Routes,useLocation,useParams} from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Lens from './components/Lens';
