@@ -1,0 +1,33 @@
+import {useEffect,useState} from 'react';
+import {Link,useLocation} from 'react-router-dom';
+import {AnimatePresence,motion,useReducedMotion} from 'framer-motion';
+import {ArrowUpRight,ChevronDown,Menu,Sun,Moon,X,Globe2,Code2,ScanSearch,MessageCircle} from 'lucide-react';
+import {useToast} from './Toast';
+const links=[['Work','/work'],['Process','/process'],['Proof','/#proof'],['Contact','/#contact']];
+const serviceItems=[{title:'Business websites',desc:'Websites for ambitious businesses',icon:Globe2,href:'/services#business'},{title:'Web3 product builds',desc:'Product sites and dApp interfaces',icon:Code2,href:'/services#web3'},{title:'Website gap reviews',desc:'Find the friction with evidence',icon:ScanSearch,href:'/services#audits'}];
+export default function Navbar({theme,toggle}:{theme:'dark'|'light';toggle:()=>void}){
+ const [scrolled,setScrolled]=useState(false),[hidden,setHidden]=useState(false),[menu,setMenu]=useState(false),[services,setServices]=useState(false),[active,setActive]=useState(''),[y,setY]=useState(0);const loc=useLocation();const reduced=useReducedMotion();const {push}=useToast();
+ useEffect(()=>{let last=window.scrollY;const f=()=>{const now=window.scrollY;setScrolled(now>40);setHidden(now>140&&now>last+5);if(now<last-4)setHidden(false);last=now;};window.addEventListener('scroll',f,{passive:true});return()=>window.removeEventListener('scroll',f)},[]);
+ useEffect(()=>{setMenu(false);setServices(false);document.body.classList.remove('menu-open')},[loc.pathname]);
+ useEffect(()=>{document.body.classList.toggle('menu-open',menu);return()=>document.body.classList.remove('menu-open')},[menu]);
+ useEffect(()=>{const ids=['work','services','process','proof','contact'];const els=ids.map(id=>document.getElementById(id)).filter(Boolean) as HTMLElement[];if(!('IntersectionObserver'in window))return;const ob=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)setActive(e.target.id)}),{rootMargin:'-35% 0px -55% 0px'});els.forEach(e=>ob.observe(e));return()=>ob.disconnect()},[loc.pathname]);
+ useEffect(()=>{const esc=(e:KeyboardEvent)=>{if(e.key==='Escape'){setMenu(false);setServices(false)}};window.addEventListener('keydown',esc);return()=>window.removeEventListener('keydown',esc)},[]);
+ const navMotion=reduced?{}:{y:hidden?-100:0,opacity:hidden?0:1};
+ return <motion.header className={'site-nav '+(scrolled?'scrolled ':'')+(hidden?'nav-hidden':'')} animate={navMotion} transition={{duration:.28,ease:[.22,1,.36,1]}}>
+ <div className="nav-shell glass">
+  <Link to="/" className="brand" aria-label="Reachmark home"><span className="brand-mark"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="19" cy="21" r="12" fill="none" stroke="currentColor" strokeWidth="3"/><path d="M19 21v11m0-11h8a5 5 0 0 1 5 5v5" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/><circle cx="31" cy="8" r="3" fill="#5CF2C0"/></svg></span><span className="brand-word"><i>Reach</i><b>mark</b></span></Link>
+  <nav className="desktop-links" aria-label="Main navigation">
+   <Link className={active==='work'?'active':''} to="/work">Work</Link>
+   <div className="nav-dropdown" onMouseEnter={()=>setServices(true)} onMouseLeave={()=>setServices(false)}><button aria-haspopup="true" aria-expanded={services} onFocus={()=>setServices(true)} onClick={()=>setServices(v=>!v)}>Services <ChevronDown size={14}/></button>
+    <AnimatePresence>{services&&<motion.div className="mega glass" initial={{opacity:0,y:10,scale:.97,filter:'blur(8px)'}} animate={{opacity:1,y:0,scale:1,filter:'blur(0px)'}} exit={{opacity:0,y:8,scale:.98}} transition={{duration:.18}} onKeyDown={e=>{if(e.key==='ArrowDown'){e.preventDefault();(e.currentTarget.querySelector('a') as HTMLElement)?.focus()}}}>
+      <div className="mega-grid">{serviceItems.map(item=><Link to={item.href} key={item.title} onClick={()=>setServices(false)}><span className="mega-icon"><item.icon size={19}/></span><span><b>{item.title}</b><small>{item.desc}</small></span><ArrowUpRight size={15}/></Link>)}</div>
+      <div className="mega-foot"><span>Clear work. Measurable next steps.</span><Link to="/work">See selected work <ArrowUpRight size={14}/></Link></div>
+    </motion.div>}</AnimatePresence>
+   </div>
+   {links.slice(1).map(([name,href])=><a key={name} className={active===name.toLowerCase()?'active':''} href={href}>{name}</a>)}
+  </nav>
+  <div className="nav-actions"><button className="icon-button theme-button" onClick={toggle} aria-label={'Switch to '+(theme==='dark'?'light':'dark')+' theme'}>{theme==='dark'?<Sun size={17}/>:<Moon size={17}/>}</button><a className="button button-primary nav-cta" href="/#try-url">Get a free review <ArrowUpRight size={15}/></a><button className="icon-button mobile-menu-button" onClick={()=>setMenu(v=>!v)} aria-expanded={menu} aria-label={menu?'Close menu':'Open menu'}>{menu?<X/>:<Menu/>}</button></div>
+ </div>
+ <AnimatePresence>{menu&&<motion.div className="mobile-sheet" initial={{opacity:0,backdropFilter:'blur(0px)'}} animate={{opacity:1,backdropFilter:'blur(24px)'}} exit={{opacity:0}}><div className="mobile-sheet-inner">{[['Home','/'],['Work','/work'],['Services','/services'],['Process','/process'],['Proof','/#proof'],['Contact','/#contact']].map(([n,h],i)=><motion.div key={n} initial={reduced?false:{y:24,opacity:0,filter:'blur(8px)'}} animate={{y:0,opacity:1,filter:'blur(0px)'}} transition={{delay:i*.06}}><Link to={h} onClick={()=>setMenu(false)}>{n}<ArrowUpRight size={18}/></Link></motion.div>)}<div className="mobile-sheet-bottom"><a className="button button-primary" href="/#try-url" onClick={()=>setMenu(false)}>Get a free review <ArrowUpRight size={16}/></a><div><a href="https://wa.me/2340000000000" onClick={e=>{if(!import.meta.env.VITE_WHATSAPP_NUMBER){e.preventDefault();push('Add VITE_WHATSAPP_NUMBER to enable WhatsApp.','info')}}}><MessageCircle size={16}/> WhatsApp</a><button onClick={toggle}>{theme==='dark'?<Sun size={16}/>:<Moon size={16}/>} Theme</button></div></div></div></motion.div>}</AnimatePresence>
+ </motion.header>
+}
