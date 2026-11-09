@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /signin
+Disallow: /signup
+Disallow: /workspace
+Sitemap: https://reachmarkdigital.xyz/sitemap.xml
