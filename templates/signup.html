@@ -22,6 +22,7 @@ button[type=submit]:disabled{opacity:.65;cursor:wait;transform:none}
 .social-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:12px 16px;border:1px solid #747775;border-radius:999px;background:#fff;color:#1f1f1f;font:600 14px/1.2 Manrope,sans-serif;text-decoration:none;cursor:pointer;transition:background .15s,box-shadow .15s,transform .15s}
 .social-btn:hover{background:#f8fafd;box-shadow:0 1px 3px 1px rgba(60,64,67,.12);transform:translateY(-1px)}
 .social-btn svg{flex-shrink:0}
+.auth-alt-actions{display:grid;gap:10px}.auth-alt-actions #oauth-btns{display:grid;gap:10px}.auth-alt-actions .divider{margin:18px 0 4px}.magic-link-btn{min-height:46px;border-color:rgba(32,37,31,.18);background:#f8faf5}.magic-link-icon{font-size:17px;color:#26351e}.magic-link-btn:disabled{opacity:.6;cursor:wait;transform:none}#magic-note{min-height:0;margin:0;font-size:11px}#magic-note:empty{display:none}
 .locale-select{margin-top:18px;font:700 12px Manrope,sans-serif;padding:8px 10px;border-radius:999px;border:1px solid rgba(32,37,31,.12);background:#fff;color:#20251f;cursor:pointer}
 #verify-hint{display:none;margin:12px 0 0;padding:12px;border-radius:12px;background:#eef6d1;border:1px solid #d8e9b8;color:#2d4a0a;font:600 12px Manrope,sans-serif}
 #verify-hint button{background:none;border:0;padding:0;color:#1a3310;font:inherit;text-decoration:underline;cursor:pointer}
@@ -35,8 +36,6 @@ button[type=submit]:disabled{opacity:.65;cursor:wait;transform:none}
   <h1>{{ t('au.s_f_h') }}</h1>
   <p class="lead">{{ t('au.s_lead') }}</p>
   <div id="msg" role="alert" class="auth-error"></div>
-  <div id="oauth-wrap"><div id="oauth-btns">{% set oauth_mode = 'signup' %}{% include '_google_btn.html' %}</div></div>
-  <div class="divider">{{ t('au.o_or') }}</div>
   <form id="signup-form" novalidate>
     <label for="name">{{ t('au.s_name') }}</label>
     <input id="name" name="name" maxlength="120" placeholder="Ada Lovelace" autocomplete="name">
@@ -48,6 +47,12 @@ button[type=submit]:disabled{opacity:.65;cursor:wait;transform:none}
     </div>
     <button type="submit">{{ t('au.s_create') }}</button>
   </form>
+  <div class="divider">OR CONTINUE WITH</div>
+  <div class="auth-alt-actions">
+    <div id="oauth-btns">{% set oauth_mode = 'signup' %}{% include '_google_btn.html' %}</div>
+    <button type="button" class="social-btn magic-link-btn" id="magic-link-btn"><span class="magic-link-icon" aria-hidden="true">✉</span><span>Continue with an email link</span></button>
+    <p id="magic-note" class="auth-note" role="status" aria-live="polite"></p>
+  </div>
   <div id="verify-hint">{{ t('au.s_v1') }} <button type="button" onclick="requestVerify(event)">{{ t('au.s_resend') }}</button></div>
   <p class="auth-note">{{ t('au.s_note1') }} <a href="/signin">{{ t('au.s_signin') }}</a></p>
   <p class="auth-note" style="font-size:11px">{{ t('au.s_priv') }} · <a href="/terms">{{ t('foot.terms') }}</a> · <a href="/privacy">{{ t('foot.privacy') }}</a></p>
@@ -59,6 +64,22 @@ button[type=submit]:disabled{opacity:.65;cursor:wait;transform:none}
 var T_=window.T||function(k,f){return f;};
 (function(){var b=document.getElementById('rm-progress');if(!b)return;b.className='on';function d(){b.classList.add('done');setTimeout(function(){b.remove();},450);}if(document.readyState==='complete')d();else window.addEventListener('load',d);})();
 const form=document.getElementById('signup-form'),msg=document.getElementById('msg');
+const magicBtn=document.getElementById('magic-link-btn'),magicNote=document.getElementById('magic-note');
+magicBtn?.addEventListener('click',async()=>{
+  const email=document.getElementById('email').value.trim();
+  magicNote.textContent='';
+  if(!email){magicNote.textContent='Enter your email address above first.';document.getElementById('email').focus();return;}
+  magicBtn.disabled=true;
+  magicBtn.querySelector('span:last-child').textContent='Sending secure link…';
+  try{
+    const r=await fetch('/api/auth/magic-link',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});
+    const j=await r.json();
+    if(!r.ok)throw new Error(j.error||'The sign-in link could not be sent.');
+    magicNote.textContent=j.message||'Check your inbox for your secure sign-in link.';
+  }catch(err){magicNote.textContent=err.message||'Please try again in a moment.';}
+  finally{magicBtn.disabled=false;magicBtn.querySelector('span:last-child').textContent='Continue with an email link';}
+});
+
 let csrfToken=document.querySelector('meta[name="csrf-token"]')?.content||'';
 async function requestVerify(e){e.preventDefault();const email=document.getElementById('email').value.trim();try{let r=await fetch('/api/auth/request-verification',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});let j=await r.json();alert(j.already_verified?T_('au.js_verified','verified'):T_('au.js_vsent','vsent'));}catch(err){alert(T_('au.js_noresend','noresend'))}}
 form.onsubmit=async e=>{
