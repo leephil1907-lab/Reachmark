@@ -5,7 +5,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY package.json package-lock.json ./
 COPY frontend ./frontend
-RUN npm ci && npm run build
+COPY src ./src
+COPY public ./public
+COPY index.html vite.config.ts tsconfig.json tailwind.config.js postcss.config.js ./
+RUN npm install --no-audit --no-fund && npm run build
+COPY dist ./dist
 COPY web ./web
 COPY agents ./agents
 COPY crew ./crew
