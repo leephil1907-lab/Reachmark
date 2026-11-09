@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '22', cache: npm}
       - run: pip install -r requirements.txt
-      - run: npm ci && npm run build
+      - run: npm install --no-audit --no-fund && npm run build
       # Full backend suite: a green check here must mean every test passed.
       - run: pip install pytest && python -m pytest tests -q -p no:cacheprovider
       - run: PYTHONPATH=. python tests/test_schema.py
