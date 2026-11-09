@@ -146,12 +146,26 @@
   function renderAgents(data) {
     var host = $('crew-agent-grid');
     if (!host) return;
-    var activeAgent = state.run && state.run.steps ? (state.run.steps.filter(function (step) { return step.status === 'running'; })[0] || {}).agent : '';
+    var steps = state.run && Array.isArray(state.run.steps) ? state.run.steps : [];
+    var latestByAgent = {};
+    steps.forEach(function (step) { latestByAgent[step.agent] = step; });
     host.innerHTML = (data.agents || []).map(function (agent) {
-      return '<article class="crew-agent' + (agent.id === activeAgent ? ' active' : '') + '">' +
+      var step = latestByAgent[agent.id] || null;
+      var status = step ? step.status : 'ready';
+      var label = status === 'running' ? 'Working now' :
+        status === 'completed' ? 'Completed' :
+        status === 'failed' ? 'Needs attention' :
+        status === 'blocked' ? 'Waiting for approval' :
+        status === 'skipped' ? 'Not needed this run' : 'Ready';
+      var tone = status === 'running' ? 'working' :
+        status === 'completed' ? 'completed' :
+        (status === 'failed' || status === 'blocked') ? 'attention' : 'ready';
+      return '<article class="crew-agent ' + tone + '">' +
+        '<div class="crew-agent-status"><span class="crew-status-dot"></span><span>' + label + '</span></div>' +
         '<span class="tag">' + esc(agent.tier) + '</span>' +
         '<h4>' + esc(agent.symbol) + ' ' + esc(agent.name) + '</h4>' +
         '<p>' + esc(agent.mission) + '</p>' +
+        (step ? '<p class="crew-agent-latest">' + esc(step.summary || step.title || label) + '</p>' : '') +
         ((agent.skills || []).length ? '<p class="small muted">' + ((agent.skills || []).length > 1 ? T_('wsj.cr_pb2','Playbooks') : T_('wsj.cr_pb1','Playbook')) +
           ': ' + (agent.skills || []).map(esc).join(' · ') + ' <span class="pill">' + esc(data.playbook_version || 'vendored') + '</span></p>' : '') +
         '<ul>' + (agent.guardrails || []).slice(0, 2).map(function (line) { return '<li>' + esc(line) + '</li>'; }).join('') + '</ul>' +
