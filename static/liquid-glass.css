@@ -170,3 +170,23 @@ html[data-theme=dark] .lg-toast{background:rgba(15,28,47,.94);border-color:rgba(
 @media(max-width:380px){.lg-mobile-dock a{min-width:48px;padding:6px 4px}.lg-sticky-cta{right:10px;padding:11px 13px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.lg-reveal{opacity:1;filter:none;transform:none;transition:none}.lg-preloader,.lg-preloader:after{display:none!important}.pub-head,.pub-menu,.x-site .x-btn{transition:none!important}.x-card:hover{transform:none}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.pub-head,.ed-console,.rm-preview-window,.x-try,.x-step,.x-trust-grid a,.x-card,.lg-contact-form,.lg-mobile-dock{background:rgba(245,248,253,.97)}}
+
+/* Cross-document transitions where supported; navigation remains fully functional without them. */
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:lg-out .18s ease both}
+::view-transition-new(root){animation:lg-in .28s ease both}
+@keyframes lg-out{to{opacity:0;filter:blur(5px)}}
+@keyframes lg-in{from{opacity:0;filter:blur(5px)}to{opacity:1;filter:blur(0)}}
+.lg-contact-copy a{color:#1d4ed8;font-weight:650}
+.lg-services .x-plans-grid article h3{font:400 30px/1.1 'Instrument Serif',Georgia,serif;color:#17243a;margin:14px 0}
+.lg-services .x-plans-grid article a{display:inline-flex;margin-top:12px;color:#1d4ed8;font:650 13px Inter,sans-serif;text-decoration:none}
+.lg-services .x-plans-grid article small{color:#1d4ed8;letter-spacing:.12em}
+.lg-contact-form .lg-submit:hover{background:#174fc5}
+.lg-contact-form .lg-consent a{color:#1d4ed8}
+@media(max-width:700px){
+  .x-step,.x-trust-grid a,.x-card,.x-plans-grid article,.x-founder-copy,.rm-preview-window{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(255,255,255,.9)}
+  .lg-toast{top:auto;bottom:calc(150px + env(safe-area-inset-bottom))}
+  .lg-lens-wrap,.lg-contact-form,.pub-head,.lg-mobile-dock{backdrop-filter:blur(18px) saturate(145%);-webkit-backdrop-filter:blur(18px) saturate(145%)}
+  .x-site main{overflow-x:clip}
+}
+@media(max-width:700px) and (prefers-reduced-motion:reduce){.lg-lens-range{scroll-behavior:auto}}
