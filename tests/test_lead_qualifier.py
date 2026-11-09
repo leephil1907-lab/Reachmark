@@ -1,8 +1,11 @@
 """Regression tests for authenticated, owner-scoped lead qualification."""
-from tests.test_app import ProspectTests
+import unittest
+from tests.test_app import ProspectTests, module
 
 
-class LeadQualifierTests(ProspectTests):
+class LeadQualifierTests(unittest.TestCase):
+    setUp = ProspectTests.setUp
+    tearDown = ProspectTests.tearDown
     def _as_owner(self):
         with self.client.session_transaction() as session:
             session["owner"] = True
@@ -96,5 +99,4 @@ class LeadQualifierTests(ProspectTests):
 
 
 def module_db():
-    from tests.test_app import module
     return module.db()
