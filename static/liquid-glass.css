@@ -190,3 +190,12 @@ html[data-theme=dark] .lg-toast{background:rgba(15,28,47,.94);border-color:rgba(
   .x-site main{overflow-x:clip}
 }
 @media(max-width:700px) and (prefers-reduced-motion:reduce){.lg-lens-range{scroll-behavior:auto}}
+
+/* Real loading state for the live website check. */
+.lg-audit-skeleton{display:grid;gap:12px;padding:18px;border:1px solid rgba(255,255,255,.9);border-radius:18px;background:rgba(255,255,255,.66)}
+.lg-skeleton-line{height:12px;border-radius:999px;background:linear-gradient(110deg,rgba(119,145,183,.12) 8%,rgba(255,255,255,.88) 18%,rgba(119,145,183,.12) 33%);background-size:220% 100%;animation:lgShimmer 1.6s linear infinite}
+.lg-skeleton-line:nth-child(2){width:82%}.lg-skeleton-line:nth-child(3){width:66%}.lg-skeleton-line:nth-child(4){height:54px;border-radius:14px}
+@keyframes lgShimmer{to{background-position-x:-220%}}
+#x-audit-out.lg-loaded>*{animation:lgResultIn .25s ease both}
+@keyframes lgResultIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.lg-skeleton-line{animation:none}#x-audit-out.lg-loaded>*{animation:none}}
