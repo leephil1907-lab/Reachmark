@@ -5,14 +5,14 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY package.json package-lock.json ./
 COPY frontend ./frontend
-RUN npm ci && npm run build
+COPY static ./static
+RUN npm install --no-audit --no-fund && npm run build
 COPY web ./web
 COPY agents ./agents
 COPY crew ./crew
 COPY scripts ./scripts
 COPY robots.txt ./
 COPY templates ./templates
-COPY static ./static
 # AI crew assets: vendored playbooks (attributed, unmodified), the facts-only
 # knowledge base the receptionist answers from, and the offline demo fixtures.
 COPY skills ./skills
