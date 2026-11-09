@@ -874,6 +874,27 @@ def reviews_page():
     return render_template('reviews.html', base=base, structured=structured, client_reviews=revs, seo=seo)
 
 
+# Public React SPA fallback: only unknown browser routes reach this handler.
+@app.route('/<path:public_path>')
+def react_public_fallback(public_path):
+    if public_path.startswith('api/'):
+        return jsonify(error='Not found'), 404
+    react_index = os.path.join(ROOT, 'static', 'site', 'index.html')
+    if os.path.isfile(react_index):
+        return send_from_directory(os.path.join(ROOT, 'static', 'site'), 'index.html')
+    abort(404)
+
+@app.route('/robots.txt')
+def public_robots():
+    return send_from_directory(ROOT, 'robots.txt', mimetype='text/plain')
+
+@app.route('/sitemap.xml')
+def public_sitemap():
+    base = (settings().get('public_base_url') or request.url_root).rstrip('/')
+    urls = ['/', '/#work', '/#services', '/#process', '/#proof', '/#faq', '/#contact']
+    entries = ''.join('<url><loc>%s%s</loc></url>' % (base, path) for path in urls)
+    return Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">%s</urlset>' % entries, mimetype='application/xml')
+
 # Apply all legacy SQLite column upgrades once every feature table exists.
 from web.migrations import run_migrations
 run_migrations(db)
