@@ -1,8 +1,10 @@
 #!/bin/sh
-# Railway / Docker start — print a clear reason if production env is still a template.
+# Render / Railway / Docker start — validate production env before Gunicorn.
 set -e
 if [ -z "$RELEASE_SHA" ] || [ "$RELEASE_SHA" = "local" ]; then
-  if [ -n "$RAILWAY_GIT_COMMIT_SHA" ]; then
+  if [ -n "$RENDER_GIT_COMMIT" ]; then
+    RELEASE_SHA="$RENDER_GIT_COMMIT"
+  elif [ -n "$RAILWAY_GIT_COMMIT_SHA" ]; then
     RELEASE_SHA="$RAILWAY_GIT_COMMIT_SHA"
   fi
 fi
