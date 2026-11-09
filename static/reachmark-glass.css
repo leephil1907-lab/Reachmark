@@ -235,3 +235,8 @@ html[data-theme=dark] .x-foot#rm-foot{background:rgba(12,18,11,.82);border-color
   .ed-hero-side{padding:17px;border-radius:18px}
   .password-field input{padding-right:78px!important}
 }
+
+/* Contrast tuning for small editorial labels on the homepage. */
+.ed-ticker-run > span.ed-tick > b > span{color:#b0c19b!important}
+#try-url .ed-k .ed-n{color:#52682b!important}
+#how-it-works .kicker .ed-n{color:#26391b!important}
