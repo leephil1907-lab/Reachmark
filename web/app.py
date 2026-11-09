@@ -237,6 +237,9 @@ def adsense_tags(response):
     return response
 @app.errorhandler(413)
 def too_big(e): return jsonify(error=_t('er_051', locale_now())),413
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('404.html'), 404
 @app.route('/')
 def home():
     base=settings()['public_base_url'].rstrip('/')
