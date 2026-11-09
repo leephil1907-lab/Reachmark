@@ -1,10 +1,10 @@
-import {createContext,useCallback,useContext,useMemo,useState,type ReactNode,useEffect,useState as useLocalState} from 'react';
+import {createContext,useCallback,useContext,useMemo,useState,type ReactNode,useEffect} from 'react';
 import {CheckCircle2,AlertCircle,Info,X} from 'lucide-react';
 type ToastKind='success'|'error'|'info'; type ToastItem={id:number;kind:ToastKind;message:string};
 const C=createContext<{push:(message:string,kind?:ToastKind)=>void}>({push:()=>{}});
 export function useToast(){return useContext(C)}
 function ToastCard({item,remove}:{item:ToastItem;remove:(id:number)=>void}){
- const [paused,setPaused]=useLocalState(false);
+ const [paused,setPaused]=useState(false);
  useEffect(()=>{if(paused)return;const id=window.setTimeout(()=>remove(item.id),4000);return()=>window.clearTimeout(id)},[paused,item.id,remove]);
  return <div className={'toast glass '+item.kind} role="status" onMouseEnter={()=>setPaused(true)} onMouseLeave={()=>setPaused(false)} onFocus={()=>setPaused(true)} onBlur={()=>setPaused(false)}><span className="toast-icon">{item.kind==='success'?<CheckCircle2/>:item.kind==='error'?<AlertCircle/>:<Info/>}</span><span>{item.message}</span><button aria-label="Dismiss notification" onClick={()=>remove(item.id)}><X size={16}/></button><i style={{animationPlayState:paused?'paused':'running'}}/></div>
 }
