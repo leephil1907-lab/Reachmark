@@ -25,3 +25,5 @@ Disallow: /*.db$
 Disallow: /*.log$
 Disallow: /*.bak$
 Disallow: /*.sql$
+
+Sitemap: https://reachmarkdigital.xyz/sitemap.xml
