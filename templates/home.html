@@ -388,8 +388,8 @@
   </section>
 
   <section class="lg-contact" id="contact" aria-labelledby="lg-contact-title">
-    <div class="lg-contact-copy"><p class="ed-k">START A CONVERSATION</p><h2 id="lg-contact-title">Let's find what is costing you customers.</h2><p>Tell us a little about your business and what you want to improve. Your enquiry is sent to Reachmark's existing enquiry system for follow-up.</p><p><a href="/enquire">Prefer the full project brief? Open the project enquiry page →</a></p>{% if whatsapp_url %}<p><a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer">Talk to us on WhatsApp →</a></p>{% endif %}</div>
-    <form class="lg-contact-form" id="lg-inquiry-form">
+    <div class="lg-contact-copy"><p class="ed-k">START A CONVERSATION</p><h2 id="lg-contact-title">Let's find what is costing you customers.</h2><p>Tell us a little about your business and what you want to improve. Your enquiry is sent to Reachmark's existing enquiry system for follow-up.</p><p><a href="/enquire">Prefer the full project brief? Open the project enquiry page →</a></p>{% if whatsapp_url %}<p><a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer">Talk to us on WhatsApp →</a></p>{% endif %}{% if telegram_url %}<p><a href="{{ telegram_url }}" target="_blank" rel="noopener noreferrer">Talk to us on Telegram →</a></p>{% endif %}</div>
+    <form class="lg-contact-form" id="lg-inquiry-form"><input class="lg-honeypot" type="text" name="company_url" tabindex="-1" autocomplete="off" aria-hidden="true">
       <div class="lg-form-grid">
         <label class="lg-field">Your name<input name="name" autocomplete="name" maxlength="120" required minlength="2" placeholder="Full name"></label>
         <label class="lg-field">Email address<input name="email" type="email" autocomplete="email" maxlength="250" required placeholder="you@company.com"></label>
