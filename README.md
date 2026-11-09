@@ -34,7 +34,7 @@ Reachmark is a Flask app, so **GitHub Pages cannot host it**. The GitHub-native 
 2. Setup installs Python and Node, then starts the app on port **8000**.
 3. GitHub opens a preview. The link looks like `https://<codespace-name>-8000.app.github.dev`.
 
-That instance is development-only (no production secrets). Railway remains production, with Gmail SMTP and the `/data` volume.
+That instance is development-only (no production secrets). Render Pro in Frankfurt is the planned production target; Railway remains intact as rollback until the verified data migration and DNS cutover are complete.
 
 ## Development
 
@@ -46,9 +46,22 @@ npm ci && npm run build
 python -m flask --app web.app run --host 0.0.0.0 --port 8000
 ```
 
+## Public website (React/Vite)
+
+The public Reachmark site is built with React 18, TypeScript, Vite, Framer Motion, React Router, Lenis and lucide-react. Source lives in `frontend/site`; the production bundle is emitted to `static/site` and served by the existing Flask app so existing audit, account, enquiry and admin APIs remain same-origin.
+
+```bash
+npm install --no-audit --no-fund
+npm run dev:site
+npm run typecheck
+npm run build
+```
+
+Copy `frontend/site/.env.example` to the Vite environment file when configuring optional public endpoints. Never place server credentials in `VITE_*` variables. The free review uses `/api/public/audit`; project enquiries use `/api/enquiries` by default.
+
 ## Production
 
-Production deployment is maintained separately from development configuration. Use the provided production environment template and follow the release checks before deployment.
+Render Pro is configured in `render.yaml`; follow `RENDER_MIGRATION.md` for database backup/restore, secret transfer, smoke tests and DNS cutover. Keep Railway running until Render is verified. The app uses SQLite on a single persistent disk-backed instance; do not scale to multiple instances until a separately tested PostgreSQL migration is completed.
 
 ## Status
 
