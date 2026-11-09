@@ -34,10 +34,10 @@ if os.getenv('APP_ENV') == 'production':
     if not os.path.isabs(path):
         errors.append('DATABASE_PATH must be an absolute path.')
     if errors:
-        sys.stderr.write('Reachmark production boot failed:\\n')
+        sys.stderr.write('Reachmark production boot failed:' + chr(10))
         for item in errors:
-            sys.stderr.write('  - ' + item + '\\n')
+            sys.stderr.write('  - ' + item + chr(10))
         sys.exit(1)
-sys.stderr.write('Reachmark production checks passed. Starting Gunicorn on 0.0.0.0:%s\\n' % os.getenv('PORT', '8000'))
+sys.stderr.write('Reachmark production checks passed. Starting Gunicorn on 0.0.0.0:%s' % os.getenv('PORT', '8000') + chr(10))
 PY
 exec gunicorn --bind "0.0.0.0:${PORT:-8000}" --workers "${WEB_CONCURRENCY:-1}" --threads "${GUNICORN_THREADS:-4}" --timeout 120 --access-logfile - --error-logfile - web.app:app
