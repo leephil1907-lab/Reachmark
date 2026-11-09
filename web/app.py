@@ -150,7 +150,7 @@ def inject_adsense():
             'adsense_display_slot': os.getenv('ADSENSE_DISPLAY_SLOT','').strip()}
 @app.before_request
 def custom_domain_redirect():
-    """Render or Railway service hostname → canonical domain. Never redirect a host to itself."""
+    """Railway hostname → canonical domain only. Keep Render service URLs available for pre-DNS smoke tests."""
     try:
         if request.path.startswith(('/healthz','/static/')):
             return None
