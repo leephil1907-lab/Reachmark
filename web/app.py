@@ -261,7 +261,18 @@ def home():
         funnel_record(db, now, 'visit', {'path': '/'})
     except Exception:
         pass
+    react_index = os.path.join(ROOT, 'static', 'site', 'index.html')
+    if os.path.isfile(react_index):
+        return send_from_directory(os.path.join(ROOT, 'static', 'site'), 'index.html')
     return render_template('home.html',base=base,structured=structured,samples=SAMPLES,seo=seo,google_verification=gsv,ga_id=ga_id,gt_id=gt_id,gtm_id=gtm_id)
+
+@app.route('/work/<slug>')
+def react_case_study(slug):
+    react_index = os.path.join(ROOT, 'static', 'site', 'index.html')
+    if os.path.isfile(react_index):
+        return send_from_directory(os.path.join(ROOT, 'static', 'site'), 'index.html')
+    return redirect('/showcase/' + slug)
+
 @app.route('/admin',methods=['GET','POST'])
 def admin():
     """The owner's admin console. It is reached only by typing /admin: nothing on
