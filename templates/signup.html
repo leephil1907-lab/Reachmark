@@ -60,6 +60,26 @@ var T_=window.T||function(k,f){return f;};
 (function(){var b=document.getElementById('rm-progress');if(!b)return;b.className='on';function d(){b.classList.add('done');setTimeout(function(){b.remove();},450);}if(document.readyState==='complete')d();else window.addEventListener('load',d);})();
 const form=document.getElementById('signup-form'),msg=document.getElementById('msg');
 let csrfToken=document.querySelector('meta[name="csrf-token"]')?.content||'';
+(function(){
+  document.querySelectorAll('input[type="password"]').forEach(function(input){
+    if(input.dataset.visibilityControl)return;
+    input.dataset.visibilityControl='1';
+    var wrap=document.createElement('div');
+    wrap.className='password-field';
+    input.parentNode.insertBefore(wrap,input);
+    wrap.appendChild(input);
+    var toggle=document.createElement('button');
+    toggle.type='button';toggle.className='password-toggle';
+    toggle.textContent='Show';toggle.setAttribute('aria-label','Show password');
+    toggle.addEventListener('click',function(){
+      var visible=input.type==='password';
+      input.type=visible?'text':'password';
+      toggle.textContent=visible?'Hide':'Show';
+      toggle.setAttribute('aria-label',visible?'Hide password':'Show password');
+    });
+    wrap.appendChild(toggle);
+  });
+})();
 async function requestVerify(e){e.preventDefault();const email=document.getElementById('email').value.trim();try{let r=await fetch('/api/auth/request-verification',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});let j=await r.json();alert(j.already_verified?T_('au.js_verified','verified'):T_('au.js_vsent','vsent'));}catch(err){alert(T_('au.js_noresend','noresend'))}}
 form.onsubmit=async e=>{
   e.preventDefault();
