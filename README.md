@@ -34,7 +34,7 @@ Reachmark is a Flask app, so **GitHub Pages cannot host it**. The GitHub-native 
 2. Setup installs Python and Node, then starts the app on port **8000**.
 3. GitHub opens a preview. The link looks like `https://<codespace-name>-8000.app.github.dev`.
 
-That instance is development-only (no production secrets). Railway remains production, with Gmail SMTP and the `/data` volume.
+That instance is development-only (no production secrets). Render is the planned production host, using the existing Dockerized Flask application and a persistent `/data` disk. Railway is retained as a rollback source until the Render cutover is verified.
 
 ## Development
 
@@ -48,7 +48,7 @@ python -m flask --app web.app run --host 0.0.0.0 --port 8000
 
 ## Production
 
-Production deployment is maintained separately from development configuration. Use the provided production environment template and follow the release checks before deployment.
+Production deployment is defined in `render.yaml`. See `RENDER_MIGRATION.md` for the safe database backup, secret transfer, Render deployment, domain cutover, and rollback checklist. Do not retire Railway until the Render database and production flows have been verified.
 
 ## Status
 
