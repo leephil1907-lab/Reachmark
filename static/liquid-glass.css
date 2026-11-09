@@ -18,7 +18,7 @@ nav.main a:hover,nav.main a[aria-current=page]{background:rgba(37,99,235,.09);co
 .head-cta .btn.ghost{background:rgba(255,255,255,.54);border-color:rgba(70,91,126,.16);color:#334155}
 #theme-toggle-public{border-color:rgba(70,91,126,.18);color:#334155;background:rgba(255,255,255,.55)}
 #pub-menu-btn{border-color:rgba(70,91,126,.16);color:#24334a;background:rgba(255,255,255,.68);border-radius:50%;width:40px;height:40px}
-.pub-menu{position:fixed;inset:0;z-index:-1;padding:110px 24px 40px;background:rgba(238,244,253,.94);backdrop-filter:blur(30px) saturate(160%);-webkit-backdrop-filter:blur(30px) saturate(160%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;opacity:0;visibility:hidden;transform:translateY(-12px);transition:opacity .28s,transform .28s,visibility .28s}
+.pub-menu{position:fixed;inset:0;z-index:2;padding:110px 24px 40px;background:rgba(238,244,253,.94);backdrop-filter:blur(30px) saturate(160%);-webkit-backdrop-filter:blur(30px) saturate(160%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;opacity:0;visibility:hidden;transform:translateY(-12px);transition:opacity .28s,transform .28s,visibility .28s}
 .pub-menu.open{opacity:1;visibility:visible;transform:none}
 .pub-menu a{width:min(520px,100%);padding:17px 20px;border:1px solid rgba(255,255,255,.8);border-radius:18px;background:rgba(255,255,255,.55);color:#1e293b;text-align:center;font:600 18px/1.2 Inter,'DM Sans',sans-serif;text-decoration:none;box-shadow:0 8px 24px rgba(31,55,91,.06)}
 .page-veil{display:none}
@@ -216,3 +216,9 @@ html[data-theme=dark] .lg-nav-glider{background:rgba(96,165,250,.16)}
 .x-card:before,.x-trust-grid a:before,.x-plans-grid article:before,.lg-contact-form:before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:0;background:radial-gradient(260px circle at var(--spot-x,50%) var(--spot-y,50%),rgba(96,165,250,.16),transparent 72%);transition:opacity .25s}
 .x-card:hover:before,.x-trust-grid a:hover:before,.x-plans-grid article:hover:before,.lg-contact-form:hover:before{opacity:1}
 .ed-console,.lg-lens-wrap{transform:translateY(var(--lg-parallax,0px));will-change:transform}
+
+#pub-menu-btn .ic-close{display:none}
+#pub-menu-btn[aria-expanded=true] .ic-open{display:none}
+#pub-menu-btn[aria-expanded=true] .ic-close{display:block}
+.lg-404-panel:before{transform:translate(var(--shard-x,0px),var(--shard-y,0px)) rotate(24deg)}
+.lg-404-panel:after{transform:translate(calc(var(--shard-x,0px)*-.7),calc(var(--shard-y,0px)*-.7)) rotate(-18deg)}
