@@ -19,7 +19,12 @@ class MagicLinkTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.old_db = module.DB
         with module.db() as c:
-            schema = [r[0] for r in c.execute("SELECT sql FROM sqlite_master WHERE type='table' AND sql IS NOT NULL")]
+            schema = [
+                r[0] for r in c.execute(
+                    "SELECT sql FROM sqlite_master "
+                    "WHERE type='table' AND sql IS NOT NULL AND name NOT LIKE 'sqlite_%'"
+                )
+            ]
         module.DB = os.path.join(self.tmp.name, "isolated.sqlite3")
         with module.db() as c:
             for sql in schema:
