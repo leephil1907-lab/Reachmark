@@ -143,6 +143,25 @@ def register_accounts(app, db, log):
             state TEXT
         );
         CREATE TABLE IF NOT EXISTS login_attempts(client TEXT PRIMARY KEY,failures INTEGER,blocked_until REAL);
+        CREATE TABLE IF NOT EXISTS magic_link_tokens(
+            token_hash TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            created REAL NOT NULL,
+            expires REAL NOT NULL,
+            used REAL
+        );
+        CREATE INDEX IF NOT EXISTS idx_magic_link_user_created
+            ON magic_link_tokens(user_id, created);
+        CREATE TABLE IF NOT EXISTS magic_link_requests(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            client_hash TEXT NOT NULL,
+            email_hash TEXT NOT NULL,
+            created REAL NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_magic_link_requests_client
+            ON magic_link_requests(client_hash, created);
+        CREATE INDEX IF NOT EXISTS idx_magic_link_requests_email
+            ON magic_link_requests(email_hash, created);
         ''')
 
     def get_user_by_email(email):
@@ -179,6 +198,115 @@ def register_accounts(app, db, log):
         if session.get('owner'):
             return redirect('/admin')
         return render_template('client_login.html', google_oauth_configured=bool(os.getenv('GOOGLE_CLIENT_ID','').strip() and os.getenv('GOOGLE_CLIENT_SECRET','').strip()))
+
+    @app.post('/api/auth/magic-link')
+    def request_magic_link():
+        """Request a passwordless sign-in link without revealing whether an account exists."""
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify(error=_t('au.e_email', locale_now())), 400
+        email = normalize_email(str(data.get('email', '')))
+        if not valid_email(email):
+            return jsonify(error=_t('au.e_email', locale_now())), 400
+
+        stamp = time.time()
+        client_hash = hashlib.sha256((request.remote_addr or 'unknown').encode()).hexdigest()
+        email_hash = hashlib.sha256(email.encode()).hexdigest()
+        with db() as c:
+            c.execute('DELETE FROM magic_link_requests WHERE created < ?', (stamp - 86400,))
+            client_count = c.execute(
+                'SELECT COUNT(*) FROM magic_link_requests WHERE client_hash=? AND created>? ',
+                (client_hash, stamp - 900)).fetchone()[0]
+            email_count = c.execute(
+                'SELECT COUNT(*) FROM magic_link_requests WHERE email_hash=? AND created>? ',
+                (email_hash, stamp - 3600)).fetchone()[0]
+            if client_count >= 5 or email_count >= 3:
+                return jsonify(error=_t('au.e_many', locale_now())), 429
+            c.execute(
+                'INSERT INTO magic_link_requests(client_hash,email_hash,created) VALUES(?,?,?)',
+                (client_hash, email_hash, stamp))
+            user = c.execute(
+                'SELECT id,email,is_active FROM users WHERE lower(email)=lower(?)',
+                (email,)).fetchone()
+            if user and user['is_active']:
+                raw_token = secrets.token_urlsafe(32)
+                token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+                expires = stamp + 900
+                c.execute(
+                    'INSERT INTO magic_link_tokens(token_hash,user_id,created,expires,used) VALUES(?,?,?,?,NULL)',
+                    (token_hash, user['id'], stamp, expires))
+            else:
+                raw_token = None
+
+        if raw_token:
+            base = get_base_url().rstrip('/')
+            link = f'{base}/magic-link/{raw_token}'
+            try:
+                _ml = locale_now()
+                send_branded(
+                    user['email'],
+                    'Your Reachmark sign-in link',
+                    'Use this secure link to sign in to Reachmark. It expires in 15 minutes and can only be used once. If you did not request it, you can ignore this email.\n\n' + link,
+                    html_title='Your secure sign-in link',
+                    cta_url=link,
+                    cta_label='Continue to Reachmark',
+                    db=db,
+                )
+            except Exception:
+                # Never disclose delivery or account existence to the requester.
+                pass
+        return jsonify(
+            ok=True,
+            message='If an active account matches that email address, a sign-in link will be sent shortly.'
+        ), 200
+
+    @app.route('/magic-link/<token>', methods=['GET', 'POST'])
+    def consume_magic_link(token):
+        """Require an explicit confirmation POST so mail scanners cannot consume links."""
+        token_hash = hashlib.sha256(str(token).encode()).hexdigest()
+        if request.method == 'GET':
+            with db() as c:
+                row = c.execute(
+                    'SELECT user_id,expires,used FROM magic_link_tokens WHERE token_hash=?',
+                    (token_hash,)).fetchone()
+            if not row or row['used'] is not None or row['expires'] < time.time():
+                return Response(
+                    '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Link expired · Reachmark</title><body style="font-family:Arial,sans-serif;background:#eef1e7;padding:40px"><main style="max-width:440px;margin:auto;background:white;padding:28px;border-radius:16px"><h1>This sign-in link has expired</h1><p>Request a new link from the sign-in page.</p><a href="/signin">Return to sign in</a></main></body></html>',
+                    mimetype='text/html'), 400
+            csrf_value = secrets.token_urlsafe(32)
+            session['magic_link_csrf'] = csrf_value
+            return Response(
+                '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Confirm sign-in · Reachmark</title><body style="font-family:Arial,sans-serif;background:#eef1e7;padding:40px"><main style="max-width:440px;margin:auto;background:white;padding:28px;border-radius:16px"><img src="/static/logo-primary.svg" alt="Reachmark" style="height:34px"><h1>Confirm your sign-in</h1><p>Continue to sign in to your Reachmark account. This link expires after 15 minutes and works once.</p><form method="post"><input type="hidden" name="csrf" value="' + csrf_value + '"><button style="padding:13px 20px;border:0;border-radius:24px;background:#20251f;color:#d5f268;font-weight:700">Sign in to Reachmark</button></form></main></body></html>',
+                mimetype='text/html')
+
+        supplied = request.form.get('csrf', '')
+        expected = session.pop('magic_link_csrf', '')
+        if not expected or not hmac.compare_digest(supplied, expected):
+            return Response('This sign-in confirmation has expired. Request a new link.', status=403)
+        with db() as c:
+            row = c.execute(
+                'SELECT user_id,expires,used FROM magic_link_tokens WHERE token_hash=?',
+                (token_hash,)).fetchone()
+            if not row or row['used'] is not None or row['expires'] < time.time():
+                return Response('This sign-in link has expired or has already been used. Request a new one.', status=400)
+            user = c.execute(
+                'SELECT id,is_active FROM users WHERE id=?',
+                (row['user_id'],)).fetchone()
+            if not user or not user['is_active']:
+                return Response('This account is not available for sign-in.', status=400)
+            c.execute('UPDATE magic_link_tokens SET used=? WHERE token_hash=? AND used IS NULL',
+                      (time.time(), token_hash))
+            if c.execute('SELECT changes()').fetchone()[0] != 1:
+                return Response('This sign-in link has already been used. Request a new one.', status=400)
+            uid = user['id']
+
+        session.clear()
+        session.permanent = True
+        session['client_id'] = uid
+        session['role'] = 'client'
+        session['csrf'] = secrets.token_urlsafe(32)
+        log('account', 'Client signed in with a passwordless email link')
+        return redirect('/dashboard', 302)
 
     @app.get('/client-login')
     def client_login_alias():
