@@ -189,7 +189,7 @@ def headers(r):
     private_paths = (
         '/api/', '/preview/', '/unsubscribe/', '/workspace', '/dashboard',
         '/admin', '/signin', '/signup', '/client-login', '/forgot', '/reset',
-        '/verify', '/login', '/logout',
+        '/verify', '/magic-link', '/login', '/logout',
     )
     if request.path.startswith(private_paths):
         r.headers['X-Robots-Tag'] = 'noindex, nofollow, noarchive, nosnippet'
