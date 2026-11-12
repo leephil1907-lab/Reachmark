@@ -45,6 +45,7 @@ button[type=submit]:disabled{opacity:.65;cursor:wait;transform:none}
     <div class="row"><span></span><a href="/forgot">{{ t('au.c_forgot') }}</a></div>
     <button type="submit">{{ t('au.c_signin_btn') }}</button>
   </form>
+  <p class="auth-note"><button type="button" id="magic-link-btn" onclick="requestMagicLink(event)">Email me a sign-in link</button></p>
   <p class="auth-note">{{ t('au.c_noacct') }} <a href="/signup">{{ t('au.c_create1') }}</a> · <button type="button" onclick="requestVerify(event)">{{ t('au.c_resend2') }}</button></p>
   <p id="verify-note">{{ t('au.c_vnote') }} <button type="button" onclick="requestVerify(event)">{{ t('au.c_resend2') }}</button></p>
   <p class="auth-note" style="font-size:11px"><a href="/terms">{{ t('foot.terms') }}</a> · <a href="/privacy">{{ t('foot.privacy') }}</a></p>
@@ -78,6 +79,7 @@ let csrfToken=document.querySelector('meta[name="csrf-token"]')?.content||'';
 })();
 const form=document.getElementById('login-form'),msg=document.getElementById('msg');
 async function requestVerify(e){e.preventDefault();const email=document.getElementById('email').value.trim();if(!email){alert(T_('au.js_enter_email','enteremail'));return}try{let r=await fetch('/api/auth/request-verification',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});let j=await r.json();alert(j.already_verified?T_('au.js_verified','verified'):j.throttled?T_('au.js_recent','recent'):T_('au.js_ifexists','ifexists'));}catch(err){alert(T_('au.js_noresend','noresend'))}}
+async function requestMagicLink(e){e.preventDefault();const email=document.getElementById('email').value.trim();if(!email){msg.textContent='Enter your email address first.';msg.style.display='block';return}const btn=document.getElementById('magic-link-btn');btn.disabled=true;try{const r=await fetch('/api/auth/magic-link',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({email})});const j=await r.json();if(!r.ok)throw new Error(j.error||'Please try again shortly.');msg.textContent=j.message||'If an active account matches that email address, a sign-in link will be sent shortly.';msg.style.display='block';msg.style.background='#eef6d1';msg.style.color='#2d4a0a';msg.style.border='1px solid #d8e9b8';}catch(err){msg.textContent=err.message;msg.style.display='block';}finally{btn.disabled=false}}
 form.onsubmit=async e=>{
   e.preventDefault();
   const email=document.getElementById('email').value.trim();
