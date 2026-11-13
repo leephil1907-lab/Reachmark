@@ -41,16 +41,14 @@
   var category = document.getElementById('rm-preview-category');
   var list = document.getElementById('rm-preview-findings');
   var next = document.getElementById('rm-preview-next');
+  var report = root.querySelector('.rm-preview-report');
   var choices = Array.prototype.slice.call(root.querySelectorAll('[data-preview-select]'));
+  var transitionId = 0;
+  var activeAnimation = null;
+  var reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function selectExample(key) {
-    var item = examples[key];
-    if (!item) return;
-    choices.forEach(function (button) {
-      var active = button.getAttribute('data-preview-select') === key;
-      button.classList.toggle('is-active', active);
-      button.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
+  function renderExample(item) {
     name.textContent = item.name;
     category.textContent = item.category;
     next.textContent = item.next;
@@ -70,6 +68,50 @@
       li.appendChild(number);
       li.appendChild(copy);
       list.appendChild(li);
+    });
+  }
+
+  function selectExample(key) {
+    var item = examples[key];
+    if (!item) return;
+    choices.forEach(function (button) {
+      var active = button.getAttribute('data-preview-select') === key;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+
+    transitionId += 1;
+    var currentTransition = transitionId;
+    if (activeAnimation) {
+      activeAnimation.cancel();
+      activeAnimation = null;
+    }
+
+    if (reduceMotion || !report || typeof report.animate !== 'function') {
+      renderExample(item);
+      return;
+    }
+
+    activeAnimation = report.animate(
+      [
+        { opacity: 1, transform: 'translateY(0)' },
+        { opacity: 0, transform: 'translateY(5px)' }
+      ],
+      { duration: 110, easing: 'ease-in', fill: 'forwards' }
+    );
+
+    activeAnimation.finished.then(function () {
+      if (currentTransition !== transitionId) return;
+      renderExample(item);
+      activeAnimation = report.animate(
+        [
+          { opacity: 0, transform: 'translateY(5px)' },
+          { opacity: 1, transform: 'translateY(0)' }
+        ],
+        { duration: 240, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'both' }
+      );
+    }).catch(function () {
+      /* A newer selection can cancel an in-flight transition. */
     });
   }
 
